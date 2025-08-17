@@ -1,6 +1,26 @@
 // Provider action utilities with SEO best practices
 import { type Provider } from './schemas'
 
+// Fallback function to copy text to clipboard for older browsers
+function copyToClipboardFallback(text: string) {
+  try {
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+    textArea.style.position = 'fixed'
+    textArea.style.left = '-999999px'
+    textArea.style.top = '-999999px'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+    document.execCommand('copy')
+    textArea.remove()
+    alert(`Phone number ${text} copied to clipboard!`)
+  } catch (error) {
+    // If all else fails, just show the number
+    alert(`Please call: ${text}`)
+  }
+}
+
 export interface ProviderInteractionEvent {
   action: 'contact' | 'website' | 'details' | 'save' | 'unsave' | 'rating_filter' | 'rating_view' | 'top_rated_view'
   providerId: string
@@ -55,9 +75,24 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
     event.method = 'phone'
     trackProviderInteraction(event)
     
-    // Clean phone number for tel: link
-    const cleanPhone = provider.phone.replace(/[^\d+]/g, '')
-    window.location.href = `tel:${cleanPhone}`
+    // Show phone number in a user-friendly way instead of using tel: link
+    // which can cause "Pick an app" popups on Windows
+    const phoneNumber = provider.phone
+    const message = `Call ${provider.name} at:\n\n${phoneNumber}\n\nClick OK to copy the phone number to your clipboard.`
+    
+    if (confirm(message)) {
+      // Copy phone number to clipboard
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(phoneNumber).then(() => {
+          alert(`Phone number ${phoneNumber} copied to clipboard!`)
+        }).catch(() => {
+          // Fallback for older browsers
+          copyToClipboardFallback(phoneNumber)
+        })
+      } else {
+        copyToClipboardFallback(phoneNumber)
+      }
+    }
     return true
   }
   
@@ -74,7 +109,23 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
       `Thank you!`
     )
     
-    window.location.href = `mailto:${provider.email}?subject=${subject}&body=${body}`
+    try {
+      window.location.href = `mailto:${provider.email}?subject=${subject}&body=${body}`
+    } catch (error) {
+      // Fallback if mailto doesn't work
+      const message = `Email ${provider.name} at:\n\n${provider.email}\n\nSubject: Mobile Phlebotomy Service Inquiry\n\nClick OK to copy the email address to your clipboard.`
+      if (confirm(message)) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(provider.email).then(() => {
+            alert(`Email address ${provider.email} copied to clipboard!`)
+          }).catch(() => {
+            copyToClipboardFallback(provider.email)
+          })
+        } else {
+          copyToClipboardFallback(provider.email)
+        }
+      }
+    }
     return true
   }
   
