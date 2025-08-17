@@ -1,0 +1,12 @@
+[
+  {"name": "California", "abbr": "CA", "slug": "california"},
+  {"name": "Texas", "abbr": "TX", "slug": "texas"},
+  {"name": "Florida", "abbr": "FL", "slug": "florida"},
+  {"name": "New York", "abbr": "NY", "slug": "new-york"},
+  {"name": "Illinois", "abbr": "IL", "slug": "illinois"},
+  {"name": "Pennsylvania", "abbr": "PA", "slug": "pennsylvania"},
+  {"name": "Ohio", "abbr": "OH", "slug": "ohio"},
+  {"name": "Georgia", "abbr": "GA", "slug": "georgia"},
+  {"name": "North Carolina", "abbr": "NC", "slug": "north-carolina"},
+  {"name": "Michigan", "abbr": "MI", "slug": "michigan"}
+]

@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Provider {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  phone        String?
+  email        String?
+  website      String?
+  bookingUrl   String?
+  description  String?
+  rating       Float?
+  reviewsCount Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  services     ProviderService[]
+  coverage     ProviderCoverage[]
+  address      ProviderAddress?
+  coords       ProviderCoords?
+  availability ProviderAvailability[]
+  payment      ProviderPayment[]
+  badges       ProviderBadge[]
+
+  @@map("providers")
+}
+
+model Service {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  providers ProviderService[]
+
+  @@map("services")
+}
+
+model ProviderService {
+  id         String   @id @default(cuid())
+  providerId String
+  serviceId  String
+  
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service    Service  @relation(fields: [serviceId], references: [id])
+
+  @@unique([providerId, serviceId])
+  @@map("provider_services")
+}
+
+model State {
+  id   String @id @default(cuid())
+  name String @unique
+  abbr String @unique
+
+  coverage ProviderCoverage[]
+  cities   City[]
+
+  @@map("states")
+}
+
+model City {
+  id      String @id @default(cuid())
+  name    String
+  stateId String
+  slug    String
+
+  state    State              @relation(fields: [stateId], references: [id])
+  coverage ProviderCoverage[]
+
+  @@unique([name, stateId])
+  @@map("cities")
+}
+
+model ProviderCoverage {
+  id         String  @id @default(cuid())
+  providerId String
+  stateId    String
+  cityId     String?
+  
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  state      State    @relation(fields: [stateId], references: [id])
+  city       City?    @relation(fields: [cityId], references: [id])
+
+  @@unique([providerId, stateId, cityId])
+  @@map("provider_coverage")
+}
+
+model ProviderAddress {
+  id         String  @id @default(cuid())
+  providerId String  @unique
+  street     String?
+  city       String?
+  state      String?
+  zip        String?
+  
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_addresses")
+}
+
+model ProviderCoords {
+  id         String  @id @default(cuid())
+  providerId String  @unique
+  lat        Float
+  lng        Float
+  
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_coords")
+}
+
+model Availability {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  providers ProviderAvailability[]
+
+  @@map("availability")
+}
+
+model ProviderAvailability {
+  id             String @id @default(cuid())
+  providerId     String
+  availabilityId String
+  
+  provider       Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  availability   Availability @relation(fields: [availabilityId], references: [id])
+
+  @@unique([providerId, availabilityId])
+  @@map("provider_availability")
+}
+
+model Payment {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  providers ProviderPayment[]
+
+  @@map("payments")
+}
+
+model ProviderPayment {
+  id        String @id @default(cuid())
+  providerId String
+  paymentId String
+  
+  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+
+  @@unique([providerId, paymentId])
+  @@map("provider_payments")
+}
+
+model Badge {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  providers ProviderBadge[]
+
+  @@map("badges")
+}
+
+model ProviderBadge {
+  id        String @id @default(cuid())
+  providerId String
+  badgeId   String
+  
+  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([providerId, badgeId])
+  @@map("provider_badges")
+}

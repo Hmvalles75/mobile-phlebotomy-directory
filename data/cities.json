@@ -1,0 +1,14 @@
+[
+  {"name": "Los Angeles", "state": "California", "stateAbbr": "CA", "slug": "los-angeles", "population": 3971883},
+  {"name": "San Francisco", "state": "California", "stateAbbr": "CA", "slug": "san-francisco", "population": 874961},
+  {"name": "San Diego", "state": "California", "stateAbbr": "CA", "slug": "san-diego", "population": 1423851},
+  {"name": "Houston", "state": "Texas", "stateAbbr": "TX", "slug": "houston", "population": 2320268},
+  {"name": "Dallas", "state": "Texas", "stateAbbr": "TX", "slug": "dallas", "population": 1343573},
+  {"name": "Austin", "state": "Texas", "stateAbbr": "TX", "slug": "austin", "population": 978908},
+  {"name": "Miami", "state": "Florida", "stateAbbr": "FL", "slug": "miami", "population": 442241},
+  {"name": "Tampa", "state": "Florida", "stateAbbr": "FL", "slug": "tampa", "population": 384959},
+  {"name": "Orlando", "state": "Florida", "stateAbbr": "FL", "slug": "orlando", "population": 307573},
+  {"name": "New York", "state": "New York", "stateAbbr": "NY", "slug": "new-york", "population": 8336817},
+  {"name": "Chicago", "state": "Illinois", "stateAbbr": "IL", "slug": "chicago", "population": 2746388},
+  {"name": "Philadelphia", "state": "Pennsylvania", "stateAbbr": "PA", "slug": "philadelphia", "population": 1584064}
+]

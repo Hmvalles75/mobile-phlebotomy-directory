@@ -1,0 +1,139 @@
+[
+  {
+    "name": "SF Bay Area",
+    "slug": "sf-bay-area", 
+    "type": "metro",
+    "state": "CA",
+    "cities": [
+      "San Francisco", "Oakland", "San Jose", "Fremont", "Hayward", "Sunnyvale", 
+      "Santa Clara", "Berkeley", "Richmond", "Concord", "Daly City", "San Mateo",
+      "Redwood City", "Mountain View", "Alameda", "Union City", "San Leandro",
+      "Milpitas", "Palo Alto", "San Rafael", "Cupertino", "Petaluma", "Novato"
+    ]
+  },
+  {
+    "name": "Greater Los Angeles",
+    "slug": "greater-los-angeles",
+    "type": "metro", 
+    "state": "CA",
+    "cities": [
+      "Los Angeles", "Long Beach", "Glendale", "Santa Clarita", "Pomona", 
+      "Torrance", "Pasadena", "El Monte", "Downey", "Inglewood", "West Covina",
+      "Norwalk", "Burbank", "Compton", "Carson", "Santa Monica", "Whittier"
+    ]
+  },
+  {
+    "name": "Capital Region",
+    "slug": "capital-region-ny",
+    "type": "region",
+    "state": "NY", 
+    "cities": [
+      "Albany", "Schenectady", "Troy", "Saratoga Springs", "Cohoes", "Watervliet",
+      "Rensselaer", "Colonie", "Clifton Park", "Guilderland", "Rotterdam"
+    ]
+  },
+  {
+    "name": "Metro Atlanta",
+    "slug": "metro-atlanta",
+    "type": "metro",
+    "state": "GA",
+    "cities": [
+      "Atlanta", "Columbus", "Augusta", "Savannah", "Athens", "Sandy Springs",
+      "Roswell", "Macon", "Johns Creek", "Albany", "Warner Robins", "Alpharetta"
+    ]
+  },
+  {
+    "name": "Greater Boston",
+    "slug": "greater-boston", 
+    "type": "metro",
+    "state": "MA",
+    "cities": [
+      "Boston", "Worcester", "Springfield", "Cambridge", "Lowell", "Brockton",
+      "New Bedford", "Quincy", "Lynn", "Fall River", "Newton", "Somerville"
+    ]
+  },
+  {
+    "name": "Dallas-Fort Worth",
+    "slug": "dallas-fort-worth",
+    "type": "metro",
+    "state": "TX", 
+    "cities": [
+      "Dallas", "Fort Worth", "Arlington", "Plano", "Garland", "Irving", 
+      "Grand Prairie", "McKinney", "Frisco", "Mesquite", "Carrollton", "Richardson"
+    ]
+  },
+  {
+    "name": "Greater Houston", 
+    "slug": "greater-houston",
+    "type": "metro",
+    "state": "TX",
+    "cities": [
+      "Houston", "Sugar Land", "The Woodlands", "League City", "Baytown",
+      "Pasadena", "Pearland", "Katy", "Missouri City", "Texas City", "Conroe"
+    ]
+  },
+  {
+    "name": "Tri-State Area",
+    "slug": "tri-state-area", 
+    "type": "region",
+    "state": "NY",
+    "cities": [
+      "New York", "Newark", "Jersey City", "Yonkers", "Paterson", "Elizabeth",
+      "Edison", "Woodbridge", "Lakewood", "Toms River", "Hamilton", "Trenton",
+      "Camden", "Clifton", "Brick Township", "Cherry Hill", "Passaic", "Union City",
+      "Middletown", "Gloucester Township", "East Orange", "Bayonne", "Vineland",
+      "New Brunswick", "Hoboken", "Perth Amboy", "West New York", "Bridgewater",
+      "Plainfield", "North Bergen", "Parsippany", "Wayne", "Piscataway"
+    ]
+  },
+  {
+    "name": "Greater Miami",
+    "slug": "greater-miami",
+    "type": "metro", 
+    "state": "FL",
+    "cities": [
+      "Miami", "Fort Lauderdale", "Pembroke Pines", "Hollywood", "Miramar",
+      "Coral Springs", "Miami Beach", "Pompano Beach", "Davie", "Sunrise"
+    ]
+  },
+  {
+    "name": "Tampa Bay Area",
+    "slug": "tampa-bay-area",
+    "type": "metro",
+    "state": "FL",
+    "cities": [
+      "Tampa", "St. Petersburg", "Clearwater", "Brandon", "Largo", "Palm Harbor",
+      "Temple Terrace", "Dunedin", "Safety Harbor", "Oldsmar"
+    ]
+  },
+  {
+    "name": "Greater Orlando",
+    "slug": "greater-orlando", 
+    "type": "metro",
+    "state": "FL",
+    "cities": [
+      "Orlando", "Kissimmee", "Sanford", "Oviedo", "Winter Park", "Altamonte Springs",
+      "Lake Mary", "Winter Garden", "Apopka", "Clermont"
+    ]
+  },
+  {
+    "name": "Chicagoland",
+    "slug": "chicagoland",
+    "type": "metro",
+    "state": "IL", 
+    "cities": [
+      "Chicago", "Aurora", "Rockford", "Joliet", "Naperville", "Springfield",
+      "Peoria", "Elgin", "Waukegan", "Cicero", "Champaign", "Bloomington"
+    ]
+  },
+  {
+    "name": "Greater Phoenix",
+    "slug": "greater-phoenix",
+    "type": "metro",
+    "state": "AZ",
+    "cities": [
+      "Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale", "Glendale",
+      "Gilbert", "Tempe", "Peoria", "Surprise", "Yuma", "Avondale"
+    ]
+  }
+]
