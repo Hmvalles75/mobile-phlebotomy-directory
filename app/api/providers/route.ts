@@ -60,29 +60,37 @@ export async function GET(request: NextRequest) {
     
     let filteredProviders = providers
 
-    // Filter by state
+    // Filter by state - check both address.state and coverage.states
     if (state) {
       filteredProviders = filteredProviders.filter((p: any) => 
-        p.state === state || p.coverage?.states?.includes(state)
+        p.address?.state === state || 
+        p.coverage?.states?.includes(state)
       )
     }
 
-    // Filter by city
+    // Filter by city - check both address.city and coverage.cities
     if (city) {
+      const cityLower = city.toLowerCase()
       filteredProviders = filteredProviders.filter((p: any) => 
-        p.city === city || p.coverage?.cities?.includes(city)
+        p.address?.city?.toLowerCase() === cityLower || 
+        p.coverage?.cities?.some((c: string) => c.toLowerCase() === cityLower)
       )
     }
 
-    // Filter by search query
+    // Filter by search query - search name, description, and services
     if (query) {
       const searchTerm = query.toLowerCase()
       filteredProviders = filteredProviders.filter((p: any) => 
         p.name?.toLowerCase().includes(searchTerm) ||
         p.description?.toLowerCase().includes(searchTerm) ||
-        p.services?.some((s: string) => s.toLowerCase().includes(searchTerm))
+        p.services?.some((s: string) => s.toLowerCase().includes(searchTerm)) ||
+        p.address?.city?.toLowerCase().includes(searchTerm) ||
+        p.address?.state?.toLowerCase().includes(searchTerm)
       )
     }
+
+    // Sort by rating (highest first)
+    filteredProviders.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
 
     // Limit results
     const limitedProviders = filteredProviders.slice(0, limit)
