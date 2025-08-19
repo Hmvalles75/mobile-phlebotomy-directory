@@ -52,7 +52,7 @@ export default function SearchContent() {
       setLoading(true)
       try {
         const params = new URLSearchParams()
-        if (searchQuery) params.append('q', searchQuery)
+        if (searchQuery) params.append('query', searchQuery)
         if (selectedServices.length > 0) {
           params.append('services', selectedServices.join(','))
         }
@@ -63,7 +63,7 @@ export default function SearchContent() {
 
         const response = await fetch(`/api/providers?${params}`)
         const data = await response.json()
-        setProviders(data.providers || [])
+        setProviders(data || [])
       } catch (error) {
         console.error('Error searching providers:', error)
         setProviders([])
