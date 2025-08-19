@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { Provider } from './schemas'
+// import { PrismaClient } from '@prisma/client'
+// import { Provider } from './schemas'
 
 // Use singleton pattern to prevent multiple Prisma clients
 const globalForPrisma = globalThis as unknown as {
