@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
 
     // Handle featured providers
     if (featured === 'true') {
-      const providers = await getFeaturedProviders(limit)
+      const providers = await getFeaturedProviders()
       return NextResponse.json(providers)
     }
 
     // Handle top rated providers
     if (topRated === 'true') {
-      const providers = await getTopRatedProviders(limit)
+      const providers = await getTopRatedProviders()
       return NextResponse.json(providers)
     }
 
