@@ -106,7 +106,7 @@ export function generateProviderSEO(
   }
 
   if (provider.address?.city && provider.address?.state) {
-    structuredData.address = {
+    (structuredData as any).address = {
       '@type': 'PostalAddress',
       addressLocality: provider.address.city,
       addressRegion: provider.address.state,
@@ -115,7 +115,7 @@ export function generateProviderSEO(
   }
 
   if (provider.rating && provider.reviewsCount) {
-    structuredData.aggregateRating = {
+    (structuredData as any).aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: provider.rating,
       reviewCount: provider.reviewsCount,

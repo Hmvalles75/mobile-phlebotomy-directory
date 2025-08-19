@@ -192,7 +192,7 @@ export default function StatePage({ params }: StatePageProps) {
                     No providers found in {stateName}
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    We're working to expand our network to {stateName}. 
+                    We&apos;re working to expand our network to {stateName}. 
                     Check back soon or search in nearby states.
                   </p>
                   <Link
@@ -347,7 +347,7 @@ export default function StatePage({ params }: StatePageProps) {
               of certified phlebotomists serves all major cities and regions throughout the state.
             </p>
             <p className="mt-4">
-              Whether you're in a major metropolitan area or a smaller community, you can find 
+              Whether you&apos;re in a major metropolitan area or a smaller community, you can find 
               qualified mobile phlebotomy professionals who offer flexible scheduling, competitive 
               pricing, and professional service. Many providers accept insurance and offer same-day 
               or next-day appointments.

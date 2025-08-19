@@ -3,6 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import { Provider } from '@/lib/schemas'
 
+export const dynamic = 'force-dynamic'
+
 // Load providers from JSON file
 function loadProviders(): Provider[] {
   const providersPath = path.join(process.cwd(), 'data', 'providers.json')
@@ -40,7 +42,7 @@ function getProvidersByCity(cityName: string, stateAbbr: string) {
     const hasAddressCityMatch = provider.address?.city?.toLowerCase() === normalizedCity
 
     // 3. Regional match (simplified without regions file)
-    const hasRegionalMatch = provider.coverage.regions?.length > 0
+    const hasRegionalMatch = provider.coverage.regions && provider.coverage.regions.length > 0
 
     // 4. Statewide coverage (no specific cities or regions)
     const isStatewide = (!provider.coverage.cities || provider.coverage.cities.length === 0) &&

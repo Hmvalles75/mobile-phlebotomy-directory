@@ -19,7 +19,7 @@ function loadProviders(): Provider[] {
     const providersPath = path.join(process.cwd(), 'data', 'providers.json');
     providersCache = JSON.parse(fs.readFileSync(providersPath, 'utf8'));
   }
-  return providersCache;
+  return providersCache || [];
 }
 
 function loadRegions(): Region[] {
@@ -27,7 +27,7 @@ function loadRegions(): Region[] {
     const regionsPath = path.join(process.cwd(), 'data', 'regions.json');
     regionsCache = JSON.parse(fs.readFileSync(regionsPath, 'utf8'));
   }
-  return regionsCache;
+  return regionsCache || [];
 }
 
 // Clear cache when data updates

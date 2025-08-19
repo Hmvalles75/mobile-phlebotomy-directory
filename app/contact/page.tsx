@@ -24,7 +24,7 @@ export default function Contact() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
             <p className="text-xl text-gray-600">
-              We're here to help! Reach out with any questions or feedback.
+              We&apos;re here to help! Reach out with any questions or feedback.
             </p>
           </div>
 
@@ -163,7 +163,7 @@ export default function Contact() {
 
                   <div>
                     <h4 className="font-medium text-gray-900 mb-1">How do I add my practice to the directory?</h4>
-                    <p className="text-sm text-gray-600">Use our "Add Provider" page to submit your information. We'll review and add your listing within 24-48 hours.</p>
+                    <p className="text-sm text-gray-600">Use our &quot;Add Provider&quot; page to submit your information. We&apos;ll review and add your listing within 24-48 hours.</p>
                   </div>
                 </div>
               </div>

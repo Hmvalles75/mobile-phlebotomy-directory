@@ -336,7 +336,6 @@ export default function HomePage() {
                     provider={provider}
                     variant="compact"
                     className="mt-4"
-                    onInteraction={() => trackRatingView(provider, 'homepage-featured')}
                   />
                 </div>
               ))}

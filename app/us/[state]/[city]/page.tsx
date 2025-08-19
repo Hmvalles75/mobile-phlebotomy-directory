@@ -470,7 +470,7 @@ export default function CityPage({ params }: PageProps) {
       provider.coverage.cities?.some(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const matchesServices = selectedServices.length === 0 ||
-      selectedServices.some(service => provider.services.includes(service))
+      selectedServices.some(service => provider.services.includes(service as any))
 
     return matchesSearch && matchesServices
   })

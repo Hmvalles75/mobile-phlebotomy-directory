@@ -186,15 +186,15 @@ export async function importRegionalCsv(csvFilePath: string): Promise<void> {
             
             if (!provider && row.name) {
               provider = providers.find(p => 
-                p.name.toLowerCase() === row.name.toLowerCase()
+                p.name.toLowerCase() === row.name!.toLowerCase()
               );
             }
             
             if (!provider && row.website) {
               provider = providers.find(p => 
                 p.website && (
-                  p.website.includes(row.website) || 
-                  row.website.includes(p.website.replace(/https?:\/\//, '').replace(/\/$/, ''))
+                  p.website.includes(row.website!) || 
+                  row.website!.includes(p.website.replace(/https?:\/\//, '').replace(/\/$/, ''))
                 )
               );
             }

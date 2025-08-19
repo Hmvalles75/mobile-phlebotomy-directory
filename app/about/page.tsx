@@ -8,7 +8,7 @@ export default function About() {
             
             <div className="prose prose-lg max-w-none">
               <p className="text-xl text-gray-600 mb-8">
-                The nation's premier directory connecting patients with certified mobile phlebotomy services for convenient, at-home blood draws and lab collections.
+                The nation&apos;s premier directory connecting patients with certified mobile phlebotomy services for convenient, at-home blood draws and lab collections.
               </p>
 
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
@@ -95,7 +95,7 @@ export default function About() {
               <div className="bg-primary-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold text-primary-900 mb-3">Ready to Get Started?</h3>
                 <p className="text-primary-800 mb-4">
-                  Whether you're looking for mobile phlebotomy services or want to list your practice, we're here to help.
+                  Whether you&apos;re looking for mobile phlebotomy services or want to list your practice, we&apos;re here to help.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <a href="/search" className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">

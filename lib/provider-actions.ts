@@ -119,10 +119,10 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
           navigator.clipboard.writeText(provider.email).then(() => {
             alert(`Email address ${provider.email} copied to clipboard!`)
           }).catch(() => {
-            copyToClipboardFallback(provider.email)
+            copyToClipboardFallback(provider.email!)
           })
         } else {
-          copyToClipboardFallback(provider.email)
+          copyToClipboardFallback(provider.email!)
         }
       }
     }
@@ -264,7 +264,7 @@ export function generateProviderStructuredData(provider: Provider, currentLocati
 
   // Add address if available
   if (provider.address?.city && provider.address?.state) {
-    structuredData.address = {
+    (structuredData as any).address = {
       "@type": "PostalAddress",
       "addressLocality": provider.address.city,
       "addressRegion": provider.address.state,
@@ -274,7 +274,7 @@ export function generateProviderStructuredData(provider: Provider, currentLocati
 
   // Add rating if available
   if (provider.rating && provider.reviewsCount) {
-    structuredData.aggregateRating = {
+    (structuredData as any).aggregateRating = {
       "@type": "AggregateRating",
       "ratingValue": provider.rating,
       "reviewCount": provider.reviewsCount,

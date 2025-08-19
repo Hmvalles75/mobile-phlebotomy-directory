@@ -13,7 +13,7 @@ export function Footer() {
               <span className="text-xl font-bold text-gray-900">MobilePhlebotomy</span>
             </Link>
             <p className="text-gray-600 mb-4 max-w-md">
-              The nation's largest directory of mobile phlebotomy services. Find certified, 
+              The nation&apos;s largest directory of mobile phlebotomy services. Find certified, 
               insured providers for at-home blood draws and lab collections near you.
             </p>
             <div className="flex space-x-4">

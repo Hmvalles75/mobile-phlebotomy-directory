@@ -204,8 +204,8 @@ export default function SavedProviders() {
               <div className="text-gray-400 text-6xl mb-4">❤️</div>
               <h3 className="text-xl font-medium text-gray-900 mb-2">No providers saved yet</h3>
               <p className="text-gray-600 mb-6">
-                Start saving providers you're interested in for quick access later. 
-                Look for the "Save" button on any provider listing.
+                Start saving providers you&apos;re interested in for quick access later. 
+                Look for the &quot;Save&quot; button on any provider listing.
               </p>
               <div className="space-y-3">
                 <Link 

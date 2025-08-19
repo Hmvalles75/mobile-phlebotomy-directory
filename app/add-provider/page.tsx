@@ -10,7 +10,7 @@ export default function AddProvider() {
     phone: '',
     website: '',
     description: '',
-    services: [],
+    services: [] as string[],
     address: '',
     city: '',
     state: '',
@@ -273,7 +273,7 @@ export default function AddProvider() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-900 mb-2">What happens next?</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• We'll review your submission within 24-48 hours</li>
+                  <li>• We&apos;ll review your submission within 24-48 hours</li>
                   <li>• Verify your credentials and insurance</li>
                   <li>• Add your listing to our directory</li>
                   <li>• Send you confirmation and next steps</li>
