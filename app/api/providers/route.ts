@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     if (rating) {
       const minRating = parseFloat(rating)
       const providers = await searchProviders()
-      })
       return NextResponse.json(providers)
     }
     
