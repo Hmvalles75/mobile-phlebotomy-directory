@@ -28,9 +28,7 @@ export async function GET(request: NextRequest) {
     // Handle rating filter
     if (rating) {
       const minRating = parseFloat(rating)
-      const providers = await searchProviders('', {
-        minRating: minRating >= 3.0 ? minRating : undefined,
-        sortBy: 'rating'
+      const providers = await searchProviders()
       })
       return NextResponse.json(providers)
     }
@@ -44,15 +42,7 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') as 'rating' | 'distance' | 'reviews' | 'name' || 'rating'
     const minRating = searchParams.get('minRating') ? parseFloat(searchParams.get('minRating')!) : undefined
 
-    const providers = await searchProviders(query, {
-      services: services.length > 0 ? services : undefined,
-      city,
-      state,
-      availability: availability.length > 0 ? availability : undefined,
-      payment: payment.length > 0 ? payment : undefined,
-      sortBy,
-      minRating
-    })
+    const providers = await searchProviders()
 
     return NextResponse.json(providers)
   } catch (error) {
