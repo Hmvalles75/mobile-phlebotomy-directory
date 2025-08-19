@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MobilePhlebotomy.org
 
 A production-ready Next.js 14 application providing a comprehensive directory of mobile phlebotomy services across the United States. Built with TypeScript, featuring strong SEO, automated data seeding, and clean architecture.
@@ -207,3 +208,7 @@ For support, email support@mobilephlebotomy.org or create an issue in this repos
 - Advanced analytics
 - Multi-language support
 - Insurance verification API
+=======
+# mobile-phlebotomy-directory
+Mobile phlebotomy services directory
+>>>>>>> 591bc9b032ee98f6c0cf77e4dcdee18dc7e10f17
