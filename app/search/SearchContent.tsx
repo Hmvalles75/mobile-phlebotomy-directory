@@ -19,15 +19,15 @@ export default function SearchContent() {
   const [loading, setLoading] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
 
-  const serviceOptions = [
-    'At-Home Blood Draw',
-    'Corporate Wellness',
-    'Pediatric',
-    'Geriatric',
-    'Fertility/IVF',
-    'Specimen Pickup',
-    'Lab Partner'
-  ]
+ const serviceOptions = [
+  'At-Home Blood Draw',
+  'Specimen Pickup',
+  'Lab Partner',
+  'Corporate Wellness',
+  'Mobile Laboratory',
+  'Laboratory Services',
+  'Diagnostic Services'
+]
 
   useEffect(() => {
     // Get initial services from URL params

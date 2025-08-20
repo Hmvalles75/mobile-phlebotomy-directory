@@ -80,11 +80,16 @@ export async function GET(request: NextRequest) {
 const services = searchParams.get('services')
 if (services) {
   const servicesList = services.split(',').map(s => s.trim())
-  filteredProviders = filteredProviders.filter((p: any) => 
-    servicesList.some(service => 
-      p.services?.some((s: string) => s.toLowerCase().includes(service.toLowerCase()))
+  filteredProviders = filteredProviders.filter((p: any) => {
+    if (!p.services || p.services.length === 0) return false
+    
+    return servicesList.some(selectedService => 
+      p.services.some((providerService: string) => 
+        providerService.toLowerCase() === selectedService.toLowerCase() ||
+        providerService.toLowerCase().includes(selectedService.toLowerCase())
+      )
     )
-  )
+  })
 }
 
 // Filter by rating
