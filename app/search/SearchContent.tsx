@@ -18,6 +18,8 @@ export default function SearchContent() {
   const [sortBy, setSortBy] = useState<'rating' | 'distance' | 'reviews' | 'name'>('rating')
   const [loading, setLoading] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
+  const [selectedCity, setSelectedCity] = useState('')
+  const [selectedState, setSelectedState] = useState('')
 
  const serviceOptions = [
   'At-Home Blood Draw',
@@ -53,6 +55,8 @@ export default function SearchContent() {
       try {
         const params = new URLSearchParams()
 if (searchQuery) params.append('query', searchQuery)
+if (selectedCity) params.append('city', selectedCity)
+if (selectedState) params.append('state', selectedState)
 if (selectedServices.length > 0) {
   params.append('services', selectedServices.join(','))
 }
@@ -60,7 +64,7 @@ if (minRating !== null) {
   params.append('rating', minRating.toString())
 }
 params.append('sortBy', sortBy)
-params.append('limit', '50') // Show more results
+params.append('limit', '200')
 
         const response = await fetch(`/api/providers?${params}`)
         const data = await response.json()
@@ -74,7 +78,7 @@ params.append('limit', '50') // Show more results
     }
 
     searchProviders()
-  }, [searchQuery, selectedServices, minRating, sortBy])
+  }, [searchQuery, selectedCity, selectedState, selectedServices, minRating, sortBy])
 
   const handleServiceToggle = (service: string) => {
     setSelectedServices(prev =>
@@ -125,6 +129,27 @@ params.append('limit', '50') // Show more results
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
               <h2 className="font-bold text-lg mb-4">Filters</h2>
+                {/* Location Filters */}
+<div className="mb-6">
+  <h3 className="font-medium text-gray-900 mb-3">Location</h3>
+  <div className="space-y-3">
+    <input
+      type="text"
+      placeholder="City (e.g., Los Angeles)"
+      value={selectedCity}
+      onChange={(e) => setSelectedCity(e.target.value)}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+    />
+    <input
+      type="text"
+      placeholder="State (e.g., CA, TX, NY)"
+      value={selectedState}
+      onChange={(e) => setSelectedState(e.target.value.toUpperCase())}
+      maxLength={2}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+    />
+  </div>
+</div>
               
               {/* Services Filter */}
               <div className="mb-6">
