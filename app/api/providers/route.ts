@@ -76,7 +76,25 @@ export async function GET(request: NextRequest) {
         p.coverage?.cities?.some((c: string) => c.toLowerCase() === cityLower)
       )
     }
+// Filter by services
+const services = searchParams.get('services')
+if (services) {
+  const servicesList = services.split(',').map(s => s.trim())
+  filteredProviders = filteredProviders.filter((p: any) => 
+    servicesList.some(service => 
+      p.services?.some((s: string) => s.toLowerCase().includes(service.toLowerCase()))
+    )
+  )
+}
 
+// Filter by rating
+const ratingParam = searchParams.get('rating')
+if (ratingParam) {
+  const minRating = parseFloat(ratingParam)
+  filteredProviders = filteredProviders.filter((p: any) => 
+    (p.rating || 0) >= minRating
+  )
+}
     // Filter by search query - search name, description, and services
     if (query) {
       const searchTerm = query.toLowerCase()

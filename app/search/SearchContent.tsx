@@ -52,14 +52,15 @@ export default function SearchContent() {
       setLoading(true)
       try {
         const params = new URLSearchParams()
-        if (searchQuery) params.append('query', searchQuery)
-        if (selectedServices.length > 0) {
-          params.append('services', selectedServices.join(','))
-        }
-        if (minRating !== null) {
-          params.append('minRating', minRating.toString())
-        }
-        params.append('sortBy', sortBy)
+if (searchQuery) params.append('query', searchQuery)
+if (selectedServices.length > 0) {
+  params.append('services', selectedServices.join(','))
+}
+if (minRating !== null) {
+  params.append('rating', minRating.toString())
+}
+params.append('sortBy', sortBy)
+params.append('limit', '50') // Show more results
 
         const response = await fetch(`/api/providers?${params}`)
         const data = await response.json()
