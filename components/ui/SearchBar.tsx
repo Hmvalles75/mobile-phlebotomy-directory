@@ -79,7 +79,7 @@ export function SearchBar({
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-500"
             aria-label="Search location"
           />
         </div>
@@ -100,7 +100,7 @@ export function SearchBar({
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Refine by specific location..."
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500"
             aria-label="Location filter"
           />
         </form>
