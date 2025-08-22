@@ -2,41 +2,62 @@ import pandas as pd
 import json
 from datetime import datetime
 
+# State name to abbreviation mapping
+STATE_MAPPING = {
+    'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
+    'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
+    'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
+    'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+    'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
+    'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
+    'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
+    'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+    'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
+    'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+}
+
 # Read your updated dataset
 df = pd.read_csv('dataset_crawler-google-places_2025-08-15_13-25-00-192.csv')
 
 # Function to safely get value or return empty string
 def safe_get(row, column, default=''):
     value = row.get(column, default)
-    if pd.isna(value) or value == 'NaN':
+    if pd.isna(value) or value == 'NaN' or str(value).strip() == '':
         return default
-    return str(value)
+    return str(value).strip()
 
 # Convert to the JSON format your site expects
 providers = []
 for index, row in df.iterrows():
     # Skip if no name
-    if pd.isna(row.get('title')) or not row.get('title'):
+    if pd.isna(row.get('title')) or not str(row.get('title')).strip():
         continue
-        
+    
+    # Get state and convert to abbreviation
+    state_full = safe_get(row, 'state')
+    state_abbr = STATE_MAPPING.get(state_full, state_full)
+    
+    # Handle regions serviced if available
+    regions_serviced = safe_get(row, 'regions serviced')
+    
     provider = {
         "id": str(index + 1),
         "name": safe_get(row, 'title'),
-        "slug": safe_get(row, 'title').lower().replace(' ', '-').replace('&', 'and').replace(',', '').replace('.', ''),
+        "slug": safe_get(row, 'title').lower().replace(' ', '-').replace('&', 'and').replace(',', '').replace('.', '').replace('(', '').replace(')', ''),
         "phone": safe_get(row, 'phone'),
         "website": safe_get(row, 'website'),
         "bookingUrl": safe_get(row, 'url'),
         "description": f"Professional mobile phlebotomy services. {safe_get(row, 'categoryName', 'Medical services')} providing at-home blood draw services.",
         "services": ["At-Home Blood Draw", "Specimen Pickup", "Lab Partner"],
         "coverage": {
-            "states": [safe_get(row, 'state')] if safe_get(row, 'state') else [],
+            "states": [state_abbr] if state_abbr else [],
             "cities": [safe_get(row, 'city')] if safe_get(row, 'city') else []
         },
         "address": {
             "street": safe_get(row, 'street'),
             "city": safe_get(row, 'city'),
-            "state": safe_get(row, 'state'),
-            "zip": safe_get(row, 'zip')
+            "state": state_abbr,
+            "zip": ""
         },
         "availability": ["Weekdays"],
         "payment": ["Cash", "Major Insurance"],
@@ -46,6 +67,11 @@ for index, row in df.iterrows():
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat()
     }
+    
+    # Add regions serviced info to description if available
+    if regions_serviced:
+        provider["description"] += f" Serving: {regions_serviced}."
+    
     providers.append(provider)
 
 # Save to JSON
@@ -53,3 +79,14 @@ with open('data/providers.json', 'w', encoding='utf-8') as f:
     json.dump(providers, f, indent=2, ensure_ascii=False)
 
 print(f"Converted {len(providers)} providers from your updated dataset to data/providers.json")
+
+# Show state distribution
+states = {}
+for p in providers:
+    state = p['address']['state']
+    if state:
+        states[state] = states.get(state, 0) + 1
+
+print("\nProviders by state:")
+for state, count in sorted(states.items(), key=lambda x: x[1], reverse=True)[:10]:
+    print(f"  {state}: {count}")
