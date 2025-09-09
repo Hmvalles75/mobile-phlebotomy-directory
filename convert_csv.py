@@ -17,7 +17,7 @@ STATE_MAPPING = {
 }
 
 # Read your updated dataset
-df = pd.read_csv('dataset_crawler-google-places_2025-08-15_13-25-00-192.csv')
+df = pd.read_csv('enriched_mobile_phlebotomy_providers_updated.csv')
 
 # Function to safely get value or return empty string
 def safe_get(row, column, default=''):
@@ -26,32 +26,51 @@ def safe_get(row, column, default=''):
         return default
     return str(value).strip()
 
+# Filter for mobile phlebotomy services only (excluding nationwide)
+print(f"Total rows in CSV: {len(df)}")
+
+# Apply filters
+df_filtered = df[
+    (df['is_mobile_phlebotomy'].astype(str).str.lower() == 'yes') & 
+    (df['is_nationwide'].astype(str).str.lower() != 'yes')
+]
+
+print(f"Rows after filtering (mobile phlebotomy only, excluding nationwide): {len(df_filtered)}")
+
 # Convert to the JSON format your site expects
 providers = []
-for index, row in df.iterrows():
+for index, row in df_filtered.iterrows():
     # Skip if no name
-    if pd.isna(row.get('title')) or not str(row.get('title')).strip():
+    if pd.isna(row.get('name')) or not str(row.get('name')).strip():
         continue
     
     # Get state and convert to abbreviation
     state_full = safe_get(row, 'state')
     state_abbr = STATE_MAPPING.get(state_full, state_full)
     
-    # Handle regions serviced if available
+    # Handle regions serviced and new enriched fields
     regions_serviced = safe_get(row, 'regions serviced')
+    verified_service_areas = safe_get(row, 'verified_service_areas')
+    validation_notes = safe_get(row, 'validation_notes')
+    
+    # Build description using validation notes
+    base_description = f"Professional mobile phlebotomy services. {safe_get(row, 'categoryName', 'Medical services')} providing at-home blood draw services."
+    if validation_notes:
+        base_description = f"{base_description} {validation_notes}"
     
     provider = {
         "id": str(index + 1),
-        "name": safe_get(row, 'title'),
-        "slug": safe_get(row, 'title').lower().replace(' ', '-').replace('&', 'and').replace(',', '').replace('.', '').replace('(', '').replace(')', ''),
+        "name": safe_get(row, 'name'),
+        "slug": safe_get(row, 'name').lower().replace(' ', '-').replace('&', 'and').replace(',', '').replace('.', '').replace('(', '').replace(')', ''),
         "phone": safe_get(row, 'phone'),
         "website": safe_get(row, 'website'),
         "bookingUrl": safe_get(row, 'url'),
-        "description": f"Professional mobile phlebotomy services. {safe_get(row, 'categoryName', 'Medical services')} providing at-home blood draw services.",
+        "description": base_description,
         "services": ["At-Home Blood Draw", "Specimen Pickup", "Lab Partner"],
         "coverage": {
             "states": [state_abbr] if state_abbr else [],
-            "cities": [safe_get(row, 'city')] if safe_get(row, 'city') else []
+            "cities": [safe_get(row, 'city')] if safe_get(row, 'city') else [],
+            "serviceAreas": verified_service_areas if verified_service_areas else regions_serviced
         },
         "address": {
             "street": safe_get(row, 'street'),
@@ -63,13 +82,16 @@ for index, row in df.iterrows():
         "payment": ["Cash", "Major Insurance"],
         "rating": float(row.get('totalScore', 0)) if pd.notna(row.get('totalScore')) and row.get('totalScore') != 0 else None,
         "reviewsCount": int(row.get('reviewsCount', 0)) if pd.notna(row.get('reviewsCount')) and row.get('reviewsCount') != 0 else None,
-        "badges": ["Certified", "Insured"],
+        "badges": ["Certified", "Insured", "Mobile Service"],
+        "isMobilePhlebotomy": True,
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat()
     }
     
-    # Add regions serviced info to description if available
-    if regions_serviced:
+    # Add verified service areas to description if available
+    if verified_service_areas:
+        provider["description"] += f" Verified service areas: {verified_service_areas}."
+    elif regions_serviced:
         provider["description"] += f" Serving: {regions_serviced}."
     
     providers.append(provider)
@@ -78,7 +100,11 @@ for index, row in df.iterrows():
 with open('data/providers.json', 'w', encoding='utf-8') as f:
     json.dump(providers, f, indent=2, ensure_ascii=False)
 
-print(f"Converted {len(providers)} providers from your updated dataset to data/providers.json")
+# Also save to public folder for the website
+with open('public/data/providers.json', 'w', encoding='utf-8') as f:
+    json.dump(providers, f, indent=2, ensure_ascii=False)
+
+print(f"Converted {len(providers)} mobile phlebotomy providers to data/providers.json and public/data/providers.json")
 
 # Show state distribution
 states = {}
