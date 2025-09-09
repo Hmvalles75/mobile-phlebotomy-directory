@@ -212,7 +212,7 @@ export default function StatePage({ params }: StatePageProps) {
                             {provider.name}
                           </h3>
                           {provider.description && (
-                            <p className="text-gray-600 mb-3 line-clamp-2">
+                            <p className="text-gray-600 mb-3">
                               {provider.description}
                             </p>
                           )}
