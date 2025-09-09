@@ -20,7 +20,7 @@ export function Header() {
 
           <nav className="hidden md:flex items-center space-x-8">
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/search" className="text-gray-600 hover:text-primary-600 transition-colors">
+            <Link href="/#browse-by-state" className="text-gray-600 hover:text-primary-600 transition-colors">
               Find Providers
             </Link>
             {/* @ts-ignore - Next.js typedRoutes compatibility */}

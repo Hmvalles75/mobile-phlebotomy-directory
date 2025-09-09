@@ -71,6 +71,9 @@ interface StatePageProps {
 export default function StatePage({ params }: StatePageProps) {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [minRating, setMinRating] = useState<number | null>(null)
 
   const stateSlug = params.state
   const stateInfo = stateData[stateSlug]
@@ -99,6 +102,33 @@ export default function StatePage({ params }: StatePageProps) {
 
     fetchProviders()
   }, [stateAbbr])
+
+  // Available services
+  const availableServices = ['At-Home Blood Draw', 'Specimen Pickup', 'Lab Partner']
+
+  // Filter providers
+  const filteredProviders = providers.filter(provider => {
+    const matchesSearch = !searchQuery || 
+      provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      provider.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      provider.address.city?.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesServices = selectedServices.length === 0 ||
+      selectedServices.some(service => provider.services.includes(service as any))
+    
+    const matchesRating = !minRating || 
+      (provider.rating && provider.rating >= minRating)
+    
+    return matchesSearch && matchesServices && matchesRating
+  })
+
+  const handleServiceToggle = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service)
+        ? prev.filter(s => s !== service)
+        : [...prev, service]
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -175,8 +205,62 @@ export default function StatePage({ params }: StatePageProps) {
                   All Mobile Phlebotomy Providers in {stateName}
                 </h2>
                 <p className="text-gray-600 mt-2">
-                  {loading ? 'Loading providers...' : `${providers.length} certified providers available`}
+                  {loading ? 'Loading providers...' : `${filteredProviders.length} of ${providers.length} providers shown`}
                 </p>
+
+                {/* Search and Filters */}
+                <div className="mt-6 space-y-4">
+                  {/* Search Bar */}
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Search by name, city, or description..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Service Filters */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Filter by Services:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {availableServices.map(service => (
+                        <button
+                          key={service}
+                          onClick={() => handleServiceToggle(service)}
+                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                            selectedServices.includes(service)
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {service}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rating Filter */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Minimum Rating:</p>
+                    <div className="flex gap-2">
+                      {[null, 3, 4, 4.5].map(rating => (
+                        <button
+                          key={rating || 'all'}
+                          onClick={() => setMinRating(rating)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            minRating === rating
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {rating ? `${rating}+ ⭐` : 'All'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {loading ? (
@@ -185,26 +269,42 @@ export default function StatePage({ params }: StatePageProps) {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Loading providers...</h3>
                   <p className="text-gray-600">Please wait while we load providers in {stateName}.</p>
                 </div>
-              ) : providers.length === 0 ? (
+              ) : filteredProviders.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="text-gray-400 text-4xl mb-4">🔍</div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No providers found in {stateName}
+                    {providers.length === 0 ? `No providers found in ${stateName}` : 'No matching providers found'}
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    We&apos;re working to expand our network to {stateName}. 
-                    Check back soon or search in nearby states.
+                    {providers.length === 0 ? (
+                      <>We&apos;re working to expand our network to {stateName}. Check back soon or search in nearby states.</>
+                    ) : (
+                      'Try adjusting your filters or search terms'
+                    )}
                   </p>
-                  <Link
-                    href="/search"
-                    className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
-                  >
-                    Search All Providers
-                  </Link>
+                  {providers.length > 0 && (selectedServices.length > 0 || minRating || searchQuery) ? (
+                    <button
+                      onClick={() => {
+                        setSelectedServices([])
+                        setMinRating(null)
+                        setSearchQuery('')
+                      }}
+                      className="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  ) : (
+                    <Link
+                      href="/#browse-by-state"
+                      className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                      Browse Other States
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
-                  {providers.map((provider) => (
+                  {filteredProviders.map((provider) => (
                     <div key={provider.id} className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">

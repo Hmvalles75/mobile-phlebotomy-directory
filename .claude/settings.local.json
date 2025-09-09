@@ -14,7 +14,9 @@
       "Bash(dir:*)",
       "Bash(head:*)",
       "Bash(git add:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(python:*)",
+      "Bash(py:*)"
     ],
     "deny": [],
     "ask": []
