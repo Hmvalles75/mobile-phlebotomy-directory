@@ -111,7 +111,7 @@ export default function StatePage({ params }: StatePageProps) {
     const matchesSearch = !searchQuery || 
       provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       provider.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      provider.address.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      provider.address?.city?.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesServices = selectedServices.length === 0 ||
       selectedServices.some(service => provider.services.includes(service as any))
