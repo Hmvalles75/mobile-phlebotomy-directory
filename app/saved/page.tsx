@@ -19,8 +19,11 @@ export default function SavedProviders() {
 
   // Load saved provider IDs
   useEffect(() => {
-    const savedIds = getSavedProviders()
-    setSavedProviderIds(savedIds)
+    const loadSavedIds = async () => {
+      const savedIds = await getSavedProviders()
+      setSavedProviderIds(savedIds)
+    }
+    loadSavedIds()
   }, [])
 
   // Fetch provider details for saved IDs
@@ -84,15 +87,16 @@ export default function SavedProviders() {
     setFilteredProviders(filtered)
   }, [providers, searchQuery, sortBy, savedProviderIds])
 
-  const handleProviderUpdated = () => {
+  const handleProviderUpdated = async () => {
     // Refresh saved provider IDs when a provider is unsaved
-    const newSavedIds = getSavedProviders()
+    const newSavedIds = await getSavedProviders()
     setSavedProviderIds(newSavedIds)
   }
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (confirm(`Are you sure you want to remove all ${savedProviderIds.length} saved providers?`)) {
-      localStorage.removeItem('savedProviders')
+      const { secureStorage } = await import('@/lib/crypto')
+      secureStorage.removeItem('savedProviders')
       setSavedProviderIds([])
       setProviders([])
     }
@@ -127,6 +131,7 @@ export default function SavedProviders() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        suppressHydrationWarning
       />
       
       <div className="min-h-screen bg-gray-50">

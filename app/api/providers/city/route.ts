@@ -2,13 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { Provider } from '@/lib/schemas'
+import { cityQuerySchema, validateInput, sanitizeString } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
-// Load providers from JSON file
+// Load providers from JSON file with error handling
 function loadProviders(): Provider[] {
-  const providersPath = path.join(process.cwd(), 'data', 'providers.json')
-  return JSON.parse(fs.readFileSync(providersPath, 'utf8'))
+  try {
+    const providersPath = path.join(process.cwd(), 'data', 'providers.json')
+    if (!fs.existsSync(providersPath)) {
+      console.error('Providers file not found:', providersPath)
+      return []
+    }
+    const fileContent = fs.readFileSync(providersPath, 'utf8')
+    return JSON.parse(fileContent)
+  } catch (error) {
+    console.error('Error loading providers:', error)
+    return []
+  }
 }
 
 // Enhanced city search that includes regional providers
@@ -76,30 +87,40 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    const city = searchParams.get('city')
-    const state = searchParams.get('state')
-    const grouped = searchParams.get('grouped') === 'true'
+    // Convert URLSearchParams to object for validation
+    const queryParams: Record<string, string> = {}
+    searchParams.forEach((value, key) => {
+      queryParams[key] = value
+    })
     
-    if (!city || !state) {
-      return NextResponse.json({ error: 'City and state are required' }, { status: 400 })
+    // Validate query parameters
+    const validation = validateInput(cityQuerySchema, queryParams)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      )
     }
+    
+    const city = sanitizeString(validation.data.city)
+    const state = validation.data.state
+    const grouped = searchParams.get('grouped') === 'true'
 
-    console.log(`Fetching providers for ${city}, ${state}${grouped ? ' (grouped)' : ''}`)
     
     if (grouped) {
       // Return grouped results for enhanced UI
       const results = getProvidersByCity(city, state)
-      console.log(`Found ${results.citySpecific.length} city-specific, ${results.regional.length} regional, ${results.statewide.length} statewide providers`)
       return NextResponse.json(results)
     } else {
       // Return flat list for backward compatibility
       const providers = getAllProvidersForCity(city, state)
-      console.log(`Found ${providers.length} total providers for ${city}, ${state}`)
       return NextResponse.json(providers)
     }
   } catch (error) {
     console.error('Error in city providers API:', error)
-    // Return empty array instead of error to prevent crashes
-    return NextResponse.json([])
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

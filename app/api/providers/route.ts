@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { providerQuerySchema, validateInput, sanitizeString } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
-// Load providers from your JSON file
+// Load providers from your JSON file with error handling
 function loadProviders() {
   try {
     const filePath = path.join(process.cwd(), 'public', 'data', 'providers.json')
+    if (!fs.existsSync(filePath)) {
+      console.error('Providers file not found:', filePath)
+      return []
+    }
     const fileContent = fs.readFileSync(filePath, 'utf8')
     return JSON.parse(fileContent)
   } catch (error) {
@@ -19,13 +24,35 @@ function loadProviders() {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    
+    // Convert URLSearchParams to object for validation
+    const queryParams: Record<string, string> = {}
+    searchParams.forEach((value, key) => {
+      queryParams[key] = value
+    })
+    
+    // Validate query parameters
+    const validation = validateInput(providerQuerySchema, queryParams)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      )
+    }
+    
     const providers = loadProviders()
+    if (!providers || providers.length === 0) {
+      return NextResponse.json(
+        { error: 'No providers available' },
+        { status: 503 }
+      )
+    }
     
     // Check for special endpoints
     const featured = searchParams.get('featured')
     const topRated = searchParams.get('topRated')
     const rating = searchParams.get('rating')
-    const limit = parseInt(searchParams.get('limit') || '200')
+    const limit = validation.data.limit
 
     // Handle featured providers (high rating)
     if (featured === 'true') {
@@ -53,10 +80,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(ratedProviders)
     }
 
-    // Handle search and filters
-    const query = searchParams.get('query') || ''
-    const city = searchParams.get('city') || undefined
-    const state = searchParams.get('state') || undefined
+    // Handle search and filters with sanitization
+    const query = searchParams.get('query') ? sanitizeString(searchParams.get('query')!) : ''
+    const city = validation.data.city ? sanitizeString(validation.data.city) : undefined
+    const state = validation.data.state
     
     let filteredProviders = providers
 
@@ -76,10 +103,10 @@ export async function GET(request: NextRequest) {
         p.coverage?.cities?.some((c: string) => c.toLowerCase() === cityLower)
       )
     }
-// Filter by services
+// Filter by services with sanitization
 const services = searchParams.get('services')
 if (services) {
-  const servicesList = services.split(',').map(s => s.trim())
+  const servicesList = sanitizeString(services).split(',').map(s => s.trim())
   filteredProviders = filteredProviders.filter((p: any) => {
     if (!p.services || p.services.length === 0) return false
     
@@ -121,6 +148,9 @@ if (ratingParam) {
     return NextResponse.json(limitedProviders)
   } catch (error) {
     console.error('Error in providers API:', error)
-    return NextResponse.json([])
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

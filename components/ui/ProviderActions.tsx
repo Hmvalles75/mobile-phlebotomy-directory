@@ -137,6 +137,7 @@ export function ProviderActions({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(generateProviderStructuredData(provider, currentLocation))
           }}
+          suppressHydrationWarning
         />
       )}
 
@@ -247,6 +248,7 @@ export function ProviderDetailsModal({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(generateProviderStructuredData(provider, currentLocation))
           }}
+          suppressHydrationWarning
         />
 
         <div className="p-6">

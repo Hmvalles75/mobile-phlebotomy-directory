@@ -1,5 +1,6 @@
 // Provider action utilities with SEO best practices
 import { type Provider } from './schemas'
+import { secureStorage } from './crypto'
 
 // Fallback function to copy text to clipboard for older browsers
 function copyToClipboardFallback(text: string) {
@@ -33,10 +34,10 @@ export interface ProviderInteractionEvent {
 }
 
 // Analytics tracking for provider interactions
-export function trackProviderInteraction(event: ProviderInteractionEvent) {
-  // Store interaction in localStorage for analytics
+export async function trackProviderInteraction(event: ProviderInteractionEvent) {
+  // Store interaction in encrypted localStorage for analytics
   try {
-    const interactions = JSON.parse(localStorage.getItem('providerInteractions') || '[]')
+    const interactions = await secureStorage.getItem('providerInteractions') || []
     interactions.push(event)
     
     // Keep only last 100 interactions to avoid storage bloat
@@ -44,7 +45,7 @@ export function trackProviderInteraction(event: ProviderInteractionEvent) {
       interactions.splice(0, interactions.length - 100)
     }
     
-    localStorage.setItem('providerInteractions', JSON.stringify(interactions))
+    await secureStorage.setItem('providerInteractions', interactions)
     
     // Send to analytics service (Google Analytics, etc.)
     if (typeof window !== 'undefined' && window.gtag) {
@@ -183,9 +184,9 @@ export function visitProviderWebsite(provider: Provider, currentLocation?: strin
 }
 
 // Save/unsave provider functionality
-export function toggleSaveProvider(providerId: string, providerName: string): boolean {
+export async function toggleSaveProvider(providerId: string, providerName: string): Promise<boolean> {
   try {
-    const savedProviders = JSON.parse(localStorage.getItem('savedProviders') || '[]')
+    const savedProviders = await secureStorage.getItem('savedProviders') || []
     const isCurrentlySaved = savedProviders.includes(providerId)
     
     let newSavedProviders: string[]
@@ -195,7 +196,7 @@ export function toggleSaveProvider(providerId: string, providerName: string): bo
       newSavedProviders = [...savedProviders, providerId]
     }
     
-    localStorage.setItem('savedProviders', JSON.stringify(newSavedProviders))
+    await secureStorage.setItem('savedProviders', newSavedProviders)
     
     // Track the interaction
     trackProviderInteraction({
@@ -213,9 +214,9 @@ export function toggleSaveProvider(providerId: string, providerName: string): bo
 }
 
 // Check if provider is saved
-export function isProviderSaved(providerId: string): boolean {
+export async function isProviderSaved(providerId: string): Promise<boolean> {
   try {
-    const savedProviders = JSON.parse(localStorage.getItem('savedProviders') || '[]')
+    const savedProviders = await secureStorage.getItem('savedProviders') || []
     return savedProviders.includes(providerId)
   } catch (error) {
     return false
@@ -223,9 +224,9 @@ export function isProviderSaved(providerId: string): boolean {
 }
 
 // Get all saved providers
-export function getSavedProviders(): string[] {
+export async function getSavedProviders(): Promise<string[]> {
   try {
-    return JSON.parse(localStorage.getItem('savedProviders') || '[]')
+    return await secureStorage.getItem('savedProviders') || []
   } catch (error) {
     return []
   }

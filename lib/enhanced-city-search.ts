@@ -16,16 +16,36 @@ let regionsCache: Region[] | null = null;
 
 function loadProviders(): Provider[] {
   if (!providersCache) {
-    const providersPath = path.join(process.cwd(), 'data', 'providers.json');
-    providersCache = JSON.parse(fs.readFileSync(providersPath, 'utf8'));
+    try {
+      const providersPath = path.join(process.cwd(), 'data', 'providers.json');
+      if (!fs.existsSync(providersPath)) {
+        console.error('Providers file not found:', providersPath);
+        return [];
+      }
+      const fileContent = fs.readFileSync(providersPath, 'utf8');
+      providersCache = JSON.parse(fileContent);
+    } catch (error) {
+      console.error('Error loading providers:', error);
+      return [];
+    }
   }
   return providersCache || [];
 }
 
 function loadRegions(): Region[] {
   if (!regionsCache) {
-    const regionsPath = path.join(process.cwd(), 'data', 'regions.json');
-    regionsCache = JSON.parse(fs.readFileSync(regionsPath, 'utf8'));
+    try {
+      const regionsPath = path.join(process.cwd(), 'data', 'regions.json');
+      if (!fs.existsSync(regionsPath)) {
+        console.error('Regions file not found:', regionsPath);
+        return [];
+      }
+      const fileContent = fs.readFileSync(regionsPath, 'utf8');
+      regionsCache = JSON.parse(fileContent);
+    } catch (error) {
+      console.error('Error loading regions:', error);
+      return [];
+    }
   }
   return regionsCache || [];
 }
