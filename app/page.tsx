@@ -2,22 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { SearchBar } from '@/components/ui/SearchBar'
+import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { trackTopRatedView, trackRatingView } from '@/lib/provider-actions'
 import { type Provider } from '@/lib/schemas'
+import { topMetroAreas } from '@/data/top-metros'
 
-const featuredCities = [
-  { name: 'Los Angeles', state: 'CA', slug: 'los-angeles' },
-  { name: 'New York', state: 'NY', slug: 'new-york' },
-  { name: 'Chicago', state: 'IL', slug: 'chicago' },
-  { name: 'Houston', state: 'TX', slug: 'houston' },
-  { name: 'Miami', state: 'FL', slug: 'miami' },
-  { name: 'San Francisco', state: 'CA', slug: 'san-francisco' },
-]
+const featuredMetros = topMetroAreas.slice(0, 12)
 
 const topServices = [
   'At-Home Blood Draw',
@@ -183,7 +177,7 @@ export default function HomePage() {
               available 7 days a week across the United States.
             </p>
             
-            <SearchBar 
+            <AutocompleteSearchBar 
               onSearch={handleSearch}
               placeholder="Enter your ZIP code or city..."
               className="mb-8"
@@ -260,6 +254,56 @@ export default function HomePage() {
                 equipment for safe, professional blood collection.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Metro Areas Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Top Metro Areas We Serve
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Professional mobile phlebotomy services available in major metropolitan areas nationwide
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-8">
+            {featuredMetros.map((metro) => (
+              <Link
+                key={metro.slug}
+                href={`/us/metro/${metro.slug}`}
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary-300 transition-all group"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm">
+                      {metro.city}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {metro.state} • #{metro.rank}
+                    </p>
+                  </div>
+                  <span className="text-primary-600 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <div>💰 {metro.localInfo?.avgCost || '$60-120'}</div>
+                  <div>⏱️ {metro.localInfo?.typicalWaitTime || '24-48 hrs'}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/metros"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              View All 50 Metro Areas
+              <span>→</span>
+            </Link>
           </div>
         </div>
       </section>

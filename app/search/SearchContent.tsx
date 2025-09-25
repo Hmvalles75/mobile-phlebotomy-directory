@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { SearchBar } from '@/components/ui/SearchBar'
+import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { trackRatingFilter, trackRatingView } from '@/lib/provider-actions'
@@ -63,12 +63,18 @@ if (selectedServices.length > 0) {
 if (minRating !== null) {
   params.append('rating', minRating.toString())
 }
-params.append('sortBy', sortBy)
+params.append('sort', sortBy)
 params.append('limit', '200')
 
         const response = await fetch(`/api/providers?${params}`)
         const data = await response.json()
-        setProviders(data || [])
+
+        if (response.ok && Array.isArray(data)) {
+          setProviders(data)
+        } else {
+          console.error('API Error:', data)
+          setProviders([])
+        }
       } catch (error) {
         console.error('Error searching providers:', error)
         setProviders([])
@@ -95,7 +101,7 @@ params.append('limit', '200')
     }
   }
 
-  const sortedProviders = [...providers].sort((a, b) => {
+  const sortedProviders = (Array.isArray(providers) ? [...providers] : []).sort((a, b) => {
     switch (sortBy) {
       case 'rating':
         return (b.rating || 0) - (a.rating || 0)
@@ -114,7 +120,7 @@ params.append('limit', '200')
       <div className="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Search Mobile Phlebotomy Providers</h1>
-          <SearchBar 
+          <AutocompleteSearchBar 
             value={searchQuery}
             onChange={setSearchQuery}
             className="max-w-2xl"

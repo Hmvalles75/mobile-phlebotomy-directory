@@ -6,6 +6,9 @@ import { SearchBar } from '@/components/ui/SearchBar'
 import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
+import { ProviderSchema } from '@/components/seo/ProviderSchema'
+import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
+
 // Use the standardized coverage display function
 function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
   return formatCoverageDisplay(provider.coverage);
@@ -616,6 +619,12 @@ export default function CityPage({ params }: PageProps) {
               
               return (
               <div key={provider.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                {/* Individual Provider Schema */}
+                <ProviderSchema
+                  provider={provider}
+                  location={`${cityName}, ${state}`}
+                />
+
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
@@ -627,7 +636,12 @@ export default function CityPage({ params }: PageProps) {
                       )}
                       {provider.phone && <span>📞 {provider.phone}</span>}
                       {provider.rating && provider.reviewsCount && (
-                        <span>⭐ {provider.rating} ({provider.reviewsCount} reviews)</span>
+                        <div className="flex items-center">
+                          <span className="text-yellow-400">
+                            {'★'.repeat(Math.floor(provider.rating))}{'☆'.repeat(5 - Math.floor(provider.rating))}
+                          </span>
+                          <span className="ml-1">{provider.rating} ({provider.reviewsCount} reviews)</span>
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm text-gray-600">

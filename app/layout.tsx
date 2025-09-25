@@ -7,10 +7,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: {
-    default: 'Mobile Phlebotomy Directory | Find At-Home Blood Draw Services',
+    default: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
     template: '%s | MobilePhlebotomy.org'
   },
-  description: 'Find certified mobile phlebotomy services near you. Professional at-home blood draws, lab collections, and mobile health services nationwide.',
+  description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   keywords: 'mobile phlebotomy, at-home blood draw, mobile lab services, home blood test, phlebotomist near me',
   authors: [{ name: 'MobilePhlebotomy.org' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'),
@@ -19,13 +19,13 @@ export const metadata = {
     locale: 'en_US',
     url: '/',
     siteName: 'MobilePhlebotomy.org',
-    title: 'Mobile Phlebotomy Directory | Find At-Home Blood Draw Services',
-    description: 'Find certified mobile phlebotomy services near you. Professional at-home blood draws, lab collections, and mobile health services nationwide.',
+    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
+    description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mobile Phlebotomy Directory | Find At-Home Blood Draw Services',
-    description: 'Find certified mobile phlebotomy services near you. Professional at-home blood draws, lab collections, and mobile health services nationwide.',
+    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
+    description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   },
   robots: {
     index: true,

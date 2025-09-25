@@ -4,11 +4,14 @@ import { z } from 'zod';
 export const providerQuerySchema = z.object({
   state: z.string().min(2).max(2).optional(),
   city: z.string().min(1).max(100).optional(),
-  service: z.string().min(1).max(100).optional(),
-  search: z.string().min(1).max(200).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
+  services: z.string().min(1).max(500).optional(), // Changed from service to services, increased length for comma-separated
+  query: z.string().min(1).max(200).optional(), // Changed from search to query
+  limit: z.coerce.number().int().min(1).max(200).default(50), // Increased max to 200 to match API usage
   offset: z.coerce.number().int().min(0).default(0),
   sort: z.enum(['name', 'rating', 'distance']).optional(),
+  rating: z.coerce.number().min(0).max(5).optional(), // Added rating parameter
+  featured: z.enum(['true', 'false']).optional(), // Added featured parameter
+  topRated: z.enum(['true', 'false']).optional(), // Added topRated parameter
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
 });

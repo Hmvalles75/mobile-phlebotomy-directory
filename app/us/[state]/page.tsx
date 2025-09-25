@@ -7,6 +7,8 @@ import { BreadcrumbNav } from '@/components/seo/BreadcrumbSchema'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
+import { ProviderSchema } from '@/components/seo/ProviderSchema'
+import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
