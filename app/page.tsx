@@ -33,6 +33,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [topRatedProviders, setTopRatedProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
+  const [providerCounts, setProviderCounts] = useState<Record<string, number>>({})
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -56,8 +57,37 @@ export default function HomePage() {
         setLoading(false)
       }
     }
-    
+
+    async function fetchProviderCounts() {
+      try {
+        // Get provider counts for each metro area
+        const counts: Record<string, number> = {}
+
+        // Get all providers to count by metro area
+        const response = await fetch('/api/providers?limit=200')
+        if (response.ok) {
+          const allProviders = await response.json()
+
+          // Count providers for each featured metro area
+          featuredMetros.forEach(metro => {
+            counts[metro.slug] = allProviders.filter((provider: Provider) => {
+              // Check if provider serves this metro area
+              return provider.coverage?.cities?.some((city: string) =>
+                city.toLowerCase().includes(metro.city.toLowerCase())
+              ) || provider.coverage?.states?.includes(metro.stateAbbr) ||
+              provider.address?.city?.toLowerCase() === metro.city.toLowerCase()
+            }).length
+          })
+
+          setProviderCounts(counts)
+        }
+      } catch (error) {
+        console.error('Failed to fetch provider counts:', error)
+      }
+    }
+
     fetchTopRatedProviders()
+    fetchProviderCounts()
   }, [])
 
   const jsonLd = {
@@ -283,7 +313,7 @@ export default function HomePage() {
                       {metro.city}
                     </h3>
                     <p className="text-xs text-gray-500">
-                      {metro.state} • #{metro.rank}
+                      {metro.state} • {providerCounts[metro.slug] || 0} provider{providerCounts[metro.slug] !== 1 ? 's' : ''}
                     </p>
                   </div>
                   <span className="text-primary-600 group-hover:translate-x-1 transition-transform">→</span>
