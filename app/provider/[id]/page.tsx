@@ -296,7 +296,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   <div className="space-y-4">
                     {testimonials.map((testimonial, index) => (
                       <div key={index} className="border-l-4 border-primary-500 pl-4 py-2">
-                        <p className="text-gray-600 italic">"{testimonial}"</p>
+                        <p className="text-gray-600 italic">&ldquo;{testimonial}&rdquo;</p>
                       </div>
                     ))}
                   </div>
