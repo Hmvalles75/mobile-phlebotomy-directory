@@ -66,10 +66,19 @@ export interface EnrichedProvider {
 let providersCache: EnrichedProvider[] | null = null
 
 function generateSlug(name: string): string {
-  return name
+  // Extract just the first few words (business name) if name is too long
+  let cleanName = name
+  if (name.length > 100) {
+    // Take first 10 words or first 50 characters, whichever is shorter
+    const words = name.split(/\s+/).slice(0, 10).join(' ')
+    cleanName = words.length > 50 ? words.substring(0, 50) : words
+  }
+
+  return cleanName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+    .substring(0, 50) // Ensure max 50 characters
 }
 
 function parseServices(provider: any): string[] {
@@ -224,12 +233,20 @@ async function loadProviders(): Promise<EnrichedProvider[]> {
     const records = parseCSV(fileContent)
 
     const providers: EnrichedProvider[] = records.map((record: any, index: number) => {
-      const id = generateSlug(record.name) + '-' + index
+      // Create a simple hash for very long names to ensure unique but short IDs
+      const baseSlug = generateSlug(record.name)
+      const id = baseSlug.length > 30 ? `provider-${index.toString().padStart(3, '0')}` : `${baseSlug}-${index}`
+
+      // Clean the name field to extract business name
+      const cleanName = record.name?.length > 100
+        ? record.name.split(/\s+/).slice(0, 8).join(' ').substring(0, 80)
+        : record.name
 
       return {
         ...record,
         id,
-        slug: generateSlug(record.name),
+        name: cleanName,
+        slug: generateSlug(cleanName),
         description: record.bio || record.validation_notes,
         services: parseServices(record),
         coverage: parseCoverage(record),
