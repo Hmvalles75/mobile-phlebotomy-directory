@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
-import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
+import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { trackRatingFilter, trackRatingView } from '@/lib/provider-actions'
 import { type Provider } from '@/lib/schemas'
@@ -17,7 +18,6 @@ export default function SearchContent() {
   const [providers, setProviders] = useState<Provider[]>([])
   const [sortBy, setSortBy] = useState<'rating' | 'distance' | 'reviews' | 'name'>('rating')
   const [loading, setLoading] = useState(false)
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [selectedCity, setSelectedCity] = useState('')
   const [selectedState, setSelectedState] = useState('')
 
@@ -237,26 +237,27 @@ params.append('limit', '200')
             ) : (
               <div className="space-y-4">
                 {sortedProviders.map((provider) => (
-                  <div 
-                    key={provider.id} 
-                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => setSelectedProvider(provider)}
+                  <div
+                    key={provider.id}
+                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        <Link
+                          href={`/provider/${provider.id}`}
+                          className="text-xl font-bold text-gray-900 mb-1 hover:text-primary-600 inline-block"
+                        >
                           {provider.name}
-                        </h3>
+                        </Link>
                         {provider.rating && (
-                          <div 
-                            onClick={(e) => {
-                              e.stopPropagation()
+                          <div
+                            onClick={() => {
                               trackRatingView(provider, 'search-results')
                             }}
                           >
-                            <RatingBadge 
-                              rating={provider.rating} 
-                              reviewsCount={provider.reviewsCount} 
+                            <RatingBadge
+                              rating={provider.rating}
+                              reviewsCount={provider.reviewsCount}
                             />
                           </div>
                         )}
@@ -271,7 +272,7 @@ params.append('limit', '200')
 
                     <div className="flex flex-wrap gap-2 mb-4">
                       {provider.services.slice(0, 3).map(service => (
-                        <span 
+                        <span
                           key={service}
                           className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm"
                         >
@@ -289,12 +290,18 @@ params.append('limit', '200')
                       {formatCoverageDisplay(provider.coverage)}
                     </div>
 
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-center">
                       <ProviderActions
                         provider={provider}
                         variant="compact"
                         currentLocation="search"
                       />
+                      <Link
+                        href={`/provider/${provider.id}`}
+                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                      >
+                        View Details →
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -303,15 +310,6 @@ params.append('limit', '200')
           </div>
         </div>
       </div>
-
-      {/* Provider Details Modal */}
-      {selectedProvider && (
-        <ProviderDetailsModal
-          provider={selectedProvider}
-          isOpen={true}
-          onClose={() => setSelectedProvider(null)}
-        />
-      )}
     </div>
   )
 }

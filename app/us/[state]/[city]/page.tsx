@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
+import { ProviderActions } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
@@ -400,7 +401,6 @@ export default function CityPage({ params }: PageProps) {
     statewide: Provider[]
   } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
 
   const cityKey = params.city as keyof typeof cityMapping
   const cityInfo = cityMapping[cityKey]
@@ -627,7 +627,12 @@ export default function CityPage({ params }: PageProps) {
 
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
+                    <Link
+                      href={`/provider/${provider.id}`}
+                      className="text-xl font-bold text-gray-900 mb-2 hover:text-primary-600 inline-block"
+                    >
+                      {provider.name}
+                    </Link>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                       {provider.address?.city && provider.address.city.trim() ? (
                         <span>📍 {provider.address.city}{provider.address.state ? `, ${provider.address.state}` : ''}{provider.address.zip ? ` ${provider.address.zip}` : ''}</span>
@@ -715,11 +720,20 @@ export default function CityPage({ params }: PageProps) {
                   )}
                 </div>
 
-                <ProviderActions
-                  provider={provider}
-                  currentLocation={`${cityName}, ${state}`}
-                  showStructuredData={true}
-                />
+                <div className="flex justify-between items-center">
+                  <ProviderActions
+                    provider={provider}
+                    currentLocation={`${cityName}, ${state}`}
+                    showStructuredData={true}
+                    variant="compact"
+                  />
+                  <Link
+                    href={`/provider/${provider.id}`}
+                    className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                  >
+                    View Details →
+                  </Link>
+                </div>
               </div>
               )
             })
@@ -757,14 +771,6 @@ export default function CityPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-
-      {/* Provider Details Modal */}
-      <ProviderDetailsModal
-        provider={selectedProvider}
-        isOpen={!!selectedProvider}
-        onClose={() => setSelectedProvider(null)}
-        currentLocation={`${cityName}, ${state}`}
-      />
     </div>
   )
 }

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { topMetroAreas, getMetroBySlug, type MetroArea } from '@/data/top-metros'
@@ -27,7 +26,6 @@ export default function MetroPage({ params }: MetroPageProps) {
     statewide: Provider[]
   } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [showAllProviders, setShowAllProviders] = useState(false)
 
   const metro = getMetroBySlug(params.metro)
@@ -333,7 +331,12 @@ export default function MetroPage({ params }: MetroPageProps) {
 
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
+                            <Link
+                              href={`/provider/${provider.id}`}
+                              className="text-xl font-bold text-gray-900 mb-2 hover:text-primary-600 inline-block"
+                            >
+                              {provider.name}
+                            </Link>
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                               {provider.address?.city && provider.address.city.trim() && (
                                 <span>📍 {provider.address.city}{provider.address.state ? `, ${provider.address.state}` : ''}</span>
@@ -410,11 +413,14 @@ export default function MetroPage({ params }: MetroPageProps) {
                           )}
                         </div>
 
-                        <ProviderActions
-                          provider={provider}
-                          currentLocation={`${metro.city}, ${metro.state}`}
-                          showStructuredData={true}
-                        />
+                        <div className="flex justify-center mt-4">
+                          <Link
+                            href={`/provider/${provider.id}`}
+                            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                          >
+                            View Provider Details →
+                          </Link>
+                        </div>
                       </div>
                     )
                   })}
@@ -596,14 +602,6 @@ export default function MetroPage({ params }: MetroPageProps) {
           </div>
         </div>
       </div>
-
-      {/* Provider Details Modal */}
-      <ProviderDetailsModal
-        provider={selectedProvider}
-        isOpen={!!selectedProvider}
-        onClose={() => setSelectedProvider(null)}
-        currentLocation={`${metro.city}, ${metro.state}`}
-      />
     </div>
   )
 }

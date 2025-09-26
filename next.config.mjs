@@ -10,12 +10,15 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'www.mobilephlebotomy.org',
       },
-      // Add other trusted domains as needed
-      // For example, if you use a CDN:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'cdn.mobilephlebotomy.org',
-      // },
+      // Allow all external image domains for provider logos
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
     ],
   },
 }

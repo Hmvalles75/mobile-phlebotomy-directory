@@ -37,7 +37,7 @@ export function RatingBadge({
     return (
       <div className={`inline-flex items-center gap-1 text-sm ${className}`}>
         <span className="text-yellow-500">⭐</span>
-        <span className="font-medium text-gray-900">{rating.toFixed(1)}</span>
+        <span className="font-medium text-gray-900">{Number(rating).toFixed(1)}</span>
         {showReviews && reviewsCount && (
           <span className="text-gray-600">({reviewsCount})</span>
         )}
@@ -56,7 +56,7 @@ export function RatingBadge({
         )}
         <div className="flex items-center gap-1">
           <span className="text-yellow-500 text-lg">⭐</span>
-          <span className="font-bold text-gray-900">{rating.toFixed(1)}</span>
+          <span className="font-bold text-gray-900">{Number(rating).toFixed(1)}</span>
           {showReviews && reviewsCount && (
             <span className="text-gray-600 text-sm">({reviewsCount} reviews)</span>
           )}
@@ -76,7 +76,7 @@ export function RatingBadge({
       )}
       <div className="flex items-center gap-1">
         <span className="text-yellow-500">⭐</span>
-        <span className="font-medium text-gray-900">{rating.toFixed(1)}</span>
+        <span className="font-medium text-gray-900">{Number(rating).toFixed(1)}</span>
         {showReviews && reviewsCount && (
           <span className="text-gray-600">({reviewsCount} review{reviewsCount !== 1 ? 's' : ''})</span>
         )}

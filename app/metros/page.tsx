@@ -1,14 +1,77 @@
 import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
+import { getAllProviders } from '@/lib/providers'
 
-export default function MetrosPage() {
+export default async function MetrosPage() {
+  const providers = await getAllProviders()
+
+  // State abbreviation to full name mapping
+  const stateMap: Record<string, string> = {
+    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+  }
+
+  // Function to count providers for a metro area (matches city page logic)
+  const getProviderCount = (metroCity: string, metroStateAbbr: string) => {
+    const fullStateName = stateMap[metroStateAbbr]
+    const normalizedCity = metroCity.toLowerCase()
+
+    return providers.filter(provider => {
+      // Skip non-mobile phlebotomy services
+      if (provider.is_mobile_phlebotomy === 'No') {
+        return false
+      }
+
+      // Include nationwide providers
+      if (provider.is_nationwide === 'Yes') {
+        return true
+      }
+
+      // Check if provider serves this state (both abbreviation and full name)
+      const servesState = provider.state === metroStateAbbr ||
+                         provider.state === fullStateName ||
+                         provider.coverage?.states?.some(state =>
+                           state.toUpperCase() === metroStateAbbr ||
+                           state.toLowerCase() === fullStateName?.toLowerCase()
+                         )
+
+      if (!servesState) return false
+
+      // Check if provider directly serves this city
+      const cityMatch = provider.city?.toLowerCase() === normalizedCity ||
+                       provider.coverage?.cities?.some(city =>
+                         city.toLowerCase() === normalizedCity
+                       )
+
+      // Check if city is mentioned in verified service areas or validation notes
+      const serviceAreaMatch = provider.verified_service_areas?.toLowerCase().includes(normalizedCity) ||
+                              provider.validation_notes?.toLowerCase().includes(normalizedCity)
+
+      // Only count providers that specifically serve this city OR are city-specific providers
+      return cityMatch || serviceAreaMatch
+    }).length
+  }
+
   const metrosByState = topMetroAreas.reduce((acc, metro) => {
     if (!acc[metro.state]) {
       acc[metro.state] = []
     }
-    acc[metro.state].push(metro)
+    // Add provider count to metro object
+    const metroWithCount = {
+      ...metro,
+      providerCount: getProviderCount(metro.city, metro.stateAbbr)
+    }
+    acc[metro.state].push(metroWithCount)
     return acc
-  }, {} as Record<string, typeof topMetroAreas>)
+  }, {} as Record<string, (typeof topMetroAreas[0] & { providerCount: number })[]>)
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -75,23 +138,25 @@ export default function MetrosPage() {
             Top 10 Metro Areas by Population
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {topMetroAreas.slice(0, 10).map((metro) => (
-              <Link
-                key={metro.slug}
-                href={`/us/metro/${metro.slug}`}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {metro.city}, {metro.stateAbbr}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Rank #{metro.rank} • Pop: {(metro.population / 1000000).toFixed(1)}M
-                    </p>
+            {topMetroAreas.slice(0, 10).map((metro) => {
+              const providerCount = getProviderCount(metro.city, metro.stateAbbr)
+              return (
+                <Link
+                  key={metro.slug}
+                  href={`/us/metro/${metro.slug}`}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        {metro.city}, {metro.stateAbbr}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {providerCount} {providerCount === 1 ? 'Provider' : 'Providers'} • Pop: {(metro.population / 1000000).toFixed(1)}M
+                      </p>
+                    </div>
+                    <span className="text-primary-600 text-2xl">→</span>
                   </div>
-                  <span className="text-primary-600 text-2xl">→</span>
-                </div>
                 <div className="mt-3 space-y-1 text-xs text-gray-500">
                   <div>💰 {metro.localInfo?.avgCost || 'Competitive pricing'}</div>
                   <div>⏱️ {metro.localInfo?.typicalWaitTime || '24-48 hour service'}</div>
@@ -100,7 +165,8 @@ export default function MetrosPage() {
                   )}
                 </div>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -126,7 +192,7 @@ export default function MetrosPage() {
                         >
                           {metro.city}
                           <span className="text-xs text-gray-500 ml-2">
-                            (#{metro.rank})
+                            ({metro.providerCount} {metro.providerCount === 1 ? 'provider' : 'providers'})
                           </span>
                         </Link>
                       </li>

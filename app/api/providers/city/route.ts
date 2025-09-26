@@ -1,72 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import { Provider } from '@/lib/schemas'
+import { getAllProviders } from '@/lib/providers'
 import { cityQuerySchema, validateInput, sanitizeString } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
-// Load providers from JSON file with error handling
-function loadProviders(): Provider[] {
-  try {
-    const providersPath = path.join(process.cwd(), 'data', 'providers.json')
-    if (!fs.existsSync(providersPath)) {
-      console.error('Providers file not found:', providersPath)
-      return []
-    }
-    const fileContent = fs.readFileSync(providersPath, 'utf8')
-    return JSON.parse(fileContent)
-  } catch (error) {
-    console.error('Error loading providers:', error)
-    return []
-  }
+// State abbreviation to full name mapping
+const stateMap: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 }
 
 // Enhanced city search that includes regional providers
-function getProvidersByCity(cityName: string, stateAbbr: string) {
-  const providers = loadProviders()
-  
+async function getProvidersByCity(cityName: string, stateAbbr: string) {
+  const providers = await getAllProviders()
+
   const results = {
-    citySpecific: [] as Provider[],
-    regional: [] as Provider[],
-    statewide: [] as Provider[]
+    citySpecific: [] as any[],
+    regional: [] as any[],
+    statewide: [] as any[]
   }
 
   // Normalize inputs
   const normalizedCity = cityName.toLowerCase()
   const normalizedState = stateAbbr.toUpperCase()
+  const fullStateName = stateMap[normalizedState]
 
   providers.forEach(provider => {
-    // Check if provider serves this state
-    const servesState = provider.coverage.states.some(state => 
-      state.toUpperCase() === normalizedState
-    )
-    
+    // Skip non-mobile phlebotomy services
+    if (provider.is_mobile_phlebotomy === 'No') {
+      return
+    }
+
+    // Check if provider is nationwide
+    if (provider.is_nationwide === 'Yes') {
+      results.statewide.push(provider)
+      return
+    }
+
+    // Check if provider serves this state (both abbreviation and full name)
+    const servesState = provider.state === normalizedState ||
+                       provider.state === fullStateName ||
+                       provider.coverage?.states?.some(state =>
+                         state.toUpperCase() === normalizedState ||
+                         state.toLowerCase() === fullStateName?.toLowerCase()
+                       )
+
     if (!servesState) return
 
     // 1. Direct city match
-    const hasDirectCityMatch = provider.coverage.cities?.some(city =>
-      city.toLowerCase() === normalizedCity
-    )
+    const hasDirectCityMatch = provider.city?.toLowerCase() === normalizedCity ||
+                              provider.coverage?.cities?.some(city =>
+                                city.toLowerCase() === normalizedCity
+                              )
 
-    // 2. Address city match  
-    const hasAddressCityMatch = provider.address?.city?.toLowerCase() === normalizedCity
+    // 2. Check if city is mentioned in verified service areas or validation notes
+    const serviceAreaMatch = provider.verified_service_areas?.toLowerCase().includes(normalizedCity) ||
+                            provider.validation_notes?.toLowerCase().includes(normalizedCity)
 
-    // 3. Regional match (simplified without regions file)
-    const hasRegionalMatch = provider.coverage.regions && provider.coverage.regions.length > 0
-
-    // 4. Statewide coverage (no specific cities or regions)
-    const isStatewide = (!provider.coverage.cities || provider.coverage.cities.length === 0) &&
-                       (!provider.coverage.regions || provider.coverage.regions.length === 0) &&
-                       !provider.address?.city
+    // 3. Regional match (covers state but not specifically this city)
+    const hasRegionalMatch = !hasDirectCityMatch && !serviceAreaMatch && servesState
 
     // Categorize the provider
-    if (hasDirectCityMatch || hasAddressCityMatch) {
+    if (hasDirectCityMatch || serviceAreaMatch) {
       results.citySpecific.push(provider)
     } else if (hasRegionalMatch) {
       results.regional.push(provider)
-    } else if (isStatewide) {
-      results.statewide.push(provider)
     }
   })
 
@@ -74,8 +80,8 @@ function getProvidersByCity(cityName: string, stateAbbr: string) {
 }
 
 // Get all providers for a city (combined results)
-function getAllProvidersForCity(cityName: string, stateAbbr: string): Provider[] {
-  const results = getProvidersByCity(cityName, stateAbbr)
+async function getAllProvidersForCity(cityName: string, stateAbbr: string) {
+  const results = await getProvidersByCity(cityName, stateAbbr)
   return [
     ...results.citySpecific,
     ...results.regional,
@@ -106,14 +112,14 @@ export async function GET(request: NextRequest) {
     const state = validation.data.state
     const grouped = searchParams.get('grouped') === 'true'
 
-    
+
     if (grouped) {
       // Return grouped results for enhanced UI
-      const results = getProvidersByCity(city, state)
+      const results = await getProvidersByCity(city, state)
       return NextResponse.json(results)
     } else {
       // Return flat list for backward compatibility
-      const providers = getAllProvidersForCity(city, state)
+      const providers = await getAllProvidersForCity(city, state)
       return NextResponse.json(providers)
     }
   } catch (error) {
