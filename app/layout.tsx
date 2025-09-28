@@ -106,6 +106,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="POWVkQbxx+tXzSQd0J2tOw" async></script>
       </head>
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
