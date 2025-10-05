@@ -352,6 +352,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   currentLocation={`provider-detail-${params.id}`}
                   variant="detailed"
                   showStructuredData={false}
+                  hideViewDetails={true}
                 />
               </div>
 

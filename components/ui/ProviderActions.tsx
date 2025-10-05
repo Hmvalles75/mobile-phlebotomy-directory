@@ -17,6 +17,7 @@ interface ProviderActionsProps {
   variant?: 'default' | 'compact' | 'detailed'
   showStructuredData?: boolean
   className?: string
+  hideViewDetails?: boolean
 }
 
 export function ProviderActions({
@@ -24,7 +25,8 @@ export function ProviderActions({
   currentLocation,
   variant = 'default',
   showStructuredData = false,
-  className = ''
+  className = '',
+  hideViewDetails = false
 }: ProviderActionsProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [contactInfo, setContactInfo] = useState(() => formatProviderContact(provider))
@@ -100,27 +102,38 @@ export function ProviderActions({
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            href={`/provider/${provider.id}`}
-            className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
-            aria-label={`View detailed information for ${provider.name}`}
-          >
-            View Provider Details
-          </Link>
+        <div className={`${hideViewDetails ? 'flex gap-3' : 'grid grid-cols-2 gap-3'}`}>
+          {!hideViewDetails && (
+            <Link
+              href={`/provider/${provider.id}`}
+              className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
+              aria-label={`View detailed information for ${provider.name}`}
+            >
+              View Provider Details
+            </Link>
+          )}
 
           {provider.website && (
             <button
               onClick={handleWebsiteVisit}
               disabled={isLoading}
-              className="border border-primary-600 text-primary-600 px-4 py-3 rounded-lg hover:bg-primary-50 disabled:opacity-50 transition-colors font-medium"
+              className={`${hideViewDetails ? 'bg-primary-600 text-white' : 'border border-primary-600 text-primary-600'} px-4 py-3 rounded-lg hover:bg-primary-${hideViewDetails ? '700' : '50'} disabled:opacity-50 transition-colors font-medium`}
               aria-label={`Visit ${provider.name} official website`}
             >
               Visit Website
             </button>
           )}
 
-
+          {provider.phone && (
+            <button
+              onClick={handleContact}
+              disabled={isLoading}
+              className="border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
+              aria-label={`Contact ${provider.name} via phone`}
+            >
+              {isLoading ? 'Connecting...' : 'Contact Provider'}
+            </button>
+          )}
         </div>
       </div>
     )

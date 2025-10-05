@@ -12,7 +12,13 @@ interface ProviderImageProps {
 export function ProviderImage({ src, alt, className }: ProviderImageProps) {
   const [hasError, setHasError] = useState(false)
 
-  if (hasError || !src || (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/'))) {
+  // Check if it's a valid image URL
+  const isValidImageUrl = src &&
+    (src.startsWith('http://') || src.startsWith('https://')) &&
+    !src.startsWith('data:') && // Exclude data URLs (base64 placeholders)
+    src.length > 10 // Exclude very short URLs
+
+  if (hasError || !isValidImageUrl) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <span className="text-4xl text-gray-400">🏥</span>
