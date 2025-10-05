@@ -130,38 +130,14 @@ export default async function ProviderDetailPage({ params }: PageProps) {
             </nav>
 
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Logo/Profile Image */}
-              {(provider.logo || provider.profileImage) && (
-                <div className="flex-shrink-0">
-                  <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white rounded-lg shadow-md overflow-hidden">
-                    {(() => {
-                      const imageUrl = provider.logo || provider.profileImage || '/placeholder-logo.png'
-                      // Validate if it's a proper URL or path
-                      const isValidUrl = imageUrl.startsWith('http://') ||
-                                        imageUrl.startsWith('https://') ||
-                                        imageUrl.startsWith('/')
-
-                      if (isValidUrl) {
-                        return (
-                          <Image
-                            src={imageUrl}
-                            alt={`${provider.name} logo`}
-                            fill
-                            className="object-contain p-2"
-                            priority
-                          />
-                        )
-                      }
-                      // Show placeholder for invalid URLs
-                      return (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <span className="text-4xl text-gray-400">🏥</span>
-                        </div>
-                      )
-                    })()}
+              {/* Logo/Profile Image - Simplified to avoid broken external links */}
+              <div className="flex-shrink-0">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="text-4xl text-gray-400">🏥</span>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Provider Info */}
               <div className="flex-1">
@@ -278,11 +254,23 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     <div>
                       <strong className="text-gray-900">ZIP Codes Served:</strong>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {provider.zipCodes.split(',').map(zip => (
-                          <span key={zip} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                            {zip.trim()}
-                          </span>
-                        ))}
+                        {(() => {
+                          // Handle malformed zip codes
+                          const zipString = String(provider.zipCodes)
+                          // Check if it's a valid format (5 digits or comma-separated 5-digit codes)
+                          const validZipPattern = /^\d{5}(,\s*\d{5})*$/
+
+                          if (validZipPattern.test(zipString.replace(/\s/g, ''))) {
+                            return zipString.split(',').map(zip => (
+                              <span key={zip} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                                {zip.trim()}
+                              </span>
+                            ))
+                          } else {
+                            // Don't display invalid zip codes
+                            return null
+                          }
+                        })()}
                       </div>
                     </div>
                   )}
@@ -303,37 +291,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Business Images */}
-              {businessImages.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Photos</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {businessImages.map((image, index) => {
-                      // Validate if it's a proper URL or path
-                      const isValidUrl = image.startsWith('http://') ||
-                                        image.startsWith('https://') ||
-                                        image.startsWith('/')
-
-                      return (
-                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                          {isValidUrl ? (
-                            <Image
-                              src={image}
-                              alt={`${provider.name} photo ${index + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-2xl text-gray-400">🏥</span>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
+              {/* Business Images - Removed due to broken external links */}
             </div>
 
             {/* Right Column - Contact & Details */}

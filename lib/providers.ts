@@ -304,7 +304,17 @@ async function loadProviders(): Promise<EnrichedProvider[]> {
           street: record.street && record.street !== '' ? record.street : undefined,
           city: record.city && record.city !== '' ? record.city : undefined,
           state: record.state && record.state !== '' ? record.state : undefined,
-          zip: record.zipCodes?.split(',')[0]?.trim() || undefined
+          zip: (() => {
+            // Handle malformed zip codes
+            if (!record.zipCodes) return undefined
+            const zipString = String(record.zipCodes)
+            // Check if it contains commas with large numbers (Excel scientific notation issue)
+            if (zipString.includes(',') && zipString.length > 20) return undefined
+            // Get first valid 5-digit zip
+            const firstZip = zipString.split(',')[0]?.trim()
+            // Validate it's a 5-digit code
+            return /^\d{5}$/.test(firstZip) ? firstZip : undefined
+          })()
         },
         availability: parseAvailability(record),
         payment: parsePayment(),
