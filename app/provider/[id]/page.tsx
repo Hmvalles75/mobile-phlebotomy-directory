@@ -5,7 +5,7 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
-import Image from 'next/image'
+import { ProviderImage } from '@/components/ui/ProviderImage'
 import Link from 'next/link'
 
 interface PageProps {
@@ -130,12 +130,14 @@ export default async function ProviderDetailPage({ params }: PageProps) {
             </nav>
 
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Logo/Profile Image - Simplified to avoid broken external links */}
+              {/* Logo/Profile Image */}
               <div className="flex-shrink-0">
                 <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <span className="text-4xl text-gray-400">🏥</span>
-                  </div>
+                  <ProviderImage
+                    src={provider.logo || provider.profileImage || ''}
+                    alt={`${provider.name} logo`}
+                    className="object-contain p-2"
+                  />
                 </div>
               </div>
 
