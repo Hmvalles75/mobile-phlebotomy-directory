@@ -19,7 +19,7 @@ export default async function MetrosPage() {
     'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
   }
 
-  // Function to count providers for a metro area (matches API logic exactly)
+  // Function to count providers for a metro area (matches API logic exactly) - Updated 2025
   const getProviderCount = (metroCity: string, metroStateAbbr: string) => {
     const fullStateName = stateMap[metroStateAbbr]
     const normalizedCity = metroCity.toLowerCase()
