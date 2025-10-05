@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
 
@@ -110,22 +111,22 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
-          Contact Provider
-        </button>
-        {provider.bookingUrl && (
-          <a 
-            href={provider.bookingUrl} 
-            target="_blank" 
+        <Link
+          href={`/provider/${provider.id}`}
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        >
+          View Provider Details
+        </Link>
+        {provider.website && (
+          <a
+            href={provider.website}
+            target="_blank"
             rel="noopener noreferrer"
             className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors"
           >
-            Book Online
+            Visit Website
           </a>
         )}
-        <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-          View Details
-        </button>
         <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
           Save
         </button>

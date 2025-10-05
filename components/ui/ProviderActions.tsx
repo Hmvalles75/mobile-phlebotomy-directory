@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { type Provider } from '@/lib/schemas'
 import {
   contactProvider,
@@ -54,15 +55,14 @@ export function ProviderActions({
   if (variant === 'compact') {
     return (
       <div className={`flex gap-2 ${className}`}>
-        <button
-          onClick={handleContact}
-          disabled={isLoading}
-          className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 disabled:opacity-50 transition-colors"
-          aria-label={`Contact ${provider.name} - ${contactInfo.primary}`}
+        <Link
+          href={`/provider/${provider.id}`}
+          className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
+          aria-label={`View details for ${provider.name}`}
         >
-          {isLoading ? '...' : 'Contact'}
-        </button>
-        
+          View Details
+        </Link>
+
         {provider.website && (
           <button
             onClick={handleWebsiteVisit}
@@ -73,7 +73,7 @@ export function ProviderActions({
             Website
           </button>
         )}
-        
+
       </div>
     )
   }
@@ -101,14 +101,13 @@ export function ProviderActions({
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={handleContact}
-            disabled={isLoading}
-            className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium"
-            aria-label={`Contact ${provider.name} via ${contactInfo.methods[0]}`}
+          <Link
+            href={`/provider/${provider.id}`}
+            className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
+            aria-label={`View detailed information for ${provider.name}`}
           >
-            {isLoading ? 'Connecting...' : `Contact Provider`}
-          </button>
+            View Provider Details
+          </Link>
 
           {provider.website && (
             <button
@@ -142,16 +141,15 @@ export function ProviderActions({
       )}
 
       <div className={`flex flex-wrap gap-3 ${className}`}>
-        <button
-          onClick={handleContact}
-          disabled={isLoading}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium"
-          aria-label={`Contact ${provider.name} - ${contactInfo.primary}`}
-          data-provider-action="contact"
+        <Link
+          href={`/provider/${provider.id}`}
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          aria-label={`View detailed information for ${provider.name}`}
+          data-provider-action="view-details"
           data-provider-id={provider.id}
         >
-          {isLoading ? 'Connecting...' : 'Contact Provider'}
-        </button>
+          View Provider Details
+        </Link>
 
         {provider.website && (
           <button
@@ -189,22 +187,17 @@ export function ProviderActions({
           </a>
         )}
 
-        {/* Show "Call to Book" when no online booking is available but phone exists */}
-        {provider.phone && 
-         (!provider.bookingUrl || 
-          provider.bookingUrl.includes('google.com/maps') ||
-          provider.bookingUrl.includes('maps.google.com') ||
-          !provider.bookingUrl.includes('book')) && (
-          <button
-            onClick={() => contactProvider(provider)}
-            className="border border-green-600 text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors"
-            aria-label={`Call ${provider.name} to book appointment`}
-            data-provider-action="call-to-book"
-            data-provider-id={provider.id}
-          >
-            📞 Call to Book
-          </button>
-        )}
+        {/* Contact button for additional actions */}
+        <button
+          onClick={handleContact}
+          disabled={isLoading}
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          aria-label={`Contact ${provider.name} - ${contactInfo.primary}`}
+          data-provider-action="contact"
+          data-provider-id={provider.id}
+        >
+          {isLoading ? 'Connecting...' : 'Contact Provider'}
+        </button>
 
 
       </div>
