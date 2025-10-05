@@ -19,45 +19,56 @@ export default async function MetrosPage() {
     'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
   }
 
-  // Function to count providers for a metro area (matches city page logic)
+  // Function to count providers for a metro area (matches API logic exactly)
   const getProviderCount = (metroCity: string, metroStateAbbr: string) => {
     const fullStateName = stateMap[metroStateAbbr]
     const normalizedCity = metroCity.toLowerCase()
+    const normalizedState = metroStateAbbr.toUpperCase()
 
-    return providers.filter(provider => {
+    let count = 0
+
+    providers.forEach(provider => {
       // Skip non-mobile phlebotomy services
       if (provider.is_mobile_phlebotomy === 'No') {
-        return false
+        return
       }
 
       // Include nationwide providers
       if (provider.is_nationwide === 'Yes') {
-        return true
+        count++
+        return
       }
 
       // Check if provider serves this state (both abbreviation and full name)
-      const servesState = provider.state === metroStateAbbr ||
+      const servesState = provider.state === normalizedState ||
                          provider.state === fullStateName ||
                          provider.coverage?.states?.some(state =>
-                           state.toUpperCase() === metroStateAbbr ||
+                           state.toUpperCase() === normalizedState ||
                            state.toLowerCase() === fullStateName?.toLowerCase()
                          )
 
-      if (!servesState) return false
+      if (!servesState) return
 
-      // Check if provider directly serves this city
-      const cityMatch = provider.city?.toLowerCase() === normalizedCity ||
-                       provider.coverage?.cities?.some(city =>
-                         city.toLowerCase() === normalizedCity
-                       )
+      // 1. Direct city match (city-specific)
+      const hasDirectCityMatch = provider.city?.toLowerCase() === normalizedCity ||
+                                provider.coverage?.cities?.some(city =>
+                                  city.toLowerCase() === normalizedCity
+                                )
 
-      // Check if city is mentioned in verified service areas or validation notes
+      // 2. Check if city is mentioned in verified service areas or validation notes (city-specific)
       const serviceAreaMatch = provider.verified_service_areas?.toLowerCase().includes(normalizedCity) ||
                               provider.validation_notes?.toLowerCase().includes(normalizedCity)
 
-      // Only count providers that specifically serve this city OR are city-specific providers
-      return cityMatch || serviceAreaMatch
-    }).length
+      // 3. Regional match (covers state but not specifically this city)
+      const hasRegionalMatch = !hasDirectCityMatch && !serviceAreaMatch && servesState
+
+      // Count all providers: city-specific, regional, and statewide (like the API does)
+      if (hasDirectCityMatch || serviceAreaMatch || hasRegionalMatch) {
+        count++
+      }
+    })
+
+    return count
   }
 
   const metrosByState = topMetroAreas.reduce((acc, metro) => {
