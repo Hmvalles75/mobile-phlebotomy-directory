@@ -7,6 +7,7 @@ export interface EnrichedProvider {
   totalScore?: number
   reviewsCount?: number
   street?: string
+  'regions serviced'?: string
   city?: string
   state?: string
   countryCode?: string
@@ -125,17 +126,21 @@ function parseCoverage(provider: any): EnrichedProvider['coverage'] {
   }
 
   // Parse state from address
-  if (provider.state) {
+  if (provider.state && provider.state !== '') {
     coverage.states.push(provider.state)
   }
 
   // Parse city
-  if (provider.city) {
+  if (provider.city && provider.city !== '') {
     coverage.cities = [provider.city]
   }
 
-  // Parse service areas
-  if (provider.verified_service_areas) {
+  // Parse regions serviced (cleaned data field)
+  if (provider['regions serviced'] && provider['regions serviced'] !== '') {
+    coverage.regions = [provider['regions serviced']]
+  }
+  // Also check verified_service_areas for backward compatibility
+  else if (provider.verified_service_areas && provider.verified_service_areas !== '') {
     const areas = provider.verified_service_areas.toLowerCase()
 
     // Check for statewide coverage
@@ -160,10 +165,14 @@ function parseCoverage(provider: any): EnrichedProvider['coverage'] {
 function parseAvailability(provider: any): string[] {
   const availability: string[] = []
 
-  if (provider.weekendAvailable === 'TRUE') {
+  // Handle various boolean representations
+  const weekendAvail = provider.weekendAvailable?.toString().toLowerCase()
+  const emergencyAvail = provider.emergencyAvailable?.toString().toLowerCase()
+
+  if (weekendAvail === 'true' || weekendAvail === 'yes') {
     availability.push('Weekends')
   }
-  if (provider.emergencyAvailable === 'TRUE') {
+  if (emergencyAvail === 'true' || emergencyAvail === 'yes') {
     availability.push('24/7')
   }
   if (availability.length === 0) {
@@ -181,10 +190,13 @@ function parsePayment(): string[] {
 function parseBadges(provider: any): string[] {
   const badges: string[] = []
 
-  if (provider.certifications && provider.certifications.includes('CERTIFIED')) {
+  // Check for certifications (ASCP Certified is our default)
+  if (provider.certifications && (provider.certifications.includes('CERTIFIED') || provider.certifications.includes('ASCP'))) {
     badges.push('Certified')
   }
-  if (provider.insuranceAmount) {
+
+  // Check for insurance
+  if (provider.insuranceAmount && provider.insuranceAmount !== '' && provider.insuranceAmount !== 'nan') {
     badges.push('Insured')
   }
 
@@ -199,20 +211,23 @@ function parseBadges(provider: any): string[] {
   return badges
 }
 
-// Simple CSV parser for our use case
+// Enhanced CSV parser that handles quoted fields and commas within quotes
 function parseCSV(content: string): any[] {
   const lines = content.split('\n').filter(line => line.trim())
   if (lines.length === 0) return []
 
-  const headers = lines[0].split(',').map(h => h.trim())
+  // Parse headers
+  const headers = parseCSVLine(lines[0])
   const records = []
 
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',')
+    const values = parseCSVLine(lines[i])
     const record: any = {}
 
     for (let j = 0; j < headers.length; j++) {
-      record[headers[j]] = values[j]?.trim() || ''
+      const value = values[j]?.trim() || ''
+      // Convert 'nan' string to empty
+      record[headers[j]] = value.toLowerCase() === 'nan' ? '' : value
     }
 
     records.push(record)
@@ -221,13 +236,47 @@ function parseCSV(content: string): any[] {
   return records
 }
 
+// Helper function to parse a CSV line handling quoted fields
+function parseCSVLine(line: string): string[] {
+  const result = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    const nextChar = line[i + 1]
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"'
+        i++ // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      result.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+
+  // Add last field
+  result.push(current)
+
+  return result.map(field => field.trim())
+}
+
 async function loadProviders(): Promise<EnrichedProvider[]> {
   if (providersCache) {
     return providersCache
   }
 
   try {
-    const csvPath = path.join(process.cwd(), 'fully_enriched_providers_batch.csv')
+    const csvPath = path.join(process.cwd(), 'cleaned_providers.csv')
     const fileContent = await fs.readFile(csvPath, 'utf-8')
 
     const records = parseCSV(fileContent)
@@ -242,29 +291,32 @@ async function loadProviders(): Promise<EnrichedProvider[]> {
         ? record.name.split(/\s+/).slice(0, 8).join(' ').substring(0, 80)
         : record.name
 
-      return {
+      // Filter out empty/invalid values and handle cleaned data
+      const processedRecord = {
         ...record,
         id,
-        name: cleanName,
-        slug: generateSlug(cleanName),
-        description: record.bio || record.validation_notes,
+        name: cleanName || 'Unknown Provider',
+        slug: generateSlug(cleanName || 'provider'),
+        description: record.bio || record.validation_notes || `${cleanName} provides mobile phlebotomy services`,
         services: parseServices(record),
         coverage: parseCoverage(record),
         address: {
-          street: record.street,
-          city: record.city,
-          state: record.state,
-          zip: record.zipCodes?.split(',')[0]?.trim()
+          street: record.street && record.street !== '' ? record.street : undefined,
+          city: record.city && record.city !== '' ? record.city : undefined,
+          state: record.state && record.state !== '' ? record.state : undefined,
+          zip: record.zipCodes?.split(',')[0]?.trim() || undefined
         },
         availability: parseAvailability(record),
         payment: parsePayment(),
-        rating: record.totalScore ? parseFloat(record.totalScore) : undefined,
-        reviewsCount: record.reviewsCount ? parseInt(record.reviewsCount) : undefined,
+        rating: record.totalScore && !isNaN(parseFloat(record.totalScore)) ? parseFloat(record.totalScore) : undefined,
+        reviewsCount: record.reviewsCount && !isNaN(parseInt(record.reviewsCount)) ? parseInt(record.reviewsCount) : undefined,
         badges: parseBadges(record),
-        bookingUrl: record.website,
+        bookingUrl: record.website && record.website !== '' ? record.website : undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
+
+      return processedRecord
     })
 
     providersCache = providers

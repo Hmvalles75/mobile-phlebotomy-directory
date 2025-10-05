@@ -69,20 +69,20 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
   const yearInBusiness = provider.foundedYear ? new Date().getFullYear() - parseInt(provider.foundedYear) : null
 
-  // Parse testimonials if they exist
-  const testimonials = provider.testimonials ?
+  // Parse testimonials if they exist (cleaned data may have empty testimonials)
+  const testimonials = (provider.testimonials && provider.testimonials !== 'nan' && provider.testimonials !== '') ?
     provider.testimonials.split('|').map(t => t.trim()).filter(Boolean) : []
 
-  // Parse certifications
-  const certifications = provider.certifications ?
+  // Parse certifications (handle cleaned default values)
+  const certifications = (provider.certifications && provider.certifications !== 'nan' && provider.certifications !== '') ?
     provider.certifications.split(',').map(c => c.trim()).filter(Boolean) : []
 
-  // Parse languages
-  const languages = provider.languages ?
-    provider.languages.split(',').map(l => l.trim()).filter(Boolean) : []
+  // Parse languages (cleaned data defaults to 'English')
+  const languages = (provider.languages && provider.languages !== 'nan' && provider.languages !== '') ?
+    provider.languages.split(',').map(l => l.trim()).filter(Boolean) : ['English']
 
   // Parse business images
-  const businessImages = provider.businessImages ?
+  const businessImages = (provider.businessImages && provider.businessImages !== 'nan' && provider.businessImages !== '') ?
     provider.businessImages.split(',').map(img => img.trim()).filter(Boolean) : []
 
   // Convert EnrichedProvider to Provider-compatible format
@@ -182,7 +182,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                       📞 {provider.phone}
                     </a>
                   )}
-                  {provider.email && (
+                  {provider.email && provider.email !== '' && provider.email !== 'nan' && (
                     <a href={`mailto:${provider.email}`} className="flex items-center hover:text-primary-600">
                       ✉️ {provider.email}
                     </a>
@@ -272,7 +272,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Service Area</h2>
                 <div className="space-y-3">
                   <p className="text-gray-600">
-                    <strong>Coverage:</strong> {provider.verified_service_areas || formatCoverageDisplay(provider.coverage)}
+                    <strong>Coverage:</strong> {provider['regions serviced'] || provider.verified_service_areas || formatCoverageDisplay(provider.coverage)}
                   </p>
                   {provider.zipCodes && (
                     <div>
@@ -353,7 +353,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {provider.email && (
+                  {provider.email && provider.email !== '' && provider.email !== 'nan' && (
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">✉️</span>
                       <div>
@@ -404,13 +404,14 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Availability</h4>
                     <div className="space-y-1">
-                      {provider.emergencyAvailable === 'TRUE' && (
+                      {(provider.emergencyAvailable === 'TRUE' || provider.emergencyAvailable === 'True' || provider.emergencyAvailable === 'Yes') && (
                         <p className="text-sm text-green-600">✓ Emergency services available</p>
                       )}
-                      {provider.weekendAvailable === 'TRUE' && (
+                      {(provider.weekendAvailable === 'TRUE' || provider.weekendAvailable === 'True' || provider.weekendAvailable === 'Yes') && (
                         <p className="text-sm text-green-600">✓ Weekend appointments available</p>
                       )}
-                      {provider.emergencyAvailable !== 'TRUE' && provider.weekendAvailable !== 'TRUE' && (
+                      {(provider.emergencyAvailable === 'No' || provider.emergencyAvailable === 'FALSE' || provider.emergencyAvailable === 'False') &&
+                       (provider.weekendAvailable === 'No' || provider.weekendAvailable === 'FALSE' || provider.weekendAvailable === 'False') && (
                         <p className="text-sm text-gray-600">Standard business hours</p>
                       )}
                     </div>
