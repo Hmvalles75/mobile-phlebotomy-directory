@@ -32,10 +32,58 @@ export default function AddProvider() {
     'Health Monitoring'
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Handle form submission
-    console.log('Form submitted:', formData)
+    setIsSubmitting(true)
+
+    try {
+      // Submit to API endpoint
+      const response = await fetch('/api/submit-provider', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.mailtoLink) {
+        // Open email client with pre-filled data
+        window.location.href = data.mailtoLink
+
+        // Show success message
+        alert('Thank you for your submission! An email with your information will open. Please send it to complete your application.')
+
+        // Reset form
+        setFormData({
+          businessName: '',
+          contactName: '',
+          email: '',
+          phone: '',
+          website: '',
+          description: '',
+          services: [],
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          serviceArea: '',
+          insurance: false,
+          licensed: false,
+          yearsExperience: '',
+        })
+      } else {
+        alert('There was an error processing your submission. Please try again or contact us directly at hector@mobilephlebotomy.org')
+      }
+    } catch (error) {
+      console.error('Submission error:', error)
+      alert('There was an error processing your submission. Please contact us directly at hector@mobilephlebotomy.org')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleServiceToggle = (service: string) => {
@@ -282,9 +330,10 @@ export default function AddProvider() {
 
               <button
                 type="submit"
-                className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                disabled={isSubmitting}
+                className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Listing Application
+                {isSubmitting ? 'Processing...' : 'Submit Listing Application'}
               </button>
             </form>
           </div>
