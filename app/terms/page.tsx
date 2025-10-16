@@ -107,8 +107,8 @@ export default function Terms() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Contact Information</h2>
                 <p className="text-gray-600">
                   If you have any questions about these Terms of Service, please contact us at{' '}
-                  <a href="mailto:legal@mobilephlebotomy.org" className="text-primary-600 hover:underline">
-                    legal@mobilephlebotomy.org
+                  <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-600 hover:underline">
+                    hector@mobilephlebotomy.org
                   </a>
                 </p>
               </section>

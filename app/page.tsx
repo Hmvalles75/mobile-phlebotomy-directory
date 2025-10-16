@@ -5,9 +5,6 @@ import Link from 'next/link'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
-import { RatingBadge } from '@/components/ui/RatingBadge'
-import { ProviderActions } from '@/components/ui/ProviderActions'
-import { trackTopRatedView, trackRatingView } from '@/lib/provider-actions'
 import { type Provider } from '@/lib/schemas'
 import { topMetroAreas } from '@/data/top-metros'
 
@@ -31,8 +28,6 @@ const trustBadges = [
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [topRatedProviders, setTopRatedProviders] = useState<Provider[]>([])
-  const [loading, setLoading] = useState(true)
   const [providerCounts, setProviderCounts] = useState<Record<string, number>>({})
 
   const handleSearch = (query: string) => {
@@ -42,24 +37,23 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    async function fetchTopRatedProviders() {
-      try {
-        const response = await fetch('/api/providers?featured=true&limit=6')
-        if (response.ok) {
-          const providers = await response.json()
-          setTopRatedProviders(providers)
-          // Track that the top-rated section was loaded
-          trackTopRatedView('homepage')
-        }
-      } catch (error) {
-        console.error('Failed to fetch top rated providers:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     async function fetchProviderCounts() {
       try {
+        // State abbreviation to full name mapping
+        const stateMap: Record<string, string> = {
+          'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+          'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+          'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+          'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+          'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+          'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+          'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+          'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+          'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+          'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+          'DC': 'District of Columbia'
+        }
+
         // Get provider counts for each metro area
         const counts: Record<string, number> = {}
 
@@ -70,12 +64,21 @@ export default function HomePage() {
 
           // Count providers for each featured metro area
           featuredMetros.forEach(metro => {
+            const fullStateName = stateMap[metro.stateAbbr] || metro.state
+
             counts[metro.slug] = allProviders.filter((provider: Provider) => {
-              // Check if provider serves this metro area
-              return provider.coverage?.cities?.some((city: string) =>
+              // Check if provider serves this city
+              const cityMatch = provider.coverage?.cities?.some((city: string) =>
                 city.toLowerCase().includes(metro.city.toLowerCase())
-              ) || provider.coverage?.states?.includes(metro.stateAbbr) ||
-              provider.address?.city?.toLowerCase() === metro.city.toLowerCase()
+              ) || provider.address?.city?.toLowerCase() === metro.city.toLowerCase()
+
+              // Check if provider serves this state (compare full state names)
+              const stateMatch = provider.coverage?.states?.some((state: string) =>
+                state.toLowerCase() === fullStateName.toLowerCase() ||
+                state.toLowerCase() === metro.stateAbbr.toLowerCase()
+              ) || provider.address?.state?.toLowerCase() === fullStateName.toLowerCase()
+
+              return cityMatch || stateMatch
             }).length
           })
 
@@ -86,7 +89,6 @@ export default function HomePage() {
       }
     }
 
-    fetchTopRatedProviders()
     fetchProviderCounts()
   }, [])
 
@@ -240,55 +242,42 @@ export default function HomePage() {
         </div>
       </div>
 
-      <section className="py-16 bg-white">
+      {/* Featured Providers Coming Soon Section */}
+      <section className="py-12 bg-gradient-to-b from-primary-50 to-white">
         <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              How Mobile Phlebotomy Works
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Professional blood collection services that come to you. Safe, convenient, and certified.
+          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-primary-100 p-8 md:p-10 text-center">
+            {/* Heading with Star Icon */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-3xl">🌟</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Featured Providers
+              </h2>
+            </div>
+
+            {/* Coming Soon Badge */}
+            <div className="inline-block bg-primary-100 text-primary-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
+              Coming Soon
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-600 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Be among the first 5 mobile phlebotomy services featured on our homepage.
+              Early adopter pricing available.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Find a Provider</h3>
-              <p className="text-gray-600">
-                Search our directory of certified mobile phlebotomists in your area. 
-                Filter by services, availability, and insurance acceptance.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📅</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Schedule Service</h3>
-              <p className="text-gray-600">
-                Book your appointment online or by phone. Many providers offer 
-                same-day and emergency services.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🏠</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">At-Home Collection</h3>
-              <p className="text-gray-600">
-                A certified phlebotomist visits your location with all necessary 
-                equipment for safe, professional blood collection.
-              </p>
-            </div>
+            {/* CTA Button */}
+            <a
+              href="mailto:hector@mobilephlebotomy.org?subject=Interested%20in%20Featured%20Provider%20Placement%20-%20MobilePhlebotomy.org"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+            >
+              Get Featured
+              <span>→</span>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Featured Metro Areas Section */}
+      {/* Top Metro Areas Section */}
       <section className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
@@ -338,148 +327,103 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Top Rated Providers Section */}
-      <section className="py-16 bg-white">
+      {/* All Providers Directory Section */}
+      <section className="py-20 bg-white">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              🏆 Top Rated Providers
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Complete Provider Directory
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our highest-rated mobile phlebotomy providers based on real customer reviews. 
-              These trusted professionals deliver exceptional service with proven track records.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+              Browse our full directory of certified mobile phlebotomy services. Filter by location,
+              services, and availability to find the perfect provider for your needs.
             </p>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">⏳</div>
-              <p className="text-gray-600">Loading top-rated providers...</p>
-            </div>
-          ) : topRatedProviders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {topRatedProviders.map((provider) => (
-                <div key={provider.id} className="bg-white rounded-lg border-2 border-gray-100 hover:border-primary-200 p-6 transition-all duration-200 hover:shadow-lg">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                        {provider.name}
-                      </h3>
-                      {provider.rating && (
-                        <RatingBadge 
-                          rating={provider.rating} 
-                          reviewsCount={provider.reviewsCount}
-                          variant="featured"
-                          className="mb-3"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <span>📍</span>
-                      <span className="ml-2">
-                        {provider.address?.city}, {provider.address?.state}
-                      </span>
-                    </div>
-                    {provider.phone && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span>📞</span>
-                        <span className="ml-2">{provider.phone}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-1">
-                      {provider.services.slice(0, 2).map((service) => (
-                        <span key={service} className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
-                          {service}
-                        </span>
-                      ))}
-                      {provider.services.length > 2 && (
-                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                          +{provider.services.length - 2} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <ProviderActions
-                    provider={provider}
-                    variant="compact"
-                    className="mt-4"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">⭐</div>
-              <p className="text-gray-600">No featured providers available at this time.</p>
-            </div>
-          )}
-
-          <div className="text-center mt-8">
-            <Link 
-              href="/search?rating=4.0" 
-              className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            <Link
+              href="/search"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
             >
-              View All Top Rated Providers
+              View All Providers
               <span>→</span>
             </Link>
+          </div>
+
+          {/* Quick Links Grid */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
+            <div className="bg-gray-50 rounded-lg p-6 text-center hover:bg-gray-100 transition-colors">
+              <div className="text-4xl mb-3">🏥</div>
+              <h3 className="font-semibold text-gray-900 mb-2">By Service Type</h3>
+              <p className="text-sm text-gray-600 mb-4">Find specialists for your specific needs</p>
+              <Link href="/search?services=At-Home%20Blood%20Draw" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                Browse Services →
+              </Link>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-6 text-center hover:bg-gray-100 transition-colors">
+              <div className="text-4xl mb-3">📍</div>
+              <h3 className="font-semibold text-gray-900 mb-2">By Location</h3>
+              <p className="text-sm text-gray-600 mb-4">Search by city, state, or ZIP code</p>
+              <Link href="/search" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                Search Now →
+              </Link>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-6 text-center hover:bg-gray-100 transition-colors">
+              <div className="text-4xl mb-3">⭐</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Top Rated</h3>
+              <p className="text-sm text-gray-600 mb-4">View providers with highest ratings</p>
+              <Link href="/search?rating=4.0" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                View Top Rated →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="browse-by-state" className="py-16 bg-gray-50">
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Browse by State
+              How Mobile Phlebotomy Works
             </h2>
-            <p className="text-gray-600">
-              Find mobile phlebotomy services across all 50 states
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Professional blood collection services that come to you. Safe, convenient, and certified.
             </p>
           </div>
 
-          {/* State Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-12">
-            {[
-              'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-              'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
-              'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-              'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
-              'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri',
-              'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
-              'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-              'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
-              'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-              'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-            ].map((stateName) => (
-              <Link
-                key={stateName}
-                // @ts-ignore - Next.js typedRoutes compatibility
-                href={`/us/${stateName.toLowerCase().replace(' ', '-')}`}
-                className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-center hover:shadow-md hover:border-primary-300 transition-all"
-              >
-                <div className="text-sm font-medium text-gray-700 hover:text-primary-600">
-                  {stateName}
-                </div>
-              </Link>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🔍</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Find a Provider</h3>
+              <p className="text-gray-600">
+                Search our directory of certified mobile phlebotomists in your area.
+                Filter by services, availability, and insurance acceptance.
+              </p>
+            </div>
 
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📅</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Schedule Service</h3>
+              <p className="text-gray-600">
+                Book your appointment online or by phone. Many providers offer
+                same-day and emergency services.
+              </p>
+            </div>
 
-          <div className="text-center mt-12">
-            <Link
-              // @ts-ignore - Next.js typedRoutes compatibility
-              href="/search"
-              className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Search All Providers
-            </Link>
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🏠</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">At-Home Collection</h3>
+              <p className="text-gray-600">
+                A certified phlebotomist visits your location with all necessary
+                equipment for safe, professional blood collection.
+              </p>
+            </div>
           </div>
         </div>
       </section>

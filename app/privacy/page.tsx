@@ -102,8 +102,8 @@ export default function Privacy() {
                   </ul>
                   <p className="mt-4">
                     To exercise these rights, please contact us at{' '}
-                    <a href="mailto:privacy@mobilephlebotomy.org" className="text-primary-600 hover:underline">
-                      privacy@mobilephlebotomy.org
+                    <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-600 hover:underline">
+                      hector@mobilephlebotomy.org
                     </a>
                   </p>
                 </div>
@@ -149,9 +149,8 @@ export default function Privacy() {
                 <div className="text-gray-600">
                   <p className="mb-2">If you have any questions about this Privacy Policy, please contact us:</p>
                   <ul className="list-none space-y-1">
-                    <li>Email: <a href="mailto:privacy@mobilephlebotomy.org" className="text-primary-600 hover:underline">privacy@mobilephlebotomy.org</a></li>
-                    <li>Phone: (555) PHLEBOTOMY</li>
-                    <li>Address: [Company Address]</li>
+                    <li>Email: <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-600 hover:underline">hector@mobilephlebotomy.org</a></li>
+                    <li>Phone: (909) 784-5734</li>
                   </ul>
                 </div>
               </section>

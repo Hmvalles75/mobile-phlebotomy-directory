@@ -125,7 +125,7 @@ export default function Contact() {
                     <div className="text-primary-600 text-xl">📧</div>
                     <div>
                       <h4 className="font-medium text-gray-900">Email Support</h4>
-                      <p className="text-gray-600">support@mobilephlebotomy.org</p>
+                      <p className="text-gray-600">hector@mobilephlebotomy.org</p>
                       <p className="text-sm text-gray-500">We respond within 24 hours</p>
                     </div>
                   </div>
