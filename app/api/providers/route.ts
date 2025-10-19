@@ -49,14 +49,15 @@ export async function GET(request: NextRequest) {
     const topRated = searchParams.get('topRated')
     const rating = searchParams.get('rating')
     const sort = searchParams.get('sort')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limitParam = searchParams.get('limit')
+    const limit = limitParam ? parseInt(limitParam) : null // No default limit
 
     // Handle featured providers
     if (featured === 'true') {
       const featuredProviders = providers
         .filter((p: any) => p.featured === true)
-        .slice(0, limit)
-      return NextResponse.json(featuredProviders)
+      const result = limit ? featuredProviders.slice(0, limit) : featuredProviders
+      return NextResponse.json(result)
     }
 
     // Handle top rated providers
@@ -64,8 +65,8 @@ export async function GET(request: NextRequest) {
       const topProviders = providers
         .filter((p: any) => p.rating >= 4.0)
         .sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, limit)
-      return NextResponse.json(topProviders)
+      const result = limit ? topProviders.slice(0, limit) : topProviders
+      return NextResponse.json(result)
     }
 
     // Handle rating filter
@@ -182,9 +183,9 @@ if (ratingParam) {
       filteredProviders.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
     }
 
-    // Limit results
-    const limitedProviders = filteredProviders.slice(0, limit)
-    
+    // Limit results only if limit is specified
+    const limitedProviders = limit ? filteredProviders.slice(0, limit) : filteredProviders
+
     return NextResponse.json(limitedProviders)
   } catch (error) {
     console.error('Error in providers API:', error)

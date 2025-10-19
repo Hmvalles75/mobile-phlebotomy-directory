@@ -64,7 +64,7 @@ if (minRating !== null) {
   params.append('rating', minRating.toString())
 }
 params.append('sort', sortBy)
-params.append('limit', '200')
+// No limit - show all matching providers
 
         const response = await fetch(`/api/providers?${params}`)
         const data = await response.json()
