@@ -112,7 +112,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
 
       <div className="flex flex-wrap gap-3">
         <Link
-          href={`/provider/${provider.id}`}
+          href={`/provider/${provider.slug}`}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
         >
           View Provider Details

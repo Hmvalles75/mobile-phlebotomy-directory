@@ -21,7 +21,10 @@
       "Bash(npm run lint)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(timeout /t 5)",
+      "Read(//c/Users/hmval/Downloads/**)",
+      "Bash(mv \"app/provider/[id]\" \"app/provider/[slug]\")"
     ],
     "deny": [],
     "ask": []

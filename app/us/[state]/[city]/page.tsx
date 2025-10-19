@@ -628,7 +628,7 @@ export default function CityPage({ params }: PageProps) {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <Link
-                      href={`/provider/${provider.id}`}
+                      href={`/provider/${provider.slug}`}
                       className="text-xl font-bold text-gray-900 mb-2 hover:text-primary-600 inline-block"
                     >
                       {provider.name}
@@ -728,7 +728,7 @@ export default function CityPage({ params }: PageProps) {
                     variant="compact"
                   />
                   <Link
-                    href={`/provider/${provider.id}`}
+                    href={`/provider/${provider.slug}`}
                     className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                   >
                     View Details →

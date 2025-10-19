@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getProviderById, getAllProviders, type EnrichedProvider } from '@/lib/providers'
+import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
@@ -10,19 +10,19 @@ import Link from 'next/link'
 
 interface PageProps {
   params: {
-    id: string
+    slug: string
   }
 }
 
 export async function generateStaticParams() {
   const providers = await getAllProviders()
   return providers.map((provider) => ({
-    id: provider.id
+    slug: provider.slug
   }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const provider = await getProviderById(params.id)
+  const provider = await getProviderBySlug(params.slug)
 
   if (!provider) {
     return {
@@ -54,13 +54,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }] : undefined
     },
     alternates: {
-      canonical: `/provider/${params.id}`
+      canonical: `/provider/${params.slug}`
     }
   }
 }
 
 export default async function ProviderDetailPage({ params }: PageProps) {
-  const provider = await getProviderById(params.id)
+  const provider = await getProviderBySlug(params.slug)
 
   if (!provider) {
     notFound()
@@ -349,7 +349,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
                 <ProviderActions
                   provider={providerForSchema as any}
-                  currentLocation={`provider-detail-${params.id}`}
+                  currentLocation={`provider-detail-${params.slug}`}
                   variant="detailed"
                   showStructuredData={false}
                   hideViewDetails={true}

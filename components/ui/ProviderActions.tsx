@@ -58,7 +58,7 @@ export function ProviderActions({
     return (
       <div className={`flex gap-2 ${className}`}>
         <Link
-          href={`/provider/${provider.id}`}
+          href={`/provider/${provider.slug}`}
           className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
           aria-label={`View details for ${provider.name}`}
         >
@@ -105,7 +105,7 @@ export function ProviderActions({
         <div className={`${hideViewDetails ? 'flex gap-3' : 'grid grid-cols-2 gap-3'}`}>
           {!hideViewDetails && (
             <Link
-              href={`/provider/${provider.id}`}
+              href={`/provider/${provider.slug}`}
               className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
               aria-label={`View detailed information for ${provider.name}`}
             >
@@ -155,7 +155,7 @@ export function ProviderActions({
 
       <div className={`flex flex-wrap gap-3 ${className}`}>
         <Link
-          href={`/provider/${provider.id}`}
+          href={`/provider/${provider.slug}`}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
           aria-label={`View detailed information for ${provider.name}`}
           data-provider-action="view-details"

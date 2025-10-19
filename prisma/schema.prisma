@@ -21,6 +21,7 @@ model Provider {
   description  String?
   rating       Float?
   reviewsCount Int?
+  featured     Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

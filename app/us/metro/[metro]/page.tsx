@@ -332,7 +332,7 @@ export default function MetroPage({ params }: MetroPageProps) {
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1">
                             <Link
-                              href={`/provider/${provider.id}`}
+                              href={`/provider/${provider.slug}`}
                               className="text-xl font-bold text-gray-900 mb-2 hover:text-primary-600 inline-block"
                             >
                               {provider.name}
@@ -415,7 +415,7 @@ export default function MetroPage({ params }: MetroPageProps) {
 
                         <div className="flex justify-center mt-4">
                           <Link
-                            href={`/provider/${provider.id}`}
+                            href={`/provider/${provider.slug}`}
                             className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
                           >
                             View Provider Details →

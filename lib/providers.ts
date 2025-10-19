@@ -60,6 +60,7 @@ export interface EnrichedProvider {
   rating?: number
   badges?: string[]
   bookingUrl?: string
+  featured?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -281,7 +282,7 @@ async function loadProviders(): Promise<EnrichedProvider[]> {
 
     const records = parseCSV(fileContent)
 
-    const providers: EnrichedProvider[] = records.map((record: any, index: number) => {
+    let providers: EnrichedProvider[] = records.map((record: any, index: number) => {
       // Create a simple hash for very long names to ensure unique but short IDs
       const baseSlug = generateSlug(record.name)
       const id = baseSlug.length > 30 ? `provider-${index.toString().padStart(3, '0')}` : `${baseSlug}-${index}`
@@ -322,11 +323,22 @@ async function loadProviders(): Promise<EnrichedProvider[]> {
         reviewsCount: record.reviewsCount && !isNaN(parseInt(record.reviewsCount)) ? parseInt(record.reviewsCount) : undefined,
         badges: parseBadges(record),
         bookingUrl: record.website && record.website !== '' ? record.website : undefined,
+        featured: false, // Will be set below
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
 
       return processedRecord
+    })
+
+    // Mark top 5 providers with highest ratings as featured
+    const providersWithRating = providers
+      .filter(p => p.rating && p.rating >= 4.0)
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, 5)
+
+    providersWithRating.forEach(p => {
+      p.featured = true
     })
 
     providersCache = providers
@@ -344,6 +356,11 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
 export async function getProviderById(id: string): Promise<EnrichedProvider | null> {
   const providers = await loadProviders()
   return providers.find(p => p.id === id) || null
+}
+
+export async function getProviderBySlug(slug: string): Promise<EnrichedProvider | null> {
+  const providers = await loadProviders()
+  return providers.find(p => p.slug === slug) || null
 }
 
 export async function getProvidersByState(state: string): Promise<EnrichedProvider[]> {

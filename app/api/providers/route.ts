@@ -51,10 +51,10 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort')
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    // Handle featured providers (high rating)
+    // Handle featured providers
     if (featured === 'true') {
       const featuredProviders = providers
-        .filter((p: any) => p.rating >= 4.5)
+        .filter((p: any) => p.featured === true)
         .slice(0, limit)
       return NextResponse.json(featuredProviders)
     }

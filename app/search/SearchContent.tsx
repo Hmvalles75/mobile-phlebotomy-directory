@@ -244,7 +244,7 @@ params.append('limit', '200')
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <Link
-                          href={`/provider/${provider.id}`}
+                          href={`/provider/${provider.slug}`}
                           className="text-xl font-bold text-gray-900 mb-1 hover:text-primary-600 inline-block"
                         >
                           {provider.name}
@@ -297,7 +297,7 @@ params.append('limit', '200')
                         currentLocation="search"
                       />
                       <Link
-                        href={`/provider/${provider.id}`}
+                        href={`/provider/${provider.slug}`}
                         className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                       >
                         View Details →

@@ -1,14 +1,14 @@
 import { MetadataRoute } from 'next'
 import statesData from '@/data/states.json'
 import citiesData from '@/data/cities.json'
-import providersData from '@/data/providers.json'
-import { State, City, Provider } from '@/lib/schemas'
+import { State, City } from '@/lib/schemas'
+import { getAllProviders } from '@/lib/providers'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
   const states = statesData as State[]
   const cities = citiesData as City[]
-  const providers = providersData as Provider[]
+  const providers = await getAllProviders()
 
   const routes: MetadataRoute.Sitemap = [
     {
