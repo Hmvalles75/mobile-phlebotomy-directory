@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 
 export default function MobilePhlebotomistPage() {
   const topStates = [
@@ -47,11 +46,14 @@ export default function MobilePhlebotomistPage() {
               Professional at-home blood draw services available 7 days a week across the United States.
             </p>
 
-            <AutocompleteSearchBar
-              placeholder="Enter your ZIP code or city to find mobile phlebotomists..."
-              className="mb-6"
-              enableZipCodeRouting={true}
-            />
+            <div className="max-w-2xl mx-auto">
+              <Link
+                href="/search"
+                className="block w-full text-center bg-white text-gray-700 px-6 py-4 rounded-lg border-2 border-primary-500 hover:bg-primary-50 transition-colors font-semibold text-lg shadow-lg"
+              >
+                🔍 Search for Mobile Phlebotomists Near You
+              </Link>
+            </div>
 
             <div className="flex flex-wrap justify-center gap-3 mt-6">
               <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
