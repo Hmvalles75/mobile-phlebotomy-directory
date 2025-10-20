@@ -149,7 +149,7 @@ export default function MobilePhlebotomistPage() {
               </h3>
               <p className="text-gray-600">
                 No need to travel to a lab or wait in crowded waiting rooms. Get your blood drawn at home, work,
-                or anywhere that's convenient for you.
+                or anywhere that&apos;s convenient for you.
               </p>
             </div>
 
@@ -229,7 +229,7 @@ export default function MobilePhlebotomistPage() {
               How Mobile Phlebotomy Works
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Getting your blood drawn at home is simple and convenient. Here's how it works:
+              Getting your blood drawn at home is simple and convenient. Here&apos;s how it works:
             </p>
           </div>
 
@@ -255,7 +255,7 @@ export default function MobilePhlebotomistPage() {
                 Schedule Appointment
               </h3>
               <p className="text-gray-600">
-                Contact your chosen provider to schedule an appointment. Provide your doctor's orders
+                Contact your chosen provider to schedule an appointment. Provide your doctor&apos;s orders
                 and preferred time.
               </p>
             </div>
