@@ -24,7 +24,8 @@
       "Bash(mkdir:*)",
       "Bash(timeout /t 5)",
       "Read(//c/Users/hmval/Downloads/**)",
-      "Bash(mv \"app/provider/[id]\" \"app/provider/[slug]\")"
+      "Bash(mv \"app/provider/[id]\" \"app/provider/[slug]\")",
+      "Bash(cat .next/build-manifest.json)"
     ],
     "deny": [],
     "ask": []

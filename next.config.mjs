@@ -21,12 +21,11 @@ const nextConfig = {
       },
     ],
   },
-  async redirects() {
+  async rewrites() {
     return [
       {
         source: '/provider/mc-mobile-phlebotomist-667',
-        destination: '/search',
-        permanent: false,
+        destination: '/mobile-phlebotomist',
       },
     ]
   },
