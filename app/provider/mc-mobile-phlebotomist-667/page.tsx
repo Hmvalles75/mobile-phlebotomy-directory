@@ -1,18 +1,7 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 
 export default function MobilePhlebotomistPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(query.trim())}`
-    }
-  }
-
   const topStates = [
     { name: 'California', slug: 'california' },
     { name: 'Texas', slug: 'texas' },
@@ -59,7 +48,6 @@ export default function MobilePhlebotomistPage() {
             </p>
 
             <AutocompleteSearchBar
-              onSearch={handleSearch}
               placeholder="Enter your ZIP code or city to find mobile phlebotomists..."
               className="mb-6"
               enableZipCodeRouting={true}
