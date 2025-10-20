@@ -21,6 +21,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/provider/mc-mobile-phlebotomist-667',
+        destination: '/mobile-phlebotomist',
+      },
+    ]
+  },
 }
 
 export default nextConfig

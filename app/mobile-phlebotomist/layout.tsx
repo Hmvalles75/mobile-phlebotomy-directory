@@ -18,16 +18,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Mobile Phlebotomist Services | Find At-Home Blood Draw Near You',
     description: 'Find certified mobile phlebotomists who come to your location. Browse verified providers offering convenient at-home blood draws and lab services.',
-    type: 'website',
-    url: '/provider/mc-mobile-phlebotomist-667'
+    type: 'website'
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mobile Phlebotomist Services | Find At-Home Blood Draw Near You',
     description: 'Find certified mobile phlebotomists who come to your location. Browse verified providers offering convenient at-home blood draws and lab services.'
-  },
-  alternates: {
-    canonical: '/provider/mc-mobile-phlebotomist-667'
   },
   robots: {
     index: true,
@@ -52,7 +48,7 @@ export default function MobilePhlebotomistLayout({
     '@type': 'MedicalBusiness',
     name: 'Mobile Phlebotomist Services',
     description: 'Find certified mobile phlebotomists who provide at-home blood draw services across the United States',
-    url: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/provider/mc-mobile-phlebotomist-667` : 'https://mobilephlebotomy.org/provider/mc-mobile-phlebotomist-667',
+    url: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/mobile-phlebotomist` : 'https://mobilephlebotomy.org/mobile-phlebotomist',
     medicalSpecialty: 'Phlebotomy',
     serviceType: ['Mobile Phlebotomy', 'At-Home Blood Draw', 'Mobile Lab Services'],
     areaServed: {
@@ -97,7 +93,7 @@ export default function MobilePhlebotomistLayout({
         '@type': 'ListItem',
         position: 2,
         name: 'Mobile Phlebotomist Services',
-        item: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/provider/mc-mobile-phlebotomist-667` : 'https://mobilephlebotomy.org/provider/mc-mobile-phlebotomist-667'
+        item: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/mobile-phlebotomist` : 'https://mobilephlebotomy.org/mobile-phlebotomist'
       }
     ]
   }
