@@ -214,31 +214,45 @@ export function searchProvidersWithRegions(
 // Get coverage display text for a provider (user-focused)
 export function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
   const regions = loadRegions();
-  
+
+  // Helper to get state abbreviation
+  const getStateAbbr = () => {
+    if (provider.coverage.states && provider.coverage.states.length > 0) {
+      return provider.coverage.states[0];
+    }
+    return '';
+  };
+
   // If has specific cities
   if (provider.coverage.cities && provider.coverage.cities.length > 0) {
+    const stateAbbr = getStateAbbr();
+    const stateStr = stateAbbr ? `, ${stateAbbr}` : '';
+
     // If current city is in their coverage, highlight it
-    if (currentCity && provider.coverage.cities.some(city => 
+    if (currentCity && provider.coverage.cities.some(city =>
       city.toLowerCase() === currentCity.toLowerCase())) {
-      return `Serves ${currentCity} + ${provider.coverage.cities.length - 1} other cities`;
+      return `Serves ${currentCity}${stateStr} + ${provider.coverage.cities.length - 1} other cities`;
     }
-    
+
     if (provider.coverage.cities.length <= 3) {
-      return `Serves ${provider.coverage.cities.join(', ')}`;
+      return `Serves ${provider.coverage.cities.join(', ')}${stateStr}`;
     } else {
-      return `Serves ${provider.coverage.cities.slice(0, 2).join(', ')} + ${provider.coverage.cities.length - 2} more cities`;
+      return `Serves ${provider.coverage.cities.slice(0, 2).join(', ')}${stateStr} + ${provider.coverage.cities.length - 2} more cities`;
     }
   }
-  
+
   // If has regional coverage
   if (provider.coverage.regions && provider.coverage.regions.length > 0) {
     const regionNames = provider.coverage.regions
       .map(slug => regions.find(r => r.slug === slug)?.name)
       .filter(Boolean);
-    
-    return `Serves ${regionNames.join(' & ')}`;
+
+    const stateAbbr = getStateAbbr();
+    const stateStr = stateAbbr ? `, ${stateAbbr}` : '';
+
+    return `Serves ${regionNames.join(' & ')}${stateStr}`;
   }
-  
+
   // Statewide coverage
   const stateNames = provider.coverage.states.map(state => {
     const stateMap: Record<string, string> = {
@@ -258,7 +272,7 @@ export function getProviderCoverageDisplay(provider: Provider, currentCity?: str
     };
     return stateMap[state] || state;
   });
-  
+
   return `Serves all of ${stateNames.join(' & ')}`;
 }
 
