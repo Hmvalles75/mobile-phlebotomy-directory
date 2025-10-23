@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -126,6 +127,7 @@ export default function RootLayout({
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="POWVkQbxx+tXzSQd0J2tOw" async></script>
       </head>
       <body className={inter.className}>
+        <GoogleAnalytics />
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">
