@@ -1,0 +1,994 @@
+{
+  "timestamp": "2025-10-22T17:36:12.949Z",
+  "totalProviders": 685,
+  "validProviders": 476,
+  "removedProviders": 197,
+  "removalPercentage": "28.76%",
+  "removedProvidersList": [
+    {
+      "lineNumber": 20,
+      "name": "anywhere. Login       Geochemistry Webtrieve TM  Retrieve results and track sample progress in real ",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 21,
+      "name": "such as CoreViewer™ and ALS QCPro™.,,,,17025,,,ChIJ345pHyhFMlERMHDXePn8Z00,,NHA,,,Corporate,False,Fa",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 47,
+      "name": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 48,
+      "name": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 49,
+      "name": "Mobile Phlebotomy Services The Vein Draw Phleb Mobile Phlebotomy Services The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 50,
+      "name": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 51,
+      "name": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 52,
+      "name": "Mobile Phlebotomy Services Home About Us Benefits Phlebotomy Services Contact Us Payments Partnershi",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 53,
+      "name": "The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 54,
+      "name": "Mobile Phlebotomy Services Welcome to",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 55,
+      "name": "The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 56,
+      "name": "Mobile Phlebotomy Services Welcome to",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 57,
+      "name": "The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 58,
+      "name": "Mobile Phlebotomy Services Welcome to",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 59,
+      "name": "The Vein Draw Phleb",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 60,
+      "name": "Mobile Phlebotomy Services Servicing the San Francisco Bay Area",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 62,
+      "name": "California",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 63,
+      "name": "95111 WhatsApp Us Message Us! Book Laboratories : Boston Heart.,,,,95111,,,ChIJUapLnRE1joARKMCvOKaKa",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 81,
+      "name": "that Quanta Labs can now accommodate larger units under test   Features include:   100” head expande",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 91,
+      "name": "offering training to become a Nurse's Aide",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 102,
+      "name": "PHLEB STARZ MOBILE PHLEBOTOMY,LLC",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 114,
+      "name": "iComply Testing Solutions | Pompano Beach - Drug Test - Paternity Test - Mobile Blood Test",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 150,
+      "name": "​ Home Programs Agriculture Business Health Hospitality Technology Continuing Education Courses Admi",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 156,
+      "name": "| Medical Laboratory Gentle Touch Laboratory",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 157,
+      "name": "| Medical Laboratory Gentle Touch Laboratory",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 158,
+      "name": "| Medical Laboratory Gentle Touch Laboratory",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 159,
+      "name": "| Medical Laboratory Timely and effective medical laboratory services! Contact Us   Get in touch OUR",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 197,
+      "name": "Mercy Health — Lourdes Lab Services           Mercy Health — Lourdes Lab Services  1532 Lone Oak Rd ",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 199,
+      "name": "Mobile Phlebotomy Plus Lab Services",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 202,
+      "name": "Mercy Health — Paducah Lab Services           Mercy Health — Paducah Lab Services  225 Medical Cente",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 208,
+      "name": "Metairie",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 209,
+      "name": "Louisiana",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 210,
+      "name": "70001 Share Veintastic Skillz LLC Veins We Stick Fantastically! Mobile Phlebotomist Services About V",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 220,
+      "name": "mobile phlebotomy service.,,,,4330,,,ChIJTSLwIvv7rUwR9k7fRKEmUvA,,CERTIFIED,,,Pediatric,False,False,",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 233,
+      "name": "on the page    Patient Care    Research & Innovation    Education & Training    About      Featured ",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 234,
+      "name": "Language      Home    العربية    中文    Kreyòl Ayisyen    Português    Pусский    Español    中文      ",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 258,
+      "name": "Catalog  Home  FAQ  Contact  Faculty  COVID-19 FAQ      Call us today",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 259,
+      "name": "816-974-8823     Call us today",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 260,
+      "name": "816-974-8823           We are down for maintenance today and tomorrow. Please",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 261,
+      "name": "come back!      Toggle navigation           Home   Courses   Courses  Phlebotomy  Accelerated Phlebo",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 320,
+      "name": "to content                                       Common Searches   MyChart Login   On-Demand Video V",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 321,
+      "name": "a Provider  Cost",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 322,
+      "name": "Estimator  Clinical",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 323,
+      "name": "Trials  Refer a Patient             MyChart    Pay a Bill  Cost Estimates & Pricing  Careers  Giving",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 324,
+      "name": "may be additional insurance or private pay charges for services provided",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 325,
+      "name": "here.,,,,14564,,,ChIJL3dV3Yi11okRMDe3sJysSlc,,ASCP Certified,,,,False,True,,,English",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 340,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 341,
+      "name": "Phlebotomy One Vein",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 342,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 343,
+      "name": "Phlebotomy One Vein",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 344,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 345,
+      "name": "Phlebotomy One Vein Mobile Phlebotomy One Vein",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 346,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 347,
+      "name": "Phlebotomy One Vein",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 348,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 349,
+      "name": "Phlebotomy One Vein",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 350,
+      "name": "Mobile",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 351,
+      "name": "Phlebotomy More   Now Serving NE OH and Western PA   About One Vein Mobile Phlebotomy Our Mission Ou",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 356,
+      "name": "Mercy Health — Westfield Lab Services           Mercy Health — Westfield Lab Services  3425 Executiv",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 357,
+      "name": "419-407-3659         Hours:   Monday   8:00 am - 4:30 pm     Tuesday   8:00 am - 4:30 pm     Wednesd",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 365,
+      "name": "Mercy Health — Salem Lab Services           Mercy Health — Salem Lab Services  564 E.,,,,44460,,,ChI",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 378,
+      "name": "VenaCareNW Wellness Clinics and Mobile Phlebotomy",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 380,
+      "name": "Lab Services.,,,,,,,ChIJufIAuWPRQIYRoc-SIzXyAFc,,ASCP Certified,,,,False,False,,,English",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 387,
+      "name": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 389,
+      "name": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 391,
+      "name": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 393,
+      "name": "blood work  at your convenience Please provide your photo I. Wellness Labs MOBILE PHLEBOTOMY OPEN 6 ",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 395,
+      "name": "Divine Touch Mobile Phlebotomy Service, LLC",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 407,
+      "name": "First Aid/Cpr/Aed Training",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 408,
+      "name": "Phlebotomy Service DNA & Drug Screening Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 409,
+      "name": "First Aid/Cpr/Aed Training",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 410,
+      "name": "Phlebotomy Service DNA & Drug Screening Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 411,
+      "name": "First Aid/Cpr/Aed Training",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 412,
+      "name": "Phlebotomy Service DNA & Drug Screening Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 413,
+      "name": "First Aid/Cpr/Aed Training",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 414,
+      "name": "Phlebotomy Service DNA & Drug Screening Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 415,
+      "name": "First Aid/Cpr/Aed Training",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 416,
+      "name": "Phlebotomy Service Our mobile services serve multiple areas. Business Hours We love our customers",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 425,
+      "name": "– My Health Check Lab                       Skip to content        Submit         Close search      ",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 438,
+      "name": "4201 Cypress Creek Pkwy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 439,
+      "name": "Ste 225",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 440,
+      "name": "Houston",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 441,
+      "name": "4201 Cypress Creek Pkwy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 442,
+      "name": "Ste 225",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 443,
+      "name": "Houston",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 444,
+      "name": "4201 Cypress Creek Pkwy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 445,
+      "name": "Ste 225",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 446,
+      "name": "Houston",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 447,
+      "name": "4201 Cypress Creek Pkwy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 448,
+      "name": "Ste 225",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 449,
+      "name": "Houston",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 450,
+      "name": "4201 Cypress Creek Pkwy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 451,
+      "name": "Ste 225",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 452,
+      "name": "Houston",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 489,
+      "name": "Utah Wasatch Front from Logan to Nephi",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 490,
+      "name": "Zamadhi’s Mobile Phlebotomy",
+      "reason": "No valid contact information (phone, email, or website)"
+    },
+    {
+      "lineNumber": 498,
+      "name": "Mariposa Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 499,
+      "name": "Vein-U Mobile Blood Draw",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 502,
+      "name": "Phlebstick Mobile LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 503,
+      "name": "VeinEx Mobile Phlebotomy LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 504,
+      "name": "Sufficient Mobile Labs LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 505,
+      "name": "603 Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 506,
+      "name": "Gentle Touch Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 512,
+      "name": "Mobile Phlebotomy Express",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 517,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 518,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 519,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 520,
+      "name": "Specialists Safe",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 521,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 522,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 523,
+      "name": "Specialists Trusted Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 524,
+      "name": "Specialists Safe",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 526,
+      "name": "Oasis Mobile Phlebotomy LLC.",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 527,
+      "name": "One Stop Exam Mobile Phlebotomy Service",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 529,
+      "name": "LabCall Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 531,
+      "name": "Mariposa mobile phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 533,
+      "name": "Gentle Touch Lab Services, Inc Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 535,
+      "name": "Mobile Phlebotomy Services of Florida, LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 536,
+      "name": "Hands of Care Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 540,
+      "name": "Speedy Mobile Phlebotomy LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 541,
+      "name": "Home Draw Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 543,
+      "name": "Veinpro Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 545,
+      "name": "Aloha Mobile Phlebotomy LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 549,
+      "name": "InstaLabs of Michigan",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 551,
+      "name": "VEINFLOW Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 552,
+      "name": "Mobile Labs Pro",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 554,
+      "name": "Bevel-up At home blood draw and delivery - Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 555,
+      "name": "Peace of Mind Mobile phlebotomist.com",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 556,
+      "name": "Zamadhi's Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 561,
+      "name": "KRL Mobile Lab",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 562,
+      "name": "OneStick USA Concierge Mobile Lab",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 563,
+      "name": "preferred home phlebotomy - mobile phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 564,
+      "name": "Phlebotomy You can’t always be there but we can.,,,,,,,ChIJT525igs4km4RWFlHLS8f-lY,,ASCP Certified,,",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 565,
+      "name": "Angel Touch Mobile Phlebotomy Services LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 569,
+      "name": "Simply Draw Phlebotomy LLC.",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 572,
+      "name": "Bloodugo | Mobile Lab Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 573,
+      "name": "Mobile Virtuous Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 575,
+      "name": "Delicate Hands Mobile Lab L.L.C~Your lab on Wheels",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 576,
+      "name": "R&J Louis Mobile Phlebotomist",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 577,
+      "name": "Mobile Phlebotomy Services of Miami",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 578,
+      "name": "Concierge Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 579,
+      "name": "Swift Lab Solutions",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 580,
+      "name": "Treasure Coast Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 582,
+      "name": "Phleb Cares Mobile Phlebotomy & IV Vitamin Therapy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 583,
+      "name": "On demand mobile phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 584,
+      "name": "Blood draw wherever",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 585,
+      "name": "On the Go Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 586,
+      "name": "Bloodlink Mobile Laboratory Services LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 590,
+      "name": "QuickStick Mobile Phlebotomy Services,LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 592,
+      "name": "BIO- STREET Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 598,
+      "name": "LabPros Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 600,
+      "name": "Natural Flow Mobile Phlebotomy LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 603,
+      "name": "Burdier Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 604,
+      "name": "Passion-stic mobile phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 606,
+      "name": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 607,
+      "name": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 608,
+      "name": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 609,
+      "name": "Expert Home Lab Testing Services For convenient and accurate lab results. Get Started 615-500-4464  ",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 612,
+      "name": "TMP Mobile Phlebotomy Service",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 616,
+      "name": "On The Go Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 621,
+      "name": "One Stick That's It Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 622,
+      "name": "Stick And Draw Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 627,
+      "name": "PHLEBX INC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 631,
+      "name": "Phlebotomy On Demand LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 632,
+      "name": "Concierge Lab Service",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 634,
+      "name": "VAMPS ON WHEELS",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 641,
+      "name": "Kardynal Mobile Phlebotomy LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 643,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 644,
+      "name": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 645,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 646,
+      "name": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 647,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 648,
+      "name": "Butterfly Stick Mobile Phlebotomy Welcome to Butterfly Stick Mobile Phlebotomy Welcome",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 649,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 650,
+      "name": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 651,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 652,
+      "name": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 653,
+      "name": "to",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 654,
+      "name": "Butterfly Stick Mobile Phlebotomy (916)889-1819 (916)889-1819 (916)889-1819 (916)889-1819 Schedule t",
+      "reason": "Invalid or gibberish provider name"
+    },
+    {
+      "lineNumber": 656,
+      "name": "Quick Draw Mobile Phlebotomy Service PLLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 657,
+      "name": "Blue heart mobile phlebotomy services LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 659,
+      "name": "SSR Mobile Phlebotomy and Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 660,
+      "name": "Ultimate Healthcare LLC (Mobile Phlebotomy)",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 661,
+      "name": "Hunt Medical Services Inc",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 662,
+      "name": "Express Mobile Lab, LLC",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 663,
+      "name": "Michigan Mobile Collection Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 664,
+      "name": "Graham Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 668,
+      "name": "Assurance Mobile Labs",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 670,
+      "name": "GetBlood Mobile Phlebotomy",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 673,
+      "name": "Veinpro Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 674,
+      "name": "Lab dash Mobile LLC Mobile Phlebotomy Services",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 676,
+      "name": "BioDraw Mobile Phlebotomy Service",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 677,
+      "name": "American Mobile Phlebotomy Service",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 679,
+      "name": "Atria Mobile Blood Draw",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 680,
+      "name": "MC Mobile Phlebotomist",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 684,
+      "name": "Phlebotomy Experts",
+      "reason": "Missing valid location information (city and state required)"
+    },
+    {
+      "lineNumber": 685,
+      "name": "We Are Vien Pros",
+      "reason": "Missing valid location information (city and state required)"
+    }
+  ]
+}

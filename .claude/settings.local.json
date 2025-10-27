@@ -25,7 +25,15 @@
       "Bash(timeout /t 5)",
       "Read(//c/Users/hmval/Downloads/**)",
       "Bash(mv \"app/provider/[id]\" \"app/provider/[slug]\")",
-      "Bash(cat .next/build-manifest.json)"
+      "Bash(cat .next/build-manifest.json)",
+      "Bash(cat:*)",
+      "Bash(sed:*)",
+      "Bash(sqlite3:*)",
+      "Bash(copy cleaned_providers.csv cleaned_providers_backup.csv)",
+      "Bash(copy:*)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(git log:*)",
+      "Bash(timeout 15 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done && echo \"\"Server is ready!\"\"')"
     ],
     "deny": [],
     "ask": []

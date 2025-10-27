@@ -160,16 +160,71 @@ if (ratingParam) {
     (p.rating || 0) >= minRating
   )
 }
-    // Filter by search query - search name, description, and services
+    // Filter by search query - search name, description, services, city, state, and coverage areas
     if (query) {
       const searchTerm = query.toLowerCase()
-      filteredProviders = filteredProviders.filter((p: any) => 
-        p.name?.toLowerCase().includes(searchTerm) ||
-        p.description?.toLowerCase().includes(searchTerm) ||
-        p.services?.some((s: string) => s.toLowerCase().includes(searchTerm)) ||
-        p.address?.city?.toLowerCase().includes(searchTerm) ||
-        p.address?.state?.toLowerCase().includes(searchTerm)
-      )
+
+      // Create a map of state abbreviations for better matching
+      const stateMap: Record<string, string> = {
+        'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+        'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+        'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+        'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+        'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+        'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+        'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+        'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+        'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+        'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+      }
+
+      // Check if query matches a state abbreviation
+      const queryUpper = query.toUpperCase()
+      const fullStateName = stateMap[queryUpper]
+
+      filteredProviders = filteredProviders.filter((p: any) => {
+        // Search in basic fields
+        const basicMatch =
+          p.name?.toLowerCase().includes(searchTerm) ||
+          p.description?.toLowerCase().includes(searchTerm) ||
+          p.services?.some((s: string) => s.toLowerCase().includes(searchTerm)) ||
+          p.address?.city?.toLowerCase().includes(searchTerm) ||
+          p.address?.state?.toLowerCase().includes(searchTerm)
+
+        if (basicMatch) return true
+
+        // Search in coverage states (handle both abbreviations and full names)
+        const coverageStateMatch =
+          p.coverage?.states?.some((s: string) =>
+            s.toLowerCase().includes(searchTerm) ||
+            s.toLowerCase() === queryUpper.toLowerCase()
+          )
+
+        if (coverageStateMatch) return true
+
+        // If query is a state abbreviation, also search for the full state name
+        if (fullStateName) {
+          const fullStateMatch =
+            p.address?.state?.toLowerCase() === fullStateName.toLowerCase() ||
+            p.coverage?.states?.some((s: string) => s.toLowerCase() === fullStateName.toLowerCase()) ||
+            p.verified_service_areas?.toLowerCase().includes(fullStateName.toLowerCase())
+
+          if (fullStateMatch) return true
+        }
+
+        // Search in coverage cities
+        const coverageCityMatch =
+          p.coverage?.cities?.some((c: string) => c.toLowerCase().includes(searchTerm))
+
+        if (coverageCityMatch) return true
+
+        // Check if provider is nationwide
+        if (p.is_nationwide === 'Yes') {
+          return true
+        }
+
+        return false
+      })
     }
 
     // Sort based on sort parameter

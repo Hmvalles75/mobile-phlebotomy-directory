@@ -1,0 +1,970 @@
+{
+  "timestamp": "2025-10-22T17:35:11.193Z",
+  "totalProviders": 685,
+  "validProviders": 672,
+  "removedProviders": 1,
+  "issuesFound": 119,
+  "errors": [
+    {
+      "lineNumber": 220,
+      "provider": "mobile phlebotomy service.,,,,4330,,,ChIJTSLwIvv7rUwR9k7fRKEmUvA,,CERTIFIED,,,Pediatric,False,False,lacasse.phlebotomy@gmail.com,,English",
+      "issues": [
+        "Invalid or gibberish provider name",
+        "Provider name contains gibberish or excessive repetition",
+        "Missing location information"
+      ],
+      "severity": "error"
+    }
+  ],
+  "warnings": [
+    {
+      "lineNumber": 20,
+      "provider": "anywhere. Login       Geochemistry Webtrieve TM  Retrieve results and track sample progress in real time with access to featured digital products",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 21,
+      "provider": "such as CoreViewer™ and ALS QCPro™.,,,,17025,,,ChIJ345pHyhFMlERMHDXePn8Z00,,NHA,,,Corporate,False,False,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 47,
+      "provider": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 48,
+      "provider": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 49,
+      "provider": "Mobile Phlebotomy Services The Vein Draw Phleb Mobile Phlebotomy Services The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 50,
+      "provider": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 51,
+      "provider": "Mobile Phlebotomy Services The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 52,
+      "provider": "Mobile Phlebotomy Services Home About Us Benefits Phlebotomy Services Contact Us Payments Partnership Testimonials More Home About Us Benefits Phlebotomy Services Contact Us Payments Partnership Testimonials Home About Us Benefits Phlebotomy Services Contact Us Payments Partnership Testimonials Welcome to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 53,
+      "provider": "The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 54,
+      "provider": "Mobile Phlebotomy Services Welcome to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 55,
+      "provider": "The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 56,
+      "provider": "Mobile Phlebotomy Services Welcome to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 57,
+      "provider": "The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 58,
+      "provider": "Mobile Phlebotomy Services Welcome to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 59,
+      "provider": "The Vein Draw Phleb",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 60,
+      "provider": "Mobile Phlebotomy Services Servicing the San Francisco Bay Area",
+      "issues": [
+        "Invalid website URL:  and maintain the prioritization of your personal health and safety.,,,,94596,,,ChIJkeqjVN5hhYARqDeLAfMaC48,,ASCP Certified,,,,False,False,avacls@theveindrawphleb.com,,English"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 62,
+      "provider": "California",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 63,
+      "provider": "95111 WhatsApp Us Message Us! Book Laboratories : Boston Heart.,,,,95111,,,ChIJUapLnRE1joARKMCvOKaKaQk,,ASCP Certified,,,,False,True,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 81,
+      "provider": "that Quanta Labs can now accommodate larger units under test   Features include:   100” head expander for vertical axis testing  100” slip table for horizontal axis testing  Up to 34",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 91,
+      "provider": "offering training to become a Nurse's Aide",
+      "issues": [
+        "Invalid phone number: 000,,,ChIJ2eaUNgLB54kRaSTAF-bz-j0,,CERTIFIED",
+        "Invalid website URL: 100"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 150,
+      "provider": "​ Home Programs Agriculture Business Health Hospitality Technology Continuing Education Courses Admissions Information Sessions Program Start Dates & Application Basic Skills Assessment at CCTC Admissions Specialist Financial Aid Veterans Transcripts Information  Adult Student Code of Conduct Basic Skills Assessment at CCTC Bookstore CARES Act Catalog for Cape Coral Technical College College Central Cost of Day Programs Dual Enrollment Process Frequently Asked Questions Gainful Employment Disclosures Get Involved Homeless Student Information  Job Postings for Students & Employers Library of Lee County",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 156,
+      "provider": "| Medical Laboratory Gentle Touch Laboratory",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 157,
+      "provider": "| Medical Laboratory Gentle Touch Laboratory",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 158,
+      "provider": "| Medical Laboratory Gentle Touch Laboratory",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 159,
+      "provider": "| Medical Laboratory Timely and effective medical laboratory services! Contact Us   Get in touch OUR OBJECTIVE To provide medical laboratory testing services in accordance with the applicable standards to satisfy the expectation of customers and satisfy the requirements of accrediting body and authorized body.,,,,316",
+      "issues": [
+        "Invalid phone number: 000,,,ChIJLZRO-5jf7ogRDBTebFmDgm4,,NHA,,,,True,True,filler@godaddy.com,,English",
+        "Invalid website URL: 000"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 197,
+      "provider": "Mercy Health — Lourdes Lab Services           Mercy Health — Lourdes Lab Services  1532 Lone Oak Rd  Paducah",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 202,
+      "provider": "Mercy Health — Paducah Lab Services           Mercy Health — Paducah Lab Services  225 Medical Center Dr  Paducah",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 208,
+      "provider": "Metairie",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 209,
+      "provider": "Louisiana",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 210,
+      "provider": "70001 Share Veintastic Skillz LLC Veins We Stick Fantastically! Mobile Phlebotomist Services About Veintastic Skillz Why Choose Me Location Opening Hours Contact Me Follow Me (504) 345-6009 Book Message Me Mobile Phlebotomist Services Mobile Phlebotomy Services  ( 9 ) $80.,,,,70001,,,ChIJX3d4fq2qSgYRXaawfSD1R5Y,,ASCP Certified,,,,False,True,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 230,
+      "provider": "Laboratory | Beverly Hospital",
+      "issues": [
+        "Invalid phone number: (978) 922-3000 ext. 6009"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 233,
+      "provider": "on the page    Patient Care    Research & Innovation    Education & Training    About      Featured Links    Giving to Mass General Brigham      Featured Links    Giving to Mass General Brigham      Featured Links    Giving to Mass General Brigham      Featured Links    Giving to Mass General Brigham             Utility Links    Request an appointment    Log in to Patient Gateway    Find a doctor    Find a location     Choose",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 234,
+      "provider": "Language      Home    العربية    中文    Kreyòl Ayisyen    Português    Pусский    Español    中文         Search the Site         Site-wide search   0 items available in list   reset search      Search          Close Search         Primary         Patient & Visitor Information         Patient & Visitor Information     Find Care      Getting Started    New to Mass General Brigham      International Patient Services      What Is Patient Gateway?      Planning Your Visit      Find a Doctor  (opens link in new tab)      Appointments        Patient Resources    Health & Wellness      Flu",
+      "issues": [
+        "Invalid website URL:  Blood Draw Lab  The Salem Hospital Blood Draw Lab at the main campus is open to patients with an open laboratory order from their provider.,,,,1970,,,ChIJhyVtu0A04ocRJScRZCUKnI8,,NHA,,,Corporate,True,True,,,English"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 240,
+      "provider": "Mildred Elley - Pittsfield Campus",
+      "issues": [
+        "Invalid email: Becky Connors"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 258,
+      "provider": "Catalog  Home  FAQ  Contact  Faculty  COVID-19 FAQ      Call us today",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 259,
+      "provider": "816-974-8823     Call us today",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 260,
+      "provider": "816-974-8823           We are down for maintenance today and tomorrow. Please",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 261,
+      "provider": "come back!      Toggle navigation           Home   Courses   Courses  Phlebotomy  Accelerated Phlebotomy  Clinical Medical Assisting  EKG Technician  Clinical Laboratory Assisting  Workshops  Advanced Wound Care  Advanced Phlebotomy Techniques   Red Cross CPR/AED/First Aid  IV Infusion   Paramedical Examiner    Events  Reviews  News   Discover KCSP   About  Leadership Team  Jobs at KCSP  KCSP Student Gallery  FAQ  Privacy Policy  Terms & Conditions      Alumni   Career Assistance  Resume Review  Alumni Job Boards  Career Counseling  Transcript Request  Replacement Certificates      Community   Become an Externship Site  Post a Job for KCSP Grads  Request Student Volunteers  Host a Hiring Fair  On-Site Training for Employers  Verify a KCSP Certificate     Post Review!  Register  Payments                  Kansas City School of Phlebotomy   Choose from 5 specialized programs and several hands-on workshops        Come visit the school   We would be happy to show you around       Discover Medical Assisting   Every KCSP student leaves the Clinical Medical Assisting program certified       Externships in the Phlebotomy program   KCSP partners with clinical laboratories and hospitals        Why Kansas City School of Phlebotomy?  Kansas City School of Phlebotomy is dedicated to student success.,,,,64108,,,ChIJowyiSj3wwIcR3G9mKuX6luU,,CERTIFIED,,,,False,False,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 303,
+      "provider": "The New Millennium Training Center",
+      "issues": [
+        "Invalid email: The New"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 320,
+      "provider": "to content                                       Common Searches   MyChart Login   On-Demand Video Visits  Remote Access  Jobs     Quick Links   Find",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 321,
+      "provider": "a Provider  Cost",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 322,
+      "provider": "Estimator  Clinical",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 323,
+      "provider": "Trials  Refer a Patient             MyChart    Pay a Bill  Cost Estimates & Pricing  Careers  Giving  Research  Education  Health Equity & Community        Find a Provider  Locations  Conditions & Treatments  Get Care Now     Search               MyChart     Pay a Bill    Cost Estimates & Pricing    Careers    Giving    Research    Education    Health Equity & Community                          Home     Locations         Locations  Laboratory Service Center                  Home     Locations         Locations  Laboratory Service Center     Laboratory Service Center   Perinton     Part of Strong Memorial Hospital        This location is an outpatient hospital department of Strong Memorial Hospital. There",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 324,
+      "provider": "may be additional insurance or private pay charges for services provided",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 325,
+      "provider": "here.,,,,14564,,,ChIJL3dV3Yi11okRMDe3sJysSlc,,ASCP Certified,,,,False,True,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 340,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 341,
+      "provider": "Phlebotomy One Vein",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 342,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 343,
+      "provider": "Phlebotomy One Vein",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 344,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 345,
+      "provider": "Phlebotomy One Vein Mobile Phlebotomy One Vein",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 346,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 347,
+      "provider": "Phlebotomy One Vein",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 348,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 349,
+      "provider": "Phlebotomy One Vein",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 350,
+      "provider": "Mobile",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 351,
+      "provider": "Phlebotomy More   Now Serving NE OH and Western PA   About One Vein Mobile Phlebotomy Our Mission Our Testing Services Our Technology Our mission at One Vein Mobile Phlebotomy is to provide affordable and accessible blood testing services to individuals and healthcare providers. We believe that everyone should have access to accurate and reliable blood testing",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 356,
+      "provider": "Mercy Health — Westfield Lab Services           Mercy Health — Westfield Lab Services  3425 Executive Parkway  Suite 215  Toledo",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 357,
+      "provider": "419-407-3659         Hours:   Monday   8:00 am - 4:30 pm     Tuesday   8:00 am - 4:30 pm     Wednesday   8:00 am - 4:30 pm     Thursday   8:00 am - 4:30 pm     Friday   8:00 am - 4:30 pm     Saturday   Closed     Sunday   Closed          This location will be closed for lunch from 12:30 - 1 pm.,,,,43606,,,ChIJt6myFxB_PIgRlMHobqbfRIw,,ASCP Certified,,,,True,True,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 365,
+      "provider": "Mercy Health — Salem Lab Services           Mercy Health — Salem Lab Services  564 E.,,,,44460,,,ChIJPxAXVGCrNogRbZvk4905YR0,,ASCP Certified,,,,True,True,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 375,
+      "provider": "St. Charles Redmond Family Care Clinic Laboratory",
+      "issues": [
+        "Invalid email: Phone Number"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 380,
+      "provider": "Lab Services.,,,,,,,ChIJufIAuWPRQIYRoc-SIzXyAFc,,ASCP Certified,,,,False,False,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 387,
+      "provider": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 389,
+      "provider": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 391,
+      "provider": "blood work  at your convenience mobile & outpatient phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 393,
+      "provider": "blood work  at your convenience Please provide your photo I. Wellness Labs MOBILE PHLEBOTOMY OPEN 6 DAYS A WEEK BY APPOINTMENT  At Wellness Labs",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 407,
+      "provider": "First Aid/Cpr/Aed Training",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 408,
+      "provider": "Phlebotomy Service DNA & Drug Screening Services",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 409,
+      "provider": "First Aid/Cpr/Aed Training",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 410,
+      "provider": "Phlebotomy Service DNA & Drug Screening Services",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 411,
+      "provider": "First Aid/Cpr/Aed Training",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 412,
+      "provider": "Phlebotomy Service DNA & Drug Screening Services",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 413,
+      "provider": "First Aid/Cpr/Aed Training",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 414,
+      "provider": "Phlebotomy Service DNA & Drug Screening Services",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 415,
+      "provider": "First Aid/Cpr/Aed Training",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 425,
+      "provider": "– My Health Check Lab                       Skip to content        Submit         Close search           Location    Make An Appointment    Semaglutide    Telehealth Visit    Tests    Wellness Screenings      Convenient  |  Cost-Effective  |  Mobile Service  |  Privacy  |  Prompt Results           Submit                    Search     Cart  Cart      expand/collapse          Location    Make An Appointment    Semaglutide    Telehealth Visit    Tests    Wellness Screenings              Pause slideshow     Play slideshow               My Health Check Lab                Home Lab Draws  We Now Only Accept At-Home Service Appointments                Stay ahead of your health - get tested regularly to detect potential issues before they become problems. Weight Loss Tests       Testimonials        My health check lab is the best and most convenient she makes you feel like home I wish I could give a 1000 stars 🌟 thank you so much even though I did not get your name but I truly appreciated I highly recommend this place to any one that wants lab check for anything A million times thanks  Abdul Fatah Hasan       Very professional",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 438,
+      "provider": "4201 Cypress Creek Pkwy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 439,
+      "provider": "Ste 225",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 440,
+      "provider": "Houston",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 441,
+      "provider": "4201 Cypress Creek Pkwy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 442,
+      "provider": "Ste 225",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 443,
+      "provider": "Houston",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 444,
+      "provider": "4201 Cypress Creek Pkwy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 445,
+      "provider": "Ste 225",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 446,
+      "provider": "Houston",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 447,
+      "provider": "4201 Cypress Creek Pkwy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 448,
+      "provider": "Ste 225",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 449,
+      "provider": "Houston",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 450,
+      "provider": "4201 Cypress Creek Pkwy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 451,
+      "provider": "Ste 225",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 489,
+      "provider": "Utah Wasatch Front from Logan to Nephi",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 512,
+      "provider": "Mobile Phlebotomy Express",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 517,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 518,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 519,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 520,
+      "provider": "Specialists Safe",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 521,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 522,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 523,
+      "provider": "Specialists Trusted Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 524,
+      "provider": "Specialists Safe",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 564,
+      "provider": "Phlebotomy You can’t always be there but we can.,,,,,,,ChIJT525igs4km4RWFlHLS8f-lY,,ASCP Certified,,,Geriatric",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 584,
+      "provider": "Blood draw wherever",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 606,
+      "provider": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 607,
+      "provider": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 608,
+      "provider": "Expert Home Lab Testing Services Confident Care Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 609,
+      "provider": "Expert Home Lab Testing Services For convenient and accurate lab results. Get Started 615-500-4464   About Confident Care Our Mission At Confident Care Mobile Phlebotomy",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 643,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 644,
+      "provider": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 645,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 646,
+      "provider": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 647,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 648,
+      "provider": "Butterfly Stick Mobile Phlebotomy Welcome to Butterfly Stick Mobile Phlebotomy Welcome",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 649,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 650,
+      "provider": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 651,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 652,
+      "provider": "Butterfly Stick Mobile Phlebotomy Welcome",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 653,
+      "provider": "to",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    },
+    {
+      "lineNumber": 654,
+      "provider": "Butterfly Stick Mobile Phlebotomy (916)889-1819 (916)889-1819 (916)889-1819 (916)889-1819 Schedule today! Contact Us   Sacramento to Placerville and the Bay Area. Our Partners   Discover Butterfly Stick Mobile Phlebotomy Pediatric Blood Collection Mobile Phlebotomy for Everyone Pediatric Blood Collection You don’t have to take your child to the lab for blood work.,,,,,,,ChIJ_5Ss_OCzbWYRpFNKJWeYxb0,,ASCP Certified,,,Pediatric,False,False,,,English",
+      "issues": [
+        "Missing location information"
+      ],
+      "severity": "warning"
+    }
+  ],
+  "removedProvidersList": [
+    "Line 220: mobile phlebotomy service.,,,,4330,,,ChIJTSLwIvv7rUwR9k7fRKEmUvA,,CERTIFIED,,,Pediatric,False,False,lacasse.phlebotomy@gmail.com,,English"
+  ]
+}

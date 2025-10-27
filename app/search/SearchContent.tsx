@@ -32,12 +32,18 @@ export default function SearchContent() {
 ]
 
   useEffect(() => {
+    // Get initial query from URL params
+    const queryParam = searchParams.get('q')
+    if (queryParam) {
+      setSearchQuery(queryParam)
+    }
+
     // Get initial services from URL params
     const servicesParam = searchParams.get('services')
     if (servicesParam) {
       setSelectedServices([servicesParam])
     }
-    
+
     // Get initial rating filter from URL params
     const ratingParam = searchParams.get('rating')
     if (ratingParam) {
@@ -120,11 +126,13 @@ params.append('sort', sortBy)
       <div className="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Search Mobile Phlebotomy Providers</h1>
-          <AutocompleteSearchBar 
+          <AutocompleteSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
+            onSearch={setSearchQuery}
             className="max-w-2xl"
             placeholder="Search by location, provider name, or service..."
+            enableAutocomplete={false}
           />
         </div>
       </div>
