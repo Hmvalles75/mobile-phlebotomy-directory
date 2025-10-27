@@ -183,43 +183,60 @@ if (ratingParam) {
       const fullStateName = stateMap[queryUpper]
 
       filteredProviders = filteredProviders.filter((p: any) => {
-        // Search in basic fields
-        const basicMatch =
-          p.name?.toLowerCase().includes(searchTerm) ||
-          p.description?.toLowerCase().includes(searchTerm) ||
-          p.services?.some((s: string) => s.toLowerCase().includes(searchTerm)) ||
-          p.address?.city?.toLowerCase().includes(searchTerm) ||
-          p.address?.state?.toLowerCase().includes(searchTerm)
+        // Check if this is a state search (either full name or abbreviation)
+        const isStateSearch = fullStateName !== undefined
 
-        if (basicMatch) return true
+        // For state searches, only match providers that actually serve that state
+        if (isStateSearch) {
+          // Check if provider is nationwide - they serve all states
+          if (p.is_nationwide === 'Yes') {
+            return true
+          }
 
-        // Search in coverage states (handle both abbreviations and full names)
-        const coverageStateMatch =
-          p.coverage?.states?.some((s: string) =>
-            s.toLowerCase().includes(searchTerm) ||
-            s.toLowerCase() === queryUpper.toLowerCase()
-          )
+          // Check if provider's address is in this state
+          if (p.address?.state?.toLowerCase() === fullStateName.toLowerCase() ||
+              p.address?.state?.toLowerCase() === searchTerm) {
+            return true
+          }
 
-        if (coverageStateMatch) return true
+          // Check if provider explicitly covers this state
+          if (p.coverage?.states?.some((s: string) =>
+            s.toLowerCase() === fullStateName.toLowerCase() ||
+            s.toLowerCase() === searchTerm
+          )) {
+            return true
+          }
 
-        // If query is a state abbreviation, also search for the full state name
-        if (fullStateName) {
-          const fullStateMatch =
-            p.address?.state?.toLowerCase() === fullStateName.toLowerCase() ||
-            p.coverage?.states?.some((s: string) => s.toLowerCase() === fullStateName.toLowerCase()) ||
-            p.verified_service_areas?.toLowerCase().includes(fullStateName.toLowerCase())
+          // Check verified service areas for exact state match
+          if (p.verified_service_areas?.toLowerCase().includes(fullStateName.toLowerCase())) {
+            return true
+          }
 
-          if (fullStateMatch) return true
+          return false
         }
 
-        // Search in coverage cities
-        const coverageCityMatch =
-          p.coverage?.cities?.some((c: string) => c.toLowerCase().includes(searchTerm))
+        // For non-state searches, search in various fields
+        // Search in provider name
+        if (p.name?.toLowerCase().includes(searchTerm)) {
+          return true
+        }
 
-        if (coverageCityMatch) return true
+        // Search in services
+        if (p.services?.some((s: string) => s.toLowerCase().includes(searchTerm))) {
+          return true
+        }
 
-        // Check if provider is nationwide
-        if (p.is_nationwide === 'Yes') {
+        // Search in city name (address and coverage)
+        if (p.address?.city?.toLowerCase().includes(searchTerm)) {
+          return true
+        }
+
+        if (p.coverage?.cities?.some((c: string) => c.toLowerCase().includes(searchTerm))) {
+          return true
+        }
+
+        // Search in address state (for partial matches like "calif" matching "california")
+        if (p.address?.state?.toLowerCase().includes(searchTerm)) {
           return true
         }
 
