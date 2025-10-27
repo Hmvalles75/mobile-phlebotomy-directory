@@ -7,6 +7,7 @@ import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
 import { type Provider } from '@/lib/schemas'
 import { topMetroAreas } from '@/data/top-metros'
+import { handleCityNameSearch } from '@/lib/zip-geocoding'
 
 const featuredMetros = topMetroAreas.slice(0, 12)
 
@@ -31,9 +32,17 @@ export default function HomePage() {
   const [providerCounts, setProviderCounts] = useState<Record<string, number>>({})
 
   const handleSearch = (query: string) => {
-    if (query.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(query.trim())}`
+    if (!query.trim()) return
+
+    // Try to route to city page if it's a city query
+    const cityRouting = handleCityNameSearch(query.trim())
+    if (cityRouting) {
+      window.location.href = cityRouting.route
+      return
     }
+
+    // Fall back to search page
+    window.location.href = `/search?q=${encodeURIComponent(query.trim())}`
   }
 
   useEffect(() => {

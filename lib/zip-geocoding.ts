@@ -296,3 +296,62 @@ export function detectSearchType(query: string): 'zipcode' | 'text' {
   const trimmed = query.trim();
   return isValidZipCode(trimmed) ? 'zipcode' : 'text';
 }
+
+// State abbreviation to full name mapping
+const STATE_ABBR_TO_NAME: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+  'DC': 'District of Columbia'
+};
+
+// Parse city name from query (e.g., "San Diego, CA" -> { city: "San Diego", state: "CA" })
+export function parseCityQuery(query: string): { city: string; stateAbbr: string } | null {
+  // Match patterns like "San Diego, CA" or "San Diego CA"
+  const match = query.trim().match(/^([A-Za-z\s]+),?\s+([A-Z]{2})$/);
+  if (!match) return null;
+
+  const city = match[1].trim();
+  const stateAbbr = match[2].toUpperCase();
+
+  // Validate state abbreviation
+  if (!STATE_ABBR_TO_NAME[stateAbbr]) return null;
+
+  return { city, stateAbbr };
+}
+
+// Handle city name search routing
+export function handleCityNameSearch(query: string): LocationRouting | null {
+  const parsed = parseCityQuery(query);
+  if (!parsed) return null;
+
+  const { city, stateAbbr } = parsed;
+  const stateName = STATE_ABBR_TO_NAME[stateAbbr];
+
+  // Check if it's a major city
+  if (MAJOR_CITIES.has(city.toLowerCase())) {
+    const citySlug = createCitySlug(city);
+    const stateSlug = createStateSlug(stateName);
+
+    return {
+      route: `/us/${stateSlug}/${citySlug}`,
+      routeType: 'city',
+      displayName: `${city}, ${stateAbbr}`
+    };
+  }
+
+  // Fall back to state page
+  const stateSlug = createStateSlug(stateName);
+  return {
+    route: `/us/${stateSlug}`,
+    routeType: 'state',
+    displayName: stateName
+  };
+}
