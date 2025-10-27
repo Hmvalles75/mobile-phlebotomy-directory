@@ -29,6 +29,15 @@ const nextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/provider/provider-:id',
+        destination: '/find-providers',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig
