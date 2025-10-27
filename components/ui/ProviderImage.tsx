@@ -12,9 +12,9 @@ interface ProviderImageProps {
 export function ProviderImage({ src, alt, className }: ProviderImageProps) {
   const [hasError, setHasError] = useState(false)
 
-  // Check if it's a valid image URL
+  // Check if it's a valid image URL (absolute or relative path)
   const isValidImageUrl = src &&
-    (src.startsWith('http://') || src.startsWith('https://')) &&
+    (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('/')) &&
     !src.startsWith('data:') && // Exclude data URLs (base64 placeholders)
     src.length > 10 // Exclude very short URLs
 
