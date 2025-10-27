@@ -33,7 +33,7 @@ const nextConfig = {
     return [
       {
         source: '/provider/provider-:id',
-        destination: '/find-providers',
+        destination: '/search',
         permanent: true,
       },
     ]
