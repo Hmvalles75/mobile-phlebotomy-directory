@@ -7,6 +7,7 @@ import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
 import { type Provider } from '@/lib/schemas'
 import { topMetroAreas } from '@/data/top-metros'
+import { handleCityNameSearch, handleStateNameSearch } from '@/lib/zip-geocoding'
 
 const featuredMetros = topMetroAreas.slice(0, 12)
 
@@ -33,7 +34,21 @@ export default function HomePage() {
   const handleSearch = (query: string) => {
     if (!query.trim()) return
 
-    // Always go to search page with the query
+    // Try to route to city page if it's a city query (e.g., "San Diego, CA")
+    const cityRouting = handleCityNameSearch(query.trim())
+    if (cityRouting) {
+      window.location.href = cityRouting.route
+      return
+    }
+
+    // Try to route to state page if it's a state query (e.g., "Pennsylvania" or "PA")
+    const stateRouting = handleStateNameSearch(query.trim())
+    if (stateRouting) {
+      window.location.href = stateRouting.route
+      return
+    }
+
+    // Fall back to search page
     window.location.href = `/search?q=${encodeURIComponent(query.trim())}`
   }
 

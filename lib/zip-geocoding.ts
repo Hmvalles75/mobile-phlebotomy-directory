@@ -327,6 +327,38 @@ export function parseCityQuery(query: string): { city: string; stateAbbr: string
   return { city, stateAbbr };
 }
 
+// Handle state name search routing (e.g., "Pennsylvania" or "PA")
+export function handleStateNameSearch(query: string): LocationRouting | null {
+  const trimmedQuery = query.trim();
+
+  // Check if it's a state abbreviation
+  const upperQuery = trimmedQuery.toUpperCase();
+  if (STATE_ABBR_TO_NAME[upperQuery]) {
+    const stateName = STATE_ABBR_TO_NAME[upperQuery];
+    const stateSlug = createStateSlug(stateName);
+    return {
+      route: `/us/${stateSlug}`,
+      routeType: 'state',
+      displayName: stateName
+    };
+  }
+
+  // Check if it's a full state name
+  const lowerQuery = trimmedQuery.toLowerCase();
+  for (const [abbr, name] of Object.entries(STATE_ABBR_TO_NAME)) {
+    if (name.toLowerCase() === lowerQuery) {
+      const stateSlug = createStateSlug(name);
+      return {
+        route: `/us/${stateSlug}`,
+        routeType: 'state',
+        displayName: name
+      };
+    }
+  }
+
+  return null;
+}
+
 // Handle city name search routing
 export function handleCityNameSearch(query: string): LocationRouting | null {
   const parsed = parseCityQuery(query);

@@ -132,7 +132,7 @@ params.append('sort', sortBy)
             onSearch={setSearchQuery}
             className="max-w-2xl"
             placeholder="Search by location, provider name, or service..."
-            enableAutocomplete={false}
+            enableAutocomplete={true}
           />
         </div>
       </div>
