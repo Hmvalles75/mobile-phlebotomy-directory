@@ -313,7 +313,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {provider.email && provider.email !== '' && provider.email !== 'nan' && (
+                  {provider.email && provider.email !== '' && provider.email !== 'nan' && provider.email.toLowerCase() !== 'no' && provider.email.toLowerCase() !== 'false' && (
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">✉️</span>
                       <div>
