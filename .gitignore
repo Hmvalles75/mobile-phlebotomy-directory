@@ -37,4 +37,5 @@ next-env.d.ts
 # Data staging
 /data/providers.staged.json
 /data/submissions.json
+/data/pending-submissions.json
 /generated/prisma
