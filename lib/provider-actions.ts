@@ -301,7 +301,11 @@ export function formatProviderContact(provider: Provider): {
   if (provider.phone) {
     primary = provider.phone
     methods.push('phone')
-  } else if (provider.email) {
+  } else if (provider.email &&
+             provider.email !== '' &&
+             provider.email !== 'nan' &&
+             provider.email.toLowerCase() !== 'no' &&
+             provider.email.toLowerCase() !== 'false') {
     primary = provider.email
     methods.push('email')
   } else if (provider.website) {
@@ -313,17 +317,22 @@ export function formatProviderContact(provider: Provider): {
     secondary.push(provider.phone)
     methods.push('phone')
   }
-  
-  if (provider.email && methods[0] !== 'email') {
+
+  if (provider.email &&
+      provider.email !== '' &&
+      provider.email !== 'nan' &&
+      provider.email.toLowerCase() !== 'no' &&
+      provider.email.toLowerCase() !== 'false' &&
+      methods[0] !== 'email') {
     secondary.push(provider.email)
     methods.push('email')
   }
-  
+
   if (provider.website && methods[0] !== 'website') {
     secondary.push('Website available')
     methods.push('website')
   }
-  
+
   return { primary, secondary, methods }
 }
 
