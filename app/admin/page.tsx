@@ -30,6 +30,23 @@ interface PendingProvider {
   ipAddress?: string
 }
 
+interface BusinessClaim {
+  id: string
+  submittedAt: string
+  status: 'pending' | 'verified' | 'rejected'
+  providerId: string
+  providerName: string
+  claimantName: string
+  claimantEmail: string
+  claimantPhone: string
+  requestedUpdates: string
+  isOwnerConfirmed: boolean
+  verifiedAt?: string
+  verificationMethod?: string
+  verificationNotes?: string
+  ipAddress?: string
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
