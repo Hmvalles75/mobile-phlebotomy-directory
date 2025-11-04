@@ -108,7 +108,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header Section */}
-        <div className="bg-white shadow-sm border-b">
+        <div className={`bg-white shadow-sm ${isVerified ? 'border-l-4 border-l-green-500 border-b' : 'border-b'}`}>
           <div className="container mx-auto px-4 py-6">
             {/* Breadcrumb */}
             <nav className="text-sm text-gray-600 mb-4">
@@ -321,8 +321,10 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
             {/* Right Column - Contact & Details */}
             <div className="space-y-6">
-              {/* Claim Business Button */}
-              <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
+              {/* Claim Business Button - Only show if not already verified */}
+              {!isVerified && (
+                <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
+              )}
 
               {/* Contact Card */}
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">

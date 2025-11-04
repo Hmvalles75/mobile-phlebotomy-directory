@@ -10,6 +10,7 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { getProviderBadge } from '@/lib/provider-tiers'
+import { isProviderRegistered } from '@/lib/business-claims'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -353,12 +354,13 @@ export default function StatePage({ params }: StatePageProps) {
                       <div className="divide-y divide-gray-200">
                         {categorizedProviders.featured.map((provider) => {
                           const registeredBadge = getProviderBadge(provider.id)
+                          const isVerified = isProviderRegistered(provider.id)
 
                           return (
-                          <div key={provider.id} className="p-6 bg-gradient-to-r from-amber-50/30 to-transparent">
+                          <div key={provider.id} className={`p-6 bg-gradient-to-r from-amber-50/30 to-transparent ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
                             <div className="flex justify-between items-start mb-4">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
                                   <h3 className="text-xl font-semibold text-gray-900">
                                     {provider.name}
                                   </h3>
@@ -366,6 +368,12 @@ export default function StatePage({ params }: StatePageProps) {
                                   {(provider as any).is_nationwide === 'Yes' && (
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                       🌎 Nationwide Service
+                                    </span>
+                                  )}
+                                  {/* Verified Badge */}
+                                  {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                      ✓ Verified
                                     </span>
                                   )}
                                   {/* Featured Badge */}
@@ -463,12 +471,13 @@ export default function StatePage({ params }: StatePageProps) {
                       <div className="divide-y divide-gray-200">
                         {categorizedProviders.registered.map((provider) => {
                           const registeredBadge = getProviderBadge(provider.id)
+                          const isVerified = isProviderRegistered(provider.id)
 
                           return (
-                          <div key={provider.id} className="p-6">
+                          <div key={provider.id} className={`p-6 ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
                             <div className="flex justify-between items-start mb-4">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
                                   <h3 className="text-xl font-semibold text-gray-900">
                                     {provider.name}
                                   </h3>
@@ -476,6 +485,12 @@ export default function StatePage({ params }: StatePageProps) {
                                   {(provider as any).is_nationwide === 'Yes' && (
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                       🌎 Nationwide Service
+                                    </span>
+                                  )}
+                                  {/* Verified Badge */}
+                                  {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                      ✓ Verified
                                     </span>
                                   )}
                                   {/* Registered Badge */}
@@ -570,11 +585,14 @@ export default function StatePage({ params }: StatePageProps) {
                   </p>
                 </div>
                 <div className="divide-y divide-gray-200">
-                  {categorizedProviders.standard.map((provider) => (
-                    <div key={provider.id} className="p-6">
+                  {categorizedProviders.standard.map((provider) => {
+                    const isVerified = isProviderRegistered(provider.id)
+
+                    return (
+                    <div key={provider.id} className={`p-6 ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <h3 className="text-lg font-semibold text-gray-900">
                               {provider.name}
                             </h3>
@@ -582,6 +600,12 @@ export default function StatePage({ params }: StatePageProps) {
                             {(provider as any).is_nationwide === 'Yes' && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                 🌎 Nationwide Service
+                              </span>
+                            )}
+                            {/* Verified Badge */}
+                            {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                ✓ Verified
                               </span>
                             )}
                           </div>
@@ -631,7 +655,8 @@ export default function StatePage({ params }: StatePageProps) {
                         className="justify-start"
                       />
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
