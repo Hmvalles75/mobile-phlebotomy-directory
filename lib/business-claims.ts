@@ -1,5 +1,8 @@
 /**
  * Manage business claim submissions and verifications
+ *
+ * IMPORTANT: This module uses Node.js fs module and can ONLY be imported in server components.
+ * For client components, use the provider-tiers.ts module which includes cached verification data.
  */
 
 import fs from 'fs'

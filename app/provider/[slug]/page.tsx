@@ -6,9 +6,8 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { ProviderImage } from '@/components/ui/ProviderImage'
-import { getProviderBadge } from '@/lib/provider-tiers'
+import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
-import { isProviderRegistered } from '@/lib/business-claims'
 import Link from 'next/link'
 
 interface PageProps {
