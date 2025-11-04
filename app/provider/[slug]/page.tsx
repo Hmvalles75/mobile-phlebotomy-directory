@@ -8,6 +8,7 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { getProviderBadge } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
+import { isProviderRegistered } from '@/lib/business-claims'
 import Link from 'next/link'
 
 interface PageProps {
@@ -98,6 +99,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   // Get provider tier badge
   const registeredBadge = getProviderBadge(provider.id)
 
+  // Check if provider is verified (has been claimed and approved)
+  const isVerified = isProviderRegistered(provider.id)
+
   return (
     <>
       <ProviderSchema provider={providerForSchema as any} />
@@ -166,7 +170,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   )}
                 </div>
 
-                {provider.is_mobile_phlebotomy === 'Yes' && (
+                {isVerified && provider.is_mobile_phlebotomy === 'Yes' && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mb-3">
                     ✓ Verified Mobile Phlebotomy Service
                   </span>
