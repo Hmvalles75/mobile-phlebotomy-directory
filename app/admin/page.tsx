@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [deployLoading, setDeployLoading] = useState(false)
 
   // Check auth on mount
   useEffect(() => {
@@ -171,6 +172,32 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleDeploy = async () => {
+    if (!confirm('Deploy approved providers to production? This will commit and push changes to your repository.')) {
+      return
+    }
+
+    setDeployLoading(true)
+
+    try {
+      const res = await fetch('/api/admin/deploy', {
+        method: 'POST'
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert(data.message)
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (error) {
+      alert('Network error. Please try again.')
+    } finally {
+      setDeployLoading(false)
+    }
+  }
+
   // Login screen
   if (!isAuthenticated) {
     return (
@@ -221,12 +248,21 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              Logout
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeploy}
+                disabled={deployLoading || approvedSubmissions.length === 0}
+                className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deployLoading ? 'Deploying...' : '🚀 Deploy Changes'}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
           <div className="mt-4 flex gap-4 text-sm">

@@ -50,12 +50,9 @@ export default function AddProvider() {
 
       const data = await response.json()
 
-      if (data.success && data.mailtoLink) {
-        // Open email client with pre-filled data
-        window.location.href = data.mailtoLink
-
+      if (data.success) {
         // Show success message
-        alert('Thank you for your submission! An email with your information will open. Please send it to complete your application.')
+        alert(data.message || 'Thank you! Your application has been submitted and is pending review. We will contact you within 24-48 hours.')
 
         // Reset form
         setFormData({
@@ -76,7 +73,7 @@ export default function AddProvider() {
           yearsExperience: '',
         })
       } else {
-        alert('There was an error processing your submission. Please try again or contact us directly at hector@mobilephlebotomy.org')
+        alert(data.error || 'There was an error processing your submission. Please try again or contact us directly at hector@mobilephlebotomy.org')
       }
     } catch (error) {
       console.error('Submission error:', error)

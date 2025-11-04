@@ -151,9 +151,23 @@ export async function POST(
       // Update status
       updateSubmissionStatus(id, 'approved')
 
+      // Trigger rebuild of providers.json (run Python script)
+      try {
+        const { execSync } = require('child_process')
+        console.log('🔄 Rebuilding providers.json...')
+        execSync('py convert_csv.py', {
+          cwd: process.cwd(),
+          stdio: 'inherit'
+        })
+        console.log('✅ Providers.json rebuilt successfully')
+      } catch (error) {
+        console.error('⚠️  Failed to rebuild providers.json:', error)
+        // Don't fail the approval if rebuild fails - can be done manually
+      }
+
       return NextResponse.json({
         success: true,
-        message: 'Provider approved and added to directory',
+        message: 'Provider approved and added to directory. Site will update on next deployment.',
         provider: submission.businessName
       })
 
