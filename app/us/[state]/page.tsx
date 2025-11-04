@@ -310,15 +310,23 @@ export default function StatePage({ params }: StatePageProps) {
                     <div key={provider.id} className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            {provider.name}
-                          </h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-xl font-semibold text-gray-900">
+                              {provider.name}
+                            </h3>
+                            {/* Nationwide/Multi-State Badge */}
+                            {(provider as any).is_nationwide === 'Yes' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                🌎 Nationwide Service
+                              </span>
+                            )}
+                          </div>
                           {provider.description && (
                             <p className="text-gray-600 mb-3">
                               {provider.description}
                             </p>
                           )}
-                          
+
                           {/* Coverage Area */}
                           <div className="mb-3">
                             <span className="text-sm font-medium text-gray-700">Coverage: </span>

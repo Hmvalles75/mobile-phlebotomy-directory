@@ -35,6 +35,12 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-xl font-bold text-gray-900">{provider.name}</h3>
+            {/* Nationwide/Multi-State Badge */}
+            {(provider as any).is_nationwide === 'Yes' && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                🌎 Nationwide Service
+              </span>
+            )}
             {showCoverageType && (
               <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                 {getCoverageIcon(coverageType)}

@@ -627,12 +627,20 @@ export default function CityPage({ params }: PageProps) {
 
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <Link
-                      href={`/provider/${provider.slug}`}
-                      className="text-xl font-bold text-gray-900 mb-2 hover:text-primary-600 inline-block"
-                    >
-                      {provider.name}
-                    </Link>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Link
+                        href={`/provider/${provider.slug}`}
+                        className="text-xl font-bold text-gray-900 hover:text-primary-600"
+                      >
+                        {provider.name}
+                      </Link>
+                      {/* Nationwide/Multi-State Badge */}
+                      {(provider as any).is_nationwide === 'Yes' && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                          🌎 Nationwide Service
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                       {provider.address?.city && provider.address.city.trim() ? (
                         <span>📍 {provider.address.city}{provider.address.state ? `, ${provider.address.state}` : ''}{provider.address.zip ? ` ${provider.address.zip}` : ''}</span>
