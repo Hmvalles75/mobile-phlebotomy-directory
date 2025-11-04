@@ -7,6 +7,7 @@ import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { getProviderBadge } from '@/lib/provider-tiers'
+import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
 import Link from 'next/link'
 
 interface PageProps {
@@ -316,6 +317,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
             {/* Right Column - Contact & Details */}
             <div className="space-y-6">
+              {/* Claim Business Button */}
+              <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
+
               {/* Contact Card */}
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
