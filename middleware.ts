@@ -6,7 +6,79 @@ const rateLimitMap = new Map<string, { count: number; timestamp: number }>()
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
 const MAX_REQUESTS = 100 // 100 requests per minute per IP
 
+// State abbreviation to slug mapping
+const stateAbbrToSlug: Record<string, string> = {
+  'al': 'alabama', 'ak': 'alaska', 'az': 'arizona', 'ar': 'arkansas',
+  'ca': 'california', 'co': 'colorado', 'ct': 'connecticut', 'de': 'delaware',
+  'fl': 'florida', 'ga': 'georgia', 'hi': 'hawaii', 'id': 'idaho',
+  'il': 'illinois', 'in': 'indiana', 'ia': 'iowa', 'ks': 'kansas',
+  'ky': 'kentucky', 'la': 'louisiana', 'me': 'maine', 'md': 'maryland',
+  'ma': 'massachusetts', 'mi': 'michigan', 'mn': 'minnesota', 'ms': 'mississippi',
+  'mo': 'missouri', 'mt': 'montana', 'ne': 'nebraska', 'nv': 'nevada',
+  'nh': 'new-hampshire', 'nj': 'new-jersey', 'nm': 'new-mexico', 'ny': 'new-york',
+  'nc': 'north-carolina', 'nd': 'north-dakota', 'oh': 'ohio', 'ok': 'oklahoma',
+  'or': 'oregon', 'pa': 'pennsylvania', 'ri': 'rhode-island', 'sc': 'south-carolina',
+  'sd': 'south-dakota', 'tn': 'tennessee', 'tx': 'texas', 'ut': 'utah',
+  'vt': 'vermont', 'va': 'virginia', 'wa': 'washington', 'wv': 'west-virginia',
+  'wi': 'wisconsin', 'wy': 'wyoming', 'dc': 'washington-dc'
+}
+
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // Handle state/city URL redirects
+  if (pathname.startsWith('/us/')) {
+    const parts = pathname.split('/')
+    let needsRedirect = false
+    let newPathname = pathname
+
+    // Handle state abbreviations or spaces in state names (e.g., /us/tx or /us/new%20york)
+    if (parts.length >= 3) {
+      const stateParam = parts[2]
+      const stateParamLower = decodeURIComponent(stateParam).toLowerCase()
+
+      // Check if it's a state abbreviation
+      const stateSlug = stateAbbrToSlug[stateParamLower]
+      if (stateSlug) {
+        parts[2] = stateSlug
+        needsRedirect = true
+      }
+      // Check if state has spaces that need to be converted to hyphens
+      else if (stateParam.includes('%20') || stateParam.includes(' ')) {
+        parts[2] = stateParamLower.replace(/\s+/g, '-')
+        needsRedirect = true
+      }
+    }
+
+    // Handle city names with special characters (e.g., st.-petersburg → st-petersburg)
+    if (parts.length >= 4) {
+      const cityParam = parts[3]
+      const decodedCity = decodeURIComponent(cityParam)
+
+      // Normalize city names: remove periods, apostrophes, convert spaces to hyphens
+      const normalizedCity = decodedCity
+        .toLowerCase()
+        .replace(/\./g, '')  // Remove periods
+        .replace(/'/g, '')   // Remove apostrophes
+        .replace(/\s+/g, '-')  // Convert spaces to hyphens
+        .replace(/[^a-z0-9-]/g, '-')  // Replace any other special chars with hyphens
+        .replace(/-+/g, '-')  // Collapse multiple hyphens
+        .replace(/(^-|-$)/g, '')  // Remove leading/trailing hyphens
+
+      if (normalizedCity !== cityParam) {
+        parts[3] = normalizedCity
+        needsRedirect = true
+      }
+    }
+
+    if (needsRedirect) {
+      newPathname = parts.join('/')
+      const url = request.nextUrl.clone()
+      url.pathname = newPathname
+      return NextResponse.redirect(url, 301)  // Permanent redirect
+    }
+  }
+
   const response = NextResponse.next()
   
   // Add security headers
