@@ -1,0 +1,47 @@
+[
+  {
+    "id": "claim_1730752933000_mobilelabspro",
+    "submittedAt": "2024-11-04T20:15:33.000Z",
+    "status": "registered",
+    "providerId": "mobile-labs-pro-477",
+    "providerName": "Mobile Labs Pro",
+    "claimantName": "Kara Terepka",
+    "claimantEmail": "kterepka@mobilelabspro.com",
+    "claimantPhone": "4403288125",
+    "requestedUpdates": "Initial business submission via Add My Business form",
+    "isOwnerConfirmed": true,
+    "verifiedAt": "2024-11-04T20:15:33.000Z",
+    "verificationMethod": "manual",
+    "verificationNotes": "Verified through Add My Business form submission"
+  },
+  {
+    "id": "claim_1730752934000_phlebcare",
+    "submittedAt": "2024-11-04T20:15:34.000Z",
+    "status": "registered",
+    "providerId": "provider-475",
+    "providerName": "Phlebcare Mobile Lab & DNA Solutions",
+    "claimantName": "Teejay Sunglao",
+    "claimantEmail": "info@mobilephlebcare.com",
+    "claimantPhone": "888-959-9382",
+    "requestedUpdates": "Initial business submission via Add My Business form",
+    "isOwnerConfirmed": true,
+    "verifiedAt": "2024-11-04T20:15:34.000Z",
+    "verificationMethod": "manual",
+    "verificationNotes": "Verified through Add My Business form submission"
+  },
+  {
+    "id": "claim_1730752935000_miriams",
+    "submittedAt": "2024-11-04T20:15:35.000Z",
+    "status": "registered",
+    "providerId": "miriam-s-mobile-blood-draw-llc-476",
+    "providerName": "Miriam's Mobile blood draw LLC",
+    "claimantName": "Miriam",
+    "claimantEmail": "miriamsmobileblooddraw@gmail.com",
+    "claimantPhone": "+1 (484) 536-9286",
+    "requestedUpdates": "Initial business submission via Add My Business form",
+    "isOwnerConfirmed": true,
+    "verifiedAt": "2024-11-04T20:15:35.000Z",
+    "verificationMethod": "manual",
+    "verificationNotes": "Verified through Add My Business form submission"
+  }
+]
