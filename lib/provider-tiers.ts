@@ -14,9 +14,6 @@
  * - Premium placement
  */
 
-import fs from 'fs'
-import path from 'path'
-
 export type ProviderTier = 'basic' | 'registered' | 'featured'
 
 interface ProviderTierData {
@@ -27,36 +24,42 @@ interface ProviderTierData {
   notes?: string
 }
 
-const TIERS_FILE = path.join(process.cwd(), 'data', 'provider-tiers.json')
+// Cache for tier data - loaded at module initialization
+let tierDataCache: Record<string, ProviderTierData> | null = null
 
 /**
- * Ensure the data directory and file exist
+ * Load tier data from JSON file (server-side only)
  */
-function ensureDataFile() {
-  const dataDir = path.dirname(TIERS_FILE)
-
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
+function loadTierDataFromFile(): Record<string, ProviderTierData> {
+  // Only run on server-side
+  if (typeof window !== 'undefined') {
+    return tierDataCache || {}
   }
 
-  if (!fs.existsSync(TIERS_FILE)) {
-    fs.writeFileSync(TIERS_FILE, JSON.stringify({}, null, 2))
+  try {
+    const fs = require('fs')
+    const path = require('path')
+    const TIERS_FILE = path.join(process.cwd(), 'data', 'provider-tiers.json')
+
+    if (fs.existsSync(TIERS_FILE)) {
+      const data = fs.readFileSync(TIERS_FILE, 'utf-8')
+      return JSON.parse(data)
+    }
+  } catch (error) {
+    console.error('Error reading provider tiers:', error)
   }
+
+  return {}
 }
 
 /**
  * Get all provider tier data
  */
 export function getAllProviderTiers(): Record<string, ProviderTierData> {
-  ensureDataFile()
-
-  try {
-    const data = fs.readFileSync(TIERS_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Error reading provider tiers:', error)
-    return {}
+  if (!tierDataCache) {
+    tierDataCache = loadTierDataFromFile()
   }
+  return tierDataCache
 }
 
 /**
@@ -94,7 +97,7 @@ export function isProviderFeatured(providerId: string): boolean {
 }
 
 /**
- * Set provider tier
+ * Set provider tier (server-side only)
  */
 export function setProviderTier(
   providerId: string,
@@ -104,11 +107,31 @@ export function setProviderTier(
     notes?: string
   }
 ): boolean {
-  ensureDataFile()
+  // Only run on server-side
+  if (typeof window !== 'undefined') {
+    console.error('setProviderTier can only be called on the server')
+    return false
+  }
 
   try {
-    const tiers = getAllProviderTiers()
+    const fs = require('fs')
+    const path = require('path')
+    const TIERS_FILE = path.join(process.cwd(), 'data', 'provider-tiers.json')
+    const dataDir = path.dirname(TIERS_FILE)
 
+    // Ensure directory exists
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true })
+    }
+
+    // Read existing data
+    let tiers: Record<string, ProviderTierData> = {}
+    if (fs.existsSync(TIERS_FILE)) {
+      const data = fs.readFileSync(TIERS_FILE, 'utf-8')
+      tiers = JSON.parse(data)
+    }
+
+    // Update tier data
     tiers[providerId] = {
       providerId,
       tier,
@@ -117,7 +140,12 @@ export function setProviderTier(
       notes: options?.notes
     }
 
+    // Write to file
     fs.writeFileSync(TIERS_FILE, JSON.stringify(tiers, null, 2))
+
+    // Update cache
+    tierDataCache = tiers
+
     return true
   } catch (error) {
     console.error('Error setting provider tier:', error)
