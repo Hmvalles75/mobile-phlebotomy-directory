@@ -369,13 +369,7 @@ export default function StatePage({ params }: StatePageProps) {
                                       🌎 Nationwide Service
                                     </span>
                                   )}
-                                  {/* Verified Badge */}
-                                  {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                      ✓ Verified
-                                    </span>
-                                  )}
-                                  {/* Featured Badge */}
+                                  {/* Tier Badge (Featured/Registered) */}
                                   {registeredBadge && (
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
                                       {registeredBadge.icon} {registeredBadge.text}
@@ -486,13 +480,7 @@ export default function StatePage({ params }: StatePageProps) {
                                       🌎 Nationwide Service
                                     </span>
                                   )}
-                                  {/* Verified Badge */}
-                                  {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                      ✓ Verified
-                                    </span>
-                                  )}
-                                  {/* Registered Badge */}
+                                  {/* Tier Badge (Featured/Registered) */}
                                   {registeredBadge && (
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
                                       {registeredBadge.icon} {registeredBadge.text}
@@ -585,6 +573,7 @@ export default function StatePage({ params }: StatePageProps) {
                 </div>
                 <div className="divide-y divide-gray-200">
                   {categorizedProviders.standard.map((provider) => {
+                    const registeredBadge = getProviderBadge(provider.id)
                     const isVerified = isProviderRegistered(provider.id)
 
                     return (
@@ -601,10 +590,10 @@ export default function StatePage({ params }: StatePageProps) {
                                 🌎 Nationwide Service
                               </span>
                             )}
-                            {/* Verified Badge */}
-                            {isVerified && (provider as any).is_mobile_phlebotomy === 'Yes' && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                ✓ Verified
+                            {/* Tier Badge (Featured/Registered) */}
+                            {registeredBadge && (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                                {registeredBadge.icon} {registeredBadge.text}
                               </span>
                             )}
                           </div>
