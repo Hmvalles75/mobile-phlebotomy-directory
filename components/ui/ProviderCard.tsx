@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
+import { getProviderBadge } from '@/lib/provider-tiers'
 
 interface ProviderCardProps {
   provider: Provider
@@ -10,16 +11,17 @@ interface ProviderCardProps {
 export function ProviderCard({ provider, showCoverageType = false }: ProviderCardProps) {
   const coverageType = getProviderCoverageType(provider)
   const coverageDisplay = getProviderCoverageDisplay(provider)
-  
+  const registeredBadge = getProviderBadge(provider.id)
+
   const getCoverageIcon = (type: string) => {
     switch (type) {
       case 'city': return '🏢'
-      case 'regional': return '🗺️' 
+      case 'regional': return '🗺️'
       case 'statewide': return '🏛️'
       default: return '📍'
     }
   }
-  
+
   const getCoverageLabel = (type: string) => {
     switch (type) {
       case 'city': return 'Local Provider'
@@ -39,6 +41,12 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
             {(provider as any).is_nationwide === 'Yes' && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                 🌎 Nationwide Service
+              </span>
+            )}
+            {/* Registered/Featured Badge */}
+            {registeredBadge && (
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                {registeredBadge.icon} {registeredBadge.text}
               </span>
             )}
             {showCoverageType && (

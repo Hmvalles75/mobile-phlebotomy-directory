@@ -33,9 +33,9 @@ export async function POST(
       )
     }
 
-    if (action === 'verify') {
-      // Update status to verified
-      const success = updateClaimStatus(id, 'verified', {
+    if (action === 'register') {
+      // Update status to registered
+      const success = updateClaimStatus(id, 'registered', {
         verificationMethod: verificationMethod || 'email_reply',
         verificationNotes
       })

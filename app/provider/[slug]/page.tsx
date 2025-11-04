@@ -6,6 +6,7 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { ProviderImage } from '@/components/ui/ProviderImage'
+import { getProviderBadge } from '@/lib/provider-tiers'
 import Link from 'next/link'
 
 interface PageProps {
@@ -93,6 +94,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
     updatedAt: provider.updatedAt
   }
 
+  // Get provider tier badge
+  const registeredBadge = getProviderBadge(provider.id)
+
   return (
     <>
       <ProviderSchema provider={providerForSchema as any} />
@@ -143,9 +147,23 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
               {/* Provider Info */}
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                  {provider.name}
-                </h1>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                    {provider.name}
+                  </h1>
+                  {/* Nationwide Badge */}
+                  {(provider as any).is_nationwide === 'Yes' && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      🌎 Nationwide Service
+                    </span>
+                  )}
+                  {/* Registered/Featured Badge */}
+                  {registeredBadge && (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                      {registeredBadge.icon} {registeredBadge.text}
+                    </span>
+                  )}
+                </div>
 
                 {provider.is_mobile_phlebotomy === 'Yes' && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mb-3">

@@ -9,6 +9,7 @@ import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
+import { getProviderBadge } from '@/lib/provider-tiers'
 
 // Use the standardized coverage display function
 function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
@@ -616,7 +617,9 @@ export default function CityPage({ params }: PageProps) {
               } else if (groupedResults?.regional.some(p => p.id === provider.id)) {
                 providerType = 'regional';
               }
-              
+
+              const registeredBadge = getProviderBadge(provider.id)
+
               return (
               <div key={provider.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                 {/* Individual Provider Schema */}
@@ -638,6 +641,12 @@ export default function CityPage({ params }: PageProps) {
                       {(provider as any).is_nationwide === 'Yes' && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                           🌎 Nationwide Service
+                        </span>
+                      )}
+                      {/* Registered/Featured Badge */}
+                      {registeredBadge && (
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                          {registeredBadge.icon} {registeredBadge.text}
                         </span>
                       )}
                     </div>

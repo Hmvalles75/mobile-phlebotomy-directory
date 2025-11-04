@@ -8,7 +8,7 @@ import path from 'path'
 export interface BusinessClaim {
   id: string
   submittedAt: string
-  status: 'pending' | 'verified' | 'rejected'
+  status: 'pending' | 'registered' | 'rejected'
 
   // Provider information
   providerId: string
@@ -89,7 +89,7 @@ export function addBusinessClaim(claim: Omit<BusinessClaim, 'id' | 'submittedAt'
  */
 export function updateClaimStatus(
   id: string,
-  status: 'pending' | 'verified' | 'rejected',
+  status: 'pending' | 'registered' | 'rejected',
   verificationData?: {
     verificationMethod?: 'email_reply' | 'phone_call' | 'manual'
     verificationNotes?: string
@@ -106,7 +106,7 @@ export function updateClaimStatus(
 
   claims[index].status = status
 
-  if (status === 'verified') {
+  if (status === 'registered') {
     claims[index].verifiedAt = new Date().toISOString()
     if (verificationData?.verificationMethod) {
       claims[index].verificationMethod = verificationData.verificationMethod
@@ -138,11 +138,11 @@ export function getClaimsByProviderId(providerId: string): BusinessClaim[] {
 }
 
 /**
- * Check if a provider has a verified claim
+ * Check if a provider has a registered claim
  */
-export function isProviderVerified(providerId: string): boolean {
+export function isProviderRegistered(providerId: string): boolean {
   const claims = getClaimsByProviderId(providerId)
-  return claims.some(claim => claim.status === 'verified')
+  return claims.some(claim => claim.status === 'registered')
 }
 
 /**

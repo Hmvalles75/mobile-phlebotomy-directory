@@ -6,7 +6,7 @@ import Link from 'next/link'
 interface BusinessClaim {
   id: string
   submittedAt: string
-  status: 'pending' | 'verified' | 'rejected'
+  status: 'pending' | 'registered' | 'rejected'
   providerId: string
   providerName: string
   claimantName: string
@@ -47,8 +47,8 @@ export default function AdminClaims() {
     }
   }
 
-  const handleAction = async (id: string, action: 'verify' | 'reject') => {
-    if (!confirm(`Are you sure you want to ${action} this claim?`)) {
+  const handleAction = async (id: string, action: 'register' | 'reject') => {
+    if (!confirm(`Are you sure you want to ${action === 'register' ? 'register' : 'reject'} this claim?`)) {
       return
     }
 
@@ -111,7 +111,7 @@ export default function AdminClaims() {
   }
 
   const pendingClaims = claims.filter(c => c.status === 'pending')
-  const verifiedClaims = claims.filter(c => c.status === 'verified')
+  const registeredClaims = claims.filter(c => c.status === 'registered')
   const rejectedClaims = claims.filter(c => c.status === 'rejected')
 
   return (
@@ -137,8 +137,8 @@ export default function AdminClaims() {
               <span className="text-yellow-900">{pendingClaims.length}</span>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-              <span className="font-medium text-green-800">Verified: </span>
-              <span className="text-green-900">{verifiedClaims.length}</span>
+              <span className="font-medium text-green-800">Registered: </span>
+              <span className="text-green-900">{registeredClaims.length}</span>
             </div>
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2">
               <span className="font-medium text-red-800">Rejected: </span>
@@ -181,7 +181,7 @@ export default function AdminClaims() {
                       className={`text-xs px-2 py-1 rounded-full ${
                         claim.status === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
-                          : claim.status === 'verified'
+                          : claim.status === 'registered'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
@@ -254,7 +254,7 @@ export default function AdminClaims() {
                   {selectedClaim.verifiedAt && (
                     <div className="border-t pt-4 bg-green-50 rounded p-3">
                       <p className="text-sm text-green-800">
-                        <span className="font-medium">Verified:</span>{' '}
+                        <span className="font-medium">Registered:</span>{' '}
                         {new Date(selectedClaim.verifiedAt).toLocaleString()}
                       </p>
                       {selectedClaim.verificationMethod && (
@@ -287,11 +287,11 @@ export default function AdminClaims() {
 
                       <div className="flex gap-3 pt-4">
                         <button
-                          onClick={() => handleAction(selectedClaim.id, 'verify')}
+                          onClick={() => handleAction(selectedClaim.id, 'register')}
                           disabled={actionLoading === selectedClaim.id}
                           className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                         >
-                          {actionLoading === selectedClaim.id ? 'Processing...' : '✓ Verify Claim'}
+                          {actionLoading === selectedClaim.id ? 'Processing...' : '✓ Register Provider'}
                         </button>
                         <button
                           onClick={() => handleAction(selectedClaim.id, 'reject')}

@@ -9,6 +9,7 @@ import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
+import { getProviderBadge } from '@/lib/provider-tiers'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -110,19 +111,42 @@ export default function StatePage({ params }: StatePageProps) {
 
   // Filter providers
   const filteredProviders = providers.filter(provider => {
-    const matchesSearch = !searchQuery || 
+    const matchesSearch = !searchQuery ||
       provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       provider.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       provider.address?.city?.toLowerCase().includes(searchQuery.toLowerCase())
-    
+
     const matchesServices = selectedServices.length === 0 ||
       selectedServices.some(service => provider.services.includes(service as any))
-    
-    const matchesRating = !minRating || 
+
+    const matchesRating = !minRating ||
       (provider.rating && provider.rating >= minRating)
-    
+
     return matchesSearch && matchesServices && matchesRating
   })
+
+  // Categorize and sort providers by tier
+  const categorizedProviders = {
+    featured: [] as Provider[],
+    registered: [] as Provider[],
+    standard: [] as Provider[]
+  }
+
+  filteredProviders.forEach(provider => {
+    const badge = getProviderBadge(provider.id)
+    if (badge?.text === 'Featured Provider') {
+      categorizedProviders.featured.push(provider)
+    } else if (badge?.text === 'Registered') {
+      categorizedProviders.registered.push(provider)
+    } else {
+      categorizedProviders.standard.push(provider)
+    }
+  })
+
+  // Sort all sections alphabetically
+  categorizedProviders.featured.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.registered.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.standard.sort((a, b) => a.name.localeCompare(b.name))
 
   const handleServiceToggle = (service: string) => {
     setSelectedServices(prev =>
@@ -305,22 +329,162 @@ export default function StatePage({ params }: StatePageProps) {
                   )}
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {filteredProviders.map((provider) => (
-                    <div key={provider.id} className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-semibold text-gray-900">
-                              {provider.name}
-                            </h3>
-                            {/* Nationwide/Multi-State Badge */}
-                            {(provider as any).is_nationwide === 'Yes' && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                🌎 Nationwide Service
-                              </span>
-                            )}
+                <>
+                  {/* Featured Providers Section */}
+                  {categorizedProviders.featured.length > 0 && (
+                    <div className="border-b border-gray-200">
+                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 border-b border-amber-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <span className="text-amber-500">⭐</span>
+                            Featured Providers
+                          </h3>
+                          <Link
+                            href="/contact"
+                            className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                          >
+                            Get Featured
+                          </Link>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                          Premium providers with verified credentials and enhanced visibility
+                        </p>
+                      </div>
+                      <div className="divide-y divide-gray-200">
+                        {categorizedProviders.featured.map((provider) => {
+                          const registeredBadge = getProviderBadge(provider.id)
+
+                          return (
+                          <div key={provider.id} className="p-6 bg-gradient-to-r from-amber-50/30 to-transparent">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="text-xl font-semibold text-gray-900">
+                                    {provider.name}
+                                  </h3>
+                                  {/* Nationwide/Multi-State Badge */}
+                                  {(provider as any).is_nationwide === 'Yes' && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                      🌎 Nationwide Service
+                                    </span>
+                                  )}
+                                  {/* Featured Badge */}
+                                  {registeredBadge && (
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                                      {registeredBadge.icon} {registeredBadge.text}
+                                    </span>
+                                  )}
+                                </div>
+                                {provider.description && (
+                                  <p className="text-gray-600 mb-3">
+                                    {provider.description}
+                                  </p>
+                                )}
+
+                                {/* Coverage Area */}
+                                <div className="mb-3">
+                                  <span className="text-sm font-medium text-gray-700">Coverage: </span>
+                                  <span className="text-sm text-gray-600">
+                                    {formatCoverageDisplay(provider.coverage)}
+                                  </span>
+                                </div>
+
+                                {/* Services */}
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                  {provider.services.slice(0, 3).map((service) => (
+                                    <span
+                                      key={service}
+                                      className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full"
+                                    >
+                                      {service}
+                                    </span>
+                                  ))}
+                                  {provider.services.length > 3 && (
+                                    <span className="text-xs text-gray-500">
+                                      +{provider.services.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Rating & Reviews */}
+                                {provider.rating && (
+                                  <div className="flex items-center space-x-2 mb-3">
+                                    <div className="flex items-center">
+                                      <span className="text-yellow-400">★</span>
+                                      <span className="text-sm font-medium text-gray-900 ml-1">
+                                        {provider.rating}
+                                      </span>
+                                    </div>
+                                    {provider.reviewsCount && (
+                                      <span className="text-sm text-gray-600">
+                                        ({provider.reviewsCount} reviews)
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Contact Info */}
+                                <div className="text-sm text-gray-600 space-y-1">
+                                  {provider.phone && (
+                                    <div>📞 {provider.phone}</div>
+                                  )}
+                                  {provider.address?.city && (
+                                    <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <ProviderActions
+                              provider={provider}
+                              currentLocation={stateName}
+                              className="justify-start"
+                            />
                           </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Registered Providers Section */}
+                  {categorizedProviders.registered.length > 0 && (
+                    <div className="border-b border-gray-200">
+                      <div className="bg-green-50 p-6 border-b border-green-100">
+                        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                          <span className="text-green-600">✓</span>
+                          Registered Providers
+                        </h3>
+                        <p className="text-gray-600 text-sm mt-1">
+                          Verified and registered providers in {stateName}
+                        </p>
+                      </div>
+                      <div className="divide-y divide-gray-200">
+                        {categorizedProviders.registered.map((provider) => {
+                          const registeredBadge = getProviderBadge(provider.id)
+
+                          return (
+                          <div key={provider.id} className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="text-xl font-semibold text-gray-900">
+                                    {provider.name}
+                                  </h3>
+                                  {/* Nationwide/Multi-State Badge */}
+                                  {(provider as any).is_nationwide === 'Yes' && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                      🌎 Nationwide Service
+                                    </span>
+                                  )}
+                                  {/* Registered Badge */}
+                                  {registeredBadge && (
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
+                                      {registeredBadge.icon} {registeredBadge.text}
+                                    </span>
+                                  )}
+                                </div>
                           {provider.description && (
                             <p className="text-gray-600 mb-3">
                               {provider.description}
@@ -388,11 +552,93 @@ export default function StatePage({ params }: StatePageProps) {
                         className="justify-start"
                       />
                     </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Standard Listings Section */}
+            {categorizedProviders.standard.length > 0 && (
+              <div>
+                <div className="bg-gray-50 p-6 border-b border-gray-200">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    All Providers
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Licensed mobile phlebotomy providers in {stateName}
+                  </p>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {categorizedProviders.standard.map((provider) => (
+                    <div key={provider.id} className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {provider.name}
+                            </h3>
+                            {/* Nationwide/Multi-State Badge */}
+                            {(provider as any).is_nationwide === 'Yes' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                🌎 Nationwide Service
+                              </span>
+                            )}
+                          </div>
+
+                          {provider.description && (
+                            <p className="text-gray-600 mb-3 text-sm">
+                              {provider.description}
+                            </p>
+                          )}
+
+                          {/* Services - Compact */}
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {provider.services.slice(0, 2).map((service) => (
+                              <span
+                                key={service}
+                                className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
+                              >
+                                {service}
+                              </span>
+                            ))}
+                            {provider.services.length > 2 && (
+                              <span className="text-xs text-gray-500">
+                                +{provider.services.length - 2} more
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Contact Info - Compact */}
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                            {provider.phone && (
+                              <span>📞 {provider.phone}</span>
+                            )}
+                            {provider.address?.city && (
+                              <span>📍 {provider.address.city}, {provider.address.state}</span>
+                            )}
+                            {provider.rating && (
+                              <span>⭐ {provider.rating}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons - Compact */}
+                      <ProviderActions
+                        provider={provider}
+                        currentLocation={stateName}
+                        className="justify-start"
+                      />
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
