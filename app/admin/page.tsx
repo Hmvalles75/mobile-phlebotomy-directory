@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface PendingProvider {
@@ -58,11 +58,6 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deployLoading, setDeployLoading] = useState(false)
 
-  // Check auth on mount
-  useEffect(() => {
-    checkAuth()
-  }, [])
-
   const checkAuth = async () => {
     try {
       const res = await fetch('/api/admin/submissions')
@@ -74,6 +69,12 @@ export default function AdminDashboard() {
       console.error('Auth check failed:', error)
     }
   }
+
+  // Check auth on mount
+  useEffect(() => {
+    checkAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

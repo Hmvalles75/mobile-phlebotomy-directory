@@ -69,10 +69,10 @@ export function ClaimBusinessForm({ providerId, providerName, onClose }: ClaimBu
             Claim Submitted Successfully!
           </h3>
           <p className="text-gray-600 mb-6">
-            Thanks for claiming <strong>{providerName}</strong>. We'll review your submission and send a verification email to <strong>{formData.claimantEmail}</strong> within 24 hours.
+            Thanks for claiming <strong>{providerName}</strong>. We&apos;ll review your submission and send a verification email to <strong>{formData.claimantEmail}</strong> within 24 hours.
           </p>
           <p className="text-sm text-gray-500 mb-6">
-            Please check your email and reply to confirm you're authorized to manage this listing. Once verified, we'll add a "Verified Listing" badge to your page.
+            Please check your email and reply to confirm you&apos;re authorized to manage this listing. Once verified, we&apos;ll add a &quot;Verified Listing&quot; badge to your page.
           </p>
           {onClose && (
             <button
