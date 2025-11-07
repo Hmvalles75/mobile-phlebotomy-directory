@@ -60,18 +60,18 @@ export default function TestLeadGenPage() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-yellow-50">
                 <h3 className="text-xl font-semibold mb-2">⚠️ Note About SMS/Email</h3>
                 <p className="text-gray-700 mb-2">
-                  If you haven't configured Twilio and SendGrid in your <code className="bg-gray-100 px-2 py-1 rounded">.env</code> file:
+                  If you haven&apos;t configured Twilio and SendGrid in your <code className="bg-gray-100 px-2 py-1 rounded">.env</code> file:
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-gray-600">
                   <li>SMS notifications will be skipped (no error)</li>
                   <li>Email notifications will be skipped (no error)</li>
                   <li>Lead will still be created and routed</li>
-                  <li>You'll see console logs instead</li>
+                  <li>You&apos;ll see console logs instead</li>
                 </ul>
               </div>
 
               <div className="border-2 border-dashed border-green-300 rounded-lg p-6 bg-green-50">
-                <h3 className="text-xl font-semibold mb-2">✅ What's Working</h3>
+                <h3 className="text-xl font-semibold mb-2">✅ What&apos;s Working</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-700">
                   <li>Lead form with client-side validation</li>
                   <li>Lead submission API endpoint</li>

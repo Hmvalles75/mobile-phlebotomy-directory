@@ -349,7 +349,7 @@ export default function HomePage() {
               <h3 className="text-xl font-semibold mb-2">Request Service</h3>
               <p className="text-gray-600">
                 Submit your request online or call us. Tell us your location and when you need service.
-                We'll match you with a qualified provider instantly.
+                We&apos;ll match you with a qualified provider instantly.
               </p>
             </div>
 

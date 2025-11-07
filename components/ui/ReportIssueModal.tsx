@@ -111,7 +111,7 @@ export function ReportIssueModal({ isOpen, onClose, providerId, providerName }: 
               {/* Issue Type */}
               <div>
                 <label htmlFor="issueType" className="block text-sm font-medium text-gray-700 mb-1">
-                  What's the issue? <span className="text-red-500">*</span>
+                  What&apos;s the issue? <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="issueType"
@@ -151,7 +151,7 @@ export function ReportIssueModal({ isOpen, onClose, providerId, providerName }: 
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <p className="text-sm font-medium text-gray-700">Contact Information (Optional)</p>
                 <p className="text-xs text-gray-600">
-                  Leave your contact info if you'd like us to follow up with you.
+                  Leave your contact info if you&apos;d like us to follow up with you.
                 </p>
 
                 <div>
