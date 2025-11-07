@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postinstall": "prisma generate",
     "postbuild": "tsx scripts/postbuild-checklist.ts",
     "start": "next start",
     "lint": "next lint",
