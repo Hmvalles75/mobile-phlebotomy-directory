@@ -233,7 +233,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <button
                 onClick={() => {
-                  ga4.leadFormOpen({ source: 'homepage_hero' })
+                  ga4.heroCTAClick({ cta_type: 'request' })
                   router.push('/coming-soon')
                 }}
                 className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
@@ -242,7 +242,7 @@ export default function HomePage() {
               </button>
               <button
                 onClick={(e) => {
-                  ga4.callClick({ source: 'homepage_hero' })
+                  ga4.heroCTAClick({ cta_type: 'call' })
                   const phoneNumber = process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-555-0100'
 
                   // On mobile, open tel: link. On desktop, show phone number with copy option
@@ -380,7 +380,7 @@ export default function HomePage() {
           <div className="text-center">
             <button
               onClick={() => {
-                ga4.leadFormOpen({ source: 'how_it_works' })
+                ga4.heroCTAClick({ cta_type: 'request' })
                 router.push('/coming-soon')
               }}
               className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg"
