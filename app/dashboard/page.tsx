@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 interface Lead {
   id: string
   createdAt: string
