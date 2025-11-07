@@ -72,9 +72,9 @@ export async function GET(req: NextRequest) {
     // Calculate stats
     const stats = {
       totalLeads: leads.length,
-      newLeads: leads.filter(l => l.status === 'NEW').length,
-      deliveredLeads: leads.filter(l => l.status === 'DELIVERED').length,
-      revenueGenerated: leads.reduce((sum, lead) => sum + lead.priceCents, 0) / 100
+      newLeads: leads.filter((l: typeof leads[number]) => l.status === 'NEW').length,
+      deliveredLeads: leads.filter((l: typeof leads[number]) => l.status === 'DELIVERED').length,
+      revenueGenerated: leads.reduce((sum: number, lead: typeof leads[number]) => sum + lead.priceCents, 0) / 100
     }
 
     return NextResponse.json({
