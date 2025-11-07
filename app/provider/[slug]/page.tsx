@@ -362,7 +362,6 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 state={provider.state || undefined}
                 zip={provider.zipCodes?.split(',')[0] || undefined}
                 phone={provider.phone || undefined}
-                twilioNumber={provider.twilioNumber || undefined}
                 isVerified={isVerified}
               />
 
