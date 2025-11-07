@@ -33,7 +33,17 @@
       "Bash(copy:*)",
       "Bash(timeout 10 bash:*)",
       "Bash(git log:*)",
-      "Bash(timeout 15 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done && echo \"\"Server is ready!\"\"')"
+      "Bash(timeout 15 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done && echo \"\"Server is ready!\"\"')",
+      "Bash(git checkout:*)",
+      "Bash(del nul)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 20 bash:*)",
+      "Bash(git restore:*)",
+      "Bash(timeout 5 bash -c 'until curl -s http://localhost:3002 > /dev/null; do sleep 1; done && echo \"\"Server is ready!\"\"')",
+      "Bash(timeout 15 bash:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

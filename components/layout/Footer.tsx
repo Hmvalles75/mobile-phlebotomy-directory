@@ -45,6 +45,14 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Global Disclaimer */}
+        <div className="border-t border-gray-200 mt-8 pt-6">
+          <p className="text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
+            Directory of publicly listed mobile phlebotomy services. Not all providers are verified.
+            We connect verified providers with patient requests.
+          </p>
+        </div>
       </div>
     </footer>
   )

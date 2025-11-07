@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
-import { getProviderBadge } from '@/lib/provider-tiers'
+import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
+import { formatPhoneNumber } from '@/lib/format-phone'
 
 interface ProviderCardProps {
   provider: Provider
@@ -12,6 +13,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
   const coverageType = getProviderCoverageType(provider)
   const coverageDisplay = getProviderCoverageDisplay(provider)
   const registeredBadge = getProviderBadge(provider.id)
+  const isVerified = isProviderRegistered(provider.id)
 
   const getCoverageIcon = (type: string) => {
     switch (type) {
@@ -35,8 +37,23 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-xl font-bold text-gray-900">{provider.name}</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
+
+          {/* Verification Status Badge */}
+          <div className="mb-2">
+            {isVerified ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-600 bg-opacity-10 text-green-700 border border-green-600">
+                ✅ Verified — Accepting patient referrals
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500 bg-opacity-10 text-yellow-800 border border-yellow-600">
+                ⚠️ Unverified — Details may vary
+              </span>
+            )}
+          </div>
+
+          {/* Additional Badges */}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             {/* Nationwide/Multi-State Badge */}
             {(provider as any).is_nationwide === 'Yes' && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
@@ -59,7 +76,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
             <span>📍 {provider.address?.city ? `${provider.address.city}, ${provider.address.state} ${provider.address.zip}` : coverageDisplay}</span>
-            {provider.phone && <span>📞 {provider.phone}</span>}
+            {provider.phone && <span>📞 {formatPhoneNumber(provider.phone)}</span>}
             {provider.rating && provider.reviewsCount && (
               <span>⭐ {provider.rating} ({provider.reviewsCount} reviews)</span>
             )}

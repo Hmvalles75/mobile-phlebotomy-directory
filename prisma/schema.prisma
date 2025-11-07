@@ -14,14 +14,28 @@ model Provider {
   id           String   @id @default(cuid())
   name         String
   slug         String   @unique
-  phone        String?
-  email        String?
+  phone        String?  // legacy field
+  phonePublic  String?  // shown only with "Unverified" badge + disclaimer
+  email        String?  // legacy, hidden from public
   website      String?
   bookingUrl   String?
   description  String?
   rating       Float?
   reviewsCount Int?
-  featured     Boolean  @default(false)
+  featured     Boolean  @default(false)  // legacy field
+
+  // Lead-gen fields
+  status          ProviderStatus @default(UNVERIFIED)
+  isFeatured      Boolean @default(false)
+  featuredTier    FeaturedTier?
+  stripeCustomerId String?
+  leadCredit      Int      @default(0)
+  claimEmail      String?  // email used after claim (hidden on public page)
+  claimToken      String?  // for email verify
+  claimVerifiedAt DateTime?
+  twilioNumber    String?  // dedicated tracking number
+  zipCodes        String?  // comma-separated service coverage ZIPs
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -33,8 +47,90 @@ model Provider {
   availability ProviderAvailability[]
   payment      ProviderPayment[]
   badges       ProviderBadge[]
+  leads        Lead[]
+  callLogs     CallLog[]
+  corrections  ProviderCorrection[]
+  correctionsQueue ProviderCorrections[] @relation("corrections_queue")
 
   @@map("providers")
+}
+
+enum ProviderStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+}
+
+enum FeaturedTier {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+model Lead {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  fullName      String
+  phone         String
+  email         String?
+  address1      String?
+  city          String
+  state         String
+  zip           String
+  urgency       Urgency
+  notes         String?
+  source        String   // "web_form" | "call"
+  gclid         String?  // future
+  routedToId    String?
+  routedAt      DateTime?
+  priceCents    Int
+  status        LeadStatus @default(NEW)
+
+  provider      Provider? @relation(fields: [routedToId], references: [id])
+
+  @@map("leads")
+}
+
+enum LeadStatus {
+  NEW
+  DELIVERED
+  REFUNDED
+  UNSOLD
+}
+
+enum Urgency {
+  STANDARD
+  STAT
+}
+
+model CallLog {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  fromNumber    String
+  toNumber      String
+  durationSec   Int?
+  callStatus    String?
+  city          String?
+  state         String?
+  zip           String?
+  providerId    String?
+  recordingUrl  String?
+  leadId        String?
+  callSid       String?  @unique
+
+  provider      Provider? @relation(fields: [providerId], references: [id])
+
+  @@map("call_logs")
+}
+
+model CityNumber {
+  id          String   @id @default(cuid())
+  city        String
+  state       String
+  twilioNumber String  @unique
+  providerId  String?
+
+  @@map("city_numbers")
 }
 
 model Service {
@@ -175,10 +271,66 @@ model ProviderBadge {
   id        String @id @default(cuid())
   providerId String
   badgeId   String
-  
+
   provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
   badge     Badge    @relation(fields: [badgeId], references: [id])
 
   @@unique([providerId, badgeId])
   @@map("provider_badges")
+}
+
+model ProviderCorrection {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  providerId    String
+  reporterName  String?
+  reporterEmail String?
+  issueType     String   // "phone" | "address" | "hours" | "closed" | "other"
+  description   String
+  status        CorrectionStatus @default(PENDING)
+  reviewedAt    DateTime?
+  reviewNotes   String?
+
+  provider      Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_corrections")
+}
+
+enum CorrectionStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+// Admin-facing corrections queue (alternative structure)
+model ProviderCorrections {
+  id          String   @id @default(cuid())
+  providerId  String?
+  provider    Provider? @relation("corrections_queue", fields: [providerId], references: [id])
+  urlSlug     String   // fallback when providerId unknown
+  note        String
+  contactEmail String?
+  createdAt   DateTime @default(now())
+  handledAt   DateTime?
+  handledBy   String?
+  status      CorrectionQueueStatus @default(OPEN)
+
+  @@map("provider_corrections_queue")
+}
+
+enum CorrectionQueueStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   // "COMING_SOON_PAGE" | "FOOTER" | "OTHER"
+  createdAt DateTime @default(now())
+  notified  Boolean  @default(false)
+
+  @@map("waitlist")
 }

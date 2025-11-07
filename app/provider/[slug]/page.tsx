@@ -8,6 +8,9 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
+import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
+import { ReportIssueButton } from '@/components/ui/ReportIssueButton'
+import { formatPhoneNumber } from '@/lib/format-phone'
 import Link from 'next/link'
 
 interface PageProps {
@@ -75,9 +78,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   const testimonials = (provider.testimonials && provider.testimonials !== 'nan' && provider.testimonials !== '') ?
     provider.testimonials.split('|').map(t => t.trim()).filter(Boolean) : []
 
-  // Parse certifications (handle cleaned default values)
-  const certifications = (provider.certifications && provider.certifications !== 'nan' && provider.certifications !== '') ?
-    provider.certifications.split(',').map(c => c.trim()).filter(Boolean) : []
+  // Certifications removed - was unverified data
+  // Only show certifications for verified providers who have uploaded proof
+  const certifications: string[] = []
 
   // Parse languages (cleaned data defaults to 'English')
   const languages = (provider.languages && provider.languages !== 'nan' && provider.languages !== '') ?
@@ -151,10 +154,25 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
               {/* Provider Info */}
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-                    {provider.name}
-                  </h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                  {provider.name}
+                </h1>
+
+                {/* Verified/Unverified Status Badge */}
+                <div className="mb-3">
+                  {isVerified ? (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-600 bg-opacity-10 border border-green-600">
+                      <span className="text-green-700 font-semibold text-sm">✅ Verified Provider</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-yellow-500 bg-opacity-10 border border-yellow-600">
+                      <span className="text-yellow-800 font-semibold text-sm">⚠️ Unverified Listing</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional Badges */}
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
                   {/* Nationwide Badge */}
                   {(provider as any).is_nationwide === 'Yes' && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
@@ -169,23 +187,29 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   )}
                 </div>
 
-                {isVerified && provider.is_mobile_phlebotomy === 'Yes' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mb-3">
-                    ✓ Verified Mobile Phlebotomy Service
-                  </span>
+                {/* Unverified Warning Message */}
+                {!isVerified && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-amber-900 leading-relaxed">
+                      <strong>Information on this page may be outdated or incomplete.</strong><br />
+                      If this is your business, <Link href={`/providers/claim?id=${provider.id}`} className="text-primary-600 hover:text-primary-700 underline font-medium">claim this listing</Link> to verify details and receive referrals.
+                    </p>
+                  </div>
                 )}
 
-                <div className="flex flex-wrap gap-4 text-gray-600 mb-4">
+                <div className="flex flex-wrap gap-4 text-gray-600 mb-2">
                   <span className="flex items-center">📍 {location}</span>
                   {provider.phone && (
-                    <a href={`tel:${provider.phone}`} className="flex items-center hover:text-primary-600">
-                      📞 {provider.phone}
-                    </a>
-                  )}
-                  {provider.email && provider.email !== '' && provider.email !== 'nan' && (
-                    <a href={`mailto:${provider.email}`} className="flex items-center hover:text-primary-600">
-                      ✉️ {provider.email}
-                    </a>
+                    <div className="flex flex-col">
+                      <a href={`tel:${provider.phone}`} className="flex items-center hover:text-primary-600">
+                        📞 {formatPhoneNumber(provider.phone)}
+                      </a>
+                      {!isVerified && (
+                        <span className="text-xs text-gray-500 mt-1 leading-tight">
+                          Phone number unverified. Please request a draw for fastest service.
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -199,7 +223,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 )}
 
                 {/* Quick Stats */}
-                <div className="flex flex-wrap gap-6 text-sm">
+                <div className="flex flex-wrap gap-6 text-sm mb-4">
                   {yearInBusiness && yearInBusiness > 0 && (
                     <div>
                       <span className="text-gray-500">Experience:</span>
@@ -224,6 +248,11 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                       <span className="ml-1 font-semibold">{provider.travelFee}</span>
                     </div>
                   )}
+                </div>
+
+                {/* Report Issue Link */}
+                <div className="pt-2 border-t border-gray-200">
+                  <ReportIssueButton providerId={provider.id} providerName={provider.name} />
                 </div>
               </div>
             </div>
@@ -325,6 +354,18 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
               )}
 
+              {/* CTA Section - Lead Gen */}
+              <ProviderCTASection
+                providerId={provider.id}
+                providerName={provider.name}
+                city={provider.city || undefined}
+                state={provider.state || undefined}
+                zip={provider.zipCodes?.split(',')[0] || undefined}
+                phone={provider.phone || undefined}
+                twilioNumber={provider.twilioNumber || undefined}
+                isVerified={isVerified}
+              />
+
               {/* Contact Card */}
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
@@ -334,18 +375,11 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">📞</span>
                       <div>
-                        <p className="font-semibold text-gray-900">{provider.phone}</p>
+                        <p className="font-semibold text-gray-900">{formatPhoneNumber(provider.phone)}</p>
                         <p className="text-sm text-gray-500">Primary Phone</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {provider.email && provider.email !== '' && provider.email !== 'nan' && provider.email.toLowerCase() !== 'no' && provider.email.toLowerCase() !== 'false' && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2">✉️</span>
-                      <div>
-                        <p className="font-semibold text-gray-900">{provider.email}</p>
-                        <p className="text-sm text-gray-500">Email</p>
+                        {!isVerified && (
+                          <p className="text-xs text-amber-600 mt-1">⚠️ Unverified - confirm details</p>
+                        )}
                       </div>
                     </div>
                   )}

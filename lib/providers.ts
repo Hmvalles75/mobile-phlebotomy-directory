@@ -191,10 +191,8 @@ function parsePayment(): string[] {
 function parseBadges(provider: any): string[] {
   const badges: string[] = []
 
-  // Check for certifications (ASCP Certified is our default)
-  if (provider.certifications && (provider.certifications.includes('CERTIFIED') || provider.certifications.includes('ASCP'))) {
-    badges.push('Certified')
-  }
+  // Certifications removed - was unverified data
+  // Only add "Certified" badge for verified providers who upload proof of certification
 
   // Check for insurance
   if (provider.insuranceAmount && provider.insuranceAmount !== '' && provider.insuranceAmount !== 'nan') {

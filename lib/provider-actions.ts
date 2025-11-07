@@ -1,6 +1,7 @@
 // Provider action utilities with SEO best practices
 import { type Provider } from './schemas'
 import { secureStorage } from './crypto'
+import { formatPhoneNumber } from './format-phone'
 
 // Fallback function to copy text to clipboard for older browsers
 function copyToClipboardFallback(text: string) {
@@ -75,17 +76,18 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
   if (provider.phone) {
     event.method = 'phone'
     trackProviderInteraction(event)
-    
+
     // Show phone number in a user-friendly way instead of using tel: link
     // which can cause "Pick an app" popups on Windows
     const phoneNumber = provider.phone
-    const message = `Call ${provider.name} at:\n\n${phoneNumber}\n\nClick OK to copy the phone number to your clipboard.`
+    const formattedPhone = formatPhoneNumber(phoneNumber)
+    const message = `Call ${provider.name} at:\n\n${formattedPhone}\n\nClick OK to copy the phone number to your clipboard.`
     
     if (confirm(message)) {
       // Copy phone number to clipboard
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(phoneNumber).then(() => {
-          alert(`Phone number ${phoneNumber} copied to clipboard!`)
+          alert(`Phone number ${formattedPhone} copied to clipboard!`)
         }).catch(() => {
           // Fallback for older browsers
           copyToClipboardFallback(phoneNumber)
@@ -297,9 +299,9 @@ export function formatProviderContact(provider: Provider): {
   const secondary: string[] = []
   
   let primary = 'Contact for details'
-  
+
   if (provider.phone) {
-    primary = provider.phone
+    primary = formatPhoneNumber(provider.phone)
     methods.push('phone')
   } else if (provider.email &&
              provider.email !== '' &&
@@ -312,9 +314,9 @@ export function formatProviderContact(provider: Provider): {
     primary = 'Visit website'
     methods.push('website')
   }
-  
+
   if (provider.phone && methods[0] !== 'phone') {
-    secondary.push(provider.phone)
+    secondary.push(formatPhoneNumber(provider.phone))
     methods.push('phone')
   }
 

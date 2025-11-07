@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
 import { type Provider } from '@/lib/schemas'
 import { topMetroAreas } from '@/data/top-metros'
 import { handleCityNameSearch, handleStateNameSearch } from '@/lib/zip-geocoding'
+import { StickyMobileCTA } from '@/components/ui/StickyMobileCTA'
+import { ga4 } from '@/lib/ga4'
 
 const featuredMetros = topMetroAreas.slice(0, 12)
 
@@ -28,6 +31,7 @@ const trustBadges = [
 ]
 
 export default function HomePage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [providerCounts, setProviderCounts] = useState<Record<string, number>>({})
 
@@ -218,21 +222,71 @@ export default function HomePage() {
         <div className="relative container py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Find Mobile <span className="text-primary-400">Phlebotomy Services</span> Near You
+              Professional <span className="text-primary-400">At-Home Blood Draws</span> Nationwide
             </h1>
             <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
-              Professional at-home blood draws and lab collections. Certified, insured providers 
-              available 7 days a week across the United States.
+              Skip the clinic. Licensed phlebotomists come to you for safe, convenient blood collection.
+              Get matched with a certified provider in your area today.
             </p>
-            
-            <AutocompleteSearchBar 
+
+            {/* Primary CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <button
+                onClick={() => {
+                  ga4.leadFormOpen({ source: 'homepage_hero' })
+                  router.push('/coming-soon')
+                }}
+                className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
+              >
+                Request Blood Draw
+              </button>
+              <button
+                onClick={(e) => {
+                  ga4.callClick({ source: 'homepage_hero' })
+                  const phoneNumber = process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-555-0100'
+
+                  // On mobile, open tel: link. On desktop, show phone number with copy option
+                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    window.location.href = `tel:${phoneNumber}`
+                  } else {
+                    // On desktop, show alert with phone number and option to copy
+                    const message = `Call us at:\n\n${phoneNumber}\n\nClick OK to copy the phone number to your clipboard.`
+                    if (confirm(message)) {
+                      if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(phoneNumber).then(() => {
+                          alert(`Phone number ${phoneNumber} copied to clipboard!`)
+                        }).catch(() => {
+                          alert(`Please call: ${phoneNumber}`)
+                        })
+                      } else {
+                        alert(`Please call: ${phoneNumber}`)
+                      }
+                    }
+                  }
+                }}
+                className="bg-white text-primary-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg border-2 border-primary-600"
+              >
+                📞 Call Now
+              </button>
+            </div>
+
+            {/* Compliance disclaimer */}
+            <div className="text-white/80 text-xs max-w-2xl mx-auto mb-6 leading-relaxed">
+              MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy services.
+              Providers marked as Verified have confirmed service availability and licensing.
+            </div>
+
+            {/* Or browse providers */}
+            <div className="text-white/90 text-sm mb-4">or browse our provider directory:</div>
+
+            <AutocompleteSearchBar
               onSearch={handleSearch}
               placeholder="Enter your ZIP code or city..."
-              className="mb-8"
+              className="mb-6"
               enableZipCodeRouting={true}
             />
 
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <div className="flex flex-wrap justify-center gap-2">
               {topServices.map((service) => (
                 <Link
                   key={service}
@@ -246,49 +300,93 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-
-            <div className="flex flex-wrap justify-center gap-3">
-              {trustBadges.map((badge) => (
-                <Badge key={badge} variant="success" size="sm">
-                  {badge}
-                </Badge>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Featured Providers Coming Soon Section */}
-      <section className="py-12 bg-gradient-to-b from-primary-50 to-white">
+      {/* Social Trust Section */}
+      <section className="py-8 bg-white border-b border-gray-100">
         <div className="container">
-          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-primary-100 p-8 md:p-10 text-center">
-            {/* Heading with Star Icon */}
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-3xl">🌟</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Featured Providers
-              </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+              <span className="text-green-600 text-xl">✅</span>
+              <span className="text-gray-700 font-medium">Licensed professionals</span>
             </div>
-
-            {/* Coming Soon Badge */}
-            <div className="inline-block bg-primary-100 text-primary-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
-              Coming Soon
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+              <span className="text-blue-600 text-xl">🏥</span>
+              <span className="text-gray-700 font-medium">Most insurance accepted</span>
             </div>
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+              <span className="text-purple-600 text-xl">🏠</span>
+              <span className="text-gray-700 font-medium">Homebound patients welcome</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+              <span className="text-orange-600 text-xl">⏱️</span>
+              <span className="text-gray-700 font-medium">No waiting rooms</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Description */}
-            <p className="text-gray-600 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-              Be among the first 5 mobile phlebotomy services featured on our homepage.
-              Early adopter pricing available.
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Get matched with a certified mobile phlebotomist in 3 simple steps.
+              Safe, convenient, and professional.
             </p>
+          </div>
 
-            {/* CTA Button */}
-            <a
-              href="mailto:hector@mobilephlebotomy.org?subject=Interested%20in%20Featured%20Provider%20Placement%20-%20MobilePhlebotomy.org"
-              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-primary-600">1</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Request Service</h3>
+              <p className="text-gray-600">
+                Submit your request online or call us. Tell us your location and when you need service.
+                We'll match you with a qualified provider instantly.
+              </p>
+            </div>
+
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-primary-600">2</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Get Matched</h3>
+              <p className="text-gray-600">
+                We connect you with a licensed, insured phlebotomist in your area.
+                Same-day and next-day appointments available.
+              </p>
+            </div>
+
+            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-primary-600">3</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">At-Home Collection</h3>
+              <p className="text-gray-600">
+                Your phlebotomist arrives with all equipment for safe, sterile blood collection.
+                Results typically available within 24-48 hours.
+              </p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <button
+              onClick={() => {
+                ga4.leadFormOpen({ source: 'how_it_works' })
+                router.push('/coming-soon')
+              }}
+              className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg"
             >
-              Get Featured
-              <span>→</span>
-            </a>
+              Request Blood Draw
+            </button>
           </div>
         </div>
       </section>
@@ -395,51 +493,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Featured Providers Coming Soon Section */}
+      <section className="py-12 bg-gradient-to-b from-primary-50 to-white">
         <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              How Mobile Phlebotomy Works
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Professional blood collection services that come to you. Safe, convenient, and certified.
+          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-primary-100 p-8 md:p-10 text-center">
+            {/* Heading with Star Icon */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-3xl">🌟</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Featured Providers
+              </h2>
+            </div>
+
+            {/* Coming Soon Badge */}
+            <div className="inline-block bg-primary-100 text-primary-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
+              Coming Soon
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-600 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Be among the first 5 mobile phlebotomy services featured on our homepage.
+              Early adopter pricing available.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Find a Provider</h3>
-              <p className="text-gray-600">
-                Search our directory of certified mobile phlebotomists in your area.
-                Filter by services, availability, and insurance acceptance.
-              </p>
-            </div>
-
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📅</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Schedule Service</h3>
-              <p className="text-gray-600">
-                Book your appointment online or by phone. Many providers offer
-                same-day and emergency services.
-              </p>
-            </div>
-
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🏠</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">At-Home Collection</h3>
-              <p className="text-gray-600">
-                A certified phlebotomist visits your location with all necessary
-                equipment for safe, professional blood collection.
-              </p>
-            </div>
+            {/* CTA Button */}
+            <a
+              href="mailto:hector@mobilephlebotomy.org?subject=Interested%20in%20Featured%20Provider%20Placement%20-%20MobilePhlebotomy.org"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+            >
+              Get Featured
+              <span>→</span>
+            </a>
           </div>
         </div>
       </section>
@@ -832,6 +916,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Sticky Mobile CTA */}
+      <StickyMobileCTA />
     </>
   )
 }

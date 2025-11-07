@@ -1,214 +1,214 @@
-<<<<<<< HEAD
-# MobilePhlebotomy.org
+# MobilePhlebotomy.org — LeadGen
 
-A production-ready Next.js 14 application providing a comprehensive directory of mobile phlebotomy services across the United States. Built with TypeScript, featuring strong SEO, automated data seeding, and clean architecture.
+A lead-generation directory connecting patients to **verified** mobile phlebotomists. Patients start with us; providers receive leads by SMS/email after verification and prepayment (credits) or subscription (Featured).
 
-## 🚀 Features
+## Runbook
+- **Modes**
+  - `SILENT_MODE=true`: collect leads, notify admin only. No routing.
+  - `SILENT_MODE=false`: auto-route to VERIFIED providers with credits.
+- **Lead Pricing (default)**
+  - STANDARD: $15–$20 (configurable)
+  - STAT: $35–$50 (configurable)
+- **Featured Tiers**
+  - SMALL $99/mo · MEDIUM $249/mo · LARGE $499/mo (Stripe Prices)
+- **Routing Order**
+  1. VERIFIED with coverage ZIPs
+  2. Featured first
+  3. Most recently active
+  4. Else: hold + email ADMIN to recruit
 
-- **Next.js 14 App Router** with TypeScript and React Server Components
-- **Comprehensive Search** with Fuse.js for fuzzy matching and filtering
-- **Dynamic Location Pages** - Auto-generated state and city landing pages
-- **Strong SEO** - Meta tags, OpenGraph, JSON-LD structured data, sitemaps
-- **Data Seeding** - API-based data collection from Google Places, Yelp, and NPI Registry
-- **Mobile-First Design** - Tailwind CSS with accessible, responsive UI
-- **Provider Management** - CSV import, form submissions, and claim system
-- **Static Generation** - Optimized for performance and SEO
+## Compliance & Positioning
+- Public site shows a **directory disclaimer**:
+  > Directory of publicly listed mobile phlebotomy services. Not all providers are verified. We connect verified providers with patient requests.
+- Unverified pages:
+  - ⚠️ "Unverified Listing" badge
+  - No public email; phone may show with disclaimer
+  - "Report this listing" link
+- Verified pages:
+  - ✅ "Verified Provider" badge
+  - Lead form + tracked call enabled
+- **PHI Minimization**: Collect only what's needed to book (name, phone, city/state/ZIP, urgency, optional notes). No lab results.
+- **HIPAA Note**: We are a marketing/lead-gen platform. We are **not** a covered entity or business associate unless we sign BAAs and handle PHI on behalf of providers. Default posture: **no BAAs**, no storage of medical records, use transport-only notifications, encrypt at rest.
 
-## 🏗️ Architecture
+## Environment
+- Vercel env:
+  - `SILENT_MODE` (true/false)
+  - `PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA4_ID`
+  - Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, Tier Price IDs
+  - Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_MESSAGING_SERVICE_SID`
+  - Email: `SENDGRID_API_KEY`, `LEAD_EMAIL_FROM`, `ADMIN_EMAIL`
 
-```
-├── app/                          # Next.js 14 App Router
-│   ├── (pages)/                  # Main application pages
-│   ├── api/                      # API routes (claim, submit)
-│   ├── provider/[slug]/          # Dynamic provider pages
-│   ├── us/[state]/               # Dynamic state pages
-│   ├── us/[state]/[city]/        # Dynamic city pages
-│   ├── sitemap.ts               # Dynamic sitemap generation
-│   └── robots.txt/              # Robots.txt route
-├── components/                   # Reusable UI components
-│   ├── ui/                      # Base UI components
-│   └── layout/                  # Layout components
-├── lib/                         # Utilities and schemas
-│   ├── schemas.ts               # Zod validation schemas
-│   ├── utils.ts                 # Utility functions
-│   └── ingest/                  # Data ingestion utilities
-├── data/                        # JSON data files
-│   ├── providers.json           # Main provider database
-│   ├── cities.json              # City data
-│   ├── states.json              # State data
-│   └── seeds/                   # Seeding configuration
-├── scripts/                     # Data management scripts
-│   ├── seed/                    # API seeding scripts
-│   ├── import-csv.ts            # CSV import utility
-│   └── generate-city-pages.ts   # City page generator
-└── public/                      # Static assets
-```
+## Data Retention
+- Leads: 18 months (auto purge task)
+- Call recordings: 90 days (optional, can disable recording)
+- Corrections/Abuse reports: 24 months
 
-## 🛠️ Tech Stack
+## Incident Playbook
+- Provider complaint → Remove/mark Unverified immediately, respond within 24h.
+- Incorrect info → Update via "Corrections" queue.
+- Data request (CCPA/GDPR) → export or delete on verified ownership email.
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Validation:** Zod
-- **Search:** Fuse.js
-- **Data:** Local JSON files (MVP approach)
-- **Deployment:** Vercel-ready
+## Deploy Checklist
+- Set all env vars
+- Verify Stripe webhook secrets
+- Twilio webhooks → `/api/telephony/voice` + `/api/telephony/status`
+- GA4 events firing
+- `SILENT_MODE=true` for first deploy; flip when ready
 
-## 📦 Installation
+## Project Structure
 
-1. **Clone the repository:**
+### Core Technologies
+- **Framework**: Next.js 14 (App Router)
+- **Database**: PostgreSQL with Prisma ORM
+- **Payments**: Stripe (credits & subscriptions)
+- **Communications**: Twilio (SMS/Voice) + SendGrid (email)
+- **Analytics**: Google Analytics 4
+
+### Key Features
+1. **Provider Directory**: Public listings with verification badges
+2. **Lead Generation**: Patient intake forms with smart routing
+3. **Credit System**: Pay-per-lead model with Stripe integration
+4. **Featured Listings**: Subscription tiers for premium placement
+5. **Call Tracking**: Twilio-powered call forwarding with recordings
+6. **Admin Dashboard**: Lead management and provider verification
+
+## Development
+
 ```bash
-git clone <repository-url>
-cd mobilephlebotomy
-```
-
-2. **Install dependencies:**
-```bash
+# Install dependencies
 npm install
-# or
-pnpm install
-# or
-yarn install
-```
 
-3. **Set up environment variables:**
-```bash
+# Set up environment variables
 cp .env.example .env.local
-```
 
-Add your API keys to `.env.local`:
-```env
-GOOGLE_PLACES_API_KEY=your_google_places_api_key
-YELP_API_KEY=your_yelp_api_key
-NPI_BASE_URL=https://npiregistry.cms.hhs.gov/api/
-NEXT_PUBLIC_SITE_URL=https://mobilephlebotomy.org
-```
+# Run database migrations
+npx prisma migrate dev
 
-4. **Run the development server:**
-```bash
+# Start development server
 npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+
+# Open Prisma Studio
+npx prisma studio
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see the application.
+## Deployment
 
-## 🔑 API Keys Setup
+### Vercel Deployment
+1. Connect GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Configure Stripe webhook endpoint: `https://yourdomain.com/api/webhooks/stripe`
+4. Configure Twilio webhooks:
+   - Voice: `https://yourdomain.com/api/telephony/voice`
+   - Status: `https://yourdomain.com/api/telephony/status`
+5. Deploy with `SILENT_MODE=true` initially
+6. Test lead flow end-to-end
+7. Flip `SILENT_MODE=false` to enable live routing
 
-### Google Places API
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable the Places API (New)
-4. Create credentials (API Key)
-5. Restrict the key to Places API for security
+### Database
+- Production: Vercel Postgres or similar PostgreSQL provider
+- Run migrations: `npx prisma migrate deploy`
+- Seed initial data if needed: `npx prisma db seed`
 
-### Yelp Fusion API
-1. Visit [Yelp Developers](https://www.yelp.com/developers)
-2. Create an app
-3. Get your API key from the app dashboard
+## API Routes
 
-### NPI Registry API
-- No API key required - this is a free public API by CMS
+### Public
+- `POST /api/lead/submit` - Submit patient lead
+- `POST /api/providers/report` - Report incorrect provider info
+- `GET /api/providers` - List providers (with filters)
+- `GET /api/autocomplete` - Search autocomplete
 
-## 🧪 Development Scripts
+### Provider Dashboard
+- `POST /api/providers/claim` - Claim provider listing
+- `POST /api/providers/verify` - Verify ownership
+- `POST /api/providers/coverage` - Update ZIP coverage
+- `GET /api/providers/dashboard` - Dashboard data
 
-```bash
-# Development
-npm run dev                    # Start dev server
-npm run build                  # Build for production
-npm run start                  # Start production server
-npm run lint                   # Run ESLint
-npm run typecheck             # Run TypeScript checks
+### Webhooks
+- `POST /api/webhooks/stripe` - Stripe events (payments, subscriptions)
+- `POST /api/telephony/voice` - Twilio voice webhook
+- `POST /api/telephony/status` - Twilio call status
 
-# Data Management (requires tsx installation)
-npm run import:csv            # Import from CSV
-npm run seed:places           # Seed from Google Places
-npm run seed:yelp             # Seed from Yelp
-npm run seed:npi              # Seed from NPI Registry
-npm run seed:all              # Run all seeding
-npm run generate:cities       # Generate city metadata
-```
+### Admin
+- `POST /api/admin/retention` - Data retention cron job
 
-## 📄 Pages
+## Email Templates
 
-- **/** - Homepage with search and featured locations
-- **/search** - Provider search with filters
-- **/provider/[slug]** - Individual provider details
-- **/us/[state]** - State-specific provider listings
-- **/us/[state]/[city]** - City-specific provider listings
-- **/add-provider** - Provider submission form
-- **/about** - About page
-- **/contact** - Contact information
-- **/terms** - Terms of service
-- **/privacy** - Privacy policy
+### Patient Emails
+- Lead confirmation
+- Provider match notification
 
-## 🚀 Deployment
+### Provider Emails
+- Claim receipt with verification link
+- Verification success welcome
+- New lead notification (SMS + email)
+- Credits depleted warning
+- Featured listing activated
 
-### Vercel (Recommended)
+### Admin Emails
+- New lead (when SILENT_MODE=true)
+- Provider correction report
+- System alerts
 
-1. **Connect your repository to Vercel**
-2. **Add environment variables** in Vercel dashboard
-3. **Deploy:** Automatic deployment on git push
+## Analytics Events (GA4)
 
-### Manual Build
+### Patient Journey
+- `lead_form_start` - User opens lead form
+- `lead_form_submit` - Lead submitted successfully
+- `provider_view` - Provider detail page view
+- `call_click` - User clicks call button
 
-```bash
-# Build the application
-npm run build
+### Provider Actions
+- `claim_click` - Provider clicks "Claim listing"
+- `verify_complete` - Provider verification complete
+- `credit_purchase` - Provider buys credits
+- `featured_subscribe` - Provider subscribes to Featured
 
-# Start production server
-npm run start
-```
+### Admin
+- `report_click` - User clicks "Report listing"
+- `report_submit` - Correction report submitted
+- `policy_view` - Privacy/Terms page view
 
-## 🎯 SEO Features
+## Security & Compliance
 
-- **Dynamic Meta Tags:** Title, description, OpenGraph for all pages
-- **JSON-LD Structured Data:**
-  - WebSite with SearchAction
-  - LocalBusiness for providers
-  - CollectionPage for locations
-  - FAQPage for common questions
-- **Sitemaps:** Auto-generated for all pages and providers
-- **Robots.txt:** Proper crawling instructions
-- **Canonical URLs:** Prevent duplicate content
+### Data Protection
+- All data encrypted at rest and in transit
+- Minimal PHI collection (name, phone, location only)
+- No storage of medical records or lab results
+- Access control on all provider/admin routes
 
-## 🔍 Search Features
+### HIPAA Considerations
+- Platform is NOT a covered entity or business associate
+- No BAAs signed by default
+- Providers handle all protected health information
+- Clear disclaimers on all public pages
 
-- **Text Search:** Provider names, descriptions, services
-- **Location Search:** ZIP codes, cities, states
-- **Service Filters:** At-home blood draws, corporate wellness, etc.
-- **Availability Filters:** Weekdays, weekends, evenings, 24/7
-- **Payment Filters:** Cash, insurance, Medicare, HSA/FSA
-- **Sorting:** Relevance, rating, distance (placeholder), name
+### User Rights (CCPA/GDPR)
+- Data access requests: Email privacy@mobilephlebotomy.org
+- Data deletion: Automated upon verified request
+- Opt-out: Unsubscribe links in all emails
 
-## 🤝 Contributing
+## Monitoring
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Key Metrics
+- Lead conversion rate (form submit → provider match)
+- Provider response time (lead delivered → first contact)
+- Credit utilization rate
+- Featured vs. Standard conversion comparison
+- Call tracking analytics
 
-## 📝 License
+### Alerts
+- Failed Stripe payments
+- Twilio delivery failures
+- Database connection issues
+- Unusual traffic patterns
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Support
 
-## 🆘 Support
+- **General**: support@mobilephlebotomy.org
+- **Privacy**: privacy@mobilephlebotomy.org
+- **Provider Issues**: providers@mobilephlebotomy.org
+- **Technical**: See GitHub Issues
 
-For support, email hector@mobilephlebotomy.org or create an issue in this repository.
+## License
 
-## 🔮 Future Enhancements
-
-- Real-time booking integration
-- Payment processing
-- Provider reviews and ratings
-- Mobile app
-- Advanced analytics
-- Multi-language support
-- Insurance verification API
-=======
-# mobile-phlebotomy-directory
-Mobile phlebotomy services directory
->>>>>>> 591bc9b032ee98f6c0cf77e4dcdee18dc7e10f17
+Proprietary - All rights reserved
