@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server'
-import { clearAdminSession } from '@/lib/admin-auth'
 
 export async function POST() {
   try {
-    await clearAdminSession()
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Logged out successfully'
     })
+
+    // Delete the session cookie
+    response.cookies.delete('admin_session')
+
+    return response
 
   } catch (error) {
     console.error('Error during admin logout:', error)
