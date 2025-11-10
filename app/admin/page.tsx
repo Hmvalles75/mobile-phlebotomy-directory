@@ -60,7 +60,9 @@ export default function AdminDashboard() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/admin/submissions')
+      const res = await fetch('/api/admin/submissions', {
+        credentials: 'include'
+      })
       if (res.ok) {
         setIsAuthenticated(true)
         loadSubmissions()
@@ -85,15 +87,19 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ password })
       })
 
       const data = await res.json()
 
       if (data.success) {
-        setIsAuthenticated(true)
         setPassword('')
-        loadSubmissions()
+        // Small delay to ensure cookie is set before checking auth
+        setTimeout(() => {
+          setIsAuthenticated(true)
+          loadSubmissions()
+        }, 100)
       } else {
         setLoginError(data.error || 'Login failed')
       }
@@ -117,7 +123,9 @@ export default function AdminDashboard() {
 
   const loadSubmissions = async () => {
     try {
-      const res = await fetch('/api/admin/submissions')
+      const res = await fetch('/api/admin/submissions', {
+        credentials: 'include'
+      })
       if (!res.ok) {
         setIsAuthenticated(false)
         return
