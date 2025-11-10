@@ -7,20 +7,7 @@ export async function GET(request: NextRequest) {
     // Verify admin authentication
     const authHeader = request.headers.get('authorization')
     const cookieHeader = request.headers.get('cookie')
-    console.log('Auth header:', authHeader ? 'present' : 'missing')
-    console.log('Cookie header:', cookieHeader ? 'present' : 'missing')
-
-    let isAuthenticated = false
-    try {
-      isAuthenticated = verifyAdminSessionFromCookies(authHeader || cookieHeader)
-      console.log('Is authenticated:', isAuthenticated)
-    } catch (verifyError) {
-      console.error('Error verifying session:', verifyError)
-      return NextResponse.json(
-        { success: false, error: 'Authentication verification failed' },
-        { status: 500 }
-      )
-    }
+    const isAuthenticated = verifyAdminSessionFromCookies(authHeader || cookieHeader)
 
     if (!isAuthenticated) {
       return NextResponse.json(
