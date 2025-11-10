@@ -42,16 +42,23 @@ const SUBMISSIONS_FILE = path.join(process.cwd(), 'data', 'pending-submissions.j
 
 /**
  * Ensure the data directory and file exist
+ * In production (Vercel), file system is read-only, so we handle gracefully
  */
 function ensureDataFile() {
-  const dataDir = path.dirname(SUBMISSIONS_FILE)
+  try {
+    const dataDir = path.dirname(SUBMISSIONS_FILE)
 
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true })
+    }
 
-  if (!fs.existsSync(SUBMISSIONS_FILE)) {
-    fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify([], null, 2))
+    if (!fs.existsSync(SUBMISSIONS_FILE)) {
+      fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify([], null, 2))
+    }
+  } catch (error) {
+    // In production (Vercel), file system is read-only
+    // This is expected and we'll return empty array instead
+    console.log('File system not writable (production environment)')
   }
 }
 
@@ -62,6 +69,11 @@ export function getPendingSubmissions(): PendingProvider[] {
   ensureDataFile()
 
   try {
+    if (!fs.existsSync(SUBMISSIONS_FILE)) {
+      console.log('Submissions file does not exist, returning empty array')
+      return []
+    }
+
     const data = fs.readFileSync(SUBMISSIONS_FILE, 'utf-8')
     return JSON.parse(data)
   } catch (error) {
