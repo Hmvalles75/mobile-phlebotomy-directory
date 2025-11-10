@@ -132,7 +132,7 @@ export async function POST(
     const { id } = await params
     const { action } = await request.json()
 
-    const submission = getSubmissionById(id)
+    const submission = await getSubmissionById(id)
 
     if (!submission) {
       return NextResponse.json(
@@ -149,7 +149,7 @@ export async function POST(
       fs.appendFileSync(CSV_PATH, '\n' + csvRow)
 
       // Update status
-      updateSubmissionStatus(id, 'approved')
+      await updateSubmissionStatus(id, 'approved')
 
       // Trigger rebuild of providers.json (run Python script)
       try {
@@ -173,7 +173,7 @@ export async function POST(
 
     } else if (action === 'reject') {
       // Update status to rejected
-      updateSubmissionStatus(id, 'rejected')
+      await updateSubmissionStatus(id, 'rejected')
 
       return NextResponse.json({
         success: true,
@@ -217,7 +217,7 @@ export async function DELETE(
 
     const { id } = await params
 
-    const success = deleteSubmission(id)
+    const success = await deleteSubmission(id)
 
     if (!success) {
       return NextResponse.json(
