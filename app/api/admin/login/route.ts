@@ -21,11 +21,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create session token
+    // Create session token (don't store password - it's already verified)
     const sessionToken = Buffer.from(JSON.stringify({
       authenticated: true,
-      expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-      password: password // Store hashed password for verification
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
     })).toString('base64')
 
     // Return token in response body for client-side storage

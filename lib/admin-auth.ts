@@ -84,7 +84,7 @@ export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): bool
 
     const session = JSON.parse(
       Buffer.from(sessionToken, 'base64').toString('utf-8')
-    ) as AdminSession & { password?: string }
+    ) as AdminSession
 
     console.log('Session decoded:', {
       authenticated: session.authenticated,
@@ -96,12 +96,6 @@ export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): bool
     // Verify not expired
     if (!session.authenticated || session.expiresAt < Date.now()) {
       console.log('Session invalid or expired')
-      return false
-    }
-
-    // Verify password if present
-    if (session.password && !verifyAdminPassword(session.password)) {
-      console.log('Password verification failed')
       return false
     }
 
