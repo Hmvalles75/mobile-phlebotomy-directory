@@ -334,3 +334,50 @@ model Waitlist {
 
   @@map("waitlist")
 }
+
+model PendingSubmission {
+  id                  String   @id @default(cuid())
+  submittedAt         DateTime @default(now())
+  status              SubmissionStatus @default(PENDING)
+
+  // Business Information
+  businessName        String
+  contactName         String
+  email               String
+  phone               String
+  website             String?
+  description         String
+
+  // Location
+  address             String?
+  city                String
+  state               String
+  zipCode             String?
+  serviceArea         String?
+
+  // Professional Details
+  yearsExperience     String?
+  licensed            Boolean  @default(false)
+  insurance           Boolean  @default(false)
+  certifications      String?
+  specialties         String?
+
+  // Availability
+  emergencyAvailable  Boolean  @default(false)
+  weekendAvailable    Boolean  @default(false)
+
+  // Optional
+  logo                String?
+
+  // Metadata
+  ipAddress           String?
+  userAgent           String?
+
+  @@map("pending_submissions")
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

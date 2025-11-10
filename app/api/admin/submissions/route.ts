@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const submissions = getPendingSubmissions()
+    const submissions = await getPendingSubmissions()
 
     return NextResponse.json({
       success: true,

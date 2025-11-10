@@ -1,10 +1,9 @@
 /**
- * Manage pending provider submissions
- * Stores submissions in a JSON file until approved/rejected
+ * Manage pending provider submissions using Prisma
  */
 
-import fs from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/prisma'
+import { SubmissionStatus } from '@prisma/client'
 
 export interface PendingProvider {
   id: string
@@ -38,44 +37,44 @@ export interface PendingProvider {
   userAgent?: string
 }
 
-const SUBMISSIONS_FILE = path.join(process.cwd(), 'data', 'pending-submissions.json')
-
-/**
- * Ensure the data directory and file exist
- * In production (Vercel), file system is read-only, so we handle gracefully
- */
-function ensureDataFile() {
-  try {
-    const dataDir = path.dirname(SUBMISSIONS_FILE)
-
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-
-    if (!fs.existsSync(SUBMISSIONS_FILE)) {
-      fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify([], null, 2))
-    }
-  } catch (error) {
-    // In production (Vercel), file system is read-only
-    // This is expected and we'll return empty array instead
-    console.log('File system not writable (production environment)')
-  }
-}
-
 /**
  * Get all pending submissions
  */
-export function getPendingSubmissions(): PendingProvider[] {
-  ensureDataFile()
-
+export async function getPendingSubmissions(): Promise<PendingProvider[]> {
   try {
-    if (!fs.existsSync(SUBMISSIONS_FILE)) {
-      console.log('Submissions file does not exist, returning empty array')
-      return []
-    }
+    const submissions = await prisma.pendingSubmission.findMany({
+      orderBy: {
+        submittedAt: 'desc'
+      }
+    })
 
-    const data = fs.readFileSync(SUBMISSIONS_FILE, 'utf-8')
-    return JSON.parse(data)
+    return submissions.map(sub => ({
+      id: sub.id,
+      submittedAt: sub.submittedAt.toISOString(),
+      status: sub.status.toLowerCase() as 'pending' | 'approved' | 'rejected',
+      businessName: sub.businessName,
+      contactName: sub.contactName,
+      email: sub.email,
+      phone: sub.phone,
+      website: sub.website || undefined,
+      services: undefined, // Not stored in new schema
+      description: sub.description,
+      address: sub.address || undefined,
+      city: sub.city,
+      state: sub.state,
+      zipCode: sub.zipCode || undefined,
+      serviceArea: sub.serviceArea || undefined,
+      yearsExperience: sub.yearsExperience || undefined,
+      licensed: sub.licensed,
+      insurance: sub.insurance,
+      certifications: sub.certifications || undefined,
+      specialties: sub.specialties || undefined,
+      emergencyAvailable: sub.emergencyAvailable,
+      weekendAvailable: sub.weekendAvailable,
+      logo: sub.logo || undefined,
+      ipAddress: sub.ipAddress || undefined,
+      userAgent: sub.userAgent || undefined
+    }))
   } catch (error) {
     console.error('Error reading pending submissions:', error)
     return []
@@ -85,67 +84,143 @@ export function getPendingSubmissions(): PendingProvider[] {
 /**
  * Add a new pending submission
  */
-export function addPendingSubmission(submission: Omit<PendingProvider, 'id' | 'submittedAt' | 'status'>): PendingProvider {
-  ensureDataFile()
+export async function addPendingSubmission(
+  submission: Omit<PendingProvider, 'id' | 'submittedAt' | 'status'>
+): Promise<PendingProvider> {
+  const newSubmission = await prisma.pendingSubmission.create({
+    data: {
+      businessName: submission.businessName,
+      contactName: submission.contactName,
+      email: submission.email,
+      phone: submission.phone,
+      website: submission.website,
+      description: submission.description,
+      address: submission.address,
+      city: submission.city,
+      state: submission.state,
+      zipCode: submission.zipCode,
+      serviceArea: submission.serviceArea,
+      yearsExperience: submission.yearsExperience,
+      licensed: submission.licensed ?? false,
+      insurance: submission.insurance ?? false,
+      certifications: submission.certifications,
+      specialties: submission.specialties,
+      emergencyAvailable: submission.emergencyAvailable ?? false,
+      weekendAvailable: submission.weekendAvailable ?? false,
+      logo: submission.logo,
+      ipAddress: submission.ipAddress,
+      userAgent: submission.userAgent
+    }
+  })
 
-  const newSubmission: PendingProvider = {
-    id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    submittedAt: new Date().toISOString(),
-    status: 'pending',
-    ...submission
+  return {
+    id: newSubmission.id,
+    submittedAt: newSubmission.submittedAt.toISOString(),
+    status: newSubmission.status.toLowerCase() as 'pending' | 'approved' | 'rejected',
+    businessName: newSubmission.businessName,
+    contactName: newSubmission.contactName,
+    email: newSubmission.email,
+    phone: newSubmission.phone,
+    website: newSubmission.website || undefined,
+    description: newSubmission.description,
+    address: newSubmission.address || undefined,
+    city: newSubmission.city,
+    state: newSubmission.state,
+    zipCode: newSubmission.zipCode || undefined,
+    serviceArea: newSubmission.serviceArea || undefined,
+    yearsExperience: newSubmission.yearsExperience || undefined,
+    licensed: newSubmission.licensed,
+    insurance: newSubmission.insurance,
+    certifications: newSubmission.certifications || undefined,
+    specialties: newSubmission.specialties || undefined,
+    emergencyAvailable: newSubmission.emergencyAvailable,
+    weekendAvailable: newSubmission.weekendAvailable,
+    logo: newSubmission.logo || undefined,
+    ipAddress: newSubmission.ipAddress || undefined,
+    userAgent: newSubmission.userAgent || undefined
   }
-
-  const submissions = getPendingSubmissions()
-  submissions.push(newSubmission)
-
-  fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2))
-
-  return newSubmission
 }
 
 /**
  * Update submission status
  */
-export function updateSubmissionStatus(
+export async function updateSubmissionStatus(
   id: string,
   status: 'pending' | 'approved' | 'rejected'
-): boolean {
-  ensureDataFile()
+): Promise<boolean> {
+  try {
+    const statusMap: Record<string, SubmissionStatus> = {
+      pending: 'PENDING',
+      approved: 'APPROVED',
+      rejected: 'REJECTED'
+    }
 
-  const submissions = getPendingSubmissions()
-  const index = submissions.findIndex(sub => sub.id === id)
+    await prisma.pendingSubmission.update({
+      where: { id },
+      data: { status: statusMap[status] }
+    })
 
-  if (index === -1) {
+    return true
+  } catch (error) {
+    console.error('Error updating submission status:', error)
     return false
   }
-
-  submissions[index].status = status
-  fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2))
-
-  return true
 }
 
 /**
  * Get a single submission by ID
  */
-export function getSubmissionById(id: string): PendingProvider | null {
-  const submissions = getPendingSubmissions()
-  return submissions.find(sub => sub.id === id) || null
+export async function getSubmissionById(id: string): Promise<PendingProvider | null> {
+  try {
+    const sub = await prisma.pendingSubmission.findUnique({
+      where: { id }
+    })
+
+    if (!sub) return null
+
+    return {
+      id: sub.id,
+      submittedAt: sub.submittedAt.toISOString(),
+      status: sub.status.toLowerCase() as 'pending' | 'approved' | 'rejected',
+      businessName: sub.businessName,
+      contactName: sub.contactName,
+      email: sub.email,
+      phone: sub.phone,
+      website: sub.website || undefined,
+      description: sub.description,
+      address: sub.address || undefined,
+      city: sub.city,
+      state: sub.state,
+      zipCode: sub.zipCode || undefined,
+      serviceArea: sub.serviceArea || undefined,
+      yearsExperience: sub.yearsExperience || undefined,
+      licensed: sub.licensed,
+      insurance: sub.insurance,
+      certifications: sub.certifications || undefined,
+      specialties: sub.specialties || undefined,
+      emergencyAvailable: sub.emergencyAvailable,
+      weekendAvailable: sub.weekendAvailable,
+      logo: sub.logo || undefined,
+      ipAddress: sub.ipAddress || undefined,
+      userAgent: sub.userAgent || undefined
+    }
+  } catch (error) {
+    console.error('Error getting submission:', error)
+    return null
+  }
 }
 
 /**
  * Delete a submission
  */
-export function deleteSubmission(id: string): boolean {
-  ensureDataFile()
-
-  const submissions = getPendingSubmissions()
-  const filtered = submissions.filter(sub => sub.id !== id)
-
-  if (filtered.length === submissions.length) {
-    return false // No submission found
+export async function deleteSubmission(id: string): Promise<boolean> {
+  try {
+    await prisma.pendingSubmission.delete({
+      where: { id }
+    })
+    return true
+  } catch (error) {
+    console.error('Error deleting submission:', error)
+    return false
   }
-
-  fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(filtered, null, 2))
-  return true
 }

@@ -1,0 +1,27 @@
+-- CreateTable
+CREATE TABLE "pending_submissions" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "submittedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "businessName" TEXT NOT NULL,
+    "contactName" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "website" TEXT,
+    "description" TEXT NOT NULL,
+    "address" TEXT,
+    "city" TEXT NOT NULL,
+    "state" TEXT NOT NULL,
+    "zipCode" TEXT,
+    "serviceArea" TEXT,
+    "yearsExperience" TEXT,
+    "licensed" BOOLEAN NOT NULL DEFAULT false,
+    "insurance" BOOLEAN NOT NULL DEFAULT false,
+    "certifications" TEXT,
+    "specialties" TEXT,
+    "emergencyAvailable" BOOLEAN NOT NULL DEFAULT false,
+    "weekendAvailable" BOOLEAN NOT NULL DEFAULT false,
+    "logo" TEXT,
+    "ipAddress" TEXT,
+    "userAgent" TEXT
+);
