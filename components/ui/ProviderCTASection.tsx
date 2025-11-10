@@ -68,17 +68,9 @@ export function ProviderCTASection({
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleRequestClick}
-          className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
+          className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
         >
           Request Blood Draw
-        </button>
-
-        <button
-          onClick={handleCallClick}
-          className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-green-700 transition"
-        >
-          <Phone size={20} />
-          Call Now
         </button>
       </div>
 

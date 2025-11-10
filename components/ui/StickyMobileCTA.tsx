@@ -36,19 +36,12 @@ export function StickyMobileCTA({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg">
-      <div className="flex gap-2 p-3">
+      <div className="p-3">
         <button
           onClick={handleRequestClick}
-          className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition text-sm"
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition text-sm"
         >
           Request Blood Draw
-        </button>
-        <button
-          onClick={handleCallClick}
-          className="flex items-center justify-center bg-green-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-green-700 transition"
-        >
-          <Phone size={20} />
-          <span className="ml-2 text-sm">Call Now</span>
         </button>
       </div>
     </div>

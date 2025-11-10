@@ -240,34 +240,6 @@ export default function HomePage() {
               >
                 Request Blood Draw
               </button>
-              <button
-                onClick={(e) => {
-                  ga4.heroCTAClick({ cta_type: 'call' })
-                  const phoneNumber = process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-555-0100'
-
-                  // On mobile, open tel: link. On desktop, show phone number with copy option
-                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                    window.location.href = `tel:${phoneNumber}`
-                  } else {
-                    // On desktop, show alert with phone number and option to copy
-                    const message = `Call us at:\n\n${phoneNumber}\n\nClick OK to copy the phone number to your clipboard.`
-                    if (confirm(message)) {
-                      if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(phoneNumber).then(() => {
-                          alert(`Phone number ${phoneNumber} copied to clipboard!`)
-                        }).catch(() => {
-                          alert(`Please call: ${phoneNumber}`)
-                        })
-                      } else {
-                        alert(`Please call: ${phoneNumber}`)
-                      }
-                    }
-                  }
-                }}
-                className="bg-white text-primary-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg border-2 border-primary-600"
-              >
-                📞 Call Now
-              </button>
             </div>
 
             {/* Compliance disclaimer */}
