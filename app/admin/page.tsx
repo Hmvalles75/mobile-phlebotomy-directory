@@ -60,12 +60,22 @@ export default function AdminDashboard() {
 
   const checkAuth = async () => {
     try {
+      const token = localStorage.getItem('admin_token')
+      if (!token) {
+        return
+      }
+
       const res = await fetch('/api/admin/submissions', {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
       if (res.ok) {
         setIsAuthenticated(true)
         loadSubmissions()
+      } else {
+        // Token invalid, clear it
+        localStorage.removeItem('admin_token')
       }
     } catch (error) {
       console.error('Auth check failed:', error)
@@ -87,19 +97,17 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ password })
       })
 
       const data = await res.json()
 
-      if (data.success) {
+      if (data.success && data.token) {
+        // Store token in localStorage
+        localStorage.setItem('admin_token', data.token)
         setPassword('')
-        // Small delay to ensure cookie is set before checking auth
-        setTimeout(() => {
-          setIsAuthenticated(true)
-          loadSubmissions()
-        }, 100)
+        setIsAuthenticated(true)
+        loadSubmissions()
       } else {
         setLoginError(data.error || 'Login failed')
       }
@@ -112,6 +120,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('admin_token')
       await fetch('/api/admin/logout', { method: 'POST' })
       setIsAuthenticated(false)
       setSubmissions([])
@@ -123,11 +132,15 @@ export default function AdminDashboard() {
 
   const loadSubmissions = async () => {
     try {
+      const token = localStorage.getItem('admin_token')
       const res = await fetch('/api/admin/submissions', {
-        credentials: 'include'
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {}
       })
       if (!res.ok) {
         setIsAuthenticated(false)
+        localStorage.removeItem('admin_token')
         return
       }
 
@@ -148,9 +161,13 @@ export default function AdminDashboard() {
     setActionLoading(id)
 
     try {
+      const token = localStorage.getItem('admin_token')
       const res = await fetch(`/api/admin/submissions/${id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ action })
       })
 
@@ -178,8 +195,12 @@ export default function AdminDashboard() {
     setActionLoading(id)
 
     try {
+      const token = localStorage.getItem('admin_token')
       const res = await fetch(`/api/admin/submissions/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {}
       })
 
       const data = await res.json()
@@ -206,8 +227,12 @@ export default function AdminDashboard() {
     setDeployLoading(true)
 
     try {
+      const token = localStorage.getItem('admin_token')
       const res = await fetch('/api/admin/deploy', {
-        method: 'POST'
+        method: 'POST',
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {}
       })
 
       const data = await res.json()

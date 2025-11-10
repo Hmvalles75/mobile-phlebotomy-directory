@@ -24,25 +24,16 @@ export async function POST(request: NextRequest) {
     // Create session token
     const sessionToken = Buffer.from(JSON.stringify({
       authenticated: true,
-      expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+      password: password // Store hashed password for verification
     })).toString('base64')
 
-    // Create response with session cookie
-    const response = NextResponse.json({
+    // Return token in response body for client-side storage
+    return NextResponse.json({
       success: true,
-      message: 'Login successful'
+      message: 'Login successful',
+      token: sessionToken
     })
-
-    // Set cookie on response
-    response.cookies.set('admin_session', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 24 * 60 * 60 // 24 hours in seconds
-    })
-
-    return response
 
   } catch (error) {
     console.error('Error during admin login:', error)

@@ -50,33 +50,45 @@ export async function createAdminSession(): Promise<string> {
 }
 
 /**
- * Verify admin session is valid from request cookies
+ * Verify admin session from Authorization header or cookies
  */
-export function verifyAdminSessionFromCookies(cookieString: string | null): boolean {
+export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): boolean {
   try {
-    if (!cookieString) {
+    if (!cookieOrAuth) {
       return false
     }
 
-    // Parse cookies from header
-    const cookies = Object.fromEntries(
-      cookieString.split('; ').map(c => {
-        const [key, ...v] = c.split('=')
-        return [key, v.join('=')]
-      })
-    )
+    let sessionToken: string | undefined
 
-    const sessionToken = cookies[ADMIN_SESSION_COOKIE]
+    // Check if it's an Authorization header (Bearer token)
+    if (cookieOrAuth.startsWith('Bearer ')) {
+      sessionToken = cookieOrAuth.substring(7)
+    } else {
+      // Parse cookies from header
+      const cookies = Object.fromEntries(
+        cookieOrAuth.split('; ').map(c => {
+          const [key, ...v] = c.split('=')
+          return [key, v.join('=')]
+        })
+      )
+      sessionToken = cookies[ADMIN_SESSION_COOKIE]
+    }
 
     if (!sessionToken) {
       return false
     }
 
-    const session: AdminSession = JSON.parse(
+    const session = JSON.parse(
       Buffer.from(sessionToken, 'base64').toString('utf-8')
-    )
+    ) as AdminSession & { password?: string }
 
+    // Verify not expired
     if (!session.authenticated || session.expiresAt < Date.now()) {
+      return false
+    }
+
+    // Verify password if present
+    if (session.password && !verifyAdminPassword(session.password)) {
       return false
     }
 
