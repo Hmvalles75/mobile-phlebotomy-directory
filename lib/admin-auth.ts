@@ -50,7 +50,45 @@ export async function createAdminSession(): Promise<string> {
 }
 
 /**
- * Verify admin session is valid
+ * Verify admin session is valid from request cookies
+ */
+export function verifyAdminSessionFromCookies(cookieString: string | null): boolean {
+  try {
+    if (!cookieString) {
+      return false
+    }
+
+    // Parse cookies from header
+    const cookies = Object.fromEntries(
+      cookieString.split('; ').map(c => {
+        const [key, ...v] = c.split('=')
+        return [key, v.join('=')]
+      })
+    )
+
+    const sessionToken = cookies[ADMIN_SESSION_COOKIE]
+
+    if (!sessionToken) {
+      return false
+    }
+
+    const session: AdminSession = JSON.parse(
+      Buffer.from(sessionToken, 'base64').toString('utf-8')
+    )
+
+    if (!session.authenticated || session.expiresAt < Date.now()) {
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error verifying admin session:', error)
+    return false
+  }
+}
+
+/**
+ * Verify admin session is valid (legacy async version)
  */
 export async function verifyAdminSession(): Promise<boolean> {
   try {

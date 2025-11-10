@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminSession } from '@/lib/admin-auth'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { getPendingSubmissions } from '@/lib/pending-submissions'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify admin authentication
-    const isAuthenticated = await verifyAdminSession()
+    const cookieHeader = request.headers.get('cookie')
+    const isAuthenticated = verifyAdminSessionFromCookies(cookieHeader)
 
     if (!isAuthenticated) {
       return NextResponse.json(
