@@ -55,6 +55,7 @@ export async function createAdminSession(): Promise<string> {
 export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): boolean {
   try {
     if (!cookieOrAuth) {
+      console.log('No cookieOrAuth provided')
       return false
     }
 
@@ -63,6 +64,7 @@ export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): bool
     // Check if it's an Authorization header (Bearer token)
     if (cookieOrAuth.startsWith('Bearer ')) {
       sessionToken = cookieOrAuth.substring(7)
+      console.log('Extracted token from Bearer header')
     } else {
       // Parse cookies from header
       const cookies = Object.fromEntries(
@@ -72,9 +74,11 @@ export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): bool
         })
       )
       sessionToken = cookies[ADMIN_SESSION_COOKIE]
+      console.log('Extracted token from cookie:', sessionToken ? 'found' : 'not found')
     }
 
     if (!sessionToken) {
+      console.log('No session token found')
       return false
     }
 
@@ -82,16 +86,26 @@ export function verifyAdminSessionFromCookies(cookieOrAuth: string | null): bool
       Buffer.from(sessionToken, 'base64').toString('utf-8')
     ) as AdminSession & { password?: string }
 
+    console.log('Session decoded:', {
+      authenticated: session.authenticated,
+      expiresAt: new Date(session.expiresAt).toISOString(),
+      now: new Date().toISOString(),
+      expired: session.expiresAt < Date.now()
+    })
+
     // Verify not expired
     if (!session.authenticated || session.expiresAt < Date.now()) {
+      console.log('Session invalid or expired')
       return false
     }
 
     // Verify password if present
     if (session.password && !verifyAdminPassword(session.password)) {
+      console.log('Password verification failed')
       return false
     }
 
+    console.log('Session verified successfully')
     return true
   } catch (error) {
     console.error('Error verifying admin session:', error)

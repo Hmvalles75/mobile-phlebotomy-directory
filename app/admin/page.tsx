@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('admin_token')
+      console.log('Checking auth with token:', token ? 'exists' : 'missing')
       if (!token) {
         return
       }
@@ -70,11 +71,13 @@ export default function AdminDashboard() {
           'Authorization': `Bearer ${token}`
         }
       })
+      console.log('Auth check response status:', res.status)
       if (res.ok) {
         setIsAuthenticated(true)
         loadSubmissions()
       } else {
         // Token invalid, clear it
+        console.log('Auth check failed, clearing token')
         localStorage.removeItem('admin_token')
       }
     } catch (error) {
@@ -101,9 +104,11 @@ export default function AdminDashboard() {
       })
 
       const data = await res.json()
+      console.log('Login response:', data)
 
       if (data.success && data.token) {
         // Store token in localStorage
+        console.log('Storing token in localStorage')
         localStorage.setItem('admin_token', data.token)
         setPassword('')
         setIsAuthenticated(true)
@@ -112,6 +117,7 @@ export default function AdminDashboard() {
         setLoginError(data.error || 'Login failed')
       }
     } catch (error) {
+      console.error('Login error:', error)
       setLoginError('Network error. Please try again.')
     } finally {
       setLoading(false)
