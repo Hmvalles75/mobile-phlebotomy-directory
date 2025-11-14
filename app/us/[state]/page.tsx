@@ -11,6 +11,7 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { getMetrosByState } from '@/data/top-metros'
+import { SimpleAccordion } from '@/components/ui/Accordion'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -235,122 +236,119 @@ export default function StatePage({ params }: StatePageProps) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* SEO Content Sections */}
-        <div className="max-w-4xl mx-auto mb-12 space-y-8">
-          {/* Intro Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Mobile phlebotomy in {stateName}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
+        {/* SEO Content - Summary + Accordion */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+            <p className="text-gray-700 leading-relaxed mb-4">
               Mobile phlebotomists come directly to your home, office, or care facility in {stateName} to collect lab samples. Instead of driving to a draw site and waiting in line, a licensed phlebotomist meets you where you are and delivers your samples to the lab.
             </p>
             <p className="text-gray-700 leading-relaxed">
               MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy providers. Some providers on this page are verified, others are not. Always confirm details directly with the provider before scheduling a visit.
             </p>
-          </section>
+          </div>
 
-          {/* How it Works Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              How mobile blood draws work in {stateName}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              In most parts of the United States, including {stateName}, a mobile phlebotomist can collect blood, urine, or other specimens at home and transport them to a national or local lab. Many providers partner with major labs, while others work with functional medicine practices or independent laboratories.
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>Appointments are scheduled in a set time window at your home or workplace.</li>
-              <li>The phlebotomist verifies your identity and lab order, then collects the samples.</li>
-              <li>Samples are labeled and taken to a partner lab for testing.</li>
-              <li>Results are sent back to your ordering provider or the lab portal, not to MobilePhlebotomy.org.</li>
-            </ul>
-          </section>
+          <SimpleAccordion
+            summary={`Read the full guide to mobile phlebotomy in ${stateName}`}
+            defaultOpen={true}
+          >
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                How mobile blood draws work in {stateName}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                In most parts of the United States, including {stateName}, a mobile phlebotomist can collect blood, urine, or other specimens at home and transport them to a national or local lab. Many providers partner with major labs, while others work with functional medicine practices or independent laboratories.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Appointments are scheduled in a set time window at your home or workplace.</li>
+                <li>The phlebotomist verifies your identity and lab order, then collects the samples.</li>
+                <li>Samples are labeled and taken to a partner lab for testing.</li>
+                <li>Results are sent back to your ordering provider or the lab portal, not to MobilePhlebotomy.org.</li>
+              </ul>
+            </section>
 
-          {/* Pricing Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Typical mobile phlebotomy pricing in {stateName}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Pricing is set by each provider, but most mobile blood draw services in the U.S. charge a separate convenience fee for the home visit. Nationally, mobile phlebotomy visits often range from about <strong className="text-gray-900">$70 to $150 or more per visit</strong>, depending on travel distance, urgency, and the number of patients seen at the same address.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Large national lab services sometimes advertise flat in-home collection fees around <strong className="text-gray-900">$75–$80</strong> as an add-on to your lab test. Smaller independent services in {stateName} may charge more or less based on mileage, after-hours requests, or special handling.
-            </p>
-            <p className="text-sm text-gray-600 italic">
-              The prices above are general estimates, not quotes. Always confirm the exact fee, what is included, and any cancellation policy directly with the provider before you book.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Typical mobile phlebotomy pricing in {stateName}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Pricing is set by each provider, but most mobile blood draw services in the U.S. charge a separate convenience fee for the home visit. Nationally, mobile phlebotomy visits often range from about <strong className="text-gray-900">$70 to $150 or more per visit</strong>, depending on travel distance, urgency, and the number of patients seen at the same address.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Large national lab services sometimes advertise flat in-home collection fees around <strong className="text-gray-900">$75–$80</strong> as an add-on to your lab test. Smaller independent services in {stateName} may charge more or less based on mileage, after-hours requests, or special handling.
+              </p>
+              <p className="text-sm text-gray-600 italic">
+                The prices above are general estimates, not quotes. Always confirm the exact fee, what is included, and any cancellation policy directly with the provider before you book.
+              </p>
+            </section>
 
-          {/* Insurance Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Insurance coverage for mobile blood draws in {stateName}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Insurance coverage for mobile phlebotomy depends on your health plan, the lab that processes your samples, and whether the testing is medically necessary. In many cases, when a licensed healthcare provider orders your labs, the laboratory testing itself can be billed to insurance, while the <em>mobile visit fee</em> is paid out of pocket as a convenience charge.
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>You almost always need a valid lab order from a doctor, nurse practitioner, or other approved provider.</li>
-              <li>Some plans and Medicare programs may cover home draws for homebound or high-risk patients in {stateName}.</li>
-              <li>Many independent mobile services are self-pay only for the visit fee, even if the lab accepts your insurance.</li>
-            </ul>
-            <p className="text-sm text-gray-600 italic">
-              Always call your insurance and the lab listed on your order to confirm coverage, copays, and any home-draw rules before scheduling.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Insurance coverage for mobile blood draws in {stateName}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Insurance coverage for mobile phlebotomy depends on your health plan, the lab that processes your samples, and whether the testing is medically necessary. In many cases, when a licensed healthcare provider orders your labs, the laboratory testing itself can be billed to insurance, while the <em>mobile visit fee</em> is paid out of pocket as a convenience charge.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>You almost always need a valid lab order from a doctor, nurse practitioner, or other approved provider.</li>
+                <li>Some plans and Medicare programs may cover home draws for homebound or high-risk patients in {stateName}.</li>
+                <li>Many independent mobile services are self-pay only for the visit fee, even if the lab accepts your insurance.</li>
+              </ul>
+              <p className="text-sm text-gray-600 italic">
+                Always call your insurance and the lab listed on your order to confirm coverage, copays, and any home-draw rules before scheduling.
+              </p>
+            </section>
 
-          {/* Who Uses Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Who mobile phlebotomy helps in {stateName}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Mobile phlebotomy is especially helpful for patients in {stateName} who have trouble getting to a lab, are immunocompromised, have tight work schedules, or simply prefer the convenience of an at-home draw. It is also commonly used for:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>Homebound or post-surgery patients</li>
-              <li>Parents scheduling labs for children at home</li>
-              <li>Busy professionals who cannot leave work for a lab visit</li>
-              <li>Senior living communities and long-term care facilities</li>
-              <li>Wellness, hormone, or functional medicine testing</li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed">
-              Use the providers listed below to find a mobile phlebotomist serving {stateName}, or submit the request form to have available providers review your case and contact you directly.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Who mobile phlebotomy helps in {stateName}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Mobile phlebotomy is especially helpful for patients in {stateName} who have trouble getting to a lab, are immunocompromised, have tight work schedules, or simply prefer the convenience of an at-home draw. It is also commonly used for:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Homebound or post-surgery patients</li>
+                <li>Parents scheduling labs for children at home</li>
+                <li>Busy professionals who cannot leave work for a lab visit</li>
+                <li>Senior living communities and long-term care facilities</li>
+                <li>Wellness, hormone, or functional medicine testing</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed">
+                Use the providers listed below to find a mobile phlebotomist serving {stateName}, or submit the request form to have available providers review your case and contact you directly.
+              </p>
+            </section>
 
-          {/* Major Cities in State - Internal Linking */}
-          {(() => {
-            const metros = getMetrosByState(stateAbbr)
-            if (metros.length > 0) {
-              return (
-                <section className="bg-white rounded-lg shadow-sm p-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Major cities we serve in {stateName}
-                  </h2>
-                  <p className="text-gray-700 mb-6">
-                    Find mobile phlebotomy providers in these {stateName} metro areas:
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {metros.map((metro) => (
-                      <Link
-                        key={metro.slug}
-                        href={`/us/metro/${metro.slug}`}
-                        className="flex items-center px-4 py-3 bg-gray-50 hover:bg-primary-50 rounded-lg transition-colors group"
-                      >
-                        <span className="text-primary-600 mr-2 group-hover:text-primary-700">→</span>
-                        <span className="text-gray-900 font-medium group-hover:text-primary-700">
-                          {metro.city}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              )
-            }
-            return null
-          })()}
+            {/* Major Cities in State - Internal Linking */}
+            {(() => {
+              const metros = getMetrosByState(stateAbbr)
+              if (metros.length > 0) {
+                return (
+                  <section className="mt-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                      Major cities we serve in {stateName}
+                    </h2>
+                    <p className="text-gray-700 mb-6">
+                      Find mobile phlebotomy providers in these {stateName} metro areas:
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {metros.map((metro) => (
+                        <Link
+                          key={metro.slug}
+                          href={`/us/metro/${metro.slug}`}
+                          className="flex items-center px-4 py-3 bg-gray-50 hover:bg-primary-50 rounded-lg transition-colors group"
+                        >
+                          <span className="text-primary-600 mr-2 group-hover:text-primary-700">→</span>
+                          <span className="text-gray-900 font-medium group-hover:text-primary-700">
+                            {metro.city}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )
+              }
+              return null
+            })()}
+          </SimpleAccordion>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">

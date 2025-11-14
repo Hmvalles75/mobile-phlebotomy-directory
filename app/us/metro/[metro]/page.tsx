@@ -9,6 +9,7 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { topMetroAreas, getMetroBySlug, type MetroArea } from '@/data/top-metros'
 import { ProviderListSchema, ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
+import { SimpleAccordion } from '@/components/ui/Accordion'
 
 interface MetroPageProps {
   params: {
@@ -259,90 +260,87 @@ export default function MetroPage({ params }: MetroPageProps) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* SEO Content Sections */}
-        <div className="max-w-4xl mx-auto mb-12 space-y-8">
-          {/* Intro Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Mobile phlebotomy in {metro.city}, {metro.state}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
+        {/* SEO Content - Summary + Accordion */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+            <p className="text-gray-700 leading-relaxed mb-4">
               Mobile phlebotomists serve patients throughout the {metro.city} metropolitan area, bringing lab collection services directly to homes, offices, and assisted living facilities. Rather than traveling to a draw station and waiting, residents of {metro.city} can schedule a licensed phlebotomist to visit at a convenient time and location.
             </p>
             <p className="text-gray-700 leading-relaxed">
               This directory lists mobile phlebotomy providers operating in the {metro.city} area. Some are verified and registered, while others are unverified public listings. We recommend confirming credentials, insurance acceptance, and pricing directly with any provider before booking an appointment.
             </p>
-          </section>
+          </div>
 
-          {/* How it Works Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              How at-home blood draws work in {metro.city}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Across {metro.city} and the greater {metro.state} area, mobile phlebotomy providers collect blood, urine, and other specimens in patients&apos; homes or workplaces, then deliver samples to partner laboratories for analysis. Providers typically work with national chains such as Quest or LabCorp, though some partner with regional or specialty labs.
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>You schedule an appointment for a specific time window at your preferred location in {metro.city}.</li>
-              <li>The phlebotomist arrives, confirms your identity and lab orders, and collects the required samples.</li>
-              <li>Specimens are properly labeled and transported to the designated laboratory.</li>
-              <li>Test results are returned to your ordering physician or posted to your lab portal—not shared with this directory.</li>
-            </ul>
-          </section>
+          <SimpleAccordion
+            summary={`Read the full guide to mobile phlebotomy in ${metro.city}`}
+            defaultOpen={true}
+          >
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                How at-home blood draws work in {metro.city}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Across {metro.city} and the greater {metro.state} area, mobile phlebotomy providers collect blood, urine, and other specimens in patients&apos; homes or workplaces, then deliver samples to partner laboratories for analysis. Providers typically work with national chains such as Quest or LabCorp, though some partner with regional or specialty labs.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>You schedule an appointment for a specific time window at your preferred location in {metro.city}.</li>
+                <li>The phlebotomist arrives, confirms your identity and lab orders, and collects the required samples.</li>
+                <li>Specimens are properly labeled and transported to the designated laboratory.</li>
+                <li>Test results are returned to your ordering physician or posted to your lab portal—not shared with this directory.</li>
+              </ul>
+            </section>
 
-          {/* Pricing Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Typical mobile phlebotomy costs in {metro.city}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Each provider sets their own rates, but mobile blood draw services in {metro.city} generally charge a separate visit fee on top of any laboratory testing costs. Nationally, these convenience fees typically fall between <strong className="text-gray-900">$70 and $150 per appointment</strong>, with variations based on distance traveled, appointment urgency, and whether multiple household members are being drawn.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Larger national providers often publish standard home-visit rates near <strong className="text-gray-900">$75–$80</strong>, while smaller independent services in the {metro.city} region may adjust pricing for factors like mileage from their base, weekend or evening visits, or specialized specimen handling requirements.
-            </p>
-            <p className="text-sm text-gray-600 italic">
-              These figures are illustrative averages and not guaranteed quotes. Contact providers directly to confirm their exact fees, included services, and cancellation policies before you commit to an appointment.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Typical mobile phlebotomy costs in {metro.city}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Each provider sets their own rates, but mobile blood draw services in {metro.city} generally charge a separate visit fee on top of any laboratory testing costs. Nationally, these convenience fees typically fall between <strong className="text-gray-900">$70 and $150 per appointment</strong>, with variations based on distance traveled, appointment urgency, and whether multiple household members are being drawn.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Larger national providers often publish standard home-visit rates near <strong className="text-gray-900">$75–$80</strong>, while smaller independent services in the {metro.city} region may adjust pricing for factors like mileage from their base, weekend or evening visits, or specialized specimen handling requirements.
+              </p>
+              <p className="text-sm text-gray-600 italic">
+                These figures are illustrative averages and not guaranteed quotes. Contact providers directly to confirm their exact fees, included services, and cancellation policies before you commit to an appointment.
+              </p>
+            </section>
 
-          {/* Insurance Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Insurance and medical orders in {metro.city}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Whether your insurance covers mobile phlebotomy in {metro.city} depends on your specific plan, the laboratory processing your tests, and the medical necessity of the work. Typically, the <em>laboratory testing</em> can be billed to insurance when ordered by a licensed provider, but the <em>mobile collection fee</em> is often an out-of-pocket convenience charge.
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>Most services require a valid lab requisition from a physician or other authorized healthcare provider.</li>
-              <li>Medicare and some private plans may cover in-home draws for homebound patients or those meeting specific medical criteria in {metro.city}.</li>
-              <li>Many mobile phlebotomy services operate on a cash-pay basis for the visit fee, even when the lab itself is in-network with your insurance.</li>
-            </ul>
-            <p className="text-sm text-gray-600 italic">
-              Before scheduling, verify coverage details with both your insurance carrier and the laboratory named on your requisition to understand any copays, deductibles, or home-visit restrictions.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Insurance and medical orders in {metro.city}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Whether your insurance covers mobile phlebotomy in {metro.city} depends on your specific plan, the laboratory processing your tests, and the medical necessity of the work. Typically, the <em>laboratory testing</em> can be billed to insurance when ordered by a licensed provider, but the <em>mobile collection fee</em> is often an out-of-pocket convenience charge.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Most services require a valid lab requisition from a physician or other authorized healthcare provider.</li>
+                <li>Medicare and some private plans may cover in-home draws for homebound patients or those meeting specific medical criteria in {metro.city}.</li>
+                <li>Many mobile phlebotomy services operate on a cash-pay basis for the visit fee, even when the lab itself is in-network with your insurance.</li>
+              </ul>
+              <p className="text-sm text-gray-600 italic">
+                Before scheduling, verify coverage details with both your insurance carrier and the laboratory named on your requisition to understand any copays, deductibles, or home-visit restrictions.
+              </p>
+            </section>
 
-          {/* Who Uses Section */}
-          <section className="bg-white rounded-lg shadow-sm p-8 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Who benefits from mobile phlebotomy in {metro.city}
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              Residents of {metro.city} choose mobile phlebotomy for its convenience and accessibility. The service is particularly valuable for individuals who face challenges traveling to traditional lab locations, as well as those seeking to minimize exposure in clinical settings or coordinate testing around demanding schedules. Common use cases include:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              <li>Patients recovering from surgery or managing chronic conditions at home</li>
-              <li>Families arranging pediatric lab work in a familiar, comfortable environment</li>
-              <li>Working professionals who cannot take time off for lab visits</li>
-              <li>Residents of senior communities, assisted living, or long-term care facilities</li>
-              <li>Individuals pursuing wellness panels, hormone testing, or functional medicine evaluations</li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed">
-              Browse the providers listed below to identify mobile phlebotomists serving {metro.city}, or use the inquiry form to request quotes and availability from multiple providers at once.
-            </p>
-          </section>
+            <section className="space-y-4 mt-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Who benefits from mobile phlebotomy in {metro.city}
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                Residents of {metro.city} choose mobile phlebotomy for its convenience and accessibility. The service is particularly valuable for individuals who face challenges traveling to traditional lab locations, as well as those seeking to minimize exposure in clinical settings or coordinate testing around demanding schedules. Common use cases include:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Patients recovering from surgery or managing chronic conditions at home</li>
+                <li>Families arranging pediatric lab work in a familiar, comfortable environment</li>
+                <li>Working professionals who cannot take time off for lab visits</li>
+                <li>Residents of senior communities, assisted living, or long-term care facilities</li>
+                <li>Individuals pursuing wellness panels, hormone testing, or functional medicine evaluations</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed">
+                Browse the providers listed below to identify mobile phlebotomists serving {metro.city}, or use the inquiry form to request quotes and availability from multiple providers at once.
+              </p>
+            </section>
+          </SimpleAccordion>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
