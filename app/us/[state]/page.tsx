@@ -561,6 +561,19 @@ export default function StatePage({ params }: StatePageProps) {
                                   {provider.address?.city && (
                                     <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
                                   )}
+                                  {provider.website && (
+                                    <div>
+                                      🌐{' '}
+                                      <a
+                                        href={provider.website}
+                                        target="_blank"
+                                        rel="noopener noreferrer nofollow"
+                                        className="text-gray-600 hover:text-primary-600 underline text-xs"
+                                      >
+                                        Website
+                                      </a>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -672,6 +685,19 @@ export default function StatePage({ params }: StatePageProps) {
                             {provider.address?.city && (
                               <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
                             )}
+                            {provider.website && (
+                              <div>
+                                🌐{' '}
+                                <a
+                                  href={provider.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer nofollow"
+                                  className="text-gray-600 hover:text-primary-600 underline text-xs"
+                                >
+                                  Website
+                                </a>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -760,6 +786,19 @@ export default function StatePage({ params }: StatePageProps) {
                             )}
                             {provider.rating && (
                               <span>⭐ {provider.rating}</span>
+                            )}
+                            {provider.website && (
+                              <span>
+                                🌐{' '}
+                                <a
+                                  href={provider.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer nofollow"
+                                  className="text-gray-600 hover:text-primary-600 underline text-xs"
+                                >
+                                  Website
+                                </a>
+                              </span>
                             )}
                           </div>
                         </div>

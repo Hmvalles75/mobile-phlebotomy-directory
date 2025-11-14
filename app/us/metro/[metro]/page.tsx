@@ -490,9 +490,14 @@ export default function MetroPage({ params }: MetroPageProps) {
                           </div>
                           {provider.website && (
                             <div>
-                              <span className="font-medium">Website:</span>{' '}
-                              <a href={provider.website} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
-                                {provider.website.replace('https://', '')}
+                              🌐{' '}
+                              <a
+                                href={provider.website}
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                                className="text-gray-600 hover:text-primary-600 underline text-xs"
+                              >
+                                Website
                               </a>
                             </div>
                           )}
