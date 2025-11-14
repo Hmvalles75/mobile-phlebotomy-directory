@@ -10,6 +10,7 @@ import { topMetroAreas, getMetroBySlug, type MetroArea } from '@/data/top-metros
 import { ProviderListSchema, ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { SimpleAccordion } from '@/components/ui/Accordion'
+import { ProviderActions } from '@/components/ui/ProviderActions'
 
 interface MetroPageProps {
   params: {
@@ -498,12 +499,11 @@ export default function MetroPage({ params }: MetroPageProps) {
                         </div>
 
                         <div className="flex justify-center mt-4">
-                          <Link
-                            href={`/provider/${provider.slug}`}
-                            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                          >
-                            View mobile phlebotomist in {metro.city} →
-                          </Link>
+                          <ProviderActions
+                            provider={provider}
+                            currentLocation={metro.city}
+                            variant="compact"
+                          />
                         </div>
                       </div>
                     )
