@@ -222,7 +222,7 @@ export default function HomePage() {
         <div className="relative container py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Professional <span className="text-primary-400">At-Home Blood Draws</span> Nationwide
+              Professional <span className="text-primary-400">Mobile Phlebotomy & At-Home Blood Draws</span> Nationwide
             </h1>
             <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
               Skip the clinic. Licensed phlebotomists come to you for safe, convenient blood collection.
