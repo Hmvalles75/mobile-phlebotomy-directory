@@ -299,6 +299,8 @@ export function generateLocalBusinessSchema(
 
 /**
  * Generate Service schema for mobile phlebotomy service
+ * NOTE: Does NOT include aggregateRating - use this for service-specific schema only
+ * For provider ratings, use generateLocalBusinessSchema on individual provider pages
  */
 export function generateServiceSchema(
   provider: Provider,
@@ -333,13 +335,8 @@ export function generateServiceSchema(
     validFrom: new Date().toISOString().split('T')[0]
   }
 
-  if (provider.rating && provider.reviewsCount) {
-    schema.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: provider.rating,
-      reviewCount: provider.reviewsCount
-    }
-  }
+  // REMOVED: aggregateRating to prevent duplicate rating schema issues
+  // Ratings should only be on individual provider pages via generateLocalBusinessSchema
 
   return schema
 }
@@ -394,6 +391,8 @@ export function generateReviewSchema(
 
 /**
  * Generate ItemList schema for provider listings
+ * NOTE: Does NOT include aggregateRating to avoid duplicate rating errors in Google Search Console
+ * Ratings should only appear on individual provider pages, not on listing pages
  */
 export function generateProviderListSchema(
   providers: Provider[],
@@ -424,11 +423,7 @@ export function generateProviderListSchema(
           addressRegion: provider.address.state,
           postalCode: provider.address.zip
         } : undefined,
-        aggregateRating: provider.rating && provider.reviewsCount ? {
-          '@type': 'AggregateRating',
-          ratingValue: provider.rating,
-          reviewCount: provider.reviewsCount
-        } : undefined,
+        // REMOVED: aggregateRating to prevent "multiple aggregate ratings" error
         priceRange: '$$'
       }
     }))

@@ -746,7 +746,6 @@ export default function CityPage({ params }: PageProps) {
                   <ProviderActions
                     provider={provider}
                     currentLocation={`${cityName}, ${state}`}
-                    showStructuredData={true}
                     variant="compact"
                   />
                   <Link

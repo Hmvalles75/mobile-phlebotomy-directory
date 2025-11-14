@@ -144,12 +144,9 @@ export default function MetroPage({ params }: MetroPageProps) {
     "serviceProvider": providers.slice(0, 5).map(provider => ({
       "@type": "MedicalBusiness",
       "name": provider.name,
-      "telephone": provider.phone,
-      "aggregateRating": provider.rating ? {
-        "@type": "AggregateRating",
-        "ratingValue": provider.rating,
-        "reviewCount": provider.reviewsCount || 1
-      } : undefined
+      "telephone": provider.phone
+      // REMOVED aggregateRating to prevent "multiple aggregate ratings" error in Google Search Console
+      // Ratings should only appear on individual provider detail pages
     }))
   }
 

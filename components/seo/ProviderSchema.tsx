@@ -81,7 +81,24 @@ export function ProviderListSchema({
     itemListElement: providers.map((provider, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      item: generateLocalBusinessSchema(provider)
+      item: {
+        '@type': 'MedicalBusiness',
+        '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/provider/${provider.id}`,
+        name: provider.name,
+        description: provider.description || `Mobile phlebotomy services by ${provider.name}`,
+        telephone: provider.phone,
+        url: provider.website,
+        address: provider.address ? {
+          '@type': 'PostalAddress',
+          addressLocality: provider.address.city,
+          addressRegion: provider.address.state,
+          postalCode: provider.address.zip,
+          addressCountry: 'US'
+        } : undefined,
+        priceRange: '$$'
+        // REMOVED: aggregateRating to prevent "multiple aggregate ratings" error
+        // Ratings should only appear on individual provider detail pages
+      }
     }))
   }
 
