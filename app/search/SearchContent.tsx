@@ -303,12 +303,15 @@ params.append('sort', sortBy)
                         provider={provider}
                         variant="compact"
                         currentLocation="search"
+                        viewDetailsText={provider.address?.city && provider.address?.state
+                          ? `View provider in ${provider.address.city}, ${provider.address.state}`
+                          : `View mobile phlebotomy provider`}
                       />
                       <Link
                         href={`/provider/${provider.slug}`}
                         className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                       >
-                        View Details →
+                        Full Details →
                       </Link>
                     </div>
                   </div>

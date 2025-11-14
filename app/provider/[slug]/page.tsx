@@ -140,6 +140,18 @@ export default async function ProviderDetailPage({ params }: PageProps) {
               <span className="text-gray-900">{provider.name}</span>
             </nav>
 
+            {/* Backlink to State Page */}
+            {provider.state && (
+              <div className="mb-4">
+                <Link
+                  href={`/us/${provider.state.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 hover:underline"
+                >
+                  ← Back to mobile phlebotomists in {provider.state}
+                </Link>
+              </div>
+            )}
+
             <div className="flex flex-col md:flex-row gap-6">
               {/* Logo/Profile Image */}
               <div className="flex-shrink-0">

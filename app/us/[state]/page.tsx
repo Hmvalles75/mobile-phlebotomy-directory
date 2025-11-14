@@ -572,6 +572,7 @@ export default function StatePage({ params }: StatePageProps) {
                               provider={provider}
                               currentLocation={stateName}
                               className="justify-start"
+                              viewDetailsText={`View mobile phlebotomist in ${stateName}`}
                             />
                           </div>
                           )
@@ -683,6 +684,7 @@ export default function StatePage({ params }: StatePageProps) {
                         provider={provider}
                         currentLocation={stateName}
                         className="justify-start"
+                        viewDetailsText={`View mobile phlebotomist in ${stateName}`}
                       />
                     </div>
                     )
@@ -772,6 +774,7 @@ export default function StatePage({ params }: StatePageProps) {
                         provider={provider}
                         currentLocation={stateName}
                         className="justify-start"
+                        viewDetailsText={`View mobile phlebotomist in ${stateName}`}
                       />
                     </div>
                     )

@@ -504,7 +504,7 @@ export default function MetroPage({ params }: MetroPageProps) {
                             href={`/provider/${provider.slug}`}
                             className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
                           >
-                            View Provider Details →
+                            View mobile phlebotomist in {metro.city} →
                           </Link>
                         </div>
                       </div>

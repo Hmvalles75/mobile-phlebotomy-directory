@@ -18,6 +18,7 @@ interface ProviderActionsProps {
   showStructuredData?: boolean
   className?: string
   hideViewDetails?: boolean
+  viewDetailsText?: string // Custom anchor text for SEO
 }
 
 export function ProviderActions({
@@ -26,7 +27,8 @@ export function ProviderActions({
   variant = 'default',
   showStructuredData = false,
   className = '',
-  hideViewDetails = false
+  hideViewDetails = false,
+  viewDetailsText
 }: ProviderActionsProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [contactInfo, setContactInfo] = useState(() => formatProviderContact(provider))
@@ -62,7 +64,7 @@ export function ProviderActions({
           className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
           aria-label={`View details for ${provider.name}`}
         >
-          View Details
+          {viewDetailsText || 'View Details'}
         </Link>
 
         {provider.website && (
@@ -109,7 +111,7 @@ export function ProviderActions({
               className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
               aria-label={`View detailed information for ${provider.name}`}
             >
-              View Provider Details
+              {viewDetailsText || 'View Provider Details'}
             </Link>
           )}
 
@@ -161,7 +163,7 @@ export function ProviderActions({
           data-provider-action="view-details"
           data-provider-id={provider.id}
         >
-          View Provider Details
+          {viewDetailsText || 'View Provider Details'}
         </Link>
 
         {provider.website && (
