@@ -62,21 +62,21 @@ export async function POST(request: NextRequest) {
       contactName: body.contactName,
       email: body.email,
       phone: body.phone,
-      website: body.website,
-      description: body.description || '',
-      address: body.address,
+      website: body.website || undefined,
+      description: body.description || 'Mobile phlebotomy services',
+      address: body.address || undefined,
       city: body.city,
       state: body.state,
-      zipCode: body.zipCode,
-      serviceArea: body.serviceArea,
-      yearsExperience: body.yearsExperience,
-      licensed: body.licensed,
-      insurance: body.insurance,
-      certifications: body.certifications,
-      specialties: body.specialties,
-      emergencyAvailable: body.emergencyAvailable,
-      weekendAvailable: body.weekendAvailable,
-      logo: body.logo,
+      zipCode: body.zipCode || undefined,
+      serviceArea: body.serviceArea || undefined,
+      yearsExperience: body.yearsExperience || undefined,
+      licensed: body.licensed === true,
+      insurance: body.insurance === true,
+      certifications: body.certifications || undefined,
+      specialties: body.specialties || undefined,
+      emergencyAvailable: body.emergencyAvailable === true,
+      weekendAvailable: body.weekendAvailable === true,
+      logo: body.logo || undefined,
       ipAddress: 'admin-created',
       userAgent: 'admin-dashboard'
     })
@@ -89,8 +89,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating submission:', error)
+    // Send detailed error message in development
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }
