@@ -57,6 +57,28 @@ export default function AdminDashboard() {
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deployLoading, setDeployLoading] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [formData, setFormData] = useState({
+    businessName: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    website: '',
+    description: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    serviceArea: '',
+    yearsExperience: '',
+    licensed: true,
+    insurance: true,
+    certifications: '',
+    specialties: '',
+    emergencyAvailable: false,
+    weekendAvailable: false,
+    logo: ''
+  })
 
   const checkAuth = async () => {
     try {
@@ -249,6 +271,59 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleAddProvider = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch('/api/admin/submissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert('Provider added successfully! It will appear in the submissions list.')
+        // Reset form
+        setFormData({
+          businessName: '',
+          contactName: '',
+          email: '',
+          phone: '',
+          website: '',
+          description: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          serviceArea: '',
+          yearsExperience: '',
+          licensed: true,
+          insurance: true,
+          certifications: '',
+          specialties: '',
+          emergencyAvailable: false,
+          weekendAvailable: false,
+          logo: ''
+        })
+        setShowAddForm(false)
+        loadSubmissions()
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (error) {
+      alert('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Login screen
   if (!isAuthenticated) {
     return (
@@ -301,6 +376,12 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <div className="flex gap-3">
               <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="px-4 py-2 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
+              >
+                {showAddForm ? '✕ Cancel' : '+ Add Provider'}
+              </button>
+              <button
                 onClick={handleDeploy}
                 disabled={deployLoading || approvedSubmissions.length === 0}
                 className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -334,6 +415,207 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Add Provider Form */}
+        {showAddForm && (
+          <div className="mb-8 bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Provider</h2>
+            <form onSubmit={handleAddProvider} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Business Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.businessName}
+                    onChange={(e) => setFormData({...formData, businessName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.contactName}
+                    onChange={(e) => setFormData({...formData, contactName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({...formData, website: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., CA"
+                    value={formData.state}
+                    onChange={(e) => setFormData({...formData, state: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                  <input
+                    type="text"
+                    value={formData.zipCode}
+                    onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Service Area</label>
+                  <input
+                    type="text"
+                    value={formData.serviceArea}
+                    onChange={(e) => setFormData({...formData, serviceArea: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Years Experience</label>
+                  <input
+                    type="text"
+                    value={formData.yearsExperience}
+                    onChange={(e) => setFormData({...formData, yearsExperience: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+                  <input
+                    type="text"
+                    value={formData.certifications}
+                    onChange={(e) => setFormData({...formData, certifications: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Specialties</label>
+                  <input
+                    type="text"
+                    value={formData.specialties}
+                    onChange={(e) => setFormData({...formData, specialties: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div className="flex gap-6">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.licensed}
+                    onChange={(e) => setFormData({...formData, licensed: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Licensed</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.insurance}
+                    onChange={(e) => setFormData({...formData, insurance: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Insured</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.emergencyAvailable}
+                    onChange={(e) => setFormData({...formData, emergencyAvailable: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Emergency Available</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.weekendAvailable}
+                    onChange={(e) => setFormData({...formData, weekendAvailable: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Weekend Available</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Adding...' : 'Add Provider'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         <div className="grid md:grid-cols-2 gap-8">
           {/* Submissions List */}
           <div>
