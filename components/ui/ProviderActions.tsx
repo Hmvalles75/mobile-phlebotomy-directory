@@ -33,6 +33,35 @@ export function ProviderActions({
   const [isLoading, setIsLoading] = useState(false)
   const [contactInfo, setContactInfo] = useState(() => formatProviderContact(provider))
 
+  // Helper function to create smart button text
+  const getButtonText = () => {
+    if (viewDetailsText) return viewDetailsText
+
+    // For compact variant, just say "View Details"
+    if (variant === 'compact') return 'View Details'
+
+    // For other variants, use a shortened name if too long
+    const name = provider.name
+
+    // If name is short enough, use full name
+    if (name.length <= 30) {
+      return `View ${name}`
+    }
+
+    // For long names, try to extract the key part
+    // Remove common suffixes
+    const shortName = name
+      .replace(/\s+(LLC|Inc\.|Inc|Corp\.|Corporation|Company|Co\.|Services|Service|Mobile Phlebotomy|Phlebotomy)$/gi, '')
+      .trim()
+
+    // If still too long, truncate intelligently
+    if (shortName.length > 30) {
+      return 'View Provider Details'
+    }
+
+    return `View ${shortName}`
+  }
+
   const handleContact = async () => {
     setIsLoading(true)
     try {
@@ -64,7 +93,7 @@ export function ProviderActions({
           className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
           aria-label={`View details for ${provider.name}`}
         >
-          {viewDetailsText || `View ${provider.name}`}
+          {getButtonText()}
         </Link>
 
         {provider.website && (
@@ -111,7 +140,7 @@ export function ProviderActions({
               className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
               aria-label={`View detailed information for ${provider.name}`}
             >
-              {viewDetailsText || `View ${provider.name}`}
+              {getButtonText()}
             </Link>
           )}
 
@@ -163,7 +192,7 @@ export function ProviderActions({
           data-provider-action="view-details"
           data-provider-id={provider.id}
         >
-          {viewDetailsText || `View ${provider.name}`}
+          {getButtonText()}
         </Link>
 
         {provider.website && (
