@@ -743,7 +743,6 @@ export default function CityPage({ params }: PageProps) {
                     currentLocation={`${cityName}, ${state}`}
                     showStructuredData={true}
                     variant="compact"
-                    viewDetailsText={`View provider in ${cityName}`}
                   />
                   <Link
                     href={`/provider/${provider.slug}`}
