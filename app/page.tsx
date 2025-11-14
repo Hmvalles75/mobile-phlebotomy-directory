@@ -258,6 +258,16 @@ export default function HomePage() {
               enableZipCodeRouting={true}
             />
 
+            {/* Link to comprehensive guide */}
+            <div className="mb-4">
+              <Link
+                href="/mobile-phlebotomy-near-me"
+                className="text-white/90 hover:text-white text-sm underline hover:no-underline transition-all"
+              >
+                Learn more about mobile phlebotomy near you →
+              </Link>
+            </div>
+
             <div className="flex flex-wrap justify-center gap-2">
               {topServices.map((service) => (
                 <Link

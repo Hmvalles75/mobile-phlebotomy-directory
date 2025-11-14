@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'Unknown'
 
     // Save as pending submission for admin review
-    const submission = addPendingSubmission({
+    const submission = await addPendingSubmission({
       businessName: formData.businessName,
       contactName: formData.contactName,
       email: formData.email,

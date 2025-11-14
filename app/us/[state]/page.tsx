@@ -213,7 +213,7 @@ export default function StatePage({ params }: StatePageProps) {
       {/* SEO-Optimized Breadcrumb Navigation */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
-          <BreadcrumbNav 
+          <BreadcrumbNav
             items={[
               { name: 'Home', url: '/' },
               { name: stateName, url: `/us/${stateSlug}` }
@@ -221,7 +221,19 @@ export default function StatePage({ params }: StatePageProps) {
           />
         </div>
       </div>
-      
+
+      {/* Backlink to National Guide */}
+      <div className="bg-gradient-to-r from-primary-50 to-white border-b">
+        <div className="container mx-auto px-4 py-3">
+          <Link
+            href="/mobile-phlebotomy-near-me"
+            className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 hover:underline"
+          >
+            ← Back to the national mobile phlebotomy guide
+          </Link>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8">
         {/* SEO Content Sections */}
         <div className="max-w-4xl mx-auto mb-12 space-y-8">
