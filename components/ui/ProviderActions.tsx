@@ -64,7 +64,7 @@ export function ProviderActions({
           className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
           aria-label={`View details for ${provider.name}`}
         >
-          {viewDetailsText || 'View Details'}
+          {viewDetailsText || `View ${provider.name}`}
         </Link>
 
         {provider.website && (
@@ -111,7 +111,7 @@ export function ProviderActions({
               className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
               aria-label={`View detailed information for ${provider.name}`}
             >
-              {viewDetailsText || 'View Provider Details'}
+              {viewDetailsText || `View ${provider.name}`}
             </Link>
           )}
 
@@ -163,7 +163,7 @@ export function ProviderActions({
           data-provider-action="view-details"
           data-provider-id={provider.id}
         >
-          {viewDetailsText || 'View Provider Details'}
+          {viewDetailsText || `View ${provider.name}`}
         </Link>
 
         {provider.website && (
