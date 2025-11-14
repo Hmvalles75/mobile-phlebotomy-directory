@@ -161,7 +161,7 @@ export default function HomePage() {
         name: 'How much does mobile phlebotomy cost?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Costs vary by location and provider, typically ranging from $25-75 for the collection fee, plus laboratory testing costs. Many insurance plans cover the service when medically necessary. The convenience fee is often worth it for the time saved and comfort of at-home service.'
+          text: 'Costs vary by location and provider, but most mobile phlebotomy services charge a separate convenience fee for the at-home visit. Typical collection fees range from about $60–150 per visit, depending on your area, appointment time, and how complex the tests are. Laboratory processing fees are usually billed separately by the lab.'
         }
       },
       {
@@ -296,7 +296,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center justify-center gap-2 text-sm md:text-base">
               <span className="text-blue-600 text-xl">🏥</span>
-              <span className="text-gray-700 font-medium">Most insurance accepted</span>
+              <span className="text-gray-700 font-medium">Insurance-friendly providers available</span>
             </div>
             <div className="flex items-center justify-center gap-2 text-sm md:text-base">
               <span className="text-purple-600 text-xl">🏠</span>
@@ -684,9 +684,11 @@ export default function HomePage() {
                     How much does mobile phlebotomy cost?
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Costs vary by location and provider, typically ranging from $25-75 for the 
-                    collection fee, plus laboratory testing costs. Many insurance plans cover 
-                    the service when medically necessary. The convenience fee is often worth 
+                    Costs vary by location and provider, but most mobile phlebotomy services charge
+                    a separate convenience fee for the at-home visit. Typical collection fees range
+                    from about $60–150 per visit, depending on your area, appointment time, and how
+                    complex the tests are. Laboratory processing fees are usually billed separately by the lab.
+                    The convenience fee is often worth 
                     it for the time saved and comfort of at-home service.
                   </p>
                 </div>

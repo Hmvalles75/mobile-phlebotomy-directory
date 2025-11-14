@@ -69,7 +69,7 @@ export default function RootLayout({
     "name": "MobilePhlebotomy.org",
     "url": process.env.NEXT_PUBLIC_SITE_URL || "https://mobilephlebotomy.org",
     "logo": `${process.env.NEXT_PUBLIC_SITE_URL || "https://mobilephlebotomy.org"}/logo.png`,
-    "description": "The nation's largest directory of mobile phlebotomy services. Find certified, insured providers for at-home blood draws and lab collections near you.",
+    "description": "A national directory of mobile phlebotomy services. Find certified, insured providers for at-home blood draws and lab collections near you.",
     "foundingDate": "2024",
     "serviceType": "Medical Directory Service",
     "areaServed": {
