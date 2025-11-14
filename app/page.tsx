@@ -500,6 +500,123 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Browse by State Section - Internal Linking */}
+      <section id="browse-by-state" className="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Find Mobile Phlebotomy by State
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Browse certified mobile blood draw services across all 50 states. Find licensed phlebotomists in your area.
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+            {/* High-Volume States (Top 10) */}
+            <div className="mb-12">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                Popular States
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {[
+                  { name: 'California', slug: 'california', abbr: 'CA' },
+                  { name: 'Texas', slug: 'texas', abbr: 'TX' },
+                  { name: 'Florida', slug: 'florida', abbr: 'FL' },
+                  { name: 'New York', slug: 'new-york', abbr: 'NY' },
+                  { name: 'Pennsylvania', slug: 'pennsylvania', abbr: 'PA' },
+                  { name: 'Illinois', slug: 'illinois', abbr: 'IL' },
+                  { name: 'Ohio', slug: 'ohio', abbr: 'OH' },
+                  { name: 'Georgia', slug: 'georgia', abbr: 'GA' },
+                  { name: 'North Carolina', slug: 'north-carolina', abbr: 'NC' },
+                  { name: 'Michigan', slug: 'michigan', abbr: 'MI' }
+                ].map((state) => (
+                  <Link
+                    key={state.slug}
+                    href={`/us/${state.slug}`}
+                    className="flex items-center justify-between px-4 py-3 bg-white hover:bg-primary-50 rounded-lg border border-gray-200 transition-all group shadow-sm hover:shadow-md"
+                  >
+                    <span className="font-medium text-gray-900 group-hover:text-primary-700">
+                      {state.name}
+                    </span>
+                    <span className="text-primary-600 group-hover:text-primary-700">→</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* All States A-Z */}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                All States
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 text-sm">
+                {[
+                  { name: 'Alabama', slug: 'alabama' },
+                  { name: 'Alaska', slug: 'alaska' },
+                  { name: 'Arizona', slug: 'arizona' },
+                  { name: 'Arkansas', slug: 'arkansas' },
+                  { name: 'California', slug: 'california' },
+                  { name: 'Colorado', slug: 'colorado' },
+                  { name: 'Connecticut', slug: 'connecticut' },
+                  { name: 'Delaware', slug: 'delaware' },
+                  { name: 'Florida', slug: 'florida' },
+                  { name: 'Georgia', slug: 'georgia' },
+                  { name: 'Hawaii', slug: 'hawaii' },
+                  { name: 'Idaho', slug: 'idaho' },
+                  { name: 'Illinois', slug: 'illinois' },
+                  { name: 'Indiana', slug: 'indiana' },
+                  { name: 'Iowa', slug: 'iowa' },
+                  { name: 'Kansas', slug: 'kansas' },
+                  { name: 'Kentucky', slug: 'kentucky' },
+                  { name: 'Louisiana', slug: 'louisiana' },
+                  { name: 'Maine', slug: 'maine' },
+                  { name: 'Maryland', slug: 'maryland' },
+                  { name: 'Massachusetts', slug: 'massachusetts' },
+                  { name: 'Michigan', slug: 'michigan' },
+                  { name: 'Minnesota', slug: 'minnesota' },
+                  { name: 'Mississippi', slug: 'mississippi' },
+                  { name: 'Missouri', slug: 'missouri' },
+                  { name: 'Montana', slug: 'montana' },
+                  { name: 'Nebraska', slug: 'nebraska' },
+                  { name: 'Nevada', slug: 'nevada' },
+                  { name: 'New Hampshire', slug: 'new-hampshire' },
+                  { name: 'New Jersey', slug: 'new-jersey' },
+                  { name: 'New Mexico', slug: 'new-mexico' },
+                  { name: 'New York', slug: 'new-york' },
+                  { name: 'North Carolina', slug: 'north-carolina' },
+                  { name: 'North Dakota', slug: 'north-dakota' },
+                  { name: 'Ohio', slug: 'ohio' },
+                  { name: 'Oklahoma', slug: 'oklahoma' },
+                  { name: 'Oregon', slug: 'oregon' },
+                  { name: 'Pennsylvania', slug: 'pennsylvania' },
+                  { name: 'Rhode Island', slug: 'rhode-island' },
+                  { name: 'South Carolina', slug: 'south-carolina' },
+                  { name: 'South Dakota', slug: 'south-dakota' },
+                  { name: 'Tennessee', slug: 'tennessee' },
+                  { name: 'Texas', slug: 'texas' },
+                  { name: 'Utah', slug: 'utah' },
+                  { name: 'Vermont', slug: 'vermont' },
+                  { name: 'Virginia', slug: 'virginia' },
+                  { name: 'Washington', slug: 'washington' },
+                  { name: 'West Virginia', slug: 'west-virginia' },
+                  { name: 'Wisconsin', slug: 'wisconsin' },
+                  { name: 'Wyoming', slug: 'wyoming' }
+                ].map((state) => (
+                  <Link
+                    key={state.slug}
+                    href={`/us/${state.slug}`}
+                    className="text-primary-600 hover:text-primary-700 hover:underline"
+                  >
+                    {state.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section for SEO */}
       <section className="py-16 bg-white">
         <div className="container">

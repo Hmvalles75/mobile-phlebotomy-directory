@@ -10,6 +10,7 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
+import { getMetrosByState } from '@/data/top-metros'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -306,6 +307,38 @@ export default function StatePage({ params }: StatePageProps) {
               Use the providers listed below to find a mobile phlebotomist serving {stateName}, or submit the request form to have available providers review your case and contact you directly.
             </p>
           </section>
+
+          {/* Major Cities in State - Internal Linking */}
+          {(() => {
+            const metros = getMetrosByState(stateAbbr)
+            if (metros.length > 0) {
+              return (
+                <section className="bg-white rounded-lg shadow-sm p-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Major cities we serve in {stateName}
+                  </h2>
+                  <p className="text-gray-700 mb-6">
+                    Find mobile phlebotomy providers in these {stateName} metro areas:
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {metros.map((metro) => (
+                      <Link
+                        key={metro.slug}
+                        href={`/us/metro/${metro.slug}`}
+                        className="flex items-center px-4 py-3 bg-gray-50 hover:bg-primary-50 rounded-lg transition-colors group"
+                      >
+                        <span className="text-primary-600 mr-2 group-hover:text-primary-700">→</span>
+                        <span className="text-gray-900 font-medium group-hover:text-primary-700">
+                          {metro.city}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+            return null
+          })()}
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
@@ -767,22 +800,40 @@ export default function StatePage({ params }: StatePageProps) {
 
               {/* Search Other States */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Other States</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Popular States</h3>
                 <div className="space-y-2">
-                  <Link href="/us/california" className="block text-primary-600 hover:text-primary-700">
+                  <Link href="/us/california" className="block text-primary-600 hover:text-primary-700 text-sm">
                     California →
                   </Link>
-                  <Link href="/us/texas" className="block text-primary-600 hover:text-primary-700">
+                  <Link href="/us/texas" className="block text-primary-600 hover:text-primary-700 text-sm">
                     Texas →
                   </Link>
-                  <Link href="/us/florida" className="block text-primary-600 hover:text-primary-700">
+                  <Link href="/us/florida" className="block text-primary-600 hover:text-primary-700 text-sm">
                     Florida →
                   </Link>
-                  <Link href="/us/new-york" className="block text-primary-600 hover:text-primary-700">
+                  <Link href="/us/new-york" className="block text-primary-600 hover:text-primary-700 text-sm">
                     New York →
                   </Link>
-                  <Link href="/" className="block text-gray-600 hover:text-primary-600 font-medium">
-                    View All States →
+                  <Link href="/us/pennsylvania" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    Pennsylvania →
+                  </Link>
+                  <Link href="/us/illinois" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    Illinois →
+                  </Link>
+                  <Link href="/us/ohio" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    Ohio →
+                  </Link>
+                  <Link href="/us/georgia" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    Georgia →
+                  </Link>
+                  <Link href="/us/north-carolina" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    North Carolina →
+                  </Link>
+                  <Link href="/us/michigan" className="block text-primary-600 hover:text-primary-700 text-sm">
+                    Michigan →
+                  </Link>
+                  <Link href="/#browse-by-state" className="block text-gray-600 hover:text-primary-600 font-medium text-sm mt-3 pt-3 border-t">
+                    View All 50 States →
                   </Link>
                 </div>
               </div>
