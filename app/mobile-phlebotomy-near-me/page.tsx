@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Script from 'next/script'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { US_STATES } from '@/lib/states'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -49,10 +50,90 @@ export default function MobilePhlebotomyNearMePage() {
     }
   ]
 
+  // FAQ Schema for SEO
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does a mobile phlebotomy visit work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A mobile phlebotomy visit begins when you schedule an appointment with a provider who serves your area. The phlebotomist travels to your specified location—home, office, or care facility—with all necessary equipment. They verify your identity and lab order, collect the required blood or specimen samples using sterile techniques, properly label everything, and transport the samples to their partner laboratory for processing. You receive results through your ordering physician or the lab portal, typically within 24-48 hours depending on the tests ordered."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a doctor's order for a mobile blood draw?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, nearly all mobile phlebotomy services require a valid laboratory requisition from a licensed healthcare provider such as a physician, nurse practitioner, or physician assistant. The lab order specifies which tests to run and ensures the testing is medically appropriate. Some direct-to-consumer lab companies offer their own ordering physicians, but most mobile phlebotomists work with orders from your existing healthcare provider."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is mobile phlebotomy covered by insurance?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Insurance coverage for mobile phlebotomy varies significantly by health plan, the laboratory processing your samples, and whether testing is medically necessary. Many insurance plans will cover the laboratory testing itself when ordered by a provider and processed by an in-network lab, but the mobile visit fee or house call charge is often a separate out-of-pocket convenience fee. Medicare and some private plans may cover home draws for homebound patients or those meeting specific medical criteria. Always verify coverage with both your insurance carrier and the laboratory before scheduling."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does a mobile blood draw usually cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Mobile blood draw costs vary by provider and location, but nationally, the convenience fee for an at-home visit typically ranges from approximately $70 to $150 or more per appointment. Larger national lab services sometimes publish flat rates around $75-$80 as an add-on to laboratory testing fees. Factors affecting pricing include travel distance, appointment urgency, after-hours or weekend visits, the number of patients being drawn at one address, and any special handling requirements. This visit fee is separate from the laboratory processing charges for your actual tests."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How far in advance should I schedule a home blood draw?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Scheduling timelines depend on your location and provider availability. In major metropolitan areas, many mobile phlebotomy services offer same-day or next-day appointments when their schedule allows. In less populated regions, you may need to book 2-3 days in advance. If your tests require fasting or specific timing, plan accordingly. For routine wellness testing, scheduling 24-48 hours ahead is usually sufficient. For urgent medical needs, call providers directly to discuss expedited service options."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can mobile phlebotomists draw blood for any lab?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Mobile phlebotomists typically work with specific partner laboratories, often national chains like Quest Diagnostics, LabCorp, or regional labs. When you receive a lab order from your doctor, it will specify which laboratory should process your samples. Confirm that your chosen mobile provider works with that particular lab before booking. Some mobile services have flexibility to work with multiple labs, while others have exclusive partnerships. Always verify compatibility before your appointment."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I get pediatric or special-handling blood draws at home?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Many mobile phlebotomists are trained and experienced in pediatric blood draws, geriatric care, and special handling situations. However, not all providers offer these specialized services. When scheduling, ask specifically about the provider's experience with children, difficult veins, specialized timing requirements for hormone panels, or any other specific needs you have. Providers who specialize in home health often have extensive experience making patients of all ages comfortable during the draw."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does MobilePhlebotomy.org provide medical advice or results?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. MobilePhlebotomy.org is a directory website that lists mobile phlebotomy providers based on publicly available information. We do not provide medical advice, lab orders, test results, or healthcare services. We do not verify credentials for all listed providers—some are verified, others are not. You must confirm all details including licensing, insurance acceptance, pricing, and qualifications directly with any provider before booking. Your test results will be delivered to your ordering healthcare provider or posted to your laboratory portal, never to this directory."
+        }
+      }
+    ]
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
+    <>
+      {/* FAQ Schema for SEO */}
+      <Script
+        type="application/ld+json"
+        id="faq-schema"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -433,5 +514,6 @@ export default function MobilePhlebotomyNearMePage() {
         onClose={() => setIsFormOpen(false)}
       />
     </div>
+    </>
   )
 }
