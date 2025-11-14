@@ -87,57 +87,62 @@ export async function getPendingSubmissions(): Promise<PendingProvider[]> {
 export async function addPendingSubmission(
   submission: Omit<PendingProvider, 'id' | 'submittedAt' | 'status'>
 ): Promise<PendingProvider> {
-  const newSubmission = await prisma.pendingSubmission.create({
-    data: {
-      businessName: submission.businessName,
-      contactName: submission.contactName,
-      email: submission.email,
-      phone: submission.phone,
-      website: submission.website,
-      description: submission.description,
-      address: submission.address,
-      city: submission.city,
-      state: submission.state,
-      zipCode: submission.zipCode,
-      serviceArea: submission.serviceArea,
-      yearsExperience: submission.yearsExperience,
-      licensed: submission.licensed ?? false,
-      insurance: submission.insurance ?? false,
-      certifications: submission.certifications,
-      specialties: submission.specialties,
-      emergencyAvailable: submission.emergencyAvailable ?? false,
-      weekendAvailable: submission.weekendAvailable ?? false,
-      logo: submission.logo,
-      ipAddress: submission.ipAddress,
-      userAgent: submission.userAgent
-    }
-  })
+  try {
+    const newSubmission = await prisma.pendingSubmission.create({
+      data: {
+        businessName: submission.businessName,
+        contactName: submission.contactName,
+        email: submission.email,
+        phone: submission.phone,
+        website: submission.website,
+        description: submission.description,
+        address: submission.address,
+        city: submission.city,
+        state: submission.state,
+        zipCode: submission.zipCode,
+        serviceArea: submission.serviceArea,
+        yearsExperience: submission.yearsExperience,
+        licensed: submission.licensed ?? false,
+        insurance: submission.insurance ?? false,
+        certifications: submission.certifications,
+        specialties: submission.specialties,
+        emergencyAvailable: submission.emergencyAvailable ?? false,
+        weekendAvailable: submission.weekendAvailable ?? false,
+        logo: submission.logo,
+        ipAddress: submission.ipAddress,
+        userAgent: submission.userAgent
+      }
+    })
 
-  return {
-    id: newSubmission.id,
-    submittedAt: newSubmission.submittedAt.toISOString(),
-    status: newSubmission.status.toLowerCase() as 'pending' | 'approved' | 'rejected',
-    businessName: newSubmission.businessName,
-    contactName: newSubmission.contactName,
-    email: newSubmission.email,
-    phone: newSubmission.phone,
-    website: newSubmission.website || undefined,
-    description: newSubmission.description,
-    address: newSubmission.address || undefined,
-    city: newSubmission.city,
-    state: newSubmission.state,
-    zipCode: newSubmission.zipCode || undefined,
-    serviceArea: newSubmission.serviceArea || undefined,
-    yearsExperience: newSubmission.yearsExperience || undefined,
-    licensed: newSubmission.licensed,
-    insurance: newSubmission.insurance,
-    certifications: newSubmission.certifications || undefined,
-    specialties: newSubmission.specialties || undefined,
-    emergencyAvailable: newSubmission.emergencyAvailable,
-    weekendAvailable: newSubmission.weekendAvailable,
-    logo: newSubmission.logo || undefined,
-    ipAddress: newSubmission.ipAddress || undefined,
-    userAgent: newSubmission.userAgent || undefined
+    return {
+      id: newSubmission.id,
+      submittedAt: newSubmission.submittedAt.toISOString(),
+      status: newSubmission.status.toLowerCase() as 'pending' | 'approved' | 'rejected',
+      businessName: newSubmission.businessName,
+      contactName: newSubmission.contactName,
+      email: newSubmission.email,
+      phone: newSubmission.phone,
+      website: newSubmission.website || undefined,
+      description: newSubmission.description,
+      address: newSubmission.address || undefined,
+      city: newSubmission.city,
+      state: newSubmission.state,
+      zipCode: newSubmission.zipCode || undefined,
+      serviceArea: newSubmission.serviceArea || undefined,
+      yearsExperience: newSubmission.yearsExperience || undefined,
+      licensed: newSubmission.licensed,
+      insurance: newSubmission.insurance,
+      certifications: newSubmission.certifications || undefined,
+      specialties: newSubmission.specialties || undefined,
+      emergencyAvailable: newSubmission.emergencyAvailable,
+      weekendAvailable: newSubmission.weekendAvailable,
+      logo: newSubmission.logo || undefined,
+      ipAddress: newSubmission.ipAddress || undefined,
+      userAgent: newSubmission.userAgent || undefined
+    }
+  } catch (error) {
+    console.error('Database error in addPendingSubmission:', error)
+    throw new Error('Database is unavailable. This feature requires a production database. SQLite does not work in Vercel production environment.')
   }
 }
 
