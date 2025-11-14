@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { type Provider } from '@/lib/schemas'
 import {
   contactProvider,
-  visitProviderWebsite,
   formatProviderContact,
   generateProviderStructuredData
 } from '@/lib/provider-actions'
@@ -72,16 +71,6 @@ export function ProviderActions({
     }
   }
 
-  const handleWebsiteVisit = async () => {
-    setIsLoading(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 100))
-      visitProviderWebsite(provider, currentLocation)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
 
 
   // Compact variant for mobile or space-constrained areas
@@ -95,18 +84,6 @@ export function ProviderActions({
         >
           {getButtonText()}
         </Link>
-
-        {provider.website && (
-          <button
-            onClick={handleWebsiteVisit}
-            disabled={isLoading}
-            className="flex-1 border border-primary-600 text-primary-600 px-3 py-2 rounded text-sm hover:bg-primary-50 disabled:opacity-50 transition-colors"
-            aria-label={`Visit ${provider.name} website`}
-          >
-            Website
-          </button>
-        )}
-
       </div>
     )
   }
@@ -133,33 +110,22 @@ export function ProviderActions({
         </div>
 
         {/* Action Buttons */}
-        <div className={`${hideViewDetails ? 'flex gap-3' : 'grid grid-cols-2 gap-3'}`}>
+        <div className="flex gap-3">
           {!hideViewDetails && (
             <Link
               href={`/provider/${provider.slug}`}
-              className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
+              className="flex-1 bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
               aria-label={`View detailed information for ${provider.name}`}
             >
               {getButtonText()}
             </Link>
           )}
 
-          {provider.website && (
-            <button
-              onClick={handleWebsiteVisit}
-              disabled={isLoading}
-              className={`${hideViewDetails ? 'bg-primary-600 text-white' : 'border border-primary-600 text-primary-600'} px-4 py-3 rounded-lg hover:bg-primary-${hideViewDetails ? '700' : '50'} disabled:opacity-50 transition-colors font-medium`}
-              aria-label={`Visit ${provider.name} official website`}
-            >
-              Visit Website
-            </button>
-          )}
-
           {provider.phone && (
             <button
               onClick={handleContact}
               disabled={isLoading}
-              className="border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
+              className="flex-1 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
               aria-label={`Contact ${provider.name} via phone`}
             >
               {isLoading ? 'Connecting...' : 'Contact Provider'}
@@ -194,42 +160,6 @@ export function ProviderActions({
         >
           {getButtonText()}
         </Link>
-
-        {provider.website && (
-          <button
-            onClick={handleWebsiteVisit}
-            disabled={isLoading}
-            className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg hover:bg-primary-50 disabled:opacity-50 transition-colors"
-            aria-label={`Visit ${provider.name} official website - opens in new tab`}
-            data-provider-action="website"
-            data-provider-id={provider.id}
-          >
-            Visit Website
-          </button>
-        )}
-
-        {/* Smart booking button - only show for actual booking sites */}
-        {provider.bookingUrl && 
-         provider.bookingUrl !== provider.website && 
-         !provider.bookingUrl.includes('google.com/maps') &&
-         !provider.bookingUrl.includes('maps.google.com') &&
-         (provider.bookingUrl.includes('book') || 
-          provider.bookingUrl.includes('appointment') || 
-          provider.bookingUrl.includes('schedule') ||
-          provider.bookingUrl.includes('calendar') ||
-          provider.bookingUrl.includes('portal')) && (
-          <a
-            href={provider.bookingUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow sponsored"
-            className="border border-green-600 text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors"
-            aria-label={`Book appointment with ${provider.name} online - opens in new tab`}
-            data-provider-action="booking"
-            data-provider-id={provider.id}
-          >
-            Book Online
-          </a>
-        )}
 
         {/* Contact button for additional actions */}
         <button
