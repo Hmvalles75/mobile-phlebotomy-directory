@@ -65,7 +65,7 @@ export default function RootLayout({
     "@type": "Organization",
     "name": "MobilePhlebotomy.org",
     "url": SITE_URL,
-    "logo": absoluteUrl("/logo.png"),
+    "logo": absoluteUrl("/logo-new.png"),
     "description": "A national directory of mobile phlebotomy services. Find certified, insured providers for at-home blood draws and lab collections near you.",
     "foundingDate": "2024",
     "serviceType": "Medical Directory Service",

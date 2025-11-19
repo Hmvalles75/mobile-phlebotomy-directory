@@ -1,5 +1,7 @@
 'use client'
 
+import { SITE_URL } from '@/lib/seo'
+
 interface BreadcrumbItem {
   name: string
   url: string
@@ -17,7 +19,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.name,
-      "item": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}${item.url}`
+      "item": `${SITE_URL}${item.url}`
     }))
   }
 

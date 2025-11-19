@@ -41,6 +41,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       type: 'website',
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Mobile Phlebotomy in ${stateName} – At-Home Blood Draw Services`,
+      description: `Find certified mobile phlebotomists for at-home blood draws throughout ${stateName}. Browse local providers and request a mobile blood draw in your area.`,
+    },
   }
 }
 
