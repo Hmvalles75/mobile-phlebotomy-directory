@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
+import { SITE_URL, absoluteUrl } from '@/lib/seo'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +15,7 @@ export const metadata = {
   description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   keywords: 'mobile phlebotomy, at-home blood draw, mobile lab services, home blood test, phlebotomist near me',
   authors: [{ name: 'MobilePhlebotomy.org' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mobilephlebotomy.org'),
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
@@ -26,12 +27,6 @@ export const metadata = {
     ],
     apple: [
       { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
-    ],
-    other: [
-      {
-        rel: 'manifest',
-        url: '/site.webmanifest',
-      },
     ],
   },
   openGraph: {
@@ -58,7 +53,6 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
-  manifest: '/site.webmanifest',
 }
 
 export default function RootLayout({
@@ -70,8 +64,8 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "MobilePhlebotomy.org",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://www.mobilephlebotomy.org",
-    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.mobilephlebotomy.org"}/logo.png`,
+    "url": SITE_URL,
+    "logo": absoluteUrl("/logo.png"),
     "description": "A national directory of mobile phlebotomy services. Find certified, insured providers for at-home blood draws and lab collections near you.",
     "foundingDate": "2024",
     "serviceType": "Medical Directory Service",
