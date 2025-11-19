@@ -255,8 +255,13 @@ if (ratingParam) {
       filteredProviders.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
     }
 
+    // Deduplicate providers by ID to prevent showing same provider multiple times
+    const uniqueProviders = Array.from(
+      new Map(filteredProviders.map((p: any) => [p.id, p])).values()
+    )
+
     // Limit results only if limit is specified
-    const limitedProviders = limit ? filteredProviders.slice(0, limit) : filteredProviders
+    const limitedProviders = limit ? uniqueProviders.slice(0, limit) : uniqueProviders
 
     return NextResponse.json(limitedProviders)
   } catch (error) {
