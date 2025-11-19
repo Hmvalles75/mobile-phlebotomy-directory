@@ -1,5 +1,15 @@
 import { Suspense } from 'react'
 import SearchContent from './SearchContent'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Search Mobile Phlebotomy Providers',
+  description: 'Search for mobile phlebotomy providers by location, service type, and more.',
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
 
 export default function SearchPage() {
   return (

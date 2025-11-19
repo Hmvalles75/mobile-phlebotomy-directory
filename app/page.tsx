@@ -373,6 +373,79 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Popular States Section - SEO Internal Linking */}
+      <section className="py-16 bg-white border-y">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Find Mobile Phlebotomy in Your State
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Licensed mobile phlebotomists available nationwide. Browse providers by state to find at-home blood draw services near you.
+            </p>
+          </div>
+
+          {/* Priority State Links */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Popular States:</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link
+                href="/us/indiana"
+                className="flex items-center justify-center px-6 py-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors group border border-primary-200"
+              >
+                <span className="text-primary-700 font-semibold group-hover:text-primary-800">Indiana</span>
+              </Link>
+              <Link
+                href="/us/montana"
+                className="flex items-center justify-center px-6 py-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors group border border-primary-200"
+              >
+                <span className="text-primary-700 font-semibold group-hover:text-primary-800">Montana</span>
+              </Link>
+              <Link
+                href="/us/iowa"
+                className="flex items-center justify-center px-6 py-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors group border border-primary-200"
+              >
+                <span className="text-primary-700 font-semibold group-hover:text-primary-800">Iowa</span>
+              </Link>
+              <Link
+                href="/us/ohio"
+                className="flex items-center justify-center px-6 py-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors group border border-primary-200"
+              >
+                <span className="text-primary-700 font-semibold group-hover:text-primary-800">Ohio</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* All States Grid */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
+              {Object.entries({
+                'Alabama': 'alabama', 'Alaska': 'alaska', 'Arizona': 'arizona', 'Arkansas': 'arkansas',
+                'California': 'california', 'Colorado': 'colorado', 'Connecticut': 'connecticut', 'Delaware': 'delaware',
+                'Florida': 'florida', 'Georgia': 'georgia', 'Hawaii': 'hawaii', 'Idaho': 'idaho',
+                'Illinois': 'illinois', 'Kansas': 'kansas', 'Kentucky': 'kentucky', 'Louisiana': 'louisiana',
+                'Maine': 'maine', 'Maryland': 'maryland', 'Massachusetts': 'massachusetts', 'Michigan': 'michigan',
+                'Minnesota': 'minnesota', 'Mississippi': 'mississippi', 'Missouri': 'missouri', 'Nebraska': 'nebraska',
+                'Nevada': 'nevada', 'New Hampshire': 'new-hampshire', 'New Jersey': 'new-jersey', 'New Mexico': 'new-mexico',
+                'New York': 'new-york', 'North Carolina': 'north-carolina', 'North Dakota': 'north-dakota', 'Oklahoma': 'oklahoma',
+                'Oregon': 'oregon', 'Pennsylvania': 'pennsylvania', 'Rhode Island': 'rhode-island', 'South Carolina': 'south-carolina',
+                'South Dakota': 'south-dakota', 'Tennessee': 'tennessee', 'Texas': 'texas', 'Utah': 'utah',
+                'Vermont': 'vermont', 'Virginia': 'virginia', 'Washington': 'washington', 'West Virginia': 'west-virginia',
+                'Wisconsin': 'wisconsin', 'Wyoming': 'wyoming'
+              }).map(([name, slug]) => (
+                <Link
+                  key={slug}
+                  href={`/us/${slug}`}
+                  className="text-primary-600 hover:text-primary-700 hover:underline text-sm py-2 px-3 hover:bg-gray-50 rounded transition-colors"
+                >
+                  {name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Top Metro Areas Section */}
       <section className="py-16 bg-gray-50">
         <div className="container">

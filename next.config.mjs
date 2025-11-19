@@ -31,9 +31,27 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Redirect non-www to www for canonical domain
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'mobilephlebotomy.org',
+          },
+        ],
+        destination: 'https://www.mobilephlebotomy.org/:path*',
+        permanent: true,
+      },
       {
         source: '/provider/provider-:id',
         destination: '/search',
+        permanent: true,
+      },
+      // Redirect /mobile-phlebotomy-prices to existing /mobile-phlebotomy-cost page
+      {
+        source: '/mobile-phlebotomy-prices',
+        destination: '/mobile-phlebotomy-cost',
         permanent: true,
       },
     ]

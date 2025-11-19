@@ -14,7 +14,10 @@ export const metadata = {
   description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   keywords: 'mobile phlebotomy, at-home blood draw, mobile lab services, home blood test, phlebotomist near me',
   authors: [{ name: 'MobilePhlebotomy.org' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mobilephlebotomy.org'),
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: [
       { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -67,8 +70,8 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "MobilePhlebotomy.org",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://mobilephlebotomy.org",
-    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || "https://mobilephlebotomy.org"}/logo.png`,
+    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://www.mobilephlebotomy.org",
+    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.mobilephlebotomy.org"}/logo.png`,
     "description": "A national directory of mobile phlebotomy services. Find certified, insured providers for at-home blood draws and lab collections near you.",
     "foundingDate": "2024",
     "serviceType": "Medical Directory Service",

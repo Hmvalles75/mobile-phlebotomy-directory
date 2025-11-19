@@ -12,6 +12,7 @@ import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/sche
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { getMetrosByState } from '@/data/top-metros'
 import { SimpleAccordion } from '@/components/ui/Accordion'
+import { LeadFormModal } from '@/components/ui/LeadFormModal'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -79,15 +80,26 @@ export default function StatePage({ params }: StatePageProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [minRating, setMinRating] = useState<number | null>(null)
+  const [showLeadForm, setShowLeadForm] = useState(false)
 
   const stateSlug = params.state
   const stateInfo = stateData[stateSlug]
-  
+
   if (!stateInfo) {
     notFound()
   }
 
   const { name: stateName, abbr: stateAbbr } = stateInfo
+
+  // Update document title and meta description for SEO
+  useEffect(() => {
+    document.title = `Mobile Phlebotomy in ${stateName} – At-Home Blood Draw Services | MobilePhlebotomy.org`
+
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', `At-home mobile phlebotomy services in ${stateName} for labs, kits, and routine blood work. Browse local mobile phlebotomists or request a referral for in-home blood draws. Licensed, insured providers available statewide.`)
+    }
+  }, [stateName])
 
   // Fetch providers for this state
   useEffect(() => {
@@ -236,6 +248,24 @@ export default function StatePage({ params }: StatePageProps) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Lead Form CTA */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-xl p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Get Matched with a Mobile Phlebotomist in {stateName}
+            </h2>
+            <p className="text-gray-700 mb-6 text-lg">
+              Tell us your location and needs – we&apos;ll connect you with qualified providers in your area.
+            </p>
+            <button
+              onClick={() => setShowLeadForm(true)}
+              className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg shadow-md hover:shadow-lg"
+            >
+              Match me with a mobile phlebotomist in {stateName}
+            </button>
+          </div>
+        </div>
+
         {/* SEO Content - Summary + Accordion */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
@@ -911,6 +941,12 @@ export default function StatePage({ params }: StatePageProps) {
         </div>
       </div>
 
+      {/* Lead Form Modal */}
+      <LeadFormModal
+        isOpen={showLeadForm}
+        onClose={() => setShowLeadForm(false)}
+        defaultState={stateAbbr}
+      />
     </div>
   )
 }
