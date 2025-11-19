@@ -255,10 +255,26 @@ if (ratingParam) {
       filteredProviders.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
     }
 
-    // Deduplicate providers by ID to prevent showing same provider multiple times
-    const uniqueProviders = Array.from(
-      new Map(filteredProviders.map((p: any) => [p.id, p])).values()
-    )
+    // Deduplicate providers to prevent showing same provider multiple times
+    // For nationwide providers, deduplicate by company name (so we show "Speedy Sticks" once, not 5 NYC locations)
+    // For regional providers, deduplicate by ID (to keep distinct locations of regional providers)
+    const deduplicationMap = new Map<string, any>()
+
+    filteredProviders.forEach((provider: any) => {
+      // Use company name as key for nationwide providers to consolidate multiple locations
+      // Use ID as key for regional providers to keep their distinct locations
+      const dedupeKey = provider.is_nationwide === 'Yes'
+        ? provider.name.toLowerCase()
+        : provider.id
+
+      // Only add if we haven't seen this key, or if the new one has better data
+      const existing = deduplicationMap.get(dedupeKey)
+      if (!existing || (provider.rating || 0) > (existing.rating || 0)) {
+        deduplicationMap.set(dedupeKey, provider)
+      }
+    })
+
+    const uniqueProviders = Array.from(deduplicationMap.values())
 
     // Limit results only if limit is specified
     const limitedProviders = limit ? uniqueProviders.slice(0, limit) : uniqueProviders
