@@ -373,6 +373,78 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Corporate Services Section */}
+      <section className="py-16 bg-gradient-to-br from-primary-600 to-primary-700">
+        <div className="container">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Left: Content */}
+              <div className="text-white">
+                <div className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  B2B Services
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Corporate & Event Phlebotomy Staffing
+                </h2>
+                <p className="text-lg text-primary-50 mb-6 leading-relaxed">
+                  Professional phlebotomists for conferences, health fairs, wellness programs,
+                  and clinical studies. From 1 to 50+ certified technicians, we handle the logistics
+                  so you can focus on your event.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-300 mt-1">✓</span>
+                    <span className="text-primary-50">Nationwide event coverage in major metros</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-300 mt-1">✓</span>
+                    <span className="text-primary-50">Certified, background-checked technicians</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-300 mt-1">✓</span>
+                    <span className="text-primary-50">Full specimen handling & shipping support</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-green-300 mt-1">✓</span>
+                    <span className="text-primary-50">HIPAA-compliant workflows</span>
+                  </li>
+                </ul>
+                <Link
+                  href="/corporate-phlebotomy"
+                  className="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold shadow-lg hover:shadow-xl"
+                >
+                  Learn More
+                  <span>→</span>
+                </Link>
+              </div>
+
+              {/* Right: Visual Card */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                <h3 className="text-white text-xl font-bold mb-6">Perfect for:</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/10 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🏢</div>
+                    <p className="text-white text-sm font-medium">Corporate Wellness</p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🎤</div>
+                    <p className="text-white text-sm font-medium">Conferences</p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🔬</div>
+                    <p className="text-white text-sm font-medium">Clinical Studies</p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🏥</div>
+                    <p className="text-white text-sm font-medium">Health Fairs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Popular States Section - SEO Internal Linking */}
       <section className="py-16 bg-white border-y">
         <div className="container">

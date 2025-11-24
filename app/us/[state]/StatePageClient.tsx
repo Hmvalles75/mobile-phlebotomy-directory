@@ -908,6 +908,38 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
           </div>
         </div>
 
+        {/* Corporate Services CTA */}
+        <div className="mt-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 md:p-10 border border-primary-200">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1">
+              <div className="inline-block bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-medium mb-3">
+                B2B Services
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                Need phlebotomists for a corporate event or health fair?
+              </h3>
+              <p className="text-gray-700 text-lg mb-4">
+                We provide nationwide staffing for conferences, wellness programs, clinical studies,
+                and on-site employee screenings. From 1 to 50+ certified phlebotomists.
+              </p>
+              <Link
+                href="/corporate-phlebotomy"
+                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-lg"
+              >
+                Learn more →
+              </Link>
+            </div>
+            <div className="flex-shrink-0">
+              <Link
+                href="/corporate-phlebotomy"
+                className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-lg hover:shadow-xl"
+              >
+                Request Staffing Quote
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* SEO Content */}
         <div className="mt-12 bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">

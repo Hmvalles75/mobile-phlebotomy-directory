@@ -483,6 +483,39 @@ export default function MobilePhlebotomyNearMePage() {
           </div>
         </section>
 
+        {/* Corporate Services CTA */}
+        <section className="bg-gray-50 rounded-xl p-8 md:p-10 border-2 border-primary-100">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1">
+              <div className="inline-block bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-medium mb-3">
+                For Organizations
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                Need phlebotomists for a corporate event or health fair?
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                We provide nationwide staffing for conferences, wellness programs, clinical studies,
+                and on-site employee screenings. From 1 to 50+ certified phlebotomists.
+              </p>
+              <Link
+                href="/corporate-phlebotomy"
+                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-lg"
+              >
+                Learn about corporate services
+                <span>→</span>
+              </Link>
+            </div>
+            <div className="flex-shrink-0">
+              <Link
+                href="/corporate-phlebotomy"
+                className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-lg hover:shadow-xl"
+              >
+                Request Staffing Quote
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Final CTA */}
         <section className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-8 md:p-12 text-white text-center">
           <h2 className="text-3xl font-bold mb-4">

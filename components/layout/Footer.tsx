@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -13,12 +13,24 @@ export function Footer() {
               <span className="text-xl font-bold text-gray-900">MobilePhlebotomy</span>
             </Link>
             <p className="text-gray-600 mb-4 max-w-md">
-              The nation&apos;s largest directory of mobile phlebotomy services. Find certified, 
+              The nation&apos;s largest directory of mobile phlebotomy services. Find certified,
               insured providers for at-home blood draws and lab collections near you.
             </p>
             <div className="flex space-x-4">
               <span className="text-sm text-gray-500">© 2024 MobilePhlebotomy.org</span>
             </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Services</h3>
+            <ul className="space-y-2">
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/mobile-phlebotomy-near-me" className="text-gray-600 hover:text-primary-600 transition-colors">Mobile Phlebotomy</Link></li>
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Corporate & Events</Link></li>
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/at-home-blood-draw-services" className="text-gray-600 hover:text-primary-600 transition-colors">At-Home Blood Draw</Link></li>
+            </ul>
           </div>
 
           <div>
