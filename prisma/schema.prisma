@@ -381,3 +381,39 @@ enum SubmissionStatus {
   APPROVED
   REJECTED
 }
+
+model CorporateEventInquiry {
+  id                      String   @id @default(cuid())
+  createdAt               DateTime @default(now())
+
+  // Company Information
+  companyName             String
+  contactName             String
+  email                   String
+  phone                   String
+
+  // Event Details
+  eventLocation           String   // city, state
+  eventVenue              String?
+  eventDates              String   // flexible text field for dates
+  estimatedDraws          String   // can be a range like "50-100"
+  estimatedPhlebotomists  String?  // optional estimate
+  eventType               String   // can store comma-separated or JSON array
+  additionalDetails       String?  // textarea
+
+  // Metadata
+  status                  CorporateInquiryStatus @default(NEW)
+  ipAddress               String?
+  userAgent               String?
+
+  @@map("corporate_event_inquiries")
+}
+
+enum CorporateInquiryStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  BOOKED
+  COMPLETED
+  DECLINED
+}
