@@ -152,7 +152,7 @@ export default function CorporatePhlebotomyPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Staffing phlebotomists for events doesn't have to be complicated
+              Staffing phlebotomists for events doesn&apos;t have to be complicated
             </h2>
             <p className="text-lg text-gray-600">
               We handle the logistics so you can focus on your event.

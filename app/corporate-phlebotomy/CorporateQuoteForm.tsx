@@ -148,7 +148,7 @@ export function CorporateQuoteForm() {
             Thank you for your interest in our corporate phlebotomy staffing services.
           </p>
           <p className="text-gray-600">
-            We'll review your event details and follow up within 24-48 hours with a staffing proposal and pricing quote.
+            We&apos;ll review your event details and follow up within 24-48 hours with a staffing proposal and pricing quote.
           </p>
           <p className="text-sm text-gray-500 mt-4">
             Check your email at <strong>{formData.email}</strong> for a confirmation.
@@ -164,7 +164,7 @@ export function CorporateQuoteForm() {
         Request a Corporate/Event Staffing Quote
       </h3>
       <p className="text-gray-600 mb-8">
-        Tell us about your event and we'll coordinate certified phlebotomists to meet your needs.
+        Tell us about your event and we&apos;ll coordinate certified phlebotomists to meet your needs.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -341,7 +341,7 @@ export function CorporateQuoteForm() {
               placeholder="2-3"
             />
             <p className="text-sm text-gray-500 mt-1">
-              If unsure, we'll help you determine the right staffing level
+              If unsure, we&apos;ll help you determine the right staffing level
             </p>
           </div>
         </div>
