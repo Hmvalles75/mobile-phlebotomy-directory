@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
+import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
 import { trackRatingFilter, trackRatingView } from '@/lib/provider-actions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
@@ -108,6 +109,25 @@ params.append('sort', sortBy)
   }
 
   const sortedProviders = (Array.isArray(providers) ? [...providers] : []).sort((a, b) => {
+    // First, sort by tier (Featured > Premium > Basic)
+    // @ts-ignore - listingTier exists in database
+    const tierA = a.listingTier || 'BASIC'
+    // @ts-ignore - listingTier exists in database
+    const tierB = b.listingTier || 'BASIC'
+    // @ts-ignore - isFeaturedCity exists in database
+    const isFeaturedA = a.isFeaturedCity || false
+    // @ts-ignore - isFeaturedCity exists in database
+    const isFeaturedB = b.isFeaturedCity || false
+
+    const tierOrder = { FEATURED: 3, PREMIUM: 2, BASIC: 1 }
+    const effectiveTierA = (tierA === 'FEATURED' || isFeaturedA) ? tierOrder.FEATURED : tierOrder[tierA as keyof typeof tierOrder] || tierOrder.BASIC
+    const effectiveTierB = (tierB === 'FEATURED' || isFeaturedB) ? tierOrder.FEATURED : tierOrder[tierB as keyof typeof tierOrder] || tierOrder.BASIC
+
+    if (effectiveTierA !== effectiveTierB) {
+      return effectiveTierB - effectiveTierA // Higher tier first
+    }
+
+    // Within same tier, sort by user-selected criteria
     switch (sortBy) {
       case 'rating':
         return (b.rating || 0) - (a.rating || 0)
@@ -251,12 +271,19 @@ params.append('sort', sortBy)
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
-                        <Link
-                          href={`/provider/${provider.slug}`}
-                          className="text-xl font-bold text-gray-900 mb-1 hover:text-primary-600 inline-block"
-                        >
-                          {provider.name}
-                        </Link>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <Link
+                            href={`/provider/${provider.slug}`}
+                            className="text-xl font-bold text-gray-900 hover:text-primary-600"
+                          >
+                            {provider.name}
+                          </Link>
+                          {/* Monetization Tier Badge */}
+                          <ListingTierBadge
+                            tier={(provider as any).listingTier || 'BASIC'}
+                            isFeaturedCity={(provider as any).isFeaturedCity || false}
+                          />
+                        </div>
                         {provider.rating && (
                           <div
                             onClick={() => {

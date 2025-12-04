@@ -72,7 +72,7 @@ function RequestBloodDrawForm() {
               Request Received!
             </h1>
             <p className="text-gray-700 text-lg mb-6">
-              Thank you for your request. We're connecting you with certified mobile phlebotomists in your area.
+              Thank you for your request. We&apos;re connecting you with certified mobile phlebotomists in your area.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
               <h3 className="font-semibold text-blue-900 mb-2">What Happens Next?</h3>
@@ -83,7 +83,7 @@ function RequestBloodDrawForm() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 mt-1">•</span>
-                  <span>You'll receive calls/texts from available phlebotomists</span>
+                  <span>You&apos;ll receive calls/texts from available phlebotomists</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 mt-1">•</span>
@@ -123,7 +123,7 @@ function RequestBloodDrawForm() {
               Request a Mobile Blood Draw
             </h1>
             <p className="text-gray-600 mb-8">
-              Fill out the form below and we'll connect you with certified mobile phlebotomists in your area.
+              Fill out the form below and we&apos;ll connect you with certified mobile phlebotomists in your area.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">

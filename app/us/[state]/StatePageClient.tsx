@@ -12,6 +12,7 @@ import { getMetrosByState } from '@/data/top-metros'
 import { SimpleAccordion } from '@/components/ui/Accordion'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { SITE_URL } from '@/lib/seo'
+import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -127,28 +128,32 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
     return matchesSearch && matchesServices && matchesRating
   })
 
-  // Categorize and sort providers by tier
+  // Categorize and sort providers by monetization tier
   const categorizedProviders = {
     featured: [] as Provider[],
-    registered: [] as Provider[],
-    standard: [] as Provider[]
+    premium: [] as Provider[],
+    basic: [] as Provider[]
   }
 
   filteredProviders.forEach(provider => {
-    const badge = getProviderBadge(provider.id)
-    if (badge?.text === 'Featured Provider') {
+    // @ts-ignore - listingTier exists in database but may not be in type yet
+    const tier = provider.listingTier || 'BASIC'
+    // @ts-ignore - isFeaturedCity exists in database
+    const isFeaturedCity = provider.isFeaturedCity || false
+
+    if (tier === 'FEATURED' || isFeaturedCity) {
       categorizedProviders.featured.push(provider)
-    } else if (badge?.text === 'Registered') {
-      categorizedProviders.registered.push(provider)
+    } else if (tier === 'PREMIUM') {
+      categorizedProviders.premium.push(provider)
     } else {
-      categorizedProviders.standard.push(provider)
+      categorizedProviders.basic.push(provider)
     }
   })
 
   // Sort all sections alphabetically
   categorizedProviders.featured.sort((a, b) => a.name.localeCompare(b.name))
-  categorizedProviders.registered.sort((a, b) => a.name.localeCompare(b.name))
-  categorizedProviders.standard.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.premium.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.basic.sort((a, b) => a.name.localeCompare(b.name))
 
   const handleServiceToggle = (service: string) => {
     setSelectedServices(prev =>
@@ -499,7 +504,6 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                       </div>
                       <div className="divide-y divide-gray-200">
                         {categorizedProviders.featured.map((provider) => {
-                          const registeredBadge = getProviderBadge(provider.id)
                           const isVerified = isProviderRegistered(provider.id)
 
                           return (
@@ -516,12 +520,11 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                       🌎 Nationwide Service
                                     </span>
                                   )}
-                                  {/* Tier Badge (Featured/Registered) */}
-                                  {registeredBadge && (
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                                      {registeredBadge.icon} {registeredBadge.text}
-                                    </span>
-                                  )}
+                                  {/* Monetization Tier Badge */}
+                                  <ListingTierBadge
+                                    tier={(provider as any).listingTier || 'BASIC'}
+                                    isFeaturedCity={(provider as any).isFeaturedCity || false}
+                                  />
                                 </div>
                                 {provider.description && (
                                   <p className="text-gray-600 mb-3">
@@ -609,21 +612,20 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                     </div>
                   )}
 
-                  {/* Registered Providers Section */}
-                  {categorizedProviders.registered.length > 0 && (
+                  {/* Premium Providers Section */}
+                  {categorizedProviders.premium.length > 0 && (
                     <div className="border-b border-gray-200">
-                      <div className="bg-green-50 p-6 border-b border-green-100">
+                      <div className="bg-primary-50 p-6 border-b border-primary-100">
                         <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                          <span className="text-green-600">✓</span>
-                          Registered Providers
+                          <span className="text-primary-600">★</span>
+                          Premium Providers
                         </h3>
                         <p className="text-gray-600 text-sm mt-1">
-                          Verified and registered providers in {stateName}
+                          Enhanced listings with verified credentials in {stateName}
                         </p>
                       </div>
                       <div className="divide-y divide-gray-200">
-                        {categorizedProviders.registered.map((provider) => {
-                          const registeredBadge = getProviderBadge(provider.id)
+                        {categorizedProviders.premium.map((provider) => {
                           const isVerified = isProviderRegistered(provider.id)
 
                           return (
@@ -640,12 +642,11 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                       🌎 Nationwide Service
                                     </span>
                                   )}
-                                  {/* Tier Badge (Featured/Registered) */}
-                                  {registeredBadge && (
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                                      {registeredBadge.icon} {registeredBadge.text}
-                                    </span>
-                                  )}
+                                  {/* Monetization Tier Badge */}
+                                  <ListingTierBadge
+                                    tier={(provider as any).listingTier || 'BASIC'}
+                                    isFeaturedCity={(provider as any).isFeaturedCity || false}
+                                  />
                                 </div>
                           {provider.description && (
                             <p className="text-gray-600 mb-3">
@@ -733,8 +734,8 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
               </div>
             )}
 
-            {/* Standard Listings Section */}
-            {categorizedProviders.standard.length > 0 && (
+            {/* Basic Listings Section */}
+            {categorizedProviders.basic.length > 0 && (
               <div>
                 <div className="bg-gray-50 p-6 border-b border-gray-200">
                   <h3 className="text-2xl font-bold text-gray-900">
@@ -745,8 +746,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                   </p>
                 </div>
                 <div className="divide-y divide-gray-200">
-                  {categorizedProviders.standard.map((provider) => {
-                    const registeredBadge = getProviderBadge(provider.id)
+                  {categorizedProviders.basic.map((provider) => {
                     const isVerified = isProviderRegistered(provider.id)
 
                     return (
@@ -763,12 +763,11 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                 🌎 Nationwide Service
                               </span>
                             )}
-                            {/* Tier Badge (Featured/Registered) */}
-                            {registeredBadge && (
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                                {registeredBadge.icon} {registeredBadge.text}
-                              </span>
-                            )}
+                            {/* Monetization Tier Badge */}
+                            <ListingTierBadge
+                              tier={(provider as any).listingTier || 'BASIC'}
+                              isFeaturedCity={(provider as any).isFeaturedCity || false}
+                            />
                           </div>
 
                           {provider.description && (
