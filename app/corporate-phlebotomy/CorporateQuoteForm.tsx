@@ -138,7 +138,7 @@ export function CorporateQuoteForm() {
 
   if (submitted) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8 border-2 border-green-200">
+      <div className="bg-white rounded-lg shadow-md p-8 border-2 border-green-200" id="quote-form">
         <div className="text-center">
           <div className="text-green-500 text-5xl mb-4">✓</div>
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
