@@ -230,7 +230,7 @@ export default function HomePage() {
             </p>
 
             {/* Primary CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <div className="flex flex-col items-center gap-3 mb-8">
               <button
                 onClick={() => {
                   ga4.heroCTAClick({ cta_type: 'request' })
@@ -238,8 +238,15 @@ export default function HomePage() {
                 }}
                 className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
               >
-                Request Blood Draw
+                Check Availability & Get Pricing Now
               </button>
+              {/* Trust Signal */}
+              <div className="flex items-center gap-2 text-white/90 text-sm">
+                <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Vetted & Certified Phlebotomists Only</span>
+              </div>
             </div>
 
             {/* Compliance disclaimer */}
@@ -365,10 +372,13 @@ export default function HomePage() {
                 ga4.heroCTAClick({ cta_type: 'request' })
                 router.push('/coming-soon')
               }}
-              className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg"
+              className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
             >
-              Request Blood Draw
+              Book Your At-Home Blood Draw Today
             </button>
+            <p className="text-gray-600 text-sm mt-3">
+              🏥 Licensed & insured professionals · Same-day appointments available
+            </p>
           </div>
         </div>
       </section>
