@@ -328,6 +328,7 @@ enum CorrectionQueueStatus {
 model Waitlist {
   id        String   @id @default(cuid())
   email     String   @unique
+  zipCode   String?  // for lead qualification and routing
   source    String   // "COMING_SOON_PAGE" | "FOOTER" | "OTHER"
   createdAt DateTime @default(now())
   notified  Boolean  @default(false)

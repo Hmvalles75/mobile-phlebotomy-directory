@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { emailAdmin } from '@/lib/adminEmail'
 
 const schema = z.object({
-  email: z.string().email('Invalid email address')
+  email: z.string().email('Invalid email address'),
+  zipCode: z.string().optional()
 })
 
 export async function POST(req: NextRequest) {
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email } = parsed.data
+    const { email, zipCode } = parsed.data
 
     // Check if email already exists
     const existing = await prisma.waitlist.findUnique({
@@ -37,14 +38,15 @@ export async function POST(req: NextRequest) {
     await prisma.waitlist.create({
       data: {
         email,
+        zipCode: zipCode || null,
         source: 'COMING_SOON_PAGE'
       }
     })
 
-    // Notify admin
+    // Notify admin with ZIP code for lead qualification
     await emailAdmin(
       'New Waitlist Signup',
-      `New user signed up for launch notification:\n\nEmail: ${email}\nSource: Coming Soon Page\nTime: ${new Date().toISOString()}`
+      `New user signed up for launch notification:\n\nEmail: ${email}\nZIP Code: ${zipCode || 'Not provided'}\nSource: Coming Soon Page\nTime: ${new Date().toISOString()}`
     )
 
     return NextResponse.json({

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
 
 export default function ComingSoonPage() {
+  const [zipCode, setZipCode] = useState('')
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -18,7 +19,7 @@ export default function ComingSoonPage() {
       const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, zipCode })
       })
 
       const data = await response.json()
@@ -29,6 +30,7 @@ export default function ComingSoonPage() {
           text: 'Thanks! We\'ll notify you when patient requests launch.'
         })
         setEmail('')
+        setZipCode('')
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to save email' })
       }
@@ -93,15 +95,37 @@ export default function ComingSoonPage() {
                 ⚡ Option 2 — Get Notified When Nationwide Booking Opens
               </h2>
               <p className="text-gray-700">
-                We&apos;re launching a nationwide &quot;Book a Mobile Phlebotomist&quot; feature soon. Enter your email and we&apos;ll alert you the moment it goes live.
+                We&apos;re launching a nationwide &quot;Book a Mobile Phlebotomist&quot; feature soon. Enter your ZIP code and email to get notified when it goes live in your area.
               </p>
 
               {/* Email Form */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
+                    <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-2">
+                      ZIP Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="zipCode"
+                      required
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      placeholder="Enter your ZIP code"
+                      pattern="[0-9]{5}"
+                      maxLength={5}
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">This helps us route you to available providers</p>
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="email"
+                      id="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
