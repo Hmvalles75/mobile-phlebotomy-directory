@@ -23,21 +23,13 @@ export async function POST(req: NextRequest) {
 
     const { zipCode } = parsed.data
 
-    // Query providers that service this ZIP code
-    // Check both `zipCodes` (legacy comma-separated) and `serviceZipCodes` (JSON array)
+    // TODO: Implement proper ZIP code radius matching
+    // For MVP, we show all active providers since ZIP code data is incomplete
+    // Future: Use ZIP code database to match providers within X mile radius
+
     const providers = await prisma.provider.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { zipCodes: { contains: zipCode } },
-              { serviceZipCodes: { contains: zipCode } }
-            ]
-          },
-          {
-            status: { in: ['VERIFIED', 'PENDING'] } // Only count active providers
-          }
-        ]
+        status: { in: ['VERIFIED', 'PENDING'] } // Only active providers
       },
       select: {
         id: true,
@@ -46,7 +38,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    console.log(`[Coverage Check] ZIP ${zipCode}: Found ${providers.length} providers`)
+    console.log(`[Coverage Check] ZIP ${zipCode}: Found ${providers.length} total active providers`)
 
     // DECISION LOGIC: Route based on provider count
     if (providers.length >= 3) {
