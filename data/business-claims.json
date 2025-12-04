@@ -43,5 +43,19 @@
     "verifiedAt": "2024-11-04T20:15:35.000Z",
     "verificationMethod": "manual",
     "verificationNotes": "Verified through Add My Business form submission"
+  },
+  {
+    "id": "claim_1764025834286_dkw92a5jp",
+    "submittedAt": "2025-11-24T23:10:34.286Z",
+    "status": "pending",
+    "providerId": "test-123",
+    "providerName": "Test Provider",
+    "claimantName": "John Doe",
+    "claimantEmail": "john@test.com",
+    "claimantPhone": "555-1234",
+    "requestedUpdates": "Update phone number",
+    "isOwnerConfirmed": true,
+    "ipAddress": "::1",
+    "userAgent": "curl/8.14.1"
   }
 ]

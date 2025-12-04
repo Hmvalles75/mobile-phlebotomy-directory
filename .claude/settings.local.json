@@ -43,7 +43,9 @@
       "Bash(timeout 15 bash:*)",
       "Bash(taskkill:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(data/pending-submissions.json)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
