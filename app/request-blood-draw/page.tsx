@@ -25,6 +25,37 @@ function RequestBloodDrawForm() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [coverageData, setCoverageData] = useState<{
+    providerCount: number
+    coverage: 'high' | 'low'
+    affiliateUrl?: string
+  } | null>(null)
+
+  // Check coverage when ZIP code is available
+  useEffect(() => {
+    const checkCoverage = async () => {
+      if (formData.zipCode && /^\d{5}$/.test(formData.zipCode)) {
+        try {
+          const response = await fetch('/api/check-coverage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ zipCode: formData.zipCode })
+          })
+          const data = await response.json()
+          if (data.ok) {
+            setCoverageData({
+              providerCount: data.providerCount,
+              coverage: data.coverage,
+              affiliateUrl: data.affiliateUrl
+            })
+          }
+        } catch (error) {
+          console.error('Coverage check error:', error)
+        }
+      }
+    }
+    checkCoverage()
+  }, [formData.zipCode])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -296,6 +327,56 @@ function RequestBloodDrawForm() {
               </p>
             </form>
           </div>
+
+          {/* Low Coverage Affiliate Fallback */}
+          {coverageData && coverageData.coverage === 'low' && coverageData.affiliateUrl && (
+            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 text-blue-500 text-2xl">ℹ️</div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-blue-900 mb-2">
+                    Limited Provider Availability in Your Area
+                  </h3>
+                  <p className="text-blue-800 text-sm mb-3">
+                    We found {coverageData.providerCount} provider{coverageData.providerCount !== 1 ? 's' : ''} in your ZIP code.
+                    For guaranteed same-day or next-day service, you may want to check our trusted nationwide partner.
+                  </p>
+                  <a
+                    href={coverageData.affiliateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                  >
+                    Check Speedy Sticks Availability
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                  <p className="text-xs text-blue-600 mt-3">
+                    We may earn a commission if you book through this partner link, at no extra cost to you.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* High Coverage Confirmation */}
+          {coverageData && coverageData.coverage === 'high' && (
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 text-green-500 text-2xl">✓</div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-green-900 mb-1">
+                    Great News! Excellent Coverage in Your Area
+                  </h3>
+                  <p className="text-green-800 text-sm">
+                    We found {coverageData.providerCount} certified providers serving your ZIP code.
+                    Submit the form above and they&apos;ll compete for your business!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

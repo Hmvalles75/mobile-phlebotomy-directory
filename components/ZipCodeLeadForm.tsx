@@ -6,47 +6,21 @@ import { useRouter } from 'next/navigation'
 export function ZipCodeLeadForm() {
   const router = useRouter()
   const [zipCode, setZipCode] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
     // Validate ZIP code format
     if (!/^\d{5}$/.test(zipCode)) {
       setError('Please enter a valid 5-digit ZIP code')
-      setLoading(false)
       return
     }
 
-    try {
-      const response = await fetch('/api/check-coverage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zipCode })
-      })
-
-      const data = await response.json()
-
-      if (data.ok) {
-        if (data.action === 'lead_form') {
-          // HIGH COVERAGE: Route to internal lead form
-          router.push(`/request-blood-draw?zip=${zipCode}`)
-        } else if (data.action === 'affiliate') {
-          // LOW COVERAGE: Redirect to affiliate (Speedy Sticks)
-          window.location.href = data.affiliateUrl
-        }
-      } else {
-        setError(data.error || 'Failed to check coverage')
-      }
-    } catch (error) {
-      console.error('Coverage check error:', error)
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    // Always route to local provider page
+    // The page will show available providers and affiliate fallback if needed
+    router.push(`/request-blood-draw?zip=${zipCode}`)
   }
 
   return (
@@ -73,16 +47,15 @@ export function ZipCodeLeadForm() {
               onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
               placeholder="Enter ZIP code"
               maxLength={5}
-              disabled={loading}
-              className="flex-1 px-4 py-3 text-lg border-2 border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/90 text-gray-900 placeholder-gray-500 disabled:opacity-50"
+              className="flex-1 px-4 py-3 text-lg border-2 border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/90 text-gray-900 placeholder-gray-500"
               required
             />
             <button
               type="submit"
-              disabled={loading || zipCode.length !== 5}
+              disabled={zipCode.length !== 5}
               className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {loading ? 'Checking...' : 'Find Providers'}
+              Find Providers
             </button>
           </div>
           {error && (
