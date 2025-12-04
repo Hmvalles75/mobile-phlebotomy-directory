@@ -37,6 +37,12 @@ model Provider {
   twilioNumber    String?  // dedicated tracking number
   zipCodes        String?  // comma-separated service coverage ZIPs
 
+  // Monetization fields
+  listingTier      ListingTier @default(BASIC)  // Basic, Premium, Featured
+  isFeaturedCity   Boolean @default(false)  // City-exclusive Featured Sponsor
+  serviceZipCodes  String?  // JSON array of paid ZIP codes
+  affiliateLink    String?  // Speedy Sticks or other affiliate URL
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -418,4 +424,10 @@ enum CorporateInquiryStatus {
   BOOKED
   COMPLETED
   DECLINED
+}
+
+enum ListingTier {
+  BASIC
+  PREMIUM
+  FEATURED
 }

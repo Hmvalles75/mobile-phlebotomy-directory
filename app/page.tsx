@@ -11,6 +11,7 @@ import { topMetroAreas } from '@/data/top-metros'
 import { handleCityNameSearch, handleStateNameSearch } from '@/lib/zip-geocoding'
 import { StickyMobileCTA } from '@/components/ui/StickyMobileCTA'
 import { ga4 } from '@/lib/ga4'
+import { ZipCodeLeadForm } from '@/components/ZipCodeLeadForm'
 
 const featuredMetros = topMetroAreas.slice(0, 12)
 
@@ -229,24 +230,9 @@ export default function HomePage() {
               Get matched with a certified provider in your area today.
             </p>
 
-            {/* Primary CTAs */}
-            <div className="flex flex-col items-center gap-3 mb-8">
-              <button
-                onClick={() => {
-                  ga4.heroCTAClick({ cta_type: 'request' })
-                  router.push('/coming-soon')
-                }}
-                className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
-              >
-                Check Availability & Get Pricing Now
-              </button>
-              {/* Trust Signal */}
-              <div className="flex items-center gap-2 text-white/90 text-sm">
-                <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">Vetted & Certified Phlebotomists Only</span>
-              </div>
+            {/* ZIP Code Lead Segmentation Form */}
+            <div className="mb-8">
+              <ZipCodeLeadForm />
             </div>
 
             {/* Compliance disclaimer */}
