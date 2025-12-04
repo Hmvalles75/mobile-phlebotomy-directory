@@ -4,7 +4,11 @@ import { prisma } from '@/lib/prisma'
 import zipcodes from 'zipcodes'
 
 const schema = z.object({
-  zipCode: z.string().regex(/^\d{5}$/, 'Invalid ZIP code format')
+  city: z.string().min(1).optional(),
+  state: z.string().length(2).optional(),
+  zipCode: z.string().regex(/^\d{5}$/, 'Invalid ZIP code format').optional()
+}).refine(data => data.city && data.state || data.zipCode, {
+  message: 'Either provide city+state or zipCode'
 })
 
 // Speedy Sticks affiliate URL (fallback for low-coverage areas)
@@ -22,21 +26,36 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { zipCode } = parsed.data
+    const { city: cityParam, state: stateParam, zipCode } = parsed.data
 
-    // Step 1: Look up city and state from ZIP code
-    const zipInfo = zipcodes.lookup(zipCode)
+    // Determine city and state (either from direct input or ZIP lookup)
+    let city: string
+    let state: string
 
-    if (!zipInfo) {
-      console.log(`[Coverage Check] ZIP ${zipCode}: Invalid or unknown ZIP code`)
+    if (cityParam && stateParam) {
+      // Direct city/state input
+      city = cityParam
+      state = stateParam
+      console.log(`[Coverage Check] Direct input: ${city}, ${state}`)
+    } else if (zipCode) {
+      // ZIP code lookup
+      const zipInfo = zipcodes.lookup(zipCode)
+      if (!zipInfo) {
+        console.log(`[Coverage Check] ZIP ${zipCode}: Invalid or unknown ZIP code`)
+        return NextResponse.json({
+          ok: false,
+          error: 'Invalid ZIP code or coverage area not found'
+        }, { status: 404 })
+      }
+      city = zipInfo.city
+      state = zipInfo.state
+      console.log(`[Coverage Check] ZIP ${zipCode} → ${city}, ${state}`)
+    } else {
       return NextResponse.json({
         ok: false,
-        error: 'Invalid ZIP code or coverage area not found'
-      }, { status: 404 })
+        error: 'Must provide either city+state or zipCode'
+      }, { status: 400 })
     }
-
-    const { city, state } = zipInfo
-    console.log(`[Coverage Check] ZIP ${zipCode} → ${city}, ${state}`)
 
     // Step 2: Find the state in database
     const stateRecord = await prisma.state.findFirst({

@@ -8,15 +8,16 @@ import { ArrowLeft } from 'lucide-react'
 function RequestBloodDrawForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const initialZip = searchParams.get('zip') || ''
+  const initialCity = searchParams.get('city') || ''
+  const initialState = searchParams.get('state') || ''
 
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
-    zipCode: initialZip,
-    city: '',
-    state: '',
+    zipCode: '',
+    city: initialCity,
+    state: initialState,
     address1: '',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
     notes: ''
@@ -31,15 +32,15 @@ function RequestBloodDrawForm() {
     affiliateUrl?: string
   } | null>(null)
 
-  // Check coverage when ZIP code is available
+  // Check coverage when city and state are available
   useEffect(() => {
     const checkCoverage = async () => {
-      if (formData.zipCode && /^\d{5}$/.test(formData.zipCode)) {
+      if (formData.city && formData.state && formData.state.length === 2) {
         try {
           const response = await fetch('/api/check-coverage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ zipCode: formData.zipCode })
+            body: JSON.stringify({ city: formData.city, state: formData.state })
           })
           const data = await response.json()
           if (data.ok) {
@@ -55,7 +56,7 @@ function RequestBloodDrawForm() {
       }
     }
     checkCoverage()
-  }, [formData.zipCode])
+  }, [formData.city, formData.state])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target

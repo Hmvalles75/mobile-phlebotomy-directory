@@ -5,22 +5,26 @@ import { useRouter } from 'next/navigation'
 
 export function ZipCodeLeadForm() {
   const router = useRouter()
-  const [zipCode, setZipCode] = useState('')
+  const [city, setCity] = useState('')
+  const [state, setState] = useState('')
   const [error, setError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Validate ZIP code format
-    if (!/^\d{5}$/.test(zipCode)) {
-      setError('Please enter a valid 5-digit ZIP code')
+    if (!city.trim() || !state.trim()) {
+      setError('Please enter both city and state')
       return
     }
 
-    // Always route to local provider page
-    // The page will show available providers and affiliate fallback if needed
-    router.push(`/request-blood-draw?zip=${zipCode}`)
+    if (state.length !== 2) {
+      setError('Please enter state as 2-letter code (e.g., CA, NY, TX)')
+      return
+    }
+
+    // Route to lead form with city and state
+    router.push(`/request-blood-draw?city=${encodeURIComponent(city)}&state=${state.toUpperCase()}`)
   }
 
   return (
@@ -35,35 +39,51 @@ export function ZipCodeLeadForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="zipCode" className="block text-sm font-medium text-white mb-2">
-            Enter Your ZIP Code
-          </label>
-          <div className="flex gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="city" className="block text-sm font-medium text-white mb-2">
+              City
+            </label>
             <input
               type="text"
-              id="zipCode"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-              placeholder="Enter ZIP code"
-              maxLength={5}
-              className="flex-1 px-4 py-3 text-lg border-2 border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/90 text-gray-900 placeholder-gray-500"
+              id="city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Los Angeles"
+              className="w-full px-4 py-3 text-lg border-2 border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/90 text-gray-900 placeholder-gray-500"
               required
             />
-            <button
-              type="submit"
-              disabled={zipCode.length !== 5}
-              className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              Find Providers
-            </button>
           </div>
-          {error && (
-            <p className="text-red-200 text-sm mt-2 bg-red-900/30 px-3 py-2 rounded">
-              {error}
-            </p>
-          )}
+          <div>
+            <label htmlFor="state" className="block text-sm font-medium text-white mb-2">
+              State
+            </label>
+            <input
+              type="text"
+              id="state"
+              value={state}
+              onChange={(e) => setState(e.target.value.toUpperCase().slice(0, 2))}
+              placeholder="CA"
+              maxLength={2}
+              className="w-full px-4 py-3 text-lg border-2 border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/90 text-gray-900 placeholder-gray-500"
+              required
+            />
+          </div>
         </div>
+
+        <button
+          type="submit"
+          disabled={!city.trim() || state.length !== 2}
+          className="w-full px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Find Providers
+        </button>
+
+        {error && (
+          <p className="text-red-200 text-sm mt-2 bg-red-900/30 px-3 py-2 rounded">
+            {error}
+          </p>
+        )}
 
         {/* Trust Signal */}
         <div className="flex items-center justify-center gap-2 text-white/90 text-sm">
