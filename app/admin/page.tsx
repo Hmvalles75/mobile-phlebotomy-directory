@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
 
 interface PendingProvider {
   id: string
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'providers' | 'corporate'>('providers')
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -375,19 +377,23 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="px-4 py-2 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
-              >
-                {showAddForm ? '✕ Cancel' : '+ Add Provider'}
-              </button>
-              <button
-                onClick={handleDeploy}
-                disabled={deployLoading || approvedSubmissions.length === 0}
-                className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {deployLoading ? 'Deploying...' : '🚀 Deploy Changes'}
-              </button>
+              {activeTab === 'providers' && (
+                <>
+                  <button
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="px-4 py-2 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
+                  >
+                    {showAddForm ? '✕ Cancel' : '+ Add Provider'}
+                  </button>
+                  <button
+                    onClick={handleDeploy}
+                    disabled={deployLoading || approvedSubmissions.length === 0}
+                    className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deployLoading ? 'Deploying...' : '🚀 Deploy Changes'}
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -397,20 +403,52 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="mt-4 flex gap-4 text-sm">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
-              <span className="font-medium text-yellow-800">Pending: </span>
-              <span className="text-yellow-900">{pendingSubmissions.length}</span>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-              <span className="font-medium text-green-800">Approved: </span>
-              <span className="text-green-900">{approvedSubmissions.length}</span>
-            </div>
-            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2">
-              <span className="font-medium text-red-800">Rejected: </span>
-              <span className="text-red-900">{rejectedSubmissions.length}</span>
-            </div>
+          {/* Tabs */}
+          <div className="mt-6 flex gap-2 border-b border-gray-200">
+            <button
+              onClick={() => {
+                setActiveTab('providers')
+                setShowAddForm(false)
+              }}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'providers'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Provider Submissions
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('corporate')
+                setShowAddForm(false)
+              }}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'corporate'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Corporate Inquiries
+            </button>
           </div>
+
+          {activeTab === 'providers' && (
+            <div className="mt-4 flex gap-4 text-sm">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+                <span className="font-medium text-yellow-800">Pending: </span>
+                <span className="text-yellow-900">{pendingSubmissions.length}</span>
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                <span className="font-medium text-green-800">Approved: </span>
+                <span className="text-green-900">{approvedSubmissions.length}</span>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                <span className="font-medium text-red-800">Rejected: </span>
+                <span className="text-red-900">{rejectedSubmissions.length}</span>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -616,10 +654,12 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Submissions List */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Provider Submissions</h2>
+        {/* Provider Submissions Tab */}
+        {activeTab === 'providers' && (
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Submissions List */}
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Provider Submissions</h2>
 
             <div className="space-y-3">
               {submissions.length === 0 && (
@@ -800,6 +840,12 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Corporate Inquiries Tab */}
+        {activeTab === 'corporate' && (
+          <CorporateInquiriesPanel />
+        )}
       </div>
     </div>
   )
