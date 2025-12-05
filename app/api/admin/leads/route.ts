@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
-    // Check admin authentication
-    const authHeader = req.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    // Verify admin authentication
+    const authHeader = req.headers.get('authorization')
+    const cookieHeader = req.headers.get('cookie')
+    const isAuthenticated = verifyAdminSessionFromCookies(authHeader || cookieHeader)
 
-    // Simple token validation (matches admin login)
-    const adminToken = process.env.ADMIN_PASSWORD
-    if (token !== adminToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
     // Fetch all leads with provider relationship
