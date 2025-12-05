@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
+import { LeadsPanel } from './LeadsPanel'
 
 interface PendingProvider {
   id: string
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'providers' | 'corporate'>('providers')
+  const [activeTab, setActiveTab] = useState<'providers' | 'corporate' | 'leads'>('providers')
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -417,6 +418,19 @@ export default function AdminDashboard() {
               }`}
             >
               Provider Submissions
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('leads')
+                setShowAddForm(false)
+              }}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'leads'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Blood Draw Leads
             </button>
             <button
               onClick={() => {
@@ -840,6 +854,11 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Leads Tab */}
+        {activeTab === 'leads' && (
+          <LeadsPanel />
         )}
 
         {/* Corporate Inquiries Tab */}
