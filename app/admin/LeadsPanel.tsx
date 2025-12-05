@@ -130,7 +130,6 @@ export function LeadsPanel() {
                 className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md ${
                   selectedLead?.id === lead.id ? 'ring-2 ring-primary-500' : ''
                 }`}
-              }
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
