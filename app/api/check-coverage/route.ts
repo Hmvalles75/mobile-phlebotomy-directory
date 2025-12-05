@@ -71,9 +71,11 @@ export async function POST(req: NextRequest) {
       console.log(`[Coverage Check] State ${state} not found in database`)
       // Fallback: show all providers if state not in DB
       const allProviders = await prisma.provider.findMany({
-        where: { status: { in: ['VERIFIED', 'PENDING'] } },
+        where: { status: { in: ['VERIFIED', 'PENDING', 'UNVERIFIED'] } },
         select: { id: true, name: true, listingTier: true }
       })
+
+      console.log(`[Coverage Check] Fallback - found ${allProviders.length} total providers`)
 
       return NextResponse.json({
         ok: true,
@@ -81,7 +83,9 @@ export async function POST(req: NextRequest) {
         providerCount: allProviders.length,
         action: allProviders.length >= 3 ? 'lead_form' : 'affiliate',
         affiliateUrl: AFFILIATE_URL,
-        message: `We found ${allProviders.length} providers (nationwide search - ${state} not in our database yet)`
+        message: allProviders.length > 0
+          ? `We found ${allProviders.length} providers (nationwide search - ${state} not in our database yet)`
+          : `No providers found in database. Please import provider data.`
       })
     }
 
