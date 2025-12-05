@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     const providers = await prisma.provider.findMany({
       where: {
         AND: [
-          { status: { in: ['VERIFIED', 'PENDING'] } },
+          { status: { in: ['VERIFIED', 'PENDING', 'UNVERIFIED'] } },
           {
             coverage: {
               some: {

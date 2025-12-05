@@ -15,7 +15,7 @@ function RequestBloodDrawForm() {
     fullName: '',
     email: '',
     phone: '',
-    zipCode: '',
+    zip: '',
     city: initialCity,
     state: initialState,
     address1: '',
@@ -217,8 +217,8 @@ function RequestBloodDrawForm() {
                     </label>
                     <input
                       type="text"
-                      name="zipCode"
-                      value={formData.zipCode}
+                      name="zip"
+                      value={formData.zip}
                       onChange={handleChange}
                       maxLength={5}
                       pattern="[0-9]{5}"
@@ -368,11 +368,11 @@ function RequestBloodDrawForm() {
                 <div className="flex-shrink-0 text-green-500 text-2xl">✓</div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-green-900 mb-1">
-                    Great News! Excellent Coverage in Your Area
+                    Great News! Excellent Coverage in Your Area.
                   </h3>
                   <p className="text-green-800 text-sm">
                     We found {coverageData.providerCount} certified providers serving your ZIP code.
-                    Submit the form above and they&apos;ll compete for your business!
+                    Submit the form above and we will immediately match your request to the top 3-5 best-rated professionals. They will contact you shortly to confirm pricing.
                   </p>
                 </div>
               </div>
