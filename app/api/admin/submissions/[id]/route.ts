@@ -1,114 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminSession, verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/lib/pending-submissions'
-import fs from 'fs'
-import path from 'path'
-
-const CSV_PATH = path.join(process.cwd(), 'cleaned_providers.csv')
+import { prisma } from '@/lib/prisma'
 
 /**
- * Convert pending submission to CSV row
+ * Add provider to PostgreSQL database
  */
-function convertToCSVRow(submission: any): string {
-  const FIELDS = [
-    'name',
-    'totalScore',
-    'reviewsCount',
-    'street',
-    'regions serviced',
-    'city',
-    'state',
-    'countryCode',
-    'website',
-    'phone',
-    'categoryName',
-    'url',
-    'is_mobile_phlebotomy',
-    'is_nationwide',
-    'verified_service_areas',
-    'validation_notes',
-    'logo',
-    'profileImage',
-    'businessImages',
-    'bio',
-    'foundedYear',
-    'teamSize',
-    'yearsExperience',
-    'zipCodes',
-    'serviceRadius',
-    'travelFee',
-    'googlePlaceId',
-    'testimonials',
-    'certifications',
-    'licenseNumber',
-    'insuranceAmount',
-    'specialties',
-    'emergencyAvailable',
-    'weekendAvailable',
-    'email',
-    'contactPerson',
-    'languages'
-  ]
+async function addProviderToDatabase(submission: any) {
+  // First, ensure state exists
+  let state = await prisma.state.findFirst({
+    where: { abbr: submission.state }
+  })
 
-  // Map submission data to CSV fields
-  const data: any = {
-    name: submission.businessName || '',
-    totalScore: '',
-    reviewsCount: '',
-    street: submission.address || '',
-    'regions serviced': submission.serviceArea || '',
-    city: submission.city || '',
-    state: submission.state || '',
-    countryCode: 'US',
-    website: submission.website || '',
-    phone: submission.phone || '',
-    categoryName: '',
-    url: '',
-    is_mobile_phlebotomy: 'Yes',
-    is_nationwide: 'No',
-    verified_service_areas: '',
-    validation_notes: '',
-    logo: submission.logo || '',
-    profileImage: '',
-    businessImages: '',
-    bio: submission.description || '',
-    foundedYear: '',
-    teamSize: '',
-    yearsExperience: submission.yearsExperience || '',
-    zipCodes: submission.zipCode || '',
-    serviceRadius: '',
-    travelFee: '',
-    googlePlaceId: '',
-    testimonials: '',
-    certifications: submission.certifications || '',
-    licenseNumber: '',
-    insuranceAmount: '',
-    specialties: submission.specialties || '',
-    emergencyAvailable: submission.emergencyAvailable ? 'Yes' : 'No',
-    weekendAvailable: submission.weekendAvailable ? 'Yes' : 'No',
-    email: submission.email || '',
-    contactPerson: submission.contactName || '',
-    languages: 'English'
+  if (!state) {
+    state = await prisma.state.create({
+      data: {
+        abbr: submission.state,
+        name: submission.state
+      }
+    })
   }
 
-  // Escape and format values
-  function escapeCSVField(field: any): string {
-    if (field === null || field === undefined) {
-      return ''
+  // Then, ensure city exists
+  let city = await prisma.city.findFirst({
+    where: {
+      name: { equals: submission.city, mode: 'insensitive' },
+      stateId: state.id
     }
+  })
 
-    const str = String(field)
+  if (!city) {
+    // Generate slug from city name
+    const citySlug = submission.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 
-    // If field contains comma, newline, or double quote, wrap in quotes and escape quotes
-    if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-      return `"${str.replace(/"/g, '""')}"`
-    }
-
-    return str
+    city = await prisma.city.create({
+      data: {
+        name: submission.city,
+        stateId: state.id,
+        slug: citySlug
+      }
+    })
   }
 
-  const values = FIELDS.map(field => escapeCSVField(data[field] || ''))
-  return values.join(',')
+  // Create the provider
+  const provider = await prisma.provider.create({
+    data: {
+      name: submission.businessName,
+      phone: submission.phone || '',
+      website: submission.website || null,
+      email: submission.email || null,
+      city: submission.city,
+      state: submission.state,
+      address: submission.address || null,
+      zipCode: submission.zipCode || null,
+      description: submission.description || null,
+      yearsExperience: submission.yearsExperience || null,
+      certifications: submission.certifications || null,
+      specialties: submission.specialties || null,
+      emergencyAvailable: submission.emergencyAvailable || false,
+      weekendAvailable: submission.weekendAvailable || false,
+      status: 'VERIFIED', // Admin approved submissions get verified badge
+      listingTier: 'FREE'
+    }
+  })
+
+  // Add coverage for the city
+  await prisma.providerCoverage.create({
+    data: {
+      providerId: provider.id,
+      stateId: state.id,
+      cityId: city.id
+    }
+  })
+
+  // Also add state-level coverage
+  const existingStateCoverage = await prisma.providerCoverage.findFirst({
+    where: {
+      providerId: provider.id,
+      stateId: state.id,
+      cityId: null
+    }
+  })
+
+  if (!existingStateCoverage) {
+    await prisma.providerCoverage.create({
+      data: {
+        providerId: provider.id,
+        stateId: state.id,
+        cityId: null
+      }
+    })
+  }
+
+  return provider
 }
 
 /**
@@ -146,33 +130,19 @@ export async function POST(
     }
 
     if (action === 'approve') {
-      // Convert to CSV row
-      const csvRow = convertToCSVRow(submission)
+      // Add provider to PostgreSQL database
+      const provider = await addProviderToDatabase(submission)
 
-      // Append to CSV file
-      fs.appendFileSync(CSV_PATH, '\n' + csvRow)
-
-      // Update status
+      // Update submission status
       await updateSubmissionStatus(id, 'approved')
 
-      // Trigger rebuild of providers.json (run Python script)
-      try {
-        const { execSync } = require('child_process')
-        console.log('🔄 Rebuilding providers.json...')
-        execSync('py convert_csv.py', {
-          cwd: process.cwd(),
-          stdio: 'inherit'
-        })
-        console.log('✅ Providers.json rebuilt successfully')
-      } catch (error) {
-        console.error('⚠️  Failed to rebuild providers.json:', error)
-        // Don't fail the approval if rebuild fails - can be done manually
-      }
+      console.log(`✅ Provider ${provider.name} added to database with ID ${provider.id}`)
 
       return NextResponse.json({
         success: true,
-        message: 'Provider approved and added to directory. Site will update on next deployment.',
-        provider: submission.businessName
+        message: 'Provider approved and added to directory immediately!',
+        provider: submission.businessName,
+        providerId: provider.id
       })
 
     } else if (action === 'reject') {
