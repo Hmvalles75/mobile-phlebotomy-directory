@@ -1,6 +1,9 @@
 import { prisma } from './prisma'
 import type { EnrichedProvider } from './providers'
 
+// Re-export EnrichedProvider type for consumers
+export type { EnrichedProvider } from './providers'
+
 /**
  * Convert database provider to EnrichedProvider format
  */
