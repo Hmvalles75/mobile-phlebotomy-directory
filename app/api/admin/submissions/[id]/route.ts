@@ -42,25 +42,34 @@ async function addProviderToDatabase(submission: any) {
     })
   }
 
+  // Generate slug from business name
+  const baseSlug = submission.businessName.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim()
+
+  // Ensure unique slug
+  let slug = baseSlug
+  let counter = 1
+  while (await prisma.provider.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`
+    counter++
+  }
+
   // Create the provider
   const provider = await prisma.provider.create({
     data: {
       name: submission.businessName,
-      phone: submission.phone || '',
+      slug,
+      phone: submission.phone || null,
+      phonePublic: submission.phone || null,
       website: submission.website || null,
       email: submission.email || null,
-      city: submission.city,
-      state: submission.state,
-      address: submission.address || null,
-      zipCode: submission.zipCode || null,
       description: submission.description || null,
-      yearsExperience: submission.yearsExperience || null,
-      certifications: submission.certifications || null,
-      specialties: submission.specialties || null,
-      emergencyAvailable: submission.emergencyAvailable || false,
-      weekendAvailable: submission.weekendAvailable || false,
+      zipCodes: submission.zipCode || null, // Store submitted ZIP for legacy compatibility
       status: 'VERIFIED', // Admin approved submissions get verified badge
-      listingTier: 'FREE'
+      listingTier: 'BASIC' // Default to BASIC tier for free listings
     }
   })
 
@@ -162,10 +171,12 @@ export async function POST(
       )
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing submission action:', error)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
     )
   }
