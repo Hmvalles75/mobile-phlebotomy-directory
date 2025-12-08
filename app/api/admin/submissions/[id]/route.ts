@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminSession } from '@/lib/admin-auth'
+import { verifyAdminSession, verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/lib/pending-submissions'
 import fs from 'fs'
 import path from 'path'
@@ -119,8 +119,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify admin authentication
-    const isAuthenticated = await verifyAdminSession()
+    // Verify admin authentication from header or cookies
+    const authHeader = request.headers.get('authorization')
+    const cookieHeader = request.headers.get('cookie')
+    const isAuthenticated = authHeader
+      ? verifyAdminSessionFromCookies(authHeader)
+      : await verifyAdminSession()
 
     if (!isAuthenticated) {
       return NextResponse.json(
@@ -205,8 +209,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify admin authentication
-    const isAuthenticated = await verifyAdminSession()
+    // Verify admin authentication from header or cookies
+    const authHeader = request.headers.get('authorization')
+    const isAuthenticated = authHeader
+      ? verifyAdminSessionFromCookies(authHeader)
+      : await verifyAdminSession()
 
     if (!isAuthenticated) {
       return NextResponse.json(
