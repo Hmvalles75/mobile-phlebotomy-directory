@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers'
+import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers-db'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
@@ -18,6 +18,9 @@ interface PageProps {
     slug: string
   }
 }
+
+// Enable ISR (Incremental Static Regeneration) - revalidate every 60 seconds
+export const revalidate = 60
 
 export async function generateStaticParams() {
   const providers = await getAllProviders()
@@ -101,8 +104,8 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   // Get provider tier badge
   const registeredBadge = getProviderBadge(provider.id)
 
-  // Check if provider is verified (has been claimed and approved)
-  const isVerified = isProviderRegistered(provider.id)
+  // Check if provider is verified (based on database status)
+  const isVerified = provider.status === 'VERIFIED'
 
   return (
     <>

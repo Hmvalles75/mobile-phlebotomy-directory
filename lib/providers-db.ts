@@ -1,40 +1,296 @@
-// Temporarily disabled for deployment
-export async function getAllProviders() {
-  return []
+import { prisma } from './prisma'
+import type { EnrichedProvider } from './providers'
+
+/**
+ * Convert database provider to EnrichedProvider format
+ */
+function toEnrichedProvider(provider: any): EnrichedProvider {
+  return {
+    id: provider.id,
+    name: provider.name,
+    slug: provider.slug,
+    phone: provider.phone || provider.phonePublic || undefined,
+    website: provider.website || undefined,
+    email: provider.email || undefined,
+    description: provider.description || undefined,
+    bio: provider.description || undefined,
+    zipCodes: provider.zipCodes || undefined,
+    status: provider.status,
+    totalScore: provider.rating || undefined,
+    reviewsCount: provider.reviewCount || undefined,
+
+    // Parse coverage from ProviderCoverage relationships
+    coverage: {
+      states: provider.coverage?.filter((c: any) => !c.cityId).map((c: any) => c.state?.abbr) || [],
+      cities: provider.coverage?.filter((c: any) => c.cityId).map((c: any) => c.city?.name) || [],
+      regions: []
+    },
+
+    // Get primary location from first city coverage
+    city: provider.coverage?.find((c: any) => c.cityId)?.city?.name,
+    state: provider.coverage?.find((c: any) => c.stateId)?.state?.abbr,
+
+    services: [],
+    availability: [],
+    payment: [],
+    badges: provider.status === 'VERIFIED' ? ['Verified'] : [],
+    featured: provider.listingTier === 'FEATURED',
+    createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()
+  }
 }
 
-export async function getProvidersByCity() {
-  return []
+export async function getAllProviders(): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error fetching providers from database:', error)
+    return []
+  }
 }
 
-export async function getProvidersByState() {
-  return []
+export async function getProviderBySlug(slug: string): Promise<EnrichedProvider | null> {
+  try {
+    const provider = await prisma.provider.findUnique({
+      where: { slug },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      }
+    })
+
+    if (!provider) return null
+    return toEnrichedProvider(provider)
+  } catch (error) {
+    console.error('Error fetching provider by slug:', error)
+    return null
+  }
 }
 
-export async function searchProviders() {
-  return []
+export async function getProviderById(id: string): Promise<EnrichedProvider | null> {
+  try {
+    const provider = await prisma.provider.findUnique({
+      where: { id },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      }
+    })
+
+    if (!provider) return null
+    return toEnrichedProvider(provider)
+  } catch (error) {
+    console.error('Error fetching provider by id:', error)
+    return null
+  }
 }
 
-export async function getProviderById() {
-  return undefined
+export async function getProvidersByCity(cityName: string, stateAbbr?: string): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      where: {
+        coverage: {
+          some: {
+            city: {
+              name: {
+                equals: cityName,
+                mode: 'insensitive'
+              }
+            },
+            ...(stateAbbr && {
+              state: {
+                abbr: stateAbbr
+              }
+            })
+          }
+        }
+      },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      }
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error fetching providers by city:', error)
+    return []
+  }
 }
 
-export async function getProviderBySlug() {
-  return undefined
+export async function getProvidersByState(stateAbbr: string): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      where: {
+        coverage: {
+          some: {
+            state: {
+              abbr: stateAbbr
+            }
+          }
+        }
+      },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      }
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error fetching providers by state:', error)
+    return []
+  }
 }
 
-export async function getFeaturedProviders() {
-  return []
+export async function searchProviders(query: string): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      where: {
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } }
+        ]
+      },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      }
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error searching providers:', error)
+    return []
+  }
 }
 
-export async function getTopRatedProviders() {
-  return []
+export async function getFeaturedProviders(): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      where: {
+        listingTier: 'FEATURED'
+      },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      },
+      take: 10
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error fetching featured providers:', error)
+    return []
+  }
 }
 
-export async function getProvidersByService() {
-  return []
+export async function getTopRatedProviders(): Promise<EnrichedProvider[]> {
+  try {
+    const providers = await prisma.provider.findMany({
+      where: {
+        rating: {
+          gte: 4.0
+        }
+      },
+      include: {
+        coverage: {
+          include: {
+            state: true,
+            city: true
+          }
+        }
+      },
+      orderBy: {
+        rating: 'desc'
+      },
+      take: 10
+    })
+
+    return providers.map(toEnrichedProvider)
+  } catch (error) {
+    console.error('Error fetching top rated providers:', error)
+    return []
+  }
 }
 
-export async function getCitiesWithProviders() {
-  return []
+export async function getProvidersByService(service: string): Promise<EnrichedProvider[]> {
+  // Service filtering would require a services field in the database
+  // For now, return all providers
+  return getAllProviders()
+}
+
+export async function getCitiesWithProviders(): Promise<Array<{ city: string; state: string; count: number }>> {
+  try {
+    const cities = await prisma.providerCoverage.groupBy({
+      by: ['cityId', 'stateId'],
+      where: {
+        cityId: {
+          not: null
+        }
+      },
+      _count: {
+        providerId: true
+      }
+    })
+
+    const citiesWithNames = await Promise.all(
+      cities.map(async (c) => {
+        const city = await prisma.city.findUnique({
+          where: { id: c.cityId! },
+          include: { state: true }
+        })
+
+        return {
+          city: city?.name || '',
+          state: city?.state?.abbr || '',
+          count: c._count.providerId
+        }
+      })
+    )
+
+    return citiesWithNames.filter(c => c.city && c.state)
+  } catch (error) {
+    console.error('Error fetching cities with providers:', error)
+    return []
+  }
 }

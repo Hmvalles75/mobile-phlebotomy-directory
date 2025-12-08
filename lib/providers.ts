@@ -40,6 +40,7 @@ export interface EnrichedProvider {
   email?: string
   contactPerson?: string
   languages?: string
+  status?: 'VERIFIED' | 'UNVERIFIED' | 'PENDING'
   // Schema fields for compatibility
   slug: string
   description?: string
