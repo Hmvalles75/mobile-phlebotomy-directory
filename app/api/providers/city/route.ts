@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllProviders } from '@/lib/providers'
+import { getAllProviders } from '@/lib/providers-db'
 import { cityQuerySchema, validateInput, sanitizeString } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'

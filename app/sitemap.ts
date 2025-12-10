@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import statesData from '@/data/states.json'
 import citiesData from '@/data/cities.json'
 import { State, City } from '@/lib/schemas'
-import { getAllProviders } from '@/lib/providers'
+import { getAllProviders } from '@/lib/providers-db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'

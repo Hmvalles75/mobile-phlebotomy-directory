@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllProviders } from '@/lib/providers'
+import { getAllProviders } from '@/lib/providers-db'
 import { sanitizeString } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
-// Load providers from the enriched CSV data
+// Load providers from the database
 async function loadProviders() {
   try {
     const providers = await getAllProviders()
