@@ -8,6 +8,7 @@ const tiers = [
     id: 'FOUNDING_PARTNER',
     name: 'Founding Partner Premium',
     price: 49,
+    roi: 'Just 2 leads pays for itself',
     description: 'Launch offer for providers in new, unserved markets',
     badge: 'Limited Time',
     popular: true,
@@ -25,6 +26,7 @@ const tiers = [
     id: 'STANDARD_PREMIUM',
     name: 'Standard Premium',
     price: 79,
+    roi: '~3 leads pays for itself',
     description: 'Standard premium listing for established markets',
     icon: Star,
     features: [
@@ -40,6 +42,7 @@ const tiers = [
     id: 'HIGH_DENSITY',
     name: 'High-Density Metro',
     price: 149,
+    roi: '6 leads pays for itself',
     description: 'Maximum visibility in major metro markets',
     icon: TrendingUp,
     features: [
@@ -103,11 +106,16 @@ export default function PricingPage() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
                     {tier.name}
                   </h2>
-                  <div className="mb-3">
+                  <div className="mb-2">
                     <span className="text-5xl font-bold text-gray-900">
                       ${tier.price}
                     </span>
                     <span className="text-gray-600 text-lg">/month</span>
+                  </div>
+                  <div className="mb-3">
+                    <span className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                      💰 {tier.roi}
+                    </span>
                   </div>
                   <p className="text-gray-600">{tier.description}</p>
                 </div>
