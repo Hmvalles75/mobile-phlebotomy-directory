@@ -641,10 +641,10 @@ export default function HomePage() {
 
             {/* CTA Button */}
             <Link
-              href="/providers/claim"
+              href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg"
             >
-              Upgrade to Premium
+              View Pricing
               <span>→</span>
             </Link>
           </div>
