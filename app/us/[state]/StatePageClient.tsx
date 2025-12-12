@@ -492,10 +492,10 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             Featured Providers
                           </h3>
                           <Link
-                            href="/contact"
+                            href="/providers/claim"
                             className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
                           >
-                            Get Featured
+                            Upgrade to Premium
                           </Link>
                         </div>
                         <p className="text-gray-600 text-sm">

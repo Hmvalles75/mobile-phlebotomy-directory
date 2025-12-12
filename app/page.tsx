@@ -616,7 +616,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Providers Coming Soon Section */}
+      {/* Premium Provider Placement Section */}
       <section className="py-12 bg-gradient-to-b from-primary-50 to-white">
         <div className="container">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-primary-100 p-8 md:p-10 text-center">
@@ -624,29 +624,29 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-3xl">🌟</span>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Featured Providers
+                Premium Provider Placement
               </h2>
             </div>
 
-            {/* Coming Soon Badge */}
-            <div className="inline-block bg-primary-100 text-primary-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
-              Coming Soon
+            {/* Launch Offer Badge */}
+            <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
+              Now Available - Starting at $49/month
             </div>
 
             {/* Description */}
             <p className="text-gray-600 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-              Be among the first 5 mobile phlebotomy services featured on our homepage.
-              Early adopter pricing available.
+              Get premium placement at the top of search results and exclusive market coverage.
+              Founding Partner rates available for new markets.
             </p>
 
             {/* CTA Button */}
-            <a
-              href="mailto:hector@mobilephlebotomy.org?subject=Interested%20in%20Featured%20Provider%20Placement%20-%20MobilePhlebotomy.org"
+            <Link
+              href="/providers/claim"
               className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg"
             >
-              Get Featured
+              Upgrade to Premium
               <span>→</span>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
