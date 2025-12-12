@@ -64,18 +64,18 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Handle subscription (featured tier)
+        // Handle subscription (premium tier)
         if (type === 'featured_subscription') {
-          const tier = session.metadata?.tier as 'SMALL' | 'MEDIUM' | 'LARGE'
+          const tier = session.metadata?.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
           if (tier) {
             await prisma.provider.update({
               where: { id: providerId },
               data: {
-                isFeatured: true,
+                listingTier: 'PREMIUM',
                 featuredTier: tier
               }
             })
-            console.log(`Activated ${tier} featured tier for provider ${providerId}`)
+            console.log(`Activated ${tier} premium tier for provider ${providerId}`)
           }
         }
         break
@@ -94,12 +94,12 @@ export async function POST(req: NextRequest) {
         if (provider && subscription.status === 'active') {
           // Extract tier from metadata if available
           const metadata = subscription.metadata || {}
-          const tier = metadata.tier as 'SMALL' | 'MEDIUM' | 'LARGE' | undefined
+          const tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | undefined
 
           await prisma.provider.update({
             where: { id: provider.id },
             data: {
-              isFeatured: true,
+              listingTier: 'PREMIUM',
               featuredTier: tier || provider.featuredTier
             }
           })
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
           await prisma.provider.update({
             where: { id: provider.id },
             data: {
-              isFeatured: false,
+              listingTier: 'BASIC',
               featuredTier: null
             }
           })

@@ -45,7 +45,12 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(data/pending-submissions.json)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm exec prisma:*)",
+      "Bash(pnpm rebuild)",
+      "Bash(find:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

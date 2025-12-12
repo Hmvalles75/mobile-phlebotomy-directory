@@ -7,9 +7,9 @@ const stripe = process.env.STRIPE_SECRET_KEY
   : null
 
 const TIER_PRICES = {
-  SMALL: process.env.STRIPE_PRICE_FEATURED_SMALL || '',   // $99/mo
-  MEDIUM: process.env.STRIPE_PRICE_FEATURED_MED || '',    // $249/mo
-  LARGE: process.env.STRIPE_PRICE_FEATURED_LARGE || ''    // $499/mo
+  FOUNDING_PARTNER: process.env.STRIPE_PRICE_FOUNDING_PARTNER || '',  // $49/mo
+  STANDARD_PREMIUM: process.env.STRIPE_PRICE_STANDARD_PREMIUM || '',  // $79/mo
+  HIGH_DENSITY: process.env.STRIPE_PRICE_HIGH_DENSITY || ''           // $149/mo
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { providerId, tier } = body
 
-    if (!providerId || !['SMALL', 'MEDIUM', 'LARGE'].includes(tier)) {
+    if (!providerId || !['FOUNDING_PARTNER', 'STANDARD_PREMIUM', 'HIGH_DENSITY'].includes(tier)) {
       return NextResponse.json(
         { ok: false, error: 'Invalid provider ID or tier' },
         { status: 400 }

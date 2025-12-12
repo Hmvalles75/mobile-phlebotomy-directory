@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { PremiumPricingModal } from '@/components/ui/PremiumPricingModal'
 
 interface Lead {
   id: string
@@ -48,6 +49,7 @@ function DashboardContent() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showPricingModal, setShowPricingModal] = useState(false)
 
   useEffect(() => {
     fetchDashboardData()
@@ -349,16 +351,29 @@ function DashboardContent() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Featured</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Premium</h3>
             <p className="text-gray-600 mb-4">
-              Get premium placement and more leads with a Featured subscription.
+              Get premium placement and more leads with a Premium subscription starting at $49/month.
             </p>
-            <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 font-medium">
-              View Plans
+            <button
+              onClick={() => setShowPricingModal(true)}
+              className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 font-medium"
+            >
+              View Pricing Plans
             </button>
           </div>
         </div>
       </div>
+
+      {/* Premium Pricing Modal */}
+      {data && (
+        <PremiumPricingModal
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          providerId={provider.id}
+          providerName={provider.name}
+        />
+      )}
     </div>
   )
 }
