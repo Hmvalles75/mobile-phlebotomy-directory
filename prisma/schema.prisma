@@ -30,7 +30,7 @@ model Provider {
   isFeatured      Boolean @default(false)
   featuredTier    FeaturedTier?
   stripeCustomerId String?
-  leadCredit      Int      @default(0)
+  stripePaymentMethodId String?  // saved payment method for direct charging
   claimEmail      String?  // email used after claim (hidden on public page)
   claimToken      String?  // for email verify
   claimVerifiedAt DateTime?

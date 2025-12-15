@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         name: true,
         slug: true,
         status: true,
-        leadCredit: true,
+        stripePaymentMethodId: true,
         featuredTier: true,
         claimEmail: true,
         email: true,

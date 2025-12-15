@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
-import { sendLeadToProvider, notifyAdminUnservedLead, notifyProviderLowCredits } from '@/lib/notifyProvider'
-import { routeLeadToProvider } from '@/lib/routing'
+import { notifyAdminUnservedLead } from '@/lib/notifyProvider'
+import { routeLeadAndCharge } from '@/lib/leadRouting'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -34,67 +34,43 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // Try to route to a provider
-    const provider = await routeLeadToProvider(payload.zip)
+    // Automatically route lead to an eligible provider (DPPL system)
+    // This function handles:
+    // 1. Finding providers with saved payment methods in the ZIP code
+    // 2. Attempting to charge each provider via Stripe
+    // 3. If charge succeeds, updating lead status and sending notification
+    // 4. If charge fails, trying next provider and notifying failed provider
+    const routedProviderId = await routeLeadAndCharge({
+      id: lead.id,
+      zip: payload.zip,
+      priceCents,
+      urgency: payload.urgency,
+      fullName: payload.fullName,
+      phone: payload.phone,
+      email: payload.email,
+      city: payload.city,
+      state: payload.state,
+      address1: payload.address1,
+      notes: payload.notes
+    })
 
-    if (provider) {
-      // Check if provider has credits
-      if (provider.leadCredit > 0) {
-        // Deliver the lead
-        await prisma.lead.update({
-          where: { id: lead.id },
-          data: {
-            routedToId: provider.id,
-            routedAt: new Date(),
-            status: 'DELIVERED'
-          }
-        })
-
-        // Send notifications
-        await sendLeadToProvider(provider, lead)
-
-        // Decrement credits
-        await prisma.provider.update({
-          where: { id: provider.id },
-          data: { leadCredit: { decrement: 1 } }
-        })
-
-        return NextResponse.json({
-          ok: true,
-          leadId: lead.id,
-          routedTo: provider.slug,
-          status: 'delivered'
-        })
-      } else {
-        // Provider found but no credits
-        await prisma.lead.update({
-          where: { id: lead.id },
-          data: {
-            routedToId: provider.id,
-            routedAt: new Date(),
-            status: 'DELIVERED' // Still mark as delivered, but provider needs to top up
-          }
-        })
-
-        // Notify provider to purchase credits
-        await notifyProviderLowCredits(provider, lead)
-
-        return NextResponse.json({
-          ok: true,
-          leadId: lead.id,
-          routedTo: provider.slug,
-          status: 'pending_credits'
-        })
-      }
+    if (routedProviderId) {
+      // Successfully routed and provider charged
+      return NextResponse.json({
+        ok: true,
+        leadId: lead.id,
+        status: 'routed',
+        message: 'Lead successfully delivered to provider'
+      })
     } else {
-      // No provider found for this ZIP
+      // No eligible provider found (no one in area with valid payment method)
       await notifyAdminUnservedLead(lead)
 
       return NextResponse.json({
         ok: true,
         leadId: lead.id,
-        routedTo: null,
-        status: 'unserved'
+        status: 'unserved',
+        message: 'Lead created but no eligible provider found'
       })
     }
   } catch (e: any) {

@@ -52,15 +52,21 @@ export async function POST(req: NextRequest) {
           })
         }
 
-        // Handle credit purchase
-        if (type === 'credit_purchase') {
-          const pack = Number(session.metadata?.pack || '0')
-          if (pack > 0) {
+        // Handle payment method setup (DPPL system)
+        if (type === 'payment_setup' && session.setup_intent) {
+          // Retrieve the setup intent to get the payment method
+          const setupIntent = await stripe.setupIntents.retrieve(
+            session.setup_intent as string
+          )
+
+          if (setupIntent.payment_method) {
             await prisma.provider.update({
               where: { id: providerId },
-              data: { leadCredit: { increment: pack } }
+              data: {
+                stripePaymentMethodId: setupIntent.payment_method as string
+              }
             })
-            console.log(`Added ${pack} credits to provider ${providerId}`)
+            console.log(`Payment method saved for provider ${providerId}`)
           }
         }
 
