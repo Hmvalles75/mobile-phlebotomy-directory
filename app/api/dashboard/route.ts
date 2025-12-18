@@ -44,13 +44,14 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Fetch recent leads for this provider
-    const leads = await prisma.lead.findMany({
+    // Fetch leads claimed by this provider (DPPL system)
+    const claimedLeads = await prisma.lead.findMany({
       where: {
-        routedToId: session.providerId
+        routedToId: session.providerId,
+        status: 'CLAIMED'
       },
       orderBy: {
-        createdAt: 'desc'
+        routedAt: 'desc'
       },
       take: 50,
       select: {
@@ -65,23 +66,69 @@ export async function GET(req: NextRequest) {
         urgency: true,
         status: true,
         priceCents: true,
-        notes: true
+        notes: true,
+        routedAt: true
       }
     })
 
+    // Fetch OPEN leads available to claim in provider's service area
+    // Parse provider's zip codes
+    const providerZipCodes = provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []
+
+    const availableLeads = await prisma.lead.findMany({
+      where: {
+        status: 'OPEN',
+        ...(providerZipCodes.length > 0 ? {
+          zip: {
+            in: providerZipCodes
+          }
+        } : {})
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 20,
+      select: {
+        id: true,
+        createdAt: true,
+        city: true,
+        state: true,
+        zip: true,
+        urgency: true,
+        status: true,
+        priceCents: true
+      }
+    })
+
+    // Check trial status
+    const providerWithTrial = await prisma.provider.findUnique({
+      where: { id: session.providerId },
+      select: {
+        trialStatus: true,
+        trialExpiresAt: true
+      }
+    })
+
+    let isTrialActive = false
+    if (providerWithTrial && providerWithTrial.trialStatus === 'ACTIVE' && providerWithTrial.trialExpiresAt) {
+      isTrialActive = providerWithTrial.trialExpiresAt > new Date()
+    }
+
     // Calculate stats
     const stats = {
-      totalLeads: leads.length,
-      newLeads: leads.filter((l: typeof leads[number]) => l.status === 'NEW').length,
-      deliveredLeads: leads.filter((l: typeof leads[number]) => l.status === 'DELIVERED').length,
-      revenueGenerated: leads.reduce((sum: number, lead: typeof leads[number]) => sum + lead.priceCents, 0) / 100
+      totalLeads: claimedLeads.length,
+      claimedLeads: claimedLeads.length,
+      availableLeads: availableLeads.length,
+      totalSpent: claimedLeads.reduce((sum: number, lead: typeof claimedLeads[number]) => sum + lead.priceCents, 0) / 100
     }
 
     return NextResponse.json({
       ok: true,
       provider,
-      leads,
-      stats
+      claimedLeads,
+      availableLeads,
+      stats,
+      isTrialActive
     })
 
   } catch (error: any) {

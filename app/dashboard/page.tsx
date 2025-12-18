@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle } from 'lucide-react'
+import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, DollarSign, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumPricingModal } from '@/components/ui/PremiumPricingModal'
 
@@ -16,9 +16,20 @@ interface Lead {
   state: string
   zip: string
   urgency: 'STANDARD' | 'STAT'
-  status: 'NEW' | 'DELIVERED' | 'REFUNDED' | 'UNSOLD'
+  status: 'NEW' | 'DELIVERED' | 'REFUNDED' | 'UNSOLD' | 'CLAIMED'
   priceCents: number
   notes?: string
+  routedAt?: string
+}
+
+interface AvailableLead {
+  id: string
+  createdAt: string
+  city: string
+  state: string
+  zip: string
+  urgency: 'STANDARD' | 'STAT'
+  priceCents: number
 }
 
 interface Provider {
@@ -34,13 +45,15 @@ interface Provider {
 
 interface DashboardData {
   provider: Provider
-  leads: Lead[]
+  claimedLeads: Lead[]
+  availableLeads: AvailableLead[]
   stats: {
     totalLeads: number
-    newLeads: number
-    deliveredLeads: number
-    revenueGenerated: number
+    claimedLeads: number
+    availableLeads: number
+    totalSpent: number
   }
+  isTrialActive: boolean
 }
 
 function DashboardContent() {
@@ -105,19 +118,6 @@ function DashboardContent() {
     return `${diffDays}d ago`
   }
 
-  const getStatusBadge = (status: Lead['status']) => {
-    switch (status) {
-      case 'NEW':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">New</span>
-      case 'DELIVERED':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Delivered</span>
-      case 'REFUNDED':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Refunded</span>
-      case 'UNSOLD':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Unsold</span>
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -155,7 +155,7 @@ function DashboardContent() {
     )
   }
 
-  const { provider, leads, stats } = data
+  const { provider, claimedLeads, availableLeads, stats, isTrialActive } = data
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -164,6 +164,16 @@ function DashboardContent() {
         <div className="bg-green-50 border-b border-green-200 px-4 py-3">
           <div className="container mx-auto">
             <p className="text-sm text-green-800">✓ Logged in successfully</p>
+          </div>
+        </div>
+      )}
+
+      {/* Trial Status Banner */}
+      {isTrialActive && (
+        <div className="bg-green-500 text-white px-4 py-3">
+          <div className="container mx-auto flex items-center justify-center gap-2">
+            <Star className="h-5 w-5" />
+            <p className="font-semibold">30-Day Free Trial Active - All leads are FREE!</p>
           </div>
         </div>
       )}
@@ -211,69 +221,152 @@ function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <CreditCard className="text-blue-600" size={24} />
-              <span className="text-3xl font-bold text-gray-900">{provider.leadCredit}</span>
+              <Zap className="text-orange-600" size={24} />
+              <span className="text-3xl font-bold text-gray-900">{stats.availableLeads}</span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">Lead Credits</p>
-            <p className="text-xs text-gray-500 mt-1">Available for new leads</p>
+            <p className="text-gray-600 text-sm font-medium">Available Leads</p>
+            <p className="text-xs text-gray-500 mt-1">Ready to claim now</p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <Users className="text-green-600" size={24} />
-              <span className="text-3xl font-bold text-gray-900">{stats.totalLeads}</span>
+              <span className="text-3xl font-bold text-gray-900">{stats.claimedLeads}</span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">Total Leads</p>
-            <p className="text-xs text-gray-500 mt-1">All time</p>
+            <p className="text-gray-600 text-sm font-medium">Claimed Leads</p>
+            <p className="text-xs text-gray-500 mt-1">Your leads</p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="text-purple-600" size={24} />
-              <span className="text-3xl font-bold text-gray-900">{stats.newLeads}</span>
+              <DollarSign className="text-blue-600" size={24} />
+              <span className="text-3xl font-bold text-gray-900">
+                {isTrialActive ? '$0' : `$${stats.totalSpent.toFixed(0)}`}
+              </span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">New Leads</p>
-            <p className="text-xs text-gray-500 mt-1">Awaiting contact</p>
+            <p className="text-gray-600 text-sm font-medium">Total Spent</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {isTrialActive ? 'FREE during trial' : 'On leads'}
+            </p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <Star className="text-yellow-600" size={24} />
-              <span className="text-3xl font-bold text-gray-900">${stats.revenueGenerated.toFixed(0)}</span>
+              <span className="text-2xl font-bold text-gray-900">
+                {isTrialActive ? 'TRIAL' : 'ACTIVE'}
+              </span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">Total Spent</p>
-            <p className="text-xs text-gray-500 mt-1">On lead credits</p>
+            <p className="text-gray-600 text-sm font-medium">Account Status</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {isTrialActive ? '30-day free trial' : 'Pay per lead'}
+            </p>
           </div>
         </div>
 
-        {/* Low Credits Warning */}
-        {provider.leadCredit < 5 && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-yellow-400" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Low credit balance</h3>
-                <p className="mt-1 text-sm text-yellow-700">
-                  You have {provider.leadCredit} lead credit{provider.leadCredit === 1 ? '' : 's'} remaining.
-                  Purchase more to continue receiving leads.
-                </p>
+        {/* Available Leads Section */}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 bg-orange-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="text-orange-600" size={24} />
+                <h2 className="text-xl font-bold text-gray-900">Available Leads in Your Area</h2>
               </div>
+              {stats.availableLeads > 0 && (
+                <span className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  {stats.availableLeads} Ready to Claim
+                </span>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Leads Table */}
+          {availableLeads.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No leads available right now</h3>
+              <p className="text-gray-600">
+                New patient leads will appear here when they submit requests in your service area.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Urgency
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Price
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Posted
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {availableLeads.map((lead) => (
+                    <tr key={lead.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{lead.city}, {lead.state}</div>
+                        <div className="text-sm text-gray-500">{lead.zip}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          lead.urgency === 'STAT'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {lead.urgency === 'STAT' ? '🚨 STAT' : '📋 Standard'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                        {isTrialActive ? (
+                          <span className="text-green-600">
+                            FREE <span className="line-through text-gray-400 ml-1">${(lead.priceCents / 100).toFixed(2)}</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-900">${(lead.priceCents / 100).toFixed(2)}</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(lead.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <Link
+                          href={`/claim/${lead.id}`}
+                          className="inline-flex items-center gap-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 font-semibold"
+                        >
+                          <Zap size={16} />
+                          Claim Lead
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Claimed Leads Section */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Recent Leads</h2>
+            <h2 className="text-xl font-bold text-gray-900">Your Claimed Leads</h2>
           </div>
 
-          {leads.length === 0 ? (
+          {claimedLeads.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No leads yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No claimed leads yet</h3>
               <p className="text-gray-600">
-                Leads will appear here once you start receiving patient requests.
+                Leads you claim will appear here with full patient contact information.
               </p>
             </div>
           ) : (
@@ -291,18 +384,15 @@ function DashboardContent() {
                       Urgency
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Cost
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Received
+                      Claimed
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {leads.map((lead) => (
+                  {claimedLeads.map((lead) => (
                     <tr key={lead.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{lead.fullName}</div>
@@ -321,14 +411,15 @@ function DashboardContent() {
                           {lead.urgency}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(lead.status)}
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${(lead.priceCents / 100).toFixed(2)}
+                        {isTrialActive ? (
+                          <span className="text-green-600 font-semibold">$0 (Trial)</span>
+                        ) : (
+                          `$${(lead.priceCents / 100).toFixed(2)}`
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(lead.createdAt)}
+                        {formatDate(lead.routedAt || lead.createdAt)}
                       </td>
                     </tr>
                   ))}
@@ -341,19 +432,31 @@ function DashboardContent() {
         {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Need More Leads?</h3>
-            <p className="text-gray-600 mb-4">
-              Purchase lead credits to continue receiving patient requests in your service area.
-            </p>
-            <button className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 font-medium">
-              Purchase Credits
-            </button>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">How It Works</h3>
+            <ul className="space-y-3 text-gray-600">
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">1.</span>
+                <span>New leads appear in "Available Leads" when patients submit requests</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">2.</span>
+                <span>Click "Claim Lead" to see full patient info and pay for the lead</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">3.</span>
+                <span>First provider to claim gets the lead - it's a race!</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">4.</span>
+                <span>{isTrialActive ? 'All leads are FREE during your 30-day trial' : 'Pay only for leads you claim'}</span>
+              </li>
+            </ul>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Premium</h3>
             <p className="text-gray-600 mb-4">
-              Get premium placement and more leads with a Premium subscription starting at $49/month.
+              Get premium placement and more visibility with a Premium subscription starting at $49/month.
             </p>
             <button
               onClick={() => setShowPricingModal(true)}
