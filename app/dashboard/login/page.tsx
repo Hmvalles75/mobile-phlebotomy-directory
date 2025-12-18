@@ -14,6 +14,13 @@ function LoginForm() {
     // Handle URL parameters for error/success messages
     const error = searchParams.get('error')
     const logout = searchParams.get('logout')
+    const setup = searchParams.get('setup')
+    const emailParam = searchParams.get('email')
+
+    // Pre-fill email if provided
+    if (emailParam) {
+      setEmail(emailParam)
+    }
 
     if (error === 'missing_token') {
       setMessage({ type: 'error', text: 'Invalid login link. Please request a new one.' })
@@ -23,6 +30,8 @@ function LoginForm() {
       setMessage({ type: 'error', text: 'An error occurred. Please try again.' })
     } else if (logout === 'success') {
       setMessage({ type: 'success', text: 'You have been logged out successfully.' })
+    } else if (setup === 'success') {
+      setMessage({ type: 'success', text: '✅ Payment method saved! Your 30-day FREE trial is now active. Click "Send Magic Link" below to access your dashboard.' })
     }
   }, [searchParams])
 

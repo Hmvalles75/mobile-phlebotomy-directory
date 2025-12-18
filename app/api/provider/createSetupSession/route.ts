@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'setup',
       customer: customerId,
-      success_url: `${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard?setup=success`,
-      cancel_url: `${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard?setup=canceled`,
+      success_url: `${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard/login?setup=success&email=${encodeURIComponent(provider.claimEmail || provider.email || '')}`,
+      cancel_url: `${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/onboard?setup=canceled`,
       payment_method_types: ['card'],
       metadata: {
         providerId,
