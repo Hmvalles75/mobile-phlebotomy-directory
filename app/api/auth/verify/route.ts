@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
     if (!token) {
       return NextResponse.redirect(
-        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/dashboard/login?error=missing_token`
+        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=missing_token`
       )
     }
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!result.ok || !result.session) {
       return NextResponse.redirect(
-        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/dashboard/login?error=invalid_token`
+        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=invalid_token`
       )
     }
 
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     // Redirect to dashboard with session cookie
     const response = NextResponse.redirect(
-      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/dashboard?login=success`
+      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard?login=success`
     )
 
     // Set session cookie (30 days)
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error('[Auth] Verify error:', error)
     return NextResponse.redirect(
-      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/dashboard/login?error=server_error`
+      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=server_error`
     )
   }
 }

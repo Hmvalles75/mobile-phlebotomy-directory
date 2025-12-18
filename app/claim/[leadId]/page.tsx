@@ -1,6 +1,7 @@
 'use client'
 
-import { use, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { AlertCircle, CheckCircle, Clock, DollarSign, MapPin, Phone, Mail, FileText } from 'lucide-react'
 
 interface Lead {
@@ -17,9 +18,9 @@ interface Lead {
   priceCents: number
 }
 
-export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: string }> }) {
-  const resolvedParams = use(params)
-  const leadId = resolvedParams.leadId
+export default function ClaimLeadPage() {
+  const params = useParams()
+  const leadId = params.leadId as string
 
   const [loading, setLoading] = useState(true)
   const [leadStatus, setLeadStatus] = useState<'open' | 'claimed' | 'unknown'>('unknown')
@@ -29,14 +30,37 @@ export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: st
   const [leadData, setLeadData] = useState<Lead | null>(null)
   const [chargeAmount, setChargeAmount] = useState<number>(0)
   const [isTrial, setIsTrial] = useState(false)
-
-  // Mock provider ID - in production, get from auth session
   const [providerId, setProviderId] = useState<string>('')
+  const [providerName, setProviderName] = useState<string>('')
+  const [isTrialActive, setIsTrialActive] = useState(false)
+  const [leadPreview, setLeadPreview] = useState<{
+    zip: string
+    city: string
+    state: string
+    urgency: 'STANDARD' | 'STAT'
+    priceCents: number
+  } | null>(null)
 
   useEffect(() => {
     checkLeadStatus()
+    fetchProviderSession()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId])
+
+  async function fetchProviderSession() {
+    try {
+      const response = await fetch('/api/auth/session')
+      const data = await response.json()
+
+      if (data.ok && data.session) {
+        setProviderId(data.session.providerId)
+        setProviderName(data.session.name)
+        setIsTrialActive(data.session.isTrialActive || false)
+      }
+    } catch (err) {
+      console.error('Failed to fetch session:', err)
+    }
+  }
 
   async function checkLeadStatus() {
     try {
@@ -45,6 +69,16 @@ export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: st
 
       if (data.ok) {
         setLeadStatus(data.status)
+        // Store preview info
+        if (data.zip && data.city && data.state) {
+          setLeadPreview({
+            zip: data.zip,
+            city: data.city,
+            state: data.state,
+            urgency: data.urgency,
+            priceCents: data.priceCents
+          })
+        }
       } else {
         setError(data.error || 'Failed to check lead status')
       }
@@ -280,22 +314,67 @@ export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: st
           </div>
         )}
 
-        {/* Temporary Provider ID Input (for testing) */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Provider ID (for testing)
-          </label>
-          <input
-            type="text"
-            value={providerId}
-            onChange={(e) => setProviderId(e.target.value)}
-            placeholder="Enter your provider ID"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            In production, this will be from your login session
-          </p>
-        </div>
+        {/* Provider Info */}
+        {providerId && providerName && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-800">
+              <strong>Logged in as:</strong> {providerName}
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Provider ID: {providerId}
+            </p>
+          </div>
+        )}
+
+        {!providerId && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Not logged in.</strong> Please <a href="/dashboard/login" className="text-primary-600 underline">login</a> to claim leads.
+            </p>
+          </div>
+        )}
+
+        {/* Lead Preview Info */}
+        {leadPreview && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+              <MapPin size={18} />
+              Lead Preview
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-700">Location:</span>
+                <span className="font-semibold text-blue-900">{leadPreview.city}, {leadPreview.state} {leadPreview.zip}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-700">Urgency:</span>
+                <span className={`font-semibold ${leadPreview.urgency === 'STAT' ? 'text-red-600' : 'text-blue-900'}`}>
+                  {leadPreview.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-700">Price:</span>
+                <span className="font-semibold text-blue-900">
+                  {isTrialActive ? (
+                    <span className="text-green-600">$0.00 (Trial) <span className="line-through text-gray-400 ml-2">${(leadPreview.priceCents / 100).toFixed(2)}</span></span>
+                  ) : (
+                    `$${(leadPreview.priceCents / 100).toFixed(2)}`
+                  )}
+                </span>
+              </div>
+            </div>
+            {isTrialActive && (
+              <div className="mt-3 bg-green-100 border border-green-300 rounded p-2">
+                <p className="text-xs text-green-800 font-semibold">
+                  🎉 FREE during your 30-day trial!
+                </p>
+              </div>
+            )}
+            <p className="text-xs text-blue-600 mt-3 italic">
+              Full patient contact info will be revealed after you claim this lead.
+            </p>
+          </div>
+        )}
 
         <button
           onClick={handleClaim}

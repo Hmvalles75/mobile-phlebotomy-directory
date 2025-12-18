@@ -20,7 +20,10 @@ export async function GET(req: NextRequest) {
         status: true,
         routedToId: true,
         priceCents: true,
-        urgency: true
+        urgency: true,
+        zip: true,
+        city: true,
+        state: true
       }
     })
 
@@ -45,7 +48,10 @@ export async function GET(req: NextRequest) {
       status,
       leadId: lead.id,
       priceCents: lead.priceCents,
-      urgency: lead.urgency
+      urgency: lead.urgency,
+      zip: lead.zip,
+      city: lead.city,
+      state: lead.state
     })
 
   } catch (error: any) {

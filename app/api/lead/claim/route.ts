@@ -8,13 +8,6 @@ const stripe = process.env.STRIPE_SECRET_KEY
   : null
 
 export async function POST(req: NextRequest) {
-  if (!stripe) {
-    return NextResponse.json(
-      { ok: false, error: 'Stripe not configured' },
-      { status: 500 }
-    )
-  }
-
   try {
     const body = await req.json()
     const { leadId, providerId } = body
@@ -99,8 +92,12 @@ export async function POST(req: NextRequest) {
       let paymentIntentId: string | null = null
 
       if (!isTrial && chargeAmount > 0) {
+        if (!stripe) {
+          throw new Error('Stripe not configured - cannot process payment')
+        }
+
         try {
-          const paymentIntent = await stripe!.paymentIntents.create({
+          const paymentIntent = await stripe.paymentIntents.create({
             amount: chargeAmount,
             currency: 'usd',
             customer: provider.stripeCustomerId,
