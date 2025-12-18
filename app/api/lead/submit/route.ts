@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead } from '@/lib/notifyProvider'
-import { routeLeadAndCharge } from '@/lib/leadRouting'
+import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -24,55 +24,40 @@ export async function POST(req: NextRequest) {
 
     const priceCents = priceFor(payload.urgency)
 
-    // Create the lead
+    // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
       data: {
         ...payload,
         email: payload.email || null,
         source: 'web_form',
-        priceCents
+        priceCents,
+        status: 'OPEN'  // Ready for claiming
       }
     })
 
-    // Automatically route lead to an eligible provider (DPPL system)
-    // This function handles:
-    // 1. Finding providers with saved payment methods in the ZIP code
-    // 2. Attempting to charge each provider via Stripe
-    // 3. If charge succeeds, updating lead status and sending notification
-    // 4. If charge fails, trying next provider and notifying failed provider
-    const routedProviderId = await routeLeadAndCharge({
+    console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}`)
+
+    // Send SMS blast to all eligible providers in the area (Race to Claim)
+    // Runs async and doesn't block the response
+    sendSMSBlastToEligibleProviders({
       id: lead.id,
       zip: payload.zip,
-      priceCents,
       urgency: payload.urgency,
-      fullName: payload.fullName,
-      phone: payload.phone,
-      email: payload.email,
       city: payload.city,
-      state: payload.state,
-      address1: payload.address1,
-      notes: payload.notes
+      state: payload.state
+    }).catch(err => {
+      console.error('SMS blast failed:', err)
+      // Also notify admin if SMS blast fails
+      notifyAdminUnservedLead(lead).catch(console.error)
     })
 
-    if (routedProviderId) {
-      // Successfully routed and provider charged
-      return NextResponse.json({
-        ok: true,
-        leadId: lead.id,
-        status: 'routed',
-        message: 'Lead successfully delivered to provider'
-      })
-    } else {
-      // No eligible provider found (no one in area with valid payment method)
-      await notifyAdminUnservedLead(lead)
-
-      return NextResponse.json({
-        ok: true,
-        leadId: lead.id,
-        status: 'unserved',
-        message: 'Lead created but no eligible provider found'
-      })
-    }
+    // Return success immediately
+    return NextResponse.json({
+      ok: true,
+      leadId: lead.id,
+      status: 'open',
+      message: 'Lead created and notifications sent to providers'
+    })
   } catch (e: any) {
     console.error('Lead submission error:', e)
 

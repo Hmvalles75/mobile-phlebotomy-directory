@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
           })
         }
 
-        // Handle payment method setup (DPPL system)
+        // Handle payment method setup (DPPL + Race to Claim system)
         if (type === 'payment_setup' && session.setup_intent) {
           // Retrieve the setup intent to get the payment method
           const setupIntent = await stripe.setupIntents.retrieve(
@@ -60,13 +60,21 @@ export async function POST(req: NextRequest) {
           )
 
           if (setupIntent.payment_method) {
+            // Calculate trial expiration (30 days from now)
+            const trialExpiresAt = new Date()
+            trialExpiresAt.setDate(trialExpiresAt.getDate() + 30)
+
             await prisma.provider.update({
               where: { id: providerId },
               data: {
-                stripePaymentMethodId: setupIntent.payment_method as string
+                stripePaymentMethodId: setupIntent.payment_method as string,
+                eligibleForLeads: true,  // Now eligible to receive leads
+                trialStatus: 'ACTIVE',   // Start 30-day trial
+                trialStartedAt: new Date(),
+                trialExpiresAt
               }
             })
-            console.log(`Payment method saved for provider ${providerId}`)
+            console.log(`Payment method saved for provider ${providerId} - 30-day trial activated until ${trialExpiresAt.toISOString()}`)
           }
         }
 

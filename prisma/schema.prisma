@@ -31,6 +31,10 @@ model Provider {
   featuredTier    FeaturedTier?
   stripeCustomerId String?
   stripePaymentMethodId String?  // saved payment method for direct charging
+  eligibleForLeads Boolean @default(false)  // true when payment method saved
+  trialStatus     TrialStatus @default(NONE)  // NONE, ACTIVE, EXPIRED
+  trialStartedAt  DateTime?  // when 30-day trial started
+  trialExpiresAt  DateTime?  // when 30-day trial ends
   claimEmail      String?  // email used after claim (hidden on public page)
   claimToken      String?  // for email verify
   claimVerifiedAt DateTime?
@@ -100,7 +104,9 @@ model Lead {
 
 enum LeadStatus {
   NEW
-  DELIVERED
+  OPEN        // Available for claiming
+  CLAIMED     // Provider has claimed this lead
+  DELIVERED   // Legacy status
   REFUNDED
   UNSOLD
 }
@@ -430,4 +436,10 @@ enum ListingTier {
   BASIC
   PREMIUM
   FEATURED
+}
+
+enum TrialStatus {
+  NONE      // No trial (new provider)
+  ACTIVE    // Trial active (0-30 days)
+  EXPIRED   // Trial expired (>30 days)
 }
