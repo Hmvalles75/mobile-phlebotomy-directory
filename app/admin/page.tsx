@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
 import { LeadsPanel } from './LeadsPanel'
+import { ChargeProviderPanel } from './ChargeProviderPanel'
 
 interface PendingProvider {
   id: string
@@ -55,7 +56,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'providers' | 'corporate' | 'leads'>('providers')
+  const [activeTab, setActiveTab] = useState<'providers' | 'corporate' | 'leads' | 'billing'>('providers')
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -444,6 +445,19 @@ export default function AdminDashboard() {
               }`}
             >
               Corporate Inquiries
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('billing')
+                setShowAddForm(false)
+              }}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'billing'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Billing & Charges
             </button>
           </div>
 
@@ -864,6 +878,11 @@ export default function AdminDashboard() {
         {/* Corporate Inquiries Tab */}
         {activeTab === 'corporate' && (
           <CorporateInquiriesPanel />
+        )}
+
+        {/* Billing & Charges Tab */}
+        {activeTab === 'billing' && (
+          <ChargeProviderPanel />
         )}
       </div>
     </div>
