@@ -46,7 +46,10 @@ export async function POST(req: NextRequest) {
       counter++
     }
 
-    // Create provider
+    // Generate claim token for magic link login
+    const claimToken = crypto.randomUUID()
+
+    // Create provider with verified status (Race to Claim auto-verification)
     const provider = await prisma.provider.create({
       data: {
         name: data.businessName,
@@ -56,9 +59,11 @@ export async function POST(req: NextRequest) {
         phone: data.phone,
         phonePublic: data.phone,
         zipCodes: data.serviceZipCodes,
-        status: 'UNVERIFIED',
+        status: 'VERIFIED',  // Auto-verify Race to Claim signups
         listingTier: 'BASIC',
-        eligibleForLeads: false  // Will be set to true after payment setup
+        eligibleForLeads: false,  // Will be set to true after payment setup
+        claimToken,  // For magic link login
+        claimVerifiedAt: new Date()  // Mark as verified immediately
       }
     })
 

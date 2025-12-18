@@ -43,15 +43,23 @@ export async function POST(req: NextRequest) {
     })
 
     if (provider) {
-      // Update existing provider
+      // Update existing provider and ensure they have login token
+      const updateData: any = {
+        name: data.businessName,
+        phone: data.phone,
+        phonePublic: data.phone,
+        zipCodes: data.serviceZipCodes,
+        claimVerifiedAt: new Date()  // Mark as verified
+      }
+
+      // Generate token if they don't have one
+      if (!provider.claimToken) {
+        updateData.claimToken = crypto.randomUUID()
+      }
+
       provider = await prisma.provider.update({
         where: { id: provider.id },
-        data: {
-          name: data.businessName,
-          phone: data.phone,
-          phonePublic: data.phone,
-          zipCodes: data.serviceZipCodes
-        }
+        data: updateData
       })
     } else {
       // Create new provider
@@ -63,6 +71,9 @@ export async function POST(req: NextRequest) {
         counter++
       }
 
+      // Generate claim token for magic link login
+      const claimToken = crypto.randomUUID()
+
       provider = await prisma.provider.create({
         data: {
           name: data.businessName,
@@ -72,8 +83,10 @@ export async function POST(req: NextRequest) {
           phone: data.phone,
           phonePublic: data.phone,
           zipCodes: data.serviceZipCodes,
-          status: 'UNVERIFIED',
-          listingTier: 'BASIC'
+          status: 'VERIFIED',  // Auto-verify PPL signups
+          listingTier: 'BASIC',
+          claimToken,  // For magic link login
+          claimVerifiedAt: new Date()  // Mark as verified immediately
         }
       })
     }
