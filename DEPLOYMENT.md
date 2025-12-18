@@ -2,11 +2,25 @@
 
 This guide covers setting up external services and deploying your mobile phlebotomy platform to production.
 
+## ✅ Latest Updates (Race to Claim DPPL)
+
+**Committed**: January 2025
+- ✅ Lead preview with ZIP, city, urgency before claiming
+- ✅ Trial pricing display ($0 with strikethrough on regular price)
+- ✅ Magic link authentication with session management
+- ✅ Direct pay-per-lead charging via Stripe Payment Intents
+- ✅ Atomic transaction handling for race conditions
+- ✅ SMS and email notifications on lead claim
+- ✅ 30-day free trial automatic activation
+
+**Production Build**: ✅ Passing
+**Repository**: ✅ Synced to main branch
+
 ## Prerequisites
 
 - Vercel account (for hosting)
-- Stripe account (for payments)
-- Twilio account (for phone tracking)
+- Stripe account (for payments - **REQUIRED for DPPL system**)
+- Twilio account (for phone tracking and SMS notifications)
 - SendGrid account (for transactional emails)
 - GitHub repository (for deployment)
 
@@ -191,32 +205,34 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID="G-SCL6SM3FD8"
 Create a `.env.production` file (DO NOT commit this to git):
 
 ```bash
-# Database (use Supabase, PlanetScale, or Neon for production)
-DATABASE_URL="postgresql://user:password@host:5432/database"
+# Database (Currently using Neon PostgreSQL)
+POSTGRES_PRISMA_URL="postgresql://neondb_owner:npg_Cu5R4HkaLtyP@ep-cool-surf-a4vqw8lh-pooler.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require&pgbouncer=true"
+POSTGRES_URL_NON_POOLING="postgresql://neondb_owner:npg_Cu5R4HkaLtyP@ep-cool-surf-a4vqw8lh.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require"
 
 # Google Analytics
 NEXT_PUBLIC_GA_MEASUREMENT_ID="G-SCL6SM3FD8"
 
-# Stripe
-STRIPE_SECRET_KEY="sk_live_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
+# Stripe (REQUIRED FOR DPPL)
+STRIPE_SECRET_KEY="sk_live_..."  # Your live key
+STRIPE_WEBHOOK_SECRET="whsec_..."  # From webhook endpoint
 
-# Stripe Price IDs
+# Stripe Price IDs (Legacy Featured Provider Subscriptions)
 STRIPE_PRICE_FEATURED_SMALL="price_..."
 STRIPE_PRICE_FEATURED_MED="price_..."
 STRIPE_PRICE_FEATURED_LARGE="price_..."
 
-# Twilio
+# Twilio (REQUIRED FOR SMS NOTIFICATIONS)
 TWILIO_ACCOUNT_SID="ACxxxxxxxx"
 TWILIO_AUTH_TOKEN="xxxxxxxx"
-TWILIO_MESSAGING_SERVICE_SID="MGxxxxxxxx"
+TWILIO_MESSAGING_SERVICE_SID="MGxxxxxxxx"  # For SMS blast
+TWILIO_PHONE_NUMBER="+1234567890"  # Your Twilio number
 TWILIO_VOICE_WEBHOOK_URL="https://mobilephlebotomy.org/api/telephony/voice"
 TWILIO_STATUS_WEBHOOK_URL="https://mobilephlebotomy.org/api/telephony/status"
 
-# SendGrid
+# SendGrid (REQUIRED FOR EMAIL NOTIFICATIONS)
 SENDGRID_API_KEY="SG.xxxxxxxx"
 
-# Site Configuration
+# Site Configuration (CRITICAL FOR MAGIC LINKS)
 PUBLIC_SITE_URL="https://mobilephlebotomy.org"
 NEXT_PUBLIC_SITE_URL="https://mobilephlebotomy.org"
 NEXT_PUBLIC_DEFAULT_PHONE="1-800-555-0100"
@@ -225,9 +241,19 @@ NEXT_PUBLIC_DEFAULT_PHONE="1-800-555-0100"
 LEAD_EMAIL_FROM="noreply@mobilephlebotomy.org"
 ADMIN_EMAIL="hector@mobilephlebotomy.org"
 
+# Admin Dashboard
+ADMIN_PASSWORD="your_secure_admin_password"
+ADMIN_SECRET="your_secure_api_secret"
+
 # Node Environment
 NODE_ENV="production"
 ```
+
+**⚠️ CRITICAL ENVIRONMENT VARIABLES FOR DPPL:**
+- `STRIPE_SECRET_KEY` - Must be LIVE key (sk_live_...) for production
+- `PUBLIC_SITE_URL` - Must match production domain for magic links to work
+- `TWILIO_MESSAGING_SERVICE_SID` - Required for SMS notifications
+- `SENDGRID_API_KEY` - Required for email notifications
 
 ---
 
@@ -357,7 +383,11 @@ NODE_ENV
 After deployment, update webhook URLs in:
 
 1. **Stripe**
-   - Update webhook endpoint to: `https://mobilephlebotomy.org/api/stripe/webhook`
+   - Update webhook endpoint to: `https://mobilephlebotomy.org/api/webhooks/stripe`
+   - Required events for Race to Claim DPPL:
+     - `checkout.session.completed` (for setup intent completion)
+     - `payment_intent.succeeded` (for successful lead claims)
+     - `payment_intent.payment_failed` (for failed lead charges)
 
 2. **Twilio**
    - Update voice webhook: `https://mobilephlebotomy.org/api/telephony/voice`
@@ -366,6 +396,20 @@ After deployment, update webhook URLs in:
 
 ### Test Critical Flows
 
+**Race to Claim DPPL System:**
+- [ ] Provider registration with payment method setup
+- [ ] Magic link login functionality
+- [ ] Trial activation (30 days automatic)
+- [ ] Lead submission via web form
+- [ ] Lead preview shows ZIP, city, urgency, and trial pricing
+- [ ] Lead claiming with $0 charge during trial
+- [ ] Lead claiming charges correct amount after trial
+- [ ] SMS notification sent to provider on claim
+- [ ] Email notification sent to provider on claim
+- [ ] Provider dashboard shows claimed leads
+- [ ] "Already claimed" scenario when lead is taken
+
+**Legacy System:**
 - [ ] Submit a lead through homepage form
 - [ ] Verify provider receives email notification
 - [ ] Test phone call tracking
