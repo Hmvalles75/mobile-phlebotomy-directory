@@ -285,9 +285,9 @@ export default function OnboardPage() {
                 <strong>What happens next:</strong>
               </p>
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
-                <li>• You'll be redirected to Stripe to securely save your payment method</li>
+                <li>• You&apos;ll be redirected to Stripe to securely save your payment method</li>
                 <li>• <strong>No charge</strong> will be made during setup</li>
-                <li>• You'll receive a <strong>30-day FREE trial</strong></li>
+                <li>• You&apos;ll receive a <strong>30-day FREE trial</strong></li>
                 <li>• After trial: $20/lead (standard) or $50/lead (STAT)</li>
                 <li>• Only pay when you claim a lead</li>
               </ul>

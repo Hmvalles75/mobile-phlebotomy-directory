@@ -35,6 +35,7 @@ export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: st
 
   useEffect(() => {
     checkLeadStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId])
 
   async function checkLeadStatus() {
@@ -314,7 +315,7 @@ export default function ClaimLeadPage({ params }: { params: Promise<{ leadId: st
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
             <strong>Note:</strong> By claiming this lead, you agree to be charged the lead price
-            (or $0 if you're on trial) and will receive full patient contact information.
+            (or $0 if you&apos;re on trial) and will receive full patient contact information.
           </p>
         </div>
       </div>
