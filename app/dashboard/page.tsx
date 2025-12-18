@@ -436,15 +436,15 @@ function DashboardContent() {
             <ul className="space-y-3 text-gray-600">
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">1.</span>
-                <span>New leads appear in "Available Leads" when patients submit requests</span>
+                <span>New leads appear in &quot;Available Leads&quot; when patients submit requests</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">2.</span>
-                <span>Click "Claim Lead" to see full patient info and pay for the lead</span>
+                <span>Click &quot;Claim Lead&quot; to see full patient info and pay for the lead</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">3.</span>
-                <span>First provider to claim gets the lead - it's a race!</span>
+                <span>First provider to claim gets the lead - it&apos;s a race!</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">4.</span>
