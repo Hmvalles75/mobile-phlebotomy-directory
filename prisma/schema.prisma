@@ -41,6 +41,12 @@ model Provider {
   twilioNumber    String?  // dedicated tracking number
   zipCodes        String?  // comma-separated service coverage ZIPs
 
+  // Availability settings for lead routing
+  operatingDays       String?  // e.g., "MON,TUE,WED,THU,FRI"
+  operatingHoursStart String?  // e.g., "08:00"
+  operatingHoursEnd   String?  // e.g., "17:00"
+  serviceRadiusMiles  Int?     // e.g., 25
+
   // Monetization fields
   listingTier      ListingTier @default(BASIC)  // Basic, Premium, Featured
   isFeaturedCity   Boolean @default(false)  // City-exclusive Featured Sponsor

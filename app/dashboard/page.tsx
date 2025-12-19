@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, DollarSign, Zap } from 'lucide-react'
+import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, DollarSign, Zap, Settings, MapPin, Calendar, Save, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumPricingModal } from '@/components/ui/PremiumPricingModal'
 
@@ -64,9 +64,120 @@ function DashboardContent() {
   const [error, setError] = useState<string | null>(null)
   const [showPricingModal, setShowPricingModal] = useState(false)
 
+  // Settings state
+  const [showSettings, setShowSettings] = useState(false)
+  const [settingsLoading, setSettingsLoading] = useState(false)
+  const [settingsSaved, setSettingsSaved] = useState(false)
+  const [operatingDays, setOperatingDays] = useState({
+    MON: false,
+    TUE: false,
+    WED: false,
+    THU: false,
+    FRI: false,
+    SAT: false,
+    SUN: false
+  })
+  const [operatingHoursStart, setOperatingHoursStart] = useState('08:00')
+  const [operatingHoursEnd, setOperatingHoursEnd] = useState('17:00')
+  const [serviceRadiusMiles, setServiceRadiusMiles] = useState(25)
+
   useEffect(() => {
     fetchDashboardData()
+    fetchSettings()
   }, [])
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/provider/settings', {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.ok) {
+          const { operatingDays: daysStr, operatingHoursStart, operatingHoursEnd, serviceRadiusMiles } = result.settings
+
+          // Parse operating days
+          if (daysStr) {
+            const days = daysStr.split(',').map((d: string) => d.trim())
+            setOperatingDays({
+              MON: days.includes('MON'),
+              TUE: days.includes('TUE'),
+              WED: days.includes('WED'),
+              THU: days.includes('THU'),
+              FRI: days.includes('FRI'),
+              SAT: days.includes('SAT'),
+              SUN: days.includes('SUN')
+            })
+          }
+
+          setOperatingHoursStart(operatingHoursStart)
+          setOperatingHoursEnd(operatingHoursEnd)
+          setServiceRadiusMiles(serviceRadiusMiles)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error)
+    }
+  }
+
+  const saveSettings = async () => {
+    setSettingsLoading(true)
+    setSettingsSaved(false)
+
+    try {
+      // Build comma-separated string of selected days
+      const selectedDays = Object.entries(operatingDays)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([day, _]) => day)
+        .join(',')
+
+      if (!selectedDays) {
+        alert('Please select at least one operating day')
+        setSettingsLoading(false)
+        return
+      }
+
+      const response = await fetch('/api/provider/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          operatingDays: selectedDays,
+          operatingHoursStart,
+          operatingHoursEnd,
+          serviceRadiusMiles
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.ok) {
+        setSettingsSaved(true)
+        setTimeout(() => setSettingsSaved(false), 3000)
+      } else {
+        alert(result.error || 'Failed to save settings')
+      }
+    } catch (error) {
+      alert('An error occurred while saving settings')
+    } finally {
+      setSettingsLoading(false)
+    }
+  }
+
+  const toggleWeekdays = () => {
+    setOperatingDays({
+      MON: true,
+      TUE: true,
+      WED: true,
+      THU: true,
+      FRI: true,
+      SAT: false,
+      SUN: false
+    })
+  }
 
   const fetchDashboardData = async () => {
     try {
@@ -262,6 +373,157 @@ function DashboardContent() {
               {isTrialActive ? '30-day free trial' : 'Pay per lead'}
             </p>
           </div>
+        </div>
+
+        {/* Availability Settings */}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="text-blue-600" size={24} />
+                <h2 className="text-xl font-bold text-gray-900">Availability Settings</h2>
+              </div>
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                {showSettings ? 'Hide' : 'Configure'}
+              </button>
+            </div>
+          </div>
+
+          {showSettings && (
+            <div className="px-6 py-6">
+              <p className="text-gray-600 mb-6 text-sm">
+                Configure your operating hours and service area to receive only relevant leads. Leads will only be sent to you during your available hours and within your service radius.
+              </p>
+
+              {/* Operating Days */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                    <Calendar size={18} />
+                    Operating Days
+                  </label>
+                  <button
+                    onClick={toggleWeekdays}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Mon-Fri Only
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 gap-2">
+                  {Object.entries(operatingDays).map(([day, isSelected]) => (
+                    <button
+                      key={day}
+                      onClick={() => setOperatingDays({ ...operatingDays, [day]: !isSelected })}
+                      className={`px-3 py-2 rounded-lg border-2 font-medium text-sm transition-colors ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50 text-blue-900'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Operating Hours */}
+              <div className="mb-6">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                  <Clock size={18} />
+                  Operating Hours
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={operatingHoursStart}
+                      onChange={(e) => setOperatingHoursStart(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={operatingHoursEnd}
+                      onChange={(e) => setOperatingHoursEnd(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Radius */}
+              <div className="mb-6">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                  <MapPin size={18} />
+                  Service Radius
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="5"
+                    max="100"
+                    step="5"
+                    value={serviceRadiusMiles}
+                    onChange={(e) => setServiceRadiusMiles(parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      max="200"
+                      value={serviceRadiusMiles}
+                      onChange={(e) => setServiceRadiusMiles(parseInt(e.target.value) || 25)}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center font-semibold"
+                    />
+                    <span className="text-sm text-gray-600 font-medium">miles</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Leads within {serviceRadiusMiles} miles from your ZIP code will be shown
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={saveSettings}
+                  disabled={settingsLoading}
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                >
+                  {settingsLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      Save Availability Settings
+                    </>
+                  )}
+                </button>
+                {settingsSaved && (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle size={20} />
+                    <span className="font-medium text-sm">Saved!</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!showSettings && (
+            <div className="px-6 py-4 text-center text-sm text-gray-600">
+              Click &quot;Configure&quot; to set your operating hours and service radius
+            </div>
+          )}
         </div>
 
         {/* Available Leads Section */}

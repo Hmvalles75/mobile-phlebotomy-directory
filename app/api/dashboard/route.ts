@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Fetch provider data
+    // Fetch provider data with availability settings
     const provider = await prisma.provider.findUnique({
       where: { id: session.providerId },
       select: {
@@ -33,7 +33,11 @@ export async function GET(req: NextRequest) {
         twilioNumber: true,
         stripeCustomerId: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        operatingDays: true,
+        operatingHoursStart: true,
+        operatingHoursEnd: true,
+        serviceRadiusMiles: true
       }
     })
 
@@ -42,6 +46,32 @@ export async function GET(req: NextRequest) {
         { ok: false, error: 'Provider not found' },
         { status: 404 }
       )
+    }
+
+    // Check if provider is currently available based on their settings
+    const isProviderAvailableNow = () => {
+      if (!provider.operatingDays || !provider.operatingHoursStart || !provider.operatingHoursEnd) {
+        // If no availability settings, assume available (backwards compatibility)
+        return true
+      }
+
+      const now = new Date()
+      const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+      const currentDay = dayNames[now.getDay()]
+
+      // Check if current day is in operating days
+      const operatingDaysList = provider.operatingDays.split(',').map(d => d.trim())
+      if (!operatingDaysList.includes(currentDay)) {
+        return false
+      }
+
+      // Check if current time is within operating hours
+      const currentTime = now.toTimeString().slice(0, 5) // HH:MM format
+      if (currentTime < provider.operatingHoursStart || currentTime > provider.operatingHoursEnd) {
+        return false
+      }
+
+      return true
     }
 
     // Fetch leads claimed by this provider (DPPL system)
@@ -72,33 +102,41 @@ export async function GET(req: NextRequest) {
     })
 
     // Fetch OPEN leads available to claim in provider's service area
-    // Parse provider's zip codes
-    const providerZipCodes = provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []
+    // Only show leads if provider is currently available
+    let availableLeads: any[] = []
 
-    const availableLeads = await prisma.lead.findMany({
-      where: {
-        status: 'OPEN',
-        ...(providerZipCodes.length > 0 ? {
-          zip: {
-            in: providerZipCodes
-          }
-        } : {})
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 20,
-      select: {
-        id: true,
-        createdAt: true,
-        city: true,
-        state: true,
-        zip: true,
-        urgency: true,
-        status: true,
-        priceCents: true
-      }
-    })
+    if (isProviderAvailableNow()) {
+      // Parse provider's zip codes
+      const providerZipCodes = provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []
+
+      availableLeads = await prisma.lead.findMany({
+        where: {
+          status: 'OPEN',
+          ...(providerZipCodes.length > 0 ? {
+            zip: {
+              in: providerZipCodes
+            }
+          } : {})
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: 20,
+        select: {
+          id: true,
+          createdAt: true,
+          city: true,
+          state: true,
+          zip: true,
+          urgency: true,
+          status: true,
+          priceCents: true
+        }
+      })
+    } else {
+      // Provider is not available right now - don't show any leads
+      console.log(`[Dashboard] Provider ${provider.id} is not available at this time`)
+    }
 
     // Check trial status
     const providerWithTrial = await prisma.provider.findUnique({
