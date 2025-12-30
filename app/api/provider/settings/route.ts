@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET - Fetch provider settings
 export async function GET(req: NextRequest) {
   try {
-    // Get provider ID from session
-    const providerId = req.cookies.get('provider_id')?.value
+    // Verify authentication
+    const session = getSessionFromRequest(req)
 
-    if (!providerId) {
+    if (!session) {
       return NextResponse.json(
         { ok: false, error: 'Not authenticated' },
         { status: 401 }
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     }
 
     const provider = await prisma.provider.findUnique({
-      where: { id: providerId },
+      where: { id: session.providerId },
       select: {
         operatingDays: true,
         operatingHoursStart: true,
@@ -53,10 +54,10 @@ export async function GET(req: NextRequest) {
 // POST - Update provider settings
 export async function POST(req: NextRequest) {
   try {
-    // Get provider ID from session
-    const providerId = req.cookies.get('provider_id')?.value
+    // Verify authentication
+    const session = getSessionFromRequest(req)
 
-    if (!providerId) {
+    if (!session) {
       return NextResponse.json(
         { ok: false, error: 'Not authenticated' },
         { status: 401 }
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     // Update provider settings
     const updatedProvider = await prisma.provider.update({
-      where: { id: providerId },
+      where: { id: session.providerId },
       data: {
         operatingDays,
         operatingHoursStart,
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    console.log(`✅ Provider ${providerId} updated availability settings`)
+    console.log(`✅ Provider ${session.providerId} updated availability settings`)
     console.log(`   Days: ${operatingDays}`)
     console.log(`   Hours: ${operatingHoursStart} - ${operatingHoursEnd}`)
     console.log(`   Radius: ${serviceRadiusMiles} miles`)
