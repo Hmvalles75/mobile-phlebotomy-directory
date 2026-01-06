@@ -28,8 +28,8 @@ export function Header() {
               Metro Areas
             </Link>
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">
-              Facilities & Group Services
+            <Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors whitespace-nowrap">
+              Group Services
             </Link>
             <div className="relative group">
               <button className="text-gray-600 hover:text-primary-600 transition-colors flex items-center">
