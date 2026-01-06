@@ -419,6 +419,7 @@ model CorporateEventInquiry {
   estimatedDraws          String   // can be a range like "50-100"
   estimatedPhlebotomists  String?  // optional estimate
   eventType               String   // can store comma-separated or JSON array
+  urgency                 String?  // exploratory or time-sensitive
   additionalDetails       String?  // textarea
 
   // Metadata

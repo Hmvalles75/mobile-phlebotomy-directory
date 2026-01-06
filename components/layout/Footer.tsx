@@ -27,7 +27,7 @@ export function Footer() {
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/mobile-phlebotomy-near-me" className="text-gray-600 hover:text-primary-600 transition-colors">Mobile Phlebotomy</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
-              <li><Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Corporate & Events</Link></li>
+              <li><Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Facilities & Group Services</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/at-home-blood-draw-services" className="text-gray-600 hover:text-primary-600 transition-colors">At-Home Blood Draw</Link></li>
             </ul>

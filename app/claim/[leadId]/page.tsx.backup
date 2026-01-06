@@ -1,0 +1,342 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import { AlertCircle, CheckCircle, Clock, DollarSign, MapPin, Phone, Mail, FileText } from 'lucide-react'
+
+interface Lead {
+  id: string
+  fullName: string
+  phone: string
+  email?: string
+  address1?: string
+  city: string
+  state: string
+  zip: string
+  urgency: 'STANDARD' | 'STAT'
+  notes?: string
+  priceCents: number
+}
+
+export default function ClaimLeadPage() {
+  const params = useParams()
+  const leadId = params.leadId as string
+
+  const [loading, setLoading] = useState(true)
+  const [leadStatus, setLeadStatus] = useState<'open' | 'claimed' | 'unknown'>('unknown')
+  const [claiming, setClaiming] = useState(false)
+  const [claimed, setClaimed] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [leadData, setLeadData] = useState<Lead | null>(null)
+  const [chargeAmount, setChargeAmount] = useState<number>(0)
+  const [isTrial, setIsTrial] = useState(false)
+  const [providerId, setProviderId] = useState<string>('')
+  const [providerName, setProviderName] = useState<string>('')
+
+  useEffect(() => {
+    checkLeadStatus()
+    fetchProviderSession()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leadId])
+
+  async function fetchProviderSession() {
+    try {
+      const response = await fetch('/api/auth/session')
+      const data = await response.json()
+
+      if (data.ok && data.session) {
+        setProviderId(data.session.providerId)
+        setProviderName(data.session.name)
+      }
+    } catch (err) {
+      console.error('Failed to fetch session:', err)
+    }
+  }
+
+  async function checkLeadStatus() {
+    try {
+      const response = await fetch(`/api/lead/status?leadId=${leadId}`)
+      const data = await response.json()
+
+      if (data.ok) {
+        setLeadStatus(data.status)
+      } else {
+        setError(data.error || 'Failed to check lead status')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to check lead status')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleClaim() {
+    if (!providerId) {
+      setError('Please enter your Provider ID to claim this lead')
+      return
+    }
+
+    setClaiming(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/lead/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadId, providerId })
+      })
+
+      const data = await response.json()
+
+      if (data.ok) {
+        setLeadData(data.lead)
+        setChargeAmount(data.chargeAmount)
+        setIsTrial(data.isTrial)
+        setClaimed(true)
+        setLeadStatus('claimed')
+      } else {
+        if (data.error === 'ALREADY_CLAIMED') {
+          setLeadStatus('claimed')
+          setError('Sorry, this lead has already been claimed by another provider!')
+        } else {
+          setError(data.error || 'Failed to claim lead')
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to claim lead')
+    } finally {
+      setClaiming(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading lead details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Lead already claimed by someone else
+  if (leadStatus === 'claimed' && !claimed) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <AlertCircle className="mx-auto h-16 w-16 text-red-600 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Lead Already Claimed
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Sorry, this lead has already been claimed by another provider. Better luck next time!
+          </p>
+          <a
+            href="/dashboard"
+            className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+          >
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  // Successfully claimed - show lead details
+  if (claimed && leadData) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          {/* Success Banner */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+            <div className="flex items-start gap-4">
+              <CheckCircle className="text-green-600 flex-shrink-0" size={32} />
+              <div>
+                <h1 className="text-2xl font-bold text-green-900 mb-2">
+                  Lead Claimed Successfully! {isTrial && '🎉 FREE TRIAL'}
+                </h1>
+                <p className="text-green-800">
+                  {isTrial
+                    ? '✅ This lead is FREE as part of your 30-day trial'
+                    : `✅ Charged $${(chargeAmount / 100).toFixed(2)} to your saved payment method`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Patient Contact Information */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Phone className="text-primary-600" size={24} />
+              Patient Contact Information
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                <p className="text-lg font-semibold text-gray-900">{leadData.fullName}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                <a
+                  href={`tel:${leadData.phone}`}
+                  className="text-lg font-semibold text-primary-600 hover:text-primary-700"
+                >
+                  {leadData.phone}
+                </a>
+              </div>
+
+              {leadData.email && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                  <a
+                    href={`mailto:${leadData.email}`}
+                    className="text-lg text-primary-600 hover:text-primary-700"
+                  >
+                    {leadData.email}
+                  </a>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <MapPin className="inline mr-1" size={16} />
+                  Location
+                </label>
+                <p className="text-gray-900">
+                  {leadData.address1 && `${leadData.address1}, `}
+                  {leadData.city}, {leadData.state} {leadData.zip}
+                </p>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Urgency</label>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                    leadData.urgency === 'STAT'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {leadData.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
+                  </span>
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Price</label>
+                  <span className="text-lg font-semibold text-gray-900">
+                    {isTrial ? '$0 (Trial)' : `$${(leadData.priceCents / 100).toFixed(2)}`}
+                  </span>
+                </div>
+              </div>
+
+              {leadData.notes && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    <FileText className="inline mr-1" size={16} />
+                    Additional Notes
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{leadData.notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Next Steps</h3>
+            <div className="space-y-3">
+              <a
+                href={`tel:${leadData.phone}`}
+                className="block w-full bg-primary-600 text-white text-center px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+              >
+                📞 Call Patient Now
+              </a>
+              {leadData.email && (
+                <a
+                  href={`mailto:${leadData.email}`}
+                  className="block w-full bg-white border-2 border-gray-300 text-gray-700 text-center px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                >
+                  ✉️ Send Email
+                </a>
+              )}
+              <a
+                href="/dashboard"
+                className="block w-full bg-white border-2 border-gray-300 text-gray-700 text-center px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+              >
+                View Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Lead is available for claiming
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+        <div className="text-center mb-6">
+          <Clock className="mx-auto h-16 w-16 text-primary-600 mb-4 animate-pulse" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            New Patient Lead Available!
+          </h1>
+          <p className="text-gray-600">
+            Be the first to claim this lead and connect with the patient.
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Provider Info */}
+        {providerId && providerName && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-800">
+              <strong>Logged in as:</strong> {providerName}
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Provider ID: {providerId}
+            </p>
+          </div>
+        )}
+
+        {!providerId && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Not logged in.</strong> Please <a href="/dashboard/login" className="text-primary-600 underline">login</a> to claim leads.
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={handleClaim}
+          disabled={claiming || !providerId}
+          className="w-full bg-primary-600 text-white py-4 px-6 rounded-lg hover:bg-primary-700 transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+        >
+          {claiming ? (
+            <span className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Claiming Lead...
+            </span>
+          ) : (
+            '🏆 CLAIM THIS LEAD'
+          )}
+        </button>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Note:</strong> By claiming this lead, you agree to be charged the lead price
+            (or $0 if you&apos;re on trial) and will receive full patient contact information.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

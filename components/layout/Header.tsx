@@ -29,7 +29,7 @@ export function Header() {
             </Link>
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
             <Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">
-              Corporate & Events
+              Facilities & Group Services
             </Link>
             <div className="relative group">
               <button className="text-gray-600 hover:text-primary-600 transition-colors flex items-center">

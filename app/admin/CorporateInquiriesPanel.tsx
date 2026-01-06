@@ -15,6 +15,7 @@ interface CorporateInquiry {
   estimatedDraws: string
   estimatedPhlebotomists?: string
   eventType: string
+  urgency?: string
   additionalDetails?: string
   status: 'NEW' | 'CONTACTED' | 'QUOTED' | 'BOOKED' | 'COMPLETED' | 'DECLINED'
   ipAddress?: string
@@ -182,7 +183,7 @@ export function CorporateInquiriesPanel() {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Inquiries List */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Corporate Event Inquiries</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Facilities & Group Service Inquiries</h2>
 
           <div className="space-y-3">
             {inquiries.length === 0 && (
@@ -306,6 +307,13 @@ export function CorporateInquiriesPanel() {
                     <label className="text-sm font-medium text-gray-500">Event Type</label>
                     <p className="text-gray-900">{selectedInquiry.eventType}</p>
                   </div>
+
+                  {selectedInquiry.urgency && (
+                    <div className="mt-3">
+                      <label className="text-sm font-medium text-gray-500">Urgency</label>
+                      <p className="text-gray-900 capitalize">{selectedInquiry.urgency}</p>
+                    </div>
+                  )}
 
                   {selectedInquiry.additionalDetails && (
                     <div className="mt-3">

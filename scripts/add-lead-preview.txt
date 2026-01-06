@@ -1,0 +1,53 @@
+Add this after line 308 (after the Provider Info section) in app/claim/[leadId]/page.tsx:
+
+        {/* Lead Preview Info */}
+        {leadPreview && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-900 mb-3">Lead Preview</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-blue-700">Location:</span>
+                <span className="font-semibold text-blue-900">{leadPreview.city}, {leadPreview.state} {leadPreview.zip}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-blue-700">Urgency:</span>
+                <span className={`font-semibold ${leadPreview.urgency === 'STAT' ? 'text-red-600' : 'text-blue-900'}`}>
+                  {leadPreview.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-blue-700">Price:</span>
+                <span className="font-semibold text-blue-900">${(leadPreview.priceCents / 100).toFixed(2)}</span>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-3">
+              Full patient contact info will be revealed after you claim this lead.
+            </p>
+          </div>
+        )}
+
+And add this state variable after line 34:
+
+  const [leadPreview, setLeadPreview] = useState<{
+    zip: string
+    city: string
+    state: string
+    urgency: 'STANDARD' | 'STAT'
+    priceCents: number
+  } | null>(null)
+
+And update checkLeadStatus() to set the preview (around line 61):
+
+      if (data.ok) {
+        setLeadStatus(data.status)
+        // Store preview info
+        if (data.zip && data.city && data.state) {
+          setLeadPreview({
+            zip: data.zip,
+            city: data.city,
+            state: data.state,
+            urgency: data.urgency,
+            priceCents: data.priceCents
+          })
+        }
+      }

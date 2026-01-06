@@ -29,21 +29,22 @@ async function sendAdminNotification(inquiry: any) {
 
   try {
     const emailBody = `
-New Corporate/Event Staffing Inquiry
+New Facilities & Group Services Inquiry
 
-COMPANY INFORMATION:
-- Company: ${inquiry.companyName}
+COMPANY/FACILITY INFORMATION:
+- Company/Facility: ${inquiry.companyName}
 - Contact: ${inquiry.contactName}
 - Email: ${inquiry.email}
 - Phone: ${inquiry.phone}
 
-EVENT DETAILS:
+SERVICE DETAILS:
 - Location: ${inquiry.eventLocation}
-- Venue: ${inquiry.eventVenue || 'Not specified'}
-- Dates: ${inquiry.eventDates}
+- Venue/Site: ${inquiry.eventVenue || 'Not specified'}
+- Dates/Timeline: ${inquiry.eventDates}
 - Estimated Blood Draws: ${inquiry.estimatedDraws}
-- Estimated Phlebotomists Needed: ${inquiry.estimatedPhlebotomists || 'Not specified'}
-- Event Type: ${inquiry.eventType}
+- Estimated Staffing Needed: ${inquiry.estimatedPhlebotomists || 'Not specified'}
+- Service Type: ${inquiry.eventType}
+- Urgency: ${inquiry.urgency || 'Not specified'}
 
 ADDITIONAL DETAILS:
 ${inquiry.additionalDetails || 'None provided'}
@@ -64,7 +65,7 @@ View in admin dashboard: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobileph
       body: JSON.stringify({
         from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
         to: ['hector@mobilephlebotomy.org'],
-        subject: `Corporate Staffing Inquiry: ${inquiry.companyName}`,
+        subject: `Facilities & Group Services Inquiry: ${inquiry.companyName}`,
         text: emailBody,
       }),
     })
@@ -98,27 +99,29 @@ async function sendConfirmationEmail(inquiry: any) {
     const confirmationBody = `
 Hi ${inquiry.contactName},
 
-Thank you for your corporate/event phlebotomy staffing inquiry!
+Thank you for your facilities & group services inquiry!
 
 We've received your request for ${inquiry.estimatedDraws} blood draws at ${inquiry.eventLocation} on ${inquiry.eventDates}.
 
-Our team will review your event details and follow up within 24-48 hours with:
-✓ Staffing availability confirmation
-✓ Detailed pricing proposal
-✓ Logistics coordination plan
+Our team will review your details and work to coordinate certified mobile phlebotomist availability in your area. Response times may vary based on location and provider schedules.
 
-If you have any immediate questions, feel free to reply to this email or call us directly.
+What happens next:
+• We'll assess provider availability in your location
+• We'll reach out to discuss coordination options
+• Availability and timelines depend on your specific area and provider schedules
+
+If you have any immediate questions, feel free to reply to this email.
 
 Best regards,
 MobilePhlebotomy.org Team
 
 ---
 Your Inquiry Details:
-- Company: ${inquiry.companyName}
-- Event Location: ${inquiry.eventLocation}
-- Event Dates: ${inquiry.eventDates}
+- Company/Facility: ${inquiry.companyName}
+- Location: ${inquiry.eventLocation}
+- Dates/Timeline: ${inquiry.eventDates}
 - Estimated Blood Draws: ${inquiry.estimatedDraws}
-- Event Type: ${inquiry.eventType}
+- Service Type: ${inquiry.eventType}
 
 Reference ID: ${inquiry.id}
     `.trim()
@@ -133,7 +136,7 @@ Reference ID: ${inquiry.id}
         from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
         to: [inquiry.email],
         replyTo: ['hector@mobilephlebotomy.org'],
-        subject: `Corporate Staffing Inquiry Received - ${inquiry.companyName}`,
+        subject: `Facilities & Group Services Inquiry Received - ${inquiry.companyName}`,
         text: confirmationBody,
       }),
     })
@@ -186,7 +189,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       inquiryId: inquiry.id,
-      message: 'Thank you! We will review your event details and follow up with a staffing proposal.'
+      message: 'Thank you! We will review your details and work to coordinate provider availability in your area.'
     })
   } catch (e: any) {
     console.error('Corporate inquiry submission error:', e)

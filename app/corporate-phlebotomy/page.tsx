@@ -4,63 +4,63 @@ import { CorporateQuoteForm } from './CorporateQuoteForm'
 import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Corporate & Event Phlebotomy Staffing Services | MobilePhlebotomy.org',
-  description: 'Professional mobile blood draw staffing for conferences, wellness fairs, clinical studies, and on-site employee screenings. Certified phlebotomists nationwide.',
+  title: 'Facilities & Group Mobile Phlebotomy Services | MobilePhlebotomy.org',
+  description: 'Coordination of certified mobile phlebotomists for facilities, organizations, and group blood draw needs. Nationwide provider network with metro-area coverage.',
   alternates: {
     canonical: `${SITE_URL}/corporate-phlebotomy`,
   },
   openGraph: {
-    title: 'Corporate & Event Phlebotomy Staffing Services',
-    description: 'Professional mobile blood draw staffing for conferences, wellness fairs, clinical studies, and on-site employee screenings.',
+    title: 'Facilities & Group Mobile Phlebotomy Services',
+    description: 'Coordination of certified mobile phlebotomists for facilities, organizations, and group blood draw needs.',
     url: `${SITE_URL}/corporate-phlebotomy`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Corporate & Event Phlebotomy Staffing Services',
-    description: 'Professional mobile blood draw staffing for conferences, wellness fairs, clinical studies, and on-site employee screenings.',
+    title: 'Facilities & Group Mobile Phlebotomy Services',
+    description: 'Coordination of certified mobile phlebotomists for facilities, organizations, and group blood draw needs.',
   },
 }
 
 const benefits = [
   {
     title: 'Certified, Experienced Mobile Phlebotomists',
-    description: 'All technicians are certified, background-checked, and experienced in mobile and event-based blood draws.'
+    description: 'We coordinate vetted, certified technicians experienced in mobile and facility-based blood draws.'
   },
   {
-    title: 'Coverage for 1–50+ Technicians',
-    description: 'From small corporate screenings to large conference events, we scale to meet your staffing needs.'
+    title: 'Coordination for 1–50+ Technicians',
+    description: 'From small facility needs to large events, we help coordinate staffing at scale.'
   },
   {
-    title: 'Nationwide Availability',
-    description: 'We coordinate phlebotomists in major metros across the United States.'
+    title: 'Nationwide Provider Network',
+    description: 'We coordinate certified mobile phlebotomists in major metros across the United States.'
   },
   {
     title: 'On-Site Collection & Labeling',
-    description: 'Professional specimen collection, labeling, and handling following your protocol or lab requirements.'
+    description: 'Coordination of professional specimen collection, labeling, and handling following protocols.'
   },
   {
     title: 'Packaging & Shipping Support',
-    description: 'We can assist with packaging specimens and coordinating FedEx/UPS shipping to your designated lab.'
+    description: 'We help coordinate packaging and shipping logistics to your designated lab.'
   },
   {
     title: 'Kit-Based or Standard Lab Draws',
-    description: 'Work with your lab kits and collection materials, or we can help source supplies.'
+    description: 'Coordination for work with your lab kits and collection materials, or help sourcing supplies.'
   },
   {
     title: 'HIPAA-Conscious Workflows',
-    description: 'All phlebotomists follow HIPAA-compliant practices for handling patient information and specimens.'
+    description: 'All coordinated phlebotomists follow HIPAA-compliant practices for handling information and specimens.'
   },
   {
-    title: 'Flexible Event Coverage',
-    description: 'Single-day events, multi-day conventions, or recurring corporate health programs.'
+    title: 'Flexible Coverage',
+    description: 'Single-day services, multi-day events, or recurring facility support programs.'
   }
 ]
 
 const audiences = [
+  'Healthcare facilities & hospitals',
+  'Assisted living & nursing homes',
   'Corporate wellness programs',
-  'Employer health screenings',
-  'Insurance exams',
   'Medical and clinical research studies',
   'Health fairs and community events',
   'Large conferences and trade shows',
@@ -71,23 +71,23 @@ const audiences = [
 const faqs = [
   {
     question: 'Do you supply the phlebotomists?',
-    answer: 'Yes. We connect you with certified phlebotomists who have experience with mobile and event-based draws. All technicians are vetted, certified, and insured.'
+    answer: 'We coordinate certified mobile phlebotomists who have experience with facility and event-based draws. All providers are vetted, certified, and insured independent professionals.'
   },
   {
-    question: 'Can you provide supplies and shipping?',
-    answer: 'Yes, in many cases we can assist with supplies and packaging. We can also work with your lab kits and shipping labels if you have an existing lab partnership.'
+    question: 'Can you coordinate supplies and shipping?',
+    answer: 'Yes, in many cases we can help coordinate supplies and packaging logistics. We can also work with your lab kits and shipping labels if you have an existing lab partnership.'
   },
   {
-    question: 'How quickly can you staff an event?',
-    answer: 'In many major metros we can coordinate staffing within 24–72 hours, depending on the size and timing of your event. For best results, we recommend reaching out 1-2 weeks in advance.'
+    question: 'How quickly can you coordinate staffing?',
+    answer: 'Response times vary by location and provider availability. In major metros, coordination may be possible within several days to 1-2 weeks depending on scope and timing. We recommend reaching out as early as possible.'
   },
   {
     question: 'Do you offer nationwide coverage?',
-    answer: 'We focus on major metropolitan areas across the United States and can often help with multi-location events. Contact us to confirm coverage in your specific area.'
+    answer: 'We work with a nationwide provider network focused on major metropolitan areas across the United States. Availability varies by location. Contact us to discuss coverage in your specific area.'
   },
   {
     question: 'Can you support recurring programs?',
-    answer: 'Yes. We can help with recurring corporate wellness programs, multi-visit screenings, and ongoing research draws. We\'ll work with you to establish a consistent staffing schedule.'
+    answer: 'Yes. We help coordinate recurring facility support, wellness programs, multi-visit screenings, and ongoing research draws. We work with you to establish consistent provider scheduling.'
   }
 ]
 
@@ -101,45 +101,48 @@ export default function CorporatePhlebotomyPage() {
             {/* Left Column - Text Content */}
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Corporate & Event Phlebotomy Services
+                Facilities & Group Mobile Phlebotomy Services
               </h1>
               <p className="text-xl text-primary-100 mb-4">
-                Professional mobile blood draw staffing for conferences, wellness fairs, clinical studies, and on-site employee screenings.
+                Coordination of certified mobile phlebotomists for facilities, organizations, and group blood draw needs.
               </p>
-              <p className="text-lg text-primary-50 mb-8">
-                We provide certified phlebotomists for one-day events, multi-day conventions, and recurring corporate health programs nationwide.
+              <p className="text-lg text-primary-50 mb-6">
+                We coordinate certified phlebotomists for medical facilities, events, and recurring health programs through our nationwide provider network.
+              </p>
+              <p className="text-sm text-primary-100 mb-8 italic">
+                Services are coordinated through vetted independent mobile phlebotomy providers. Availability and response times may vary by location.
               </p>
               <a
                 href="#quote-form"
                 className="inline-block bg-white text-primary-700 px-8 py-4 rounded-lg font-semibold hover:bg-primary-50 transition-colors shadow-lg"
               >
-                Request Staffing Quote
+                Request Coordination Review
               </a>
             </div>
 
             {/* Right Column - Key Points Card */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 border border-white/20">
-              <h3 className="text-xl font-bold mb-6">What We Provide:</h3>
+              <h3 className="text-xl font-bold mb-6">What We Coordinate:</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <span className="text-green-300 mr-3 mt-1">✓</span>
-                  <span>Certified phlebotomists with event experience</span>
+                  <span>Certified mobile phlebotomists with facility/event experience</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-300 mr-3 mt-1">✓</span>
-                  <span>1 to 50+ technicians as needed</span>
+                  <span>Coordination for 1 to 50+ technicians as needed</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-300 mr-3 mt-1">✓</span>
-                  <span>Nationwide coverage in major metros</span>
+                  <span>Nationwide provider network with metro-area coverage</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-300 mr-3 mt-1">✓</span>
-                  <span>Full specimen handling & logistics</span>
+                  <span>Support for specimen handling & logistics coordination</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-300 mr-3 mt-1">✓</span>
-                  <span>HIPAA-compliant workflows</span>
+                  <span>HIPAA-compliant provider workflows</span>
                 </li>
               </ul>
             </div>
@@ -152,10 +155,10 @@ export default function CorporatePhlebotomyPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Staffing phlebotomists for events doesn&apos;t have to be complicated
+              Coordinating phlebotomists for facilities and groups doesn&apos;t have to be complicated
             </h2>
             <p className="text-lg text-gray-600">
-              We handle the logistics so you can focus on your event.
+              We help coordinate logistics and provider communication so you can focus on your mission.
             </p>
           </div>
 
@@ -231,16 +234,16 @@ export default function CorporatePhlebotomyPage() {
 
             <div className="mt-12 bg-primary-50 rounded-lg p-8 border-2 border-primary-200 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Ready to staff your event?
+                Ready to coordinate your facility or group needs?
               </h3>
               <p className="text-gray-700 mb-6">
-                Get a custom quote for your corporate or event phlebotomy needs.
+                Request a coordination review for your facility or group phlebotomy needs.
               </p>
               <a
                 href="#quote-form"
                 className="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
               >
-                Request Staffing Quote
+                Request Coordination Review
               </a>
             </div>
           </div>

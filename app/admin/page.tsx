@@ -444,7 +444,7 @@ export default function AdminDashboard() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Corporate Inquiries
+              Facilities & Group Services
             </button>
             <button
               onClick={() => {

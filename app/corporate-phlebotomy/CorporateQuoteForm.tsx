@@ -3,10 +3,11 @@
 import { useState } from 'react'
 
 const EVENT_TYPES = [
+  'Healthcare facility/hospital',
+  'Assisted living/nursing home',
   'Corporate wellness',
   'Conference/trade show',
   'Clinical trial/research',
-  'Insurance exams',
   'Health fair/community',
   'Other'
 ]
@@ -23,6 +24,7 @@ export function CorporateQuoteForm() {
     estimatedDraws: '',
     estimatedPhlebotomists: '',
     eventType: [] as string[],
+    urgency: '',
     additionalDetails: ''
   })
 
@@ -145,10 +147,10 @@ export function CorporateQuoteForm() {
             Inquiry Submitted Successfully!
           </h3>
           <p className="text-gray-700 mb-6">
-            Thank you for your interest in our corporate phlebotomy staffing services.
+            Thank you for your interest in our phlebotomy staffing services.
           </p>
           <p className="text-gray-600">
-            We&apos;ll review your event details and follow up within 24-48 hours with a staffing proposal and pricing quote.
+            We&apos;ll review your details and work to coordinate provider availability in your area. Response times may vary based on location and provider schedules.
           </p>
           <p className="text-sm text-gray-500 mt-4">
             Check your email at <strong>{formData.email}</strong> for a confirmation.
@@ -161,10 +163,10 @@ export function CorporateQuoteForm() {
   return (
     <div className="bg-white rounded-lg shadow-md p-8" id="quote-form">
       <h3 className="text-2xl font-bold text-gray-900 mb-6">
-        Request a Corporate/Event Staffing Quote
+        Request Coordination Review
       </h3>
       <p className="text-gray-600 mb-8">
-        Tell us about your event and we&apos;ll coordinate certified phlebotomists to meet your needs.
+        Tell us about your facility or group needs and we&apos;ll work to coordinate certified phlebotomists in your area.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -330,7 +332,7 @@ export function CorporateQuoteForm() {
 
           <div className="mt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Estimated Phlebotomists Needed (Optional)
+              Estimated Staffing Needed (Optional)
             </label>
             <input
               type="text"
@@ -338,10 +340,10 @@ export function CorporateQuoteForm() {
               value={formData.estimatedPhlebotomists}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="2-3"
+              placeholder="2-3 phlebotomists"
             />
             <p className="text-sm text-gray-500 mt-1">
-              If unsure, we&apos;ll help you determine the right staffing level
+              If unsure, we&apos;ll help determine appropriate staffing levels
             </p>
           </div>
         </div>
@@ -373,6 +375,26 @@ export function CorporateQuoteForm() {
           {errors.eventType && (
             <p className="text-red-500 text-sm mt-2">{errors.eventType}</p>
           )}
+        </div>
+
+        {/* Urgency */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Is this exploratory or time-sensitive? (Optional)
+          </label>
+          <select
+            name="urgency"
+            value={formData.urgency}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">Select timing...</option>
+            <option value="exploratory">Exploratory / Planning ahead</option>
+            <option value="time-sensitive">Time-sensitive / Needed soon</option>
+          </select>
+          <p className="text-sm text-gray-500 mt-1">
+            This helps us prioritize and match you with available providers
+          </p>
         </div>
 
         {/* Additional Details */}
