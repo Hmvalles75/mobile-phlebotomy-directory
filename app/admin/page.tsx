@@ -397,6 +397,12 @@ export default function AdminDashboard() {
                 </>
               )}
               <button
+                onClick={() => router.push('/admin/activity')}
+                className="px-4 py-2 text-sm bg-purple-600 text-white hover:bg-purple-700 rounded-lg transition-colors flex items-center gap-2"
+              >
+                📊 Activity Dashboard
+              </button>
+              <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
