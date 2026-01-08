@@ -10,8 +10,10 @@ interface Provider {
   claimEmail: string | null
   phone: string | null
   createdAt: string
+  claimVerifiedAt?: string | null
   stripePaymentMethodId: string | null
   eligibleForLeads: boolean
+  status?: string
   _count: {
     leads: number
   }
@@ -40,6 +42,7 @@ interface ActivityData {
       total: number
       withPayment: number
       whoClaimedLeads: number
+      claimedViaOnboard: number
     }
     leads: {
       total: number
@@ -48,6 +51,7 @@ interface ActivityData {
     }
   }
   recentProviders: Provider[]
+  onboardedProviders: Provider[]
   allProviders: Provider[]
   recentLeadClaims: LeadClaim[]
 }
@@ -58,7 +62,7 @@ export default function AdminActivityPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ActivityData | null>(null)
-  const [activeTab, setActiveTab] = useState<'recent' | 'all' | 'claims'>('recent')
+  const [activeTab, setActiveTab] = useState<'onboarded' | 'recent' | 'all' | 'claims'>('onboarded')
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -208,11 +212,11 @@ export default function AdminActivityPage() {
 
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="text-purple-600" size={24} />
-              <h3 className="font-semibold text-gray-900">Claimed Leads</h3>
+              <Activity className="text-purple-600" size={24} />
+              <h3 className="font-semibold text-gray-900">Onboarded</h3>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{data.stats.providers.whoClaimedLeads}</p>
-            <p className="text-sm text-gray-600 mt-1">providers have claims</p>
+            <p className="text-3xl font-bold text-gray-900">{data.stats.providers.claimedViaOnboard}</p>
+            <p className="text-sm text-gray-600 mt-1">claimed via /onboard</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-6">
@@ -231,6 +235,16 @@ export default function AdminActivityPage() {
         <div className="bg-white rounded-lg shadow-lg mb-8">
           <div className="border-b border-gray-200">
             <div className="flex gap-4 px-6">
+              <button
+                onClick={() => setActiveTab('onboarded')}
+                className={`py-4 px-2 border-b-2 font-semibold transition-colors ${
+                  activeTab === 'onboarded'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Onboarded ({data.onboardedProviders.length})
+              </button>
               <button
                 onClick={() => setActiveTab('recent')}
                 className={`py-4 px-2 border-b-2 font-semibold transition-colors ${
@@ -265,6 +279,67 @@ export default function AdminActivityPage() {
           </div>
 
           <div className="p-6">
+            {/* Onboarded Providers Tab */}
+            {activeTab === 'onboarded' && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Providers who claimed their listing via /onboard page
+                </p>
+                {data.onboardedProviders.length === 0 ? (
+                  <p className="text-gray-600 text-center py-8">No onboarded providers yet</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Name</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Phone</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Claimed</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Payment</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {data.onboardedProviders.map((provider) => (
+                          <tr key={provider.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{provider.name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{provider.claimEmail || provider.email || 'N/A'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{provider.phone || 'N/A'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {provider.claimVerifiedAt ? new Date(provider.claimVerifiedAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }) : 'N/A'}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                provider.status === 'VERIFIED' ? 'bg-green-100 text-green-800' :
+                                provider.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {provider.status || 'UNVERIFIED'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              {provider.stripePaymentMethodId ? (
+                                <span className="text-green-600 font-semibold">✓ Yes</span>
+                              ) : (
+                                <span className="text-gray-400">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Recent Providers Tab */}
             {activeTab === 'recent' && (
               <div className="space-y-4">

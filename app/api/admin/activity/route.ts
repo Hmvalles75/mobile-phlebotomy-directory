@@ -28,6 +28,11 @@ export async function GET(req: NextRequest) {
         }
       }
     })
+    const providersClaimedViaOnboard = await prisma.provider.count({
+      where: {
+        claimVerifiedAt: { not: null }
+      }
+    })
 
     // Fetch recent providers (last 30 days)
     const thirtyDaysAgo = new Date()
@@ -58,6 +63,31 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Fetch providers who claimed via /onboard
+    const onboardedProviders = await prisma.provider.findMany({
+      where: {
+        claimVerifiedAt: { not: null }
+      },
+      orderBy: { claimVerifiedAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        claimEmail: true,
+        phone: true,
+        createdAt: true,
+        claimVerifiedAt: true,
+        stripePaymentMethodId: true,
+        eligibleForLeads: true,
+        status: true,
+        _count: {
+          select: {
+            leads: true
+          }
+        }
+      }
+    })
+
     // Fetch all providers for full list
     const allProviders = await prisma.provider.findMany({
       orderBy: { createdAt: 'desc' },
@@ -68,8 +98,10 @@ export async function GET(req: NextRequest) {
         claimEmail: true,
         phone: true,
         createdAt: true,
+        claimVerifiedAt: true,
         stripePaymentMethodId: true,
         eligibleForLeads: true,
+        status: true,
         _count: {
           select: {
             leads: true
@@ -114,7 +146,8 @@ export async function GET(req: NextRequest) {
         providers: {
           total: totalProviders,
           withPayment: providersWithPayment,
-          whoClaimedLeads: providersWhoClaimedLeads
+          whoClaimedLeads: providersWhoClaimedLeads,
+          claimedViaOnboard: providersClaimedViaOnboard
         },
         leads: {
           total: totalLeads,
@@ -123,6 +156,7 @@ export async function GET(req: NextRequest) {
         }
       },
       recentProviders,
+      onboardedProviders,
       allProviders,
       recentLeadClaims
     })
