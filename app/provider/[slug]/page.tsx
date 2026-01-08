@@ -177,7 +177,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 {/* Verified/Unverified Status Badge */}
                 <div className="mb-3">
                   {isVerified ? (
-                    <img src="/images/PV_Badge.png" alt="Platform Verified" className="h-20 w-auto" />
+                    <img src="/images/PV_Badge.png" alt="Platform Verified" className="h-9 w-auto" />
                   ) : (
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-yellow-500 bg-opacity-10 border border-yellow-600">
                       <span className="text-yellow-800 font-semibold text-sm">⚠️ Unverified Listing</span>
