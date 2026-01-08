@@ -41,6 +41,7 @@ interface Provider {
   status: 'UNVERIFIED' | 'PENDING' | 'VERIFIED'
   claimEmail: string | null
   zipCodes: string | null
+  stripePaymentMethodId: string | null
 }
 
 interface DashboardData {
@@ -279,8 +280,28 @@ function DashboardContent() {
         </div>
       )}
 
+      {/* Payment Setup Banner - Show if no payment method */}
+      {!provider.stripePaymentMethodId && (
+        <div className="bg-yellow-500 text-white px-4 py-3">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              <p className="font-semibold">
+                Add payment details to start receiving leads + get a 30-day FREE trial
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPricingModal(true)}
+              className="bg-white text-yellow-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Add Payment Method
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Trial Status Banner */}
-      {isTrialActive && (
+      {isTrialActive && provider.stripePaymentMethodId && (
         <div className="bg-green-500 text-white px-4 py-3">
           <div className="container mx-auto flex items-center justify-center gap-2">
             <Star className="h-5 w-5" />
