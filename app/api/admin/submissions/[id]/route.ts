@@ -4,10 +4,60 @@ import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/l
 import { prisma } from '@/lib/prisma'
 
 /**
+ * Find and remove duplicate scraped providers
+ */
+async function removeDuplicateProviders(submission: any) {
+  const duplicates = []
+
+  // Search for potential duplicates by:
+  // 1. Exact business name match (case-insensitive)
+  // 2. Phone number match
+  // 3. Email match
+  // 4. Website match
+  const potentialDuplicates = await prisma.provider.findMany({
+    where: {
+      OR: [
+        { name: { equals: submission.businessName, mode: 'insensitive' } },
+        submission.phone ? { phone: submission.phone } : {},
+        submission.email ? { email: submission.email } : {},
+        submission.website ? { website: submission.website } : {}
+      ].filter(condition => Object.keys(condition).length > 0), // Remove empty conditions
+      status: 'UNVERIFIED' // Only delete scraped providers, not verified ones
+    }
+  })
+
+  // Delete duplicates
+  for (const duplicate of potentialDuplicates) {
+    console.log(`🗑️  Removing duplicate scraped provider: ${duplicate.name} (ID: ${duplicate.id})`)
+
+    // Delete provider coverage first (foreign key constraint)
+    await prisma.providerCoverage.deleteMany({
+      where: { providerId: duplicate.id }
+    })
+
+    // Delete the provider
+    await prisma.provider.delete({
+      where: { id: duplicate.id }
+    })
+
+    duplicates.push(duplicate.name)
+  }
+
+  if (duplicates.length > 0) {
+    console.log(`✅ Removed ${duplicates.length} duplicate(s): ${duplicates.join(', ')}`)
+  }
+
+  return duplicates
+}
+
+/**
  * Add provider to PostgreSQL database
  */
 async function addProviderToDatabase(submission: any) {
-  // First, ensure state exists
+  // First, remove any duplicate scraped providers
+  const duplicatesRemoved = await removeDuplicateProviders(submission)
+
+  // Then, ensure state exists
   let state = await prisma.state.findFirst({
     where: { abbr: submission.state }
   })
@@ -101,7 +151,7 @@ async function addProviderToDatabase(submission: any) {
     })
   }
 
-  return provider
+  return { provider, duplicatesRemoved: duplicatesRemoved.length }
 }
 
 /**
@@ -140,18 +190,23 @@ export async function POST(
 
     if (action === 'approve') {
       // Add provider to PostgreSQL database
-      const provider = await addProviderToDatabase(submission)
+      const result = await addProviderToDatabase(submission)
 
       // Update submission status
       await updateSubmissionStatus(id, 'approved')
 
-      console.log(`✅ Provider ${provider.name} added to database with ID ${provider.id}`)
+      console.log(`✅ Provider ${result.provider.name} added to database with ID ${result.provider.id}`)
+
+      const message = result.duplicatesRemoved > 0
+        ? `Provider approved and added to directory! (Removed ${result.duplicatesRemoved} duplicate scraped listing${result.duplicatesRemoved > 1 ? 's' : ''})`
+        : 'Provider approved and added to directory immediately!'
 
       return NextResponse.json({
         success: true,
-        message: 'Provider approved and added to directory immediately!',
+        message,
         provider: submission.businessName,
-        providerId: provider.id
+        providerId: result.provider.id,
+        duplicatesRemoved: result.duplicatesRemoved
       })
 
     } else if (action === 'reject') {

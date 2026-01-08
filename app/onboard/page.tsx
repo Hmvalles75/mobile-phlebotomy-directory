@@ -13,6 +13,8 @@ export default function OnboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [claimingProvider, setClaimingProvider] = useState<any>(null)
+  const [claimEmail, setClaimEmail] = useState('')
 
   // Form data for new provider
   const [formData, setFormData] = useState({
@@ -82,10 +84,31 @@ export default function OnboardPage() {
   }
 
   async function handleSelectProvider(provider: any) {
-    setSelectedProvider(provider)
+    // Show email confirmation modal instead of immediately sending link
+    setClaimingProvider(provider)
+    setClaimEmail('')
+    setError(null)
+  }
 
-    // Send login link to access dashboard
-    await sendLoginLink(provider.id, provider.claimEmail || provider.email)
+  async function handleConfirmClaim() {
+    if (!claimEmail.trim()) {
+      setError('Please enter your email address')
+      return
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(claimEmail)) {
+      setError('Please enter a valid email address')
+      return
+    }
+
+    setError(null)
+    setSettingUpPayment(true)
+
+    // Send login link to the email they provided
+    await sendLoginLink(claimingProvider.id, claimEmail)
+    setClaimingProvider(null)
   }
 
   async function handleCreateProvider() {
@@ -145,18 +168,76 @@ export default function OnboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Get Access to Patient Leads
+            Access Your Provider Dashboard
           </h1>
           <p className="text-lg text-gray-600">
-            Claim your listing to start receiving and managing mobile phlebotomy service requests
+            Manage your provider listing and optionally receive patient service requests
           </p>
         </div>
 
         {/* Error Message */}
-        {error && (
+        {error && !claimingProvider && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
             <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Email Confirmation Modal */}
+        {claimingProvider && (
+          <div className="mb-6 bg-white rounded-lg shadow-lg p-6 border-2 border-primary-500">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Verify Your Email to Claim Listing
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              You&apos;re claiming: <span className="font-semibold">{claimingProvider.name}</span>
+            </p>
+
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="text-red-600 flex-shrink-0" size={18} />
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Email Address <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="email"
+                value={claimEmail}
+                onChange={(e) => setClaimEmail(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleConfirmClaim()}
+                placeholder="Enter your email address"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                autoFocus
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                We&apos;ll send a secure login link to this email address to verify ownership.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleConfirmClaim}
+                disabled={settingUpPayment}
+                className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50"
+              >
+                {settingUpPayment ? 'Sending...' : 'Send Login Link'}
+              </button>
+              <button
+                onClick={() => {
+                  setClaimingProvider(null)
+                  setClaimEmail('')
+                  setError(null)
+                }}
+                disabled={settingUpPayment}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
 
@@ -165,6 +246,9 @@ export default function OnboardPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Search for Your Business
           </label>
+          <p className="text-sm text-gray-600 mb-3">
+            Enter your business name, email, or phone number to locate your listing
+          </p>
           <div className="relative">
             <div className="flex gap-2">
               <input
@@ -223,8 +307,8 @@ export default function OnboardPage() {
               <p className="text-sm text-blue-800 font-semibold mb-2">What happens next:</p>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Click the link in your email to access your dashboard</li>
-                <li>• Explore how the lead system works</li>
-                <li>• Add payment details when you&apos;re ready to claim leads</li>
+                <li>• Review and update your provider listing</li>
+                <li>• Optionally set up payment to receive patient requests</li>
               </ul>
             </div>
           </div>
@@ -355,9 +439,12 @@ export default function OnboardPage() {
               </p>
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
                 <li>• We&apos;ll send you a secure login link via email</li>
-                <li>• Access your dashboard to explore the lead system</li>
-                <li>• Add payment details when you&apos;re ready to claim leads</li>
+                <li>• Access your dashboard to manage your listing</li>
+                <li>• Optionally set up payment to receive patient requests</li>
               </ul>
+              <p className="text-xs text-blue-700 mt-3 italic">
+                Patient requests are optional. Your directory listing remains active regardless.
+              </p>
             </div>
           </div>
         )}
@@ -366,10 +453,10 @@ export default function OnboardPage() {
         {!searching && searchResults.length === 0 && !showCreateForm && (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Get Started Today
+              Get Started
             </h2>
             <p className="text-gray-600 mb-6">
-              Search for your existing listing above, or click below to create a new provider account.
+              If your business appears above, claim it to manage your listing. If not, you can create a provider account below.
             </p>
             <button
               onClick={() => setShowCreateForm(true)}
@@ -378,6 +465,9 @@ export default function OnboardPage() {
               <Plus size={20} />
               Create New Provider
             </button>
+            <p className="text-xs text-gray-500 mt-4">
+              Creating or claiming a listing does not require participation in patient requests. Directory exposure remains active either way.
+            </p>
           </div>
         )}
       </div>
