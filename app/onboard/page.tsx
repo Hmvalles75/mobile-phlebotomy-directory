@@ -224,8 +224,7 @@ export default function OnboardPage() {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Click the link in your email to access your dashboard</li>
                 <li>• Explore how the lead system works</li>
-                <li>• Add payment details when you&apos;re ready to start receiving leads</li>
-                <li>• Only pay when you claim a lead</li>
+                <li>• Add payment details when you&apos;re ready to claim leads</li>
               </ul>
             </div>
           </div>
@@ -357,9 +356,7 @@ export default function OnboardPage() {
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
                 <li>• We&apos;ll send you a secure login link via email</li>
                 <li>• Access your dashboard to explore the lead system</li>
-                <li>• Add payment details when you&apos;re ready to start receiving leads</li>
-                <li>• Pay-per-lead pricing: $20/lead (standard) or $50/lead (STAT)</li>
-                <li>• Only pay when you claim a lead</li>
+                <li>• Add payment details when you&apos;re ready to claim leads</li>
               </ul>
             </div>
           </div>

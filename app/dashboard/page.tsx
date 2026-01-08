@@ -300,15 +300,13 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Trial Status Banner */}
-      {isTrialActive && provider.stripePaymentMethodId && (
-        <div className="bg-green-500 text-white px-4 py-3">
-          <div className="container mx-auto flex items-center justify-center gap-2">
-            <Star className="h-5 w-5" />
-            <p className="font-semibold">30-Day Free Trial Active - All leads are FREE!</p>
-          </div>
+      {/* Dashboard Active Banner */}
+      <div className="bg-primary-600 text-white px-4 py-3">
+        <div className="container mx-auto flex items-center justify-center gap-2">
+          <Star className="h-5 w-5" />
+          <p className="font-semibold">⭐ Provider Dashboard Active – Claim patient requests in your area</p>
         </div>
-      )}
+      </div>
 
       {/* Header */}
       <div className="bg-white border-b">
@@ -695,11 +693,7 @@ function DashboardContent() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {isTrialActive ? (
-                          <span className="text-green-600 font-semibold">$0 (Trial)</span>
-                        ) : (
-                          `$${(lead.priceCents / 100).toFixed(2)}`
-                        )}
+                        <span className="text-gray-600">Included</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(lead.routedAt || lead.createdAt)}
@@ -723,15 +717,11 @@ function DashboardContent() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">2.</span>
-                <span>Click &quot;Claim Lead&quot; to see full patient info and pay for the lead</span>
+                <span>Click &quot;Claim Lead&quot; to view full patient details</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-600 font-bold">3.</span>
-                <span>First provider to claim gets the lead - it&apos;s a race!</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600 font-bold">4.</span>
-                <span>{isTrialActive ? 'All leads are FREE during your 30-day trial' : 'Pay only for leads you claim'}</span>
+                <span>First provider to claim gets the lead</span>
               </li>
             </ul>
           </div>
