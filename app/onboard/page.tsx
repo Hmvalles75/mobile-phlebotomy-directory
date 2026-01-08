@@ -160,7 +160,7 @@ export default function OnboardPage() {
               Check Your Email!
             </h2>
             <p className="text-gray-600 mb-2">
-              We've sent a secure login link to:
+              We&apos;ve sent a secure login link to:
             </p>
             <p className="text-lg font-semibold text-gray-900 mb-6">
               {selectedProvider.email}
@@ -170,7 +170,7 @@ export default function OnboardPage() {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Click the link in your email to access your dashboard</li>
                 <li>• Explore how the lead system works</li>
-                <li>• Add payment details when you're ready to receive leads</li>
+                <li>• Add payment details when you&apos;re ready to receive leads</li>
                 <li>• Get a 30-day FREE trial when you add payment</li>
               </ul>
             </div>
@@ -301,9 +301,9 @@ export default function OnboardPage() {
                 <strong>What happens next:</strong>
               </p>
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
-                <li>• We'll send you a secure login link via email</li>
+                <li>• We&apos;ll send you a secure login link via email</li>
                 <li>• Access your dashboard to explore the lead system</li>
-                <li>• Add payment details when you're ready to start receiving leads</li>
+                <li>• Add payment details when you&apos;re ready to start receiving leads</li>
                 <li>• Get a <strong>30-day FREE trial</strong> when you add payment</li>
                 <li>• After trial: $20/lead (standard) or $50/lead (STAT)</li>
                 <li>• Only pay when you claim a lead</li>
