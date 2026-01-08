@@ -31,7 +31,7 @@ function LoginForm() {
     } else if (logout === 'success') {
       setMessage({ type: 'success', text: 'You have been logged out successfully.' })
     } else if (setup === 'success') {
-      setMessage({ type: 'success', text: '✅ Payment method saved! Your 30-day FREE trial is now active. Click "Send Magic Link" below to access your dashboard.' })
+      setMessage({ type: 'success', text: '✅ Payment method saved! You can now claim patient leads. Click "Send Magic Link" below to access your dashboard.' })
     }
   }, [searchParams])
 

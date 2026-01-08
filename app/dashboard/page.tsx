@@ -287,7 +287,7 @@ function DashboardContent() {
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
               <p className="font-semibold">
-                Add payment details to start receiving leads + get a 30-day FREE trial
+                Add payment details to start claiming patient leads
               </p>
             </div>
             <button

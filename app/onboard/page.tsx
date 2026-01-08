@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Plus, CreditCard, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function OnboardPage() {
@@ -11,6 +11,8 @@ export default function OnboardPage() {
   const [selectedProvider, setSelectedProvider] = useState<any>(null)
   const [settingUpPayment, setSettingUpPayment] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   // Form data for new provider
   const [formData, setFormData] = useState({
@@ -21,11 +23,44 @@ export default function OnboardPage() {
     serviceZipCodes: ''
   })
 
+  // Autocomplete suggestions as user types
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length >= 3) {
+        try {
+          const response = await fetch(`/api/provider/search?q=${encodeURIComponent(searchQuery)}`)
+          const data = await response.json()
+          if (data.ok) {
+            setSuggestions(data.providers || [])
+            setShowSuggestions(true)
+          }
+        } catch (err) {
+          // Silently fail for autocomplete
+        }
+      } else {
+        setSuggestions([])
+        setShowSuggestions(false)
+      }
+    }
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300)
+    return () => clearTimeout(debounceTimer)
+  }, [searchQuery])
+
+  function handleSelectSuggestion(provider: any) {
+    setSearchQuery(provider.name)
+    setShowSuggestions(false)
+    setSuggestions([])
+    // Trigger the search with the selected provider name
+    setTimeout(() => handleSearch(), 100)
+  }
+
   async function handleSearch() {
     if (!searchQuery.trim()) return
 
     setSearching(true)
     setError(null)
+    setShowSuggestions(false)
 
     try {
       const response = await fetch(`/api/provider/search?q=${encodeURIComponent(searchQuery)}`)
@@ -130,23 +165,42 @@ export default function OnboardPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Search for Your Business
           </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Enter business name, email, or phone..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            <button
-              onClick={handleSearch}
-              disabled={searching}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
-            >
-              <Search size={20} />
-              {searching ? 'Searching...' : 'Search'}
-            </button>
+          <div className="relative">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder="Enter business name, email, or phone..."
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleSearch}
+                disabled={searching}
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
+              >
+                <Search size={20} />
+                {searching ? 'Searching...' : 'Search'}
+              </button>
+            </div>
+
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                {suggestions.slice(0, 5).map((provider) => (
+                  <div
+                    key={provider.id}
+                    onClick={() => handleSelectSuggestion(provider)}
+                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="font-semibold text-gray-900">{provider.name}</div>
+                    <div className="text-sm text-gray-600">{provider.email || provider.claimEmail}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -170,8 +224,8 @@ export default function OnboardPage() {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Click the link in your email to access your dashboard</li>
                 <li>• Explore how the lead system works</li>
-                <li>• Add payment details when you&apos;re ready to receive leads</li>
-                <li>• Get a 30-day FREE trial when you add payment</li>
+                <li>• Add payment details when you&apos;re ready to start receiving leads</li>
+                <li>• Only pay when you claim a lead</li>
               </ul>
             </div>
           </div>
@@ -304,8 +358,7 @@ export default function OnboardPage() {
                 <li>• We&apos;ll send you a secure login link via email</li>
                 <li>• Access your dashboard to explore the lead system</li>
                 <li>• Add payment details when you&apos;re ready to start receiving leads</li>
-                <li>• Get a <strong>30-day FREE trial</strong> when you add payment</li>
-                <li>• After trial: $20/lead (standard) or $50/lead (STAT)</li>
+                <li>• Pay-per-lead pricing: $20/lead (standard) or $50/lead (STAT)</li>
                 <li>• Only pay when you claim a lead</li>
               </ul>
             </div>
