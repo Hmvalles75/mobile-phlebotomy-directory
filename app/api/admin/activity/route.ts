@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
       orderBy: { routedAt: 'desc' },
       take: 50,
       include: {
-        routedTo: {
+        provider: {
           select: {
             id: true,
             name: true,

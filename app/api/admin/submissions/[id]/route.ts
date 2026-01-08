@@ -17,7 +17,7 @@ async function removeDuplicateProviders(submission: any) {
   const potentialDuplicates = await prisma.provider.findMany({
     where: {
       OR: [
-        { name: { equals: submission.businessName, mode: 'insensitive' } },
+        { name: { equals: submission.businessName, mode: 'insensitive' as const } },
         submission.phone ? { phone: submission.phone } : {},
         submission.email ? { email: submission.email } : {},
         submission.website ? { website: submission.website } : {}

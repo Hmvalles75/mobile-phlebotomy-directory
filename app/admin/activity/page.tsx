@@ -27,7 +27,7 @@ interface LeadClaim {
   urgency: string
   priceCents: number
   routedAt: string
-  routedTo: {
+  provider: {
     id: string
     name: string
     email: string | null
@@ -413,7 +413,7 @@ export default function AdminActivityPage() {
                                 {claim.urgency}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900">{claim.routedTo.name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{claim.provider.name}</td>
                             <td className="px-4 py-3 text-sm text-gray-600">
                               {new Date(claim.routedAt).toLocaleDateString('en-US', {
                                 month: 'short',
