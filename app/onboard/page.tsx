@@ -329,8 +329,6 @@ export default function OnboardPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">{provider.name}</h3>
-                      <p className="text-sm text-gray-600">{provider.email || provider.claimEmail}</p>
-                      <p className="text-sm text-gray-600">{provider.phone}</p>
                     </div>
                     <button className="text-primary-600 font-semibold text-sm hover:text-primary-700">
                       Access Dashboard →
