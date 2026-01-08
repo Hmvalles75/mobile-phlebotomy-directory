@@ -4,11 +4,34 @@ import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/l
 import { prisma } from '@/lib/prisma'
 
 /**
- * Find and remove duplicate scraped providers
+ * Find and remove duplicate providers (both scraped and verified duplicates)
  */
 async function removeDuplicateProviders(submission: any) {
   const duplicates = []
 
+  // STEP 1: Check if there's already a VERIFIED provider with same email/phone
+  // If yes, reject the submission to prevent duplicate verified providers
+  if (submission.email || submission.phone) {
+    const existingVerified = await prisma.provider.findFirst({
+      where: {
+        AND: [
+          { status: 'VERIFIED' },
+          {
+            OR: [
+              submission.email ? { email: submission.email } : {},
+              submission.phone ? { phone: submission.phone } : {}
+            ].filter(condition => Object.keys(condition).length > 0)
+          }
+        ]
+      }
+    })
+
+    if (existingVerified) {
+      throw new Error(`A verified provider already exists with this ${submission.email && existingVerified.email === submission.email ? 'email' : 'phone number'}. Please contact the provider to update their existing listing instead of creating a new one. Existing provider: "${existingVerified.name}"`)
+    }
+  }
+
+  // STEP 2: Remove UNVERIFIED (scraped) duplicates
   // Search for potential duplicates by:
   // 1. Exact business name match (case-insensitive)
   // 2. Phone number match

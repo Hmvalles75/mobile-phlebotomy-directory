@@ -280,7 +280,6 @@ export default function OnboardPage() {
                     className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                   >
                     <div className="font-semibold text-gray-900">{provider.name}</div>
-                    <div className="text-sm text-gray-600">{provider.email || provider.claimEmail}</div>
                   </div>
                 ))}
               </div>
