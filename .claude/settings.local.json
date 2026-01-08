@@ -51,7 +51,8 @@
       "Bash(pnpm rebuild)",
       "Bash(find:*)",
       "Bash(nul)",
-      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\hmval\\OneDrive\\Desktop\\MobilePhlebotomy\\app\\dashboard\\page.tsx'' | Measure-Object -Line).Lines\")"
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\hmval\\OneDrive\\Desktop\\MobilePhlebotomy\\app\\dashboard\\page.tsx'' | Measure-Object -Line).Lines\")",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []

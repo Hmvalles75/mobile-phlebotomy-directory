@@ -49,14 +49,8 @@ export default function OnboardPage() {
   async function handleSelectProvider(provider: any) {
     setSelectedProvider(provider)
 
-    // If provider already has payment method, they're all set
-    if (provider.stripePaymentMethodId) {
-      setError('This provider already has a payment method saved and is eligible for leads!')
-      return
-    }
-
-    // Initiate payment setup
-    await initiatePaymentSetup(provider.id)
+    // Send login link to access dashboard
+    await sendLoginLink(provider.id, provider.claimEmail || provider.email)
   }
 
   async function handleCreateProvider() {
@@ -77,8 +71,8 @@ export default function OnboardPage() {
         throw new Error(createData.error || 'Failed to create provider')
       }
 
-      // Then initiate payment setup
-      await initiatePaymentSetup(createData.providerId)
+      // Send login link to access dashboard
+      await sendLoginLink(createData.providerId, formData.email)
 
     } catch (err: any) {
       setError(err.message || 'Failed to create provider')
@@ -86,24 +80,26 @@ export default function OnboardPage() {
     }
   }
 
-  async function initiatePaymentSetup(providerId: string) {
+  async function sendLoginLink(providerId: string, email: string) {
     try {
-      const setupResponse = await fetch('/api/provider/createSetupSession', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerId })
+        body: JSON.stringify({ email })
       })
 
-      const setupData = await setupResponse.json()
+      const data = await response.json()
 
-      if (setupData.ok && setupData.url) {
-        // Redirect to Stripe for payment method setup
-        window.location.href = setupData.url
+      if (data.ok) {
+        // Show success message
+        setError(null)
+        setSelectedProvider({ email })
+        setSettingUpPayment(false)
       } else {
-        throw new Error('Failed to create payment setup session')
+        throw new Error(data.error || 'Failed to send login link')
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to initiate payment setup')
+      setError(err.message || 'Failed to send login link')
       setSettingUpPayment(false)
     }
   }
@@ -114,10 +110,10 @@ export default function OnboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Join Our Provider Network
+            Get Access to Patient Leads
           </h1>
           <p className="text-lg text-gray-600">
-            Search for your existing listing or create a new provider account
+            Claim your listing to start receiving and managing mobile phlebotomy service requests
           </p>
         </div>
 
@@ -154,8 +150,35 @@ export default function OnboardPage() {
           </div>
         </div>
 
+        {/* Success Message - Login Link Sent */}
+        {selectedProvider && (
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="mb-4">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Check Your Email!
+            </h2>
+            <p className="text-gray-600 mb-2">
+              We've sent a secure login link to:
+            </p>
+            <p className="text-lg font-semibold text-gray-900 mb-6">
+              {selectedProvider.email}
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+              <p className="text-sm text-blue-800 font-semibold mb-2">What happens next:</p>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Click the link in your email to access your dashboard</li>
+                <li>• Explore how the lead system works</li>
+                <li>• Add payment details when you're ready to receive leads</li>
+                <li>• Get a 30-day FREE trial when you add payment</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
         {/* Search Results */}
-        {searchResults.length > 0 && (
+        {searchResults.length > 0 && !selectedProvider && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Found {searchResults.length} Provider{searchResults.length > 1 ? 's' : ''}
@@ -173,16 +196,9 @@ export default function OnboardPage() {
                       <p className="text-sm text-gray-600">{provider.email || provider.claimEmail}</p>
                       <p className="text-sm text-gray-600">{provider.phone}</p>
                     </div>
-                    {provider.stripePaymentMethodId ? (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                        <CheckCircle size={14} className="mr-1" />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                        Needs Setup
-                      </span>
-                    )}
+                    <button className="text-primary-600 font-semibold text-sm hover:text-primary-700">
+                      Access Dashboard →
+                    </button>
                   </div>
                 </div>
               ))}
@@ -276,8 +292,8 @@ export default function OnboardPage() {
               disabled={settingUpPayment}
               className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <CreditCard size={20} />
-              {settingUpPayment ? 'Setting up...' : 'Continue to Payment Setup'}
+              <CheckCircle size={20} />
+              {settingUpPayment ? 'Creating account...' : 'Create Account & View Dashboard'}
             </button>
 
             <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -285,9 +301,10 @@ export default function OnboardPage() {
                 <strong>What happens next:</strong>
               </p>
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
-                <li>• You&apos;ll be redirected to Stripe to securely save your payment method</li>
-                <li>• <strong>No charge</strong> will be made during setup</li>
-                <li>• You&apos;ll receive a <strong>30-day FREE trial</strong></li>
+                <li>• We'll send you a secure login link via email</li>
+                <li>• Access your dashboard to explore the lead system</li>
+                <li>• Add payment details when you're ready to start receiving leads</li>
+                <li>• Get a <strong>30-day FREE trial</strong> when you add payment</li>
                 <li>• After trial: $20/lead (standard) or $50/lead (STAT)</li>
                 <li>• Only pay when you claim a lead</li>
               </ul>
