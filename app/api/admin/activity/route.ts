@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     })
     const providersWhoClaimedLeads = await prisma.provider.count({
       where: {
-        Lead: {
+        leads: {
           some: {}
         }
       }
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         eligibleForLeads: true,
         _count: {
           select: {
-            Lead: true
+            leads: true
           }
         }
       }
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
         eligibleForLeads: true,
         _count: {
           select: {
-            Lead: true
+            leads: true
           }
         }
       }

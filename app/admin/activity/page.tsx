@@ -13,7 +13,7 @@ interface Provider {
   stripePaymentMethodId: string | null
   eligibleForLeads: boolean
   _count: {
-    Lead: number
+    leads: number
   }
 }
 
@@ -311,7 +311,7 @@ export default function AdminActivityPage() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                              {provider._count.Lead}
+                              {provider._count.leads}
                             </td>
                           </tr>
                         ))}
@@ -363,7 +363,7 @@ export default function AdminActivityPage() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                              {provider._count.Lead}
+                              {provider._count.leads}
                             </td>
                           </tr>
                         ))}
