@@ -12,6 +12,7 @@ import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
 import { ReportIssueButton } from '@/components/ui/ReportIssueButton'
 import { formatPhoneNumber } from '@/lib/format-phone'
 import Link from 'next/link'
+import { ProviderWebsiteLink } from '@/components/ui/ProviderWebsiteLink'
 
 interface PageProps {
   params: {
@@ -402,10 +403,13 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">🌐</span>
                       <div>
-                        <a href={provider.website} target="_blank" rel="noopener noreferrer"
-                           className="font-semibold text-primary-600 hover:underline">
-                          Visit Website
-                        </a>
+                        <ProviderWebsiteLink
+                          website={provider.website}
+                          providerName={provider.name}
+                          providerCity={provider.city || undefined}
+                          providerState={provider.state || undefined}
+                          className="font-semibold text-primary-600 hover:underline"
+                        />
                         <p className="text-sm text-gray-500">Official Website</p>
                       </div>
                     </div>

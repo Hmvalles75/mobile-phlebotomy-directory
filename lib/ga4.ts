@@ -73,5 +73,27 @@ export const ga4 = {
 
   disclaimerView: () => {
     trackEvent('disclaimer_view')
+  },
+
+  /**
+   * Track provider website outbound clicks
+   * @param params - provider_name, provider_city, provider_state, link_type, page_path
+   *
+   * To verify in GA4:
+   * 1. Go to GA4 Admin -> DebugView
+   * 2. Click any "Visit Website" link on a provider card or profile
+   * 3. Confirm 'provider_click' event appears with all parameters
+   */
+  providerClick: (params: {
+    provider_name: string
+    provider_city?: string
+    provider_state?: string
+    link_type: 'website' | 'phone' | 'email'
+    page_path?: string
+  }) => {
+    trackEvent('provider_click', {
+      ...params,
+      page_path: params.page_path || (typeof window !== 'undefined' ? window.location.pathname : undefined)
+    })
   }
 }

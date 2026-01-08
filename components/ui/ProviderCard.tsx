@@ -3,6 +3,7 @@ import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { formatPhoneNumber } from '@/lib/format-phone'
+import { ga4 } from '@/lib/ga4'
 
 interface ProviderCardProps {
   provider: Provider
@@ -154,6 +155,14 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
             target="_blank"
             rel="noopener noreferrer"
             className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors"
+            onClick={() => {
+              ga4.providerClick({
+                provider_name: provider.name,
+                provider_city: provider.address?.city,
+                provider_state: provider.address?.state,
+                link_type: 'website'
+              })
+            }}
           >
             Visit Website
           </a>
