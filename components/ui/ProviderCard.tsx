@@ -43,8 +43,9 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           {/* Verification Status Badge */}
           <div className="mb-2">
             {isVerified ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-600 bg-opacity-10 text-green-700 border border-green-600">
-                ✅ Verified — Accepting patient referrals
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-green-600 bg-opacity-10 text-green-700 border border-green-600">
+                <img src="/images/Platform Verified.png" alt="Platform Verified" className="h-4 w-auto" />
+                Verified — Accepting patient referrals
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500 bg-opacity-10 text-yellow-800 border border-yellow-600">
