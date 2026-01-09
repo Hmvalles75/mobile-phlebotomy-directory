@@ -60,15 +60,24 @@ export async function POST(req: NextRequest) {
         throw new Error('Provider not found')
       }
 
-      if (!provider.eligibleForLeads) {
-        throw new Error('Provider is not eligible to claim leads. Please add a payment method.')
-      }
+      // PAYMENT DISABLED: All leads are FREE until pay-per-lead is activated
+      // Uncomment these checks when ready to enable payments:
 
-      if (!provider.stripeCustomerId || !provider.stripePaymentMethodId) {
-        throw new Error('Provider must have a payment method saved')
-      }
+      // if (!provider.eligibleForLeads) {
+      //   throw new Error('Provider is not eligible to claim leads. Please add a payment method.')
+      // }
+
+      // if (!provider.stripeCustomerId || !provider.stripePaymentMethodId) {
+      //   throw new Error('Provider must have a payment method saved')
+      // }
 
       // 3. Check trial status and determine charge amount
+      // PAYMENT DISABLED: Always charge $0 until pay-per-lead is activated
+      let chargeAmount = 0  // Force free
+      let isTrial = true    // Treat everything as free trial
+
+      // When ready to enable payments, uncomment this logic:
+      /*
       let chargeAmount = lead.priceCents
       let isTrial = false
 
@@ -87,6 +96,7 @@ export async function POST(req: NextRequest) {
           })
         }
       }
+      */
 
       // 4. Charge provider (if not trial)
       let paymentIntentId: string | null = null

@@ -371,12 +371,12 @@ function DashboardContent() {
             <div className="flex items-center justify-between mb-2">
               <DollarSign className="text-blue-600" size={24} />
               <span className="text-3xl font-bold text-gray-900">
-                {isTrialActive ? '$0' : `$${stats.totalSpent.toFixed(0)}`}
+                $0
               </span>
             </div>
             <p className="text-gray-600 text-sm font-medium">Total Spent</p>
             <p className="text-xs text-gray-500 mt-1">
-              {isTrialActive ? 'FREE during trial' : 'On leads'}
+              FREE during beta
             </p>
           </div>
 
@@ -384,12 +384,12 @@ function DashboardContent() {
             <div className="flex items-center justify-between mb-2">
               <Star className="text-yellow-600" size={24} />
               <span className="text-2xl font-bold text-gray-900">
-                {isTrialActive ? 'TRIAL' : 'ACTIVE'}
+                BETA
               </span>
             </div>
             <p className="text-gray-600 text-sm font-medium">Account Status</p>
             <p className="text-xs text-gray-500 mt-1">
-              {isTrialActive ? '30-day free trial' : 'Pay per lead'}
+              Beta - Free leads
             </p>
           </div>
         </div>
