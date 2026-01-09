@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
 
     // Check if provider is currently available based on their settings
     const isProviderAvailableNow = () => {
-      // TEMPORARILY ALWAYS RETURN TRUE TO DEBUG LEAD VISIBILITY
-      // TODO: Re-enable time-based filtering after confirming leads show up
-      console.log('[Dashboard] Time-based availability check DISABLED for debugging')
+      // Always show leads regardless of time/day settings
+      // Providers should be able to see and claim leads 24/7
+      // The operating hours are just for displaying to patients
       return true
     }
 
@@ -93,8 +93,6 @@ export async function GET(req: NextRequest) {
       const primaryZip = providerZipCodes[0] || null
       const serviceRadius = provider.serviceRadiusMiles || 25 // Default 25 miles
 
-      console.log(`[Dashboard] Provider ${provider.id} - primaryZip: ${primaryZip}, serviceRadius: ${serviceRadius}`)
-
       // Fetch all OPEN leads (we'll filter by radius in memory)
       const allOpenLeads = await prisma.lead.findMany({
         where: {
@@ -115,27 +113,17 @@ export async function GET(req: NextRequest) {
         }
       })
 
-      console.log(`[Dashboard] Found ${allOpenLeads.length} OPEN leads total`)
-
       // Filter leads by radius if provider has a ZIP code
       if (primaryZip) {
         const { isLeadInServiceRadius } = await import('@/lib/zip-geocode')
 
-        availableLeads = allOpenLeads.filter(lead => {
-          const inRadius = isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius)
-          console.log(`[Dashboard] Lead in ${lead.city} ${lead.zip}: ${inRadius ? 'YES' : 'NO'}`)
-          return inRadius
-        }).slice(0, 20) // Limit to 20 leads
-
-        console.log(`[Dashboard] Filtered to ${availableLeads.length} leads within ${serviceRadius} miles of ${primaryZip}`)
+        availableLeads = allOpenLeads.filter(lead =>
+          isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius)
+        ).slice(0, 20) // Limit to 20 leads
       } else {
         // No ZIP code set, show no leads
-        console.log('[Dashboard] No primary ZIP code set, showing no leads')
         availableLeads = []
       }
-    } else {
-      // Provider is not available right now - don't show any leads
-      console.log(`[Dashboard] Provider ${provider.id} is not available at this time`)
     }
 
     // Check trial status
