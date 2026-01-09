@@ -110,8 +110,8 @@ export async function POST(req: NextRequest) {
           const paymentIntent = await stripe.paymentIntents.create({
             amount: chargeAmount,
             currency: 'usd',
-            customer: provider.stripeCustomerId,
-            payment_method: provider.stripePaymentMethodId,
+            customer: provider.stripeCustomerId || undefined,
+            payment_method: provider.stripePaymentMethodId || undefined,
             off_session: true,
             confirm: true,
             description: `Lead Claim: ${lead.fullName} - ${lead.city}, ${lead.state}`,
