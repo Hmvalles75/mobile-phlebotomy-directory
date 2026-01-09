@@ -50,27 +50,9 @@ export async function GET(req: NextRequest) {
 
     // Check if provider is currently available based on their settings
     const isProviderAvailableNow = () => {
-      if (!provider.operatingDays || !provider.operatingHoursStart || !provider.operatingHoursEnd) {
-        // If no availability settings, assume available (backwards compatibility)
-        return true
-      }
-
-      const now = new Date()
-      const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-      const currentDay = dayNames[now.getDay()]
-
-      // Check if current day is in operating days
-      const operatingDaysList = provider.operatingDays.split(',').map(d => d.trim())
-      if (!operatingDaysList.includes(currentDay)) {
-        return false
-      }
-
-      // Check if current time is within operating hours
-      const currentTime = now.toTimeString().slice(0, 5) // HH:MM format
-      if (currentTime < provider.operatingHoursStart || currentTime > provider.operatingHoursEnd) {
-        return false
-      }
-
+      // TEMPORARILY ALWAYS RETURN TRUE TO DEBUG LEAD VISIBILITY
+      // TODO: Re-enable time-based filtering after confirming leads show up
+      console.log('[Dashboard] Time-based availability check DISABLED for debugging')
       return true
     }
 
