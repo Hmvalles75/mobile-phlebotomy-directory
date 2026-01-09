@@ -409,6 +409,13 @@ function DashboardContent() {
                 {showSettings ? 'Hide' : 'Configure'}
               </button>
             </div>
+            {!showSettings && (!operatingHoursStart || !operatingHoursEnd || !serviceRadiusMiles) && (
+              <div className="mt-3 bg-yellow-100 border border-yellow-300 rounded-lg p-3">
+                <p className="text-sm text-yellow-900 font-semibold">
+                  ⚠️ Action Required: Configure your availability settings to see leads in your area
+                </p>
+              </div>
+            )}
           </div>
 
           {showSettings && (
@@ -565,9 +572,24 @@ function DashboardContent() {
             <div className="px-6 py-12 text-center">
               <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No leads available right now</h3>
-              <p className="text-gray-600">
-                New patient leads will appear here when they submit requests in your service area.
-              </p>
+              {(!operatingHoursStart || !operatingHoursEnd || !serviceRadiusMiles) ? (
+                <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
+                  <p className="text-yellow-900 font-semibold mb-2">⚠️ Availability Settings Required</p>
+                  <p className="text-sm text-yellow-800 mb-3">
+                    You need to configure your operating hours and service radius to see available leads.
+                  </p>
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 font-medium text-sm"
+                  >
+                    Configure Settings Now
+                  </button>
+                </div>
+              ) : (
+                <p className="text-gray-600">
+                  New patient leads will appear here when they submit requests in your service area.
+                </p>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
