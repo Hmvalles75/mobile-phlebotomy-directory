@@ -106,22 +106,19 @@ export async function GET(req: NextRequest) {
     let availableLeads: any[] = []
 
     if (isProviderAvailableNow()) {
-      // Parse provider's zip codes
+      // Get provider's primary ZIP code and service radius
       const providerZipCodes = provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []
+      const primaryZip = providerZipCodes[0] || null
+      const serviceRadius = provider.serviceRadiusMiles || 25 // Default 25 miles
 
-      availableLeads = await prisma.lead.findMany({
+      // Fetch all OPEN leads (we'll filter by radius in memory)
+      const allOpenLeads = await prisma.lead.findMany({
         where: {
-          status: 'OPEN',
-          ...(providerZipCodes.length > 0 ? {
-            zip: {
-              in: providerZipCodes
-            }
-          } : {})
+          status: 'OPEN'
         },
         orderBy: {
           createdAt: 'desc'
         },
-        take: 20,
         select: {
           id: true,
           createdAt: true,
@@ -133,6 +130,18 @@ export async function GET(req: NextRequest) {
           priceCents: true
         }
       })
+
+      // Filter leads by radius if provider has a ZIP code
+      if (primaryZip) {
+        const { isLeadInServiceRadius } = await import('@/lib/zip-geocode')
+
+        availableLeads = allOpenLeads.filter(lead =>
+          isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius)
+        ).slice(0, 20) // Limit to 20 leads
+      } else {
+        // No ZIP code set, show no leads
+        availableLeads = []
+      }
     } else {
       // Provider is not available right now - don't show any leads
       console.log(`[Dashboard] Provider ${provider.id} is not available at this time`)
