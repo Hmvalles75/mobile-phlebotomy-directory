@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
 
     if (!priceId) {
       return NextResponse.json(
-        { ok: false, error: 'Pricing not configured for this tier' },
-        { status: 500 }
+        { ok: false, error: 'Premium subscriptions are not yet available. Please check back soon or contact support.' },
+        { status: 503 }
       )
     }
 

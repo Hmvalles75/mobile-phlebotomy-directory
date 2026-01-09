@@ -400,7 +400,7 @@ function DashboardContent() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Settings className="text-blue-600" size={24} />
-                <h2 className="text-xl font-bold text-gray-900">Availability Settings</h2>
+                <h2 className="text-xl font-bold text-gray-900">Service Area Settings</h2>
               </div>
               <button
                 onClick={() => setShowSettings(!showSettings)}
@@ -412,7 +412,7 @@ function DashboardContent() {
             {!showSettings && (!operatingHoursStart || !operatingHoursEnd || !serviceRadiusMiles) && (
               <div className="mt-3 bg-yellow-100 border border-yellow-300 rounded-lg p-3">
                 <p className="text-sm text-yellow-900 font-semibold">
-                  ⚠️ Action Required: Configure your availability settings to see leads in your area
+                  ⚠️ Action Required: Configure your service area settings to see leads in your area
                 </p>
               </div>
             )}
@@ -531,7 +531,7 @@ function DashboardContent() {
                   ) : (
                     <>
                       <Save size={18} />
-                      Save Availability Settings
+                      Save Service Area Settings
                     </>
                   )}
                 </button>
@@ -574,7 +574,7 @@ function DashboardContent() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No leads available right now</h3>
               {(!operatingHoursStart || !operatingHoursEnd || !serviceRadiusMiles) ? (
                 <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
-                  <p className="text-yellow-900 font-semibold mb-2">⚠️ Availability Settings Required</p>
+                  <p className="text-yellow-900 font-semibold mb-2">⚠️ Service Area Settings Required</p>
                   <p className="text-sm text-yellow-800 mb-3">
                     You need to configure your operating hours and service radius to see available leads.
                   </p>
