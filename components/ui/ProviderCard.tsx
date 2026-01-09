@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
@@ -43,7 +44,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           {/* Verification Status Badge */}
           <div className="mb-2">
             {isVerified ? (
-              <img src="/images/PV_Badge.png" alt="Platform Verified" className="h-7 w-auto" />
+              <Image src="/images/PV_Badge.png" alt="Platform Verified" width={140} height={28} className="h-7 w-auto" />
             ) : (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500 bg-opacity-10 text-yellow-800 border border-yellow-600">
                 ⚠️ Unverified — Details may vary

@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers-db'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
@@ -177,7 +178,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 {/* Verified/Unverified Status Badge */}
                 <div className="mb-3">
                   {isVerified ? (
-                    <img src="/images/PV_Badge.png" alt="Platform Verified" className="h-9 w-auto" />
+                    <Image src="/images/PV_Badge.png" alt="Platform Verified" width={180} height={36} className="h-9 w-auto" />
                   ) : (
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-yellow-500 bg-opacity-10 border border-yellow-600">
                       <span className="text-yellow-800 font-semibold text-sm">⚠️ Unverified Listing</span>
