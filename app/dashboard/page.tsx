@@ -281,7 +281,8 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Payment Setup Banner - Show if no payment method */}
+      {/* Payment Setup Banner - DISABLED during beta (leads are free) */}
+      {/* Uncomment when pay-per-lead is activated:
       {!provider.stripePaymentMethodId && (
         <div className="bg-yellow-500 text-white px-4 py-3">
           <div className="container mx-auto flex items-center justify-between">
@@ -300,6 +301,7 @@ function DashboardContent() {
           </div>
         </div>
       )}
+      */}
 
       {/* Dashboard Active Banner */}
       <div className="bg-primary-600 text-white px-4 py-3">
