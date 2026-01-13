@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminSession, verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/lib/pending-submissions'
 import { prisma } from '@/lib/prisma'
+import { emailProviderApproved } from '@/lib/providerEmails'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -219,6 +220,21 @@ export async function POST(
       await updateSubmissionStatus(id, 'approved')
 
       console.log(`✅ Provider ${result.provider.name} added to database with ID ${result.provider.id}`)
+
+      // Send welcome email to the provider
+      if (submission.email) {
+        try {
+          await emailProviderApproved(
+            submission.email,
+            submission.businessName,
+            submission.contactName
+          )
+          console.log(`📧 Welcome email sent to ${submission.email}`)
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError)
+          // Don't fail the entire approval if email fails
+        }
+      }
 
       const message = result.duplicatesRemoved > 0
         ? `Provider approved and added to directory! (Removed ${result.duplicatesRemoved} duplicate scraped listing${result.duplicatesRemoved > 1 ? 's' : ''})`

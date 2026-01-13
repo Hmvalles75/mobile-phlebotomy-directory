@@ -125,6 +125,8 @@ Contact this patient ASAP to schedule their appointment.
 View dashboard:
 ${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard
 
+📬 Note: Check your spam/junk folder if you don't see our emails. Mark as "Not Spam" to receive all lead notifications.
+
 — MobilePhlebotomy.org`
   )
 }
@@ -139,5 +141,35 @@ Top up now to continue receiving leads:
 ${dashboardUrl}
 
 — MobilePhlebotomy.org`
+  )
+}
+
+export async function emailProviderApproved(to: string, businessName: string, contactName: string) {
+  // Extract first name from contact name (e.g., "John Doe" -> "John")
+  const firstName = contactName.split(' ')[0]
+
+  return send(
+    to,
+    'Your MobilePhlebotomy.org listing is live',
+    `Hi ${firstName},
+
+Thanks for submitting ${businessName} to MobilePhlebotomy.org — your listing has been approved and is now live in the directory.
+
+At this stage, there's nothing you need to do. Your business is visible to patients searching in your area.
+
+If you'd like to access the optional provider dashboard (to review requests, manage coverage, or receive notifications), you'll first need to complete onboarding here:
+👉 https://www.mobilephlebotomy.org/onboard
+
+Once onboarding is complete, you'll be able to access your dashboard using a secure magic link.
+
+Email notifications for patient requests are currently limited to a small group of featured providers while we refine routing and volume.
+
+If anything needs updating on your listing, feel free to reply to this email.
+
+📬 Note: Our emails may land in your spam/junk folder initially. Please mark us as "Not Spam" to ensure you receive future updates.
+
+Best,
+Hector
+MobilePhlebotomy.org`
   )
 }
