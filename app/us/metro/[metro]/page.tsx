@@ -11,6 +11,7 @@ import { ProviderListSchema, ProviderSchema } from '@/components/seo/ProviderSch
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { SimpleAccordion } from '@/components/ui/Accordion'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 
 interface MetroPageProps {
   params: {
@@ -109,6 +110,35 @@ export default function MetroPage({ params }: MetroPageProps) {
   }
 
   const displayedProviders = showAllProviders ? filteredProviders : filteredProviders.slice(0, 10)
+
+  // Categorize providers by monetization tier
+  const categorizedProviders = {
+    featured: [] as Provider[],
+    premium: [] as Provider[],
+    basic: [] as Provider[]
+  }
+
+  filteredProviders.forEach(provider => {
+    // @ts-ignore - listingTier exists in database but may not be in type yet
+    const tier = provider.listingTier || 'BASIC'
+    // @ts-ignore - isFeaturedCity exists in database
+    const isFeaturedCity = provider.isFeaturedCity || false
+    // @ts-ignore - isFeatured exists in database (pilot - visibility only)
+    const isFeatured = provider.isFeatured || false
+
+    if (tier === 'FEATURED' || isFeaturedCity || isFeatured) {
+      categorizedProviders.featured.push(provider)
+    } else if (tier === 'PREMIUM') {
+      categorizedProviders.premium.push(provider)
+    } else {
+      categorizedProviders.basic.push(provider)
+    }
+  })
+
+  // Sort all sections alphabetically
+  categorizedProviders.featured.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.premium.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.basic.sort((a, b) => a.name.localeCompare(b.name))
 
   // Generate comprehensive schema markup
   const providerListSchema = generateProviderListSchema(
@@ -340,6 +370,169 @@ export default function MetroPage({ params }: MetroPageProps) {
             </section>
           </SimpleAccordion>
         </div>
+
+        {/* Featured Providers - Top of Page */}
+        {!loading && categorizedProviders.featured.length > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-lg shadow-lg border-2 border-amber-300">
+              <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 p-6 border-b border-amber-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                    <span className="text-2xl">⭐</span>
+                    Featured Providers in {metro.city}
+                  </h2>
+                  <Link
+                    href="/pricing"
+                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium shadow-sm"
+                  >
+                    View Pricing
+                  </Link>
+                </div>
+                <p className="text-gray-700 font-medium">
+                  Premium providers with verified credentials and enhanced visibility
+                </p>
+              </div>
+              <div className="divide-y divide-gray-200">
+                {categorizedProviders.featured.map((provider) => {
+                  const isVerified = isProviderRegistered(provider.id)
+
+                  return (
+                  <div key={provider.id} className={`p-8 bg-gradient-to-r from-amber-50/40 to-transparent hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                    {/* Provider Header */}
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3 flex-wrap">
+                          <h3 className="text-3xl font-bold text-gray-900">
+                            {provider.name}
+                          </h3>
+                          {/* Featured Badge */}
+                          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md">
+                            ⭐ Featured Provider
+                          </span>
+                        </div>
+
+                        {/* Badges Row */}
+                        <div className="flex items-center gap-2 mb-4 flex-wrap">
+                          {(provider as any).is_nationwide === 'Yes' && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 text-white">
+                              🌎 Nationwide Service
+                            </span>
+                          )}
+                          {isVerified && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                              ✓ Platform Verified
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    {provider.description && (
+                      <div className="mb-6 p-4 bg-white/60 rounded-lg border border-gray-200">
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {provider.description}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid md:grid-cols-2 gap-6 mb-6">
+                      {/* Left Column - Contact & Coverage */}
+                      <div className="space-y-4">
+                        {/* Contact Information */}
+                        <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
+                          <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
+                          <div className="space-y-2 text-sm">
+                            {provider.phone && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-primary-600">📞</span>
+                                <span className="font-medium text-gray-900">{provider.phone}</span>
+                              </div>
+                            )}
+                            {provider.address?.city && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-primary-600">📍</span>
+                                <span className="text-gray-700">Based in {provider.address.city}, {provider.address.state}</span>
+                              </div>
+                            )}
+                            {provider.website && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-primary-600">🌐</span>
+                                <a
+                                  href={provider.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer nofollow"
+                                  className="text-primary-600 hover:text-primary-700 font-medium underline"
+                                >
+                                  Visit Website
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Coverage Area */}
+                        <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
+                          <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Service Coverage</h4>
+                          <p className="text-gray-700 text-sm">
+                            {formatCoverageDisplay(provider.coverage)}
+                          </p>
+                        </div>
+
+                        {/* Rating */}
+                        {provider.rating && (
+                          <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
+                            <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Rating</h4>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center">
+                                <span className="text-yellow-400 text-xl">★</span>
+                                <span className="text-xl font-bold text-gray-900 ml-1">
+                                  {provider.rating}
+                                </span>
+                              </div>
+                              {provider.reviewsCount && (
+                                <span className="text-sm text-gray-600">
+                                  ({provider.reviewsCount} reviews)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Column - Services */}
+                      <div>
+                        <div className="bg-white/60 p-4 rounded-lg border border-gray-200 h-full">
+                          <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Services Offered</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {provider.services.map((service) => (
+                              <span
+                                key={service}
+                                className="bg-gradient-to-r from-primary-100 to-primary-200 text-primary-900 text-xs font-medium px-3 py-1.5 rounded-full border border-primary-300"
+                              >
+                                {service}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-4 border-t border-gray-200">
+                      <ProviderActions
+                        provider={provider}
+                        currentLocation={metro.city}
+                        className="justify-start"
+                      />
+                    </div>
+                  </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Providers Section */}
