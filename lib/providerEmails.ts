@@ -173,3 +173,83 @@ Hector
 MobilePhlebotomy.org`
   )
 }
+
+export async function emailFeaturedProviderWelcome(to: string, providerName: string, contactName: string, metros: string[]) {
+  // Extract first name from contact name
+  const firstName = contactName.split(' ')[0]
+
+  // Format metro list
+  const metroList = metros.length > 0
+    ? metros.map(m => `  • ${m}`).join('\n')
+    : '  • Your coverage area'
+
+  return send(
+    to,
+    'Welcome to Featured Provider Status',
+    `Hi ${firstName},
+
+Great news! ${providerName} has been upgraded to Featured Provider status on MobilePhlebotomy.org.
+
+🌟 WHAT THIS MEANS FOR YOU:
+
+Premium Placement
+  ✓ Featured section at the top of all your coverage pages
+  ✓ Displayed above non-featured providers
+  ✓ Eye-catching "Featured Provider" badge
+  ✓ Professional logo and profile image display
+
+Real-Time Lead Notifications
+  ✓ Instant email alerts when patients submit requests in your area
+  ✓ Get patient contact info immediately (name, phone, location)
+  ✓ First-mover advantage to contact patients quickly
+  ✓ All leads are FREE during our beta period
+
+Enhanced Visibility
+  ✓ Prominent display on metro and state pages
+  ✓ Increased patient exposure and inquiries
+  ✓ Professional presentation with verified badge
+
+📍 YOUR FEATURED COVERAGE:
+${metroList}
+
+📧 LEAD NOTIFICATIONS:
+We'll send you email notifications for all patient requests in your service area. Make sure to:
+  • Check your spam folder and mark us as "Not Spam"
+  • Monitor ${to} regularly for new leads
+  • Respond quickly to maximize conversions
+
+🎯 BETA PRICING:
+During our beta phase, all patient leads are completely FREE. There are no charges for:
+  • Lead notifications
+  • Patient contact information
+  • Featured placement
+  • Premium visibility
+
+We're working with a small group of featured providers to refine our lead routing and volume before expanding the program.
+
+💡 NEXT STEPS:
+1. Start receiving lead notifications (already active!)
+2. Respond quickly when you receive patient requests
+3. Provide excellent service to build your reputation
+
+📊 OPTIONAL - PROVIDER DASHBOARD:
+If you'd like to access the optional provider dashboard, complete onboarding here:
+👉 https://www.mobilephlebotomy.org/onboard
+
+The dashboard allows you to:
+  • View your lead history
+  • Manage your coverage areas
+  • Update your profile information
+
+Questions or need help? Just reply to this email.
+
+Thanks for being an early Featured Provider!
+
+Best,
+Hector
+MobilePhlebotomy.org
+
+---
+📬 Note: Lead notifications may land in your spam folder initially. Please mark as "Not Spam" to receive all patient requests.`
+  )
+}
