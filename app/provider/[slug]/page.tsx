@@ -87,9 +87,21 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   // Only show certifications for verified providers who have uploaded proof
   const certifications: string[] = []
 
-  // Parse languages (cleaned data defaults to 'English')
-  const languages = (provider.languages && provider.languages !== 'nan' && provider.languages !== '') ?
-    provider.languages.split(',').map(l => l.trim()).filter(Boolean) : ['English']
+  // Parse languages from description field if available
+  const extractLanguagesFromDescription = (description: string | null | undefined): string[] => {
+    if (!description) return ['English']
+    const match = description.match(/\*\*Languages Spoken:\*\*\s*\n([^\n]+)/)
+    if (match) {
+      return match[1].split(',').map(l => l.trim()).filter(Boolean)
+    }
+    return ['English']
+  }
+
+  // Parse languages (try description first, then fallback to provider.languages field)
+  const languages = provider.description ?
+    extractLanguagesFromDescription(provider.description) :
+    ((provider.languages && provider.languages !== 'nan' && provider.languages !== '') ?
+      provider.languages.split(',').map(l => l.trim()).filter(Boolean) : ['English'])
 
   // Parse business images
   const businessImages = (provider.businessImages && provider.businessImages !== 'nan' && provider.businessImages !== '') ?
@@ -279,15 +291,79 @@ export default async function ProviderDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Main Info */}
             <div className="lg:col-span-2 space-y-8">
-              {/* About Section */}
-              {(provider.bio || provider.validation_notes) && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About {provider.name}</h2>
-                  <div className="prose max-w-none text-gray-600">
-                    <p>{provider.bio || provider.validation_notes}</p>
-                  </div>
-                </div>
-              )}
+              {/* Parse and display structured description */}
+              {(() => {
+                const description = provider.description || provider.bio || provider.validation_notes
+                if (!description) return null
+
+                // Extract service locations
+                const locationsMatch = description.match(/\*\*Service Locations:\*\*\s*\n((?:📍[^\n]+\n(?:[^\n*]+\n?)+)+)/)
+                const primaryContactMatch = description.match(/\*\*Primary Contact:\*\*\s*([^\n]+)/)
+                const comprehensiveServicesMatch = description.match(/\*\*Comprehensive Services:\*\*\s*\n([^\n]+)/)
+
+                return (
+                  <>
+                    {/* About/Intro Section */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-4">About {provider.name}</h2>
+                      <div className="prose max-w-none text-gray-600">
+                        <p>{description.split('\n\n')[0].replace(/\*\*/g, '')}</p>
+                        {primaryContactMatch && (
+                          <p className="mt-3 text-sm">
+                            <strong>Primary Contact:</strong> {primaryContactMatch[1]}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Service Locations Card */}
+                    {locationsMatch && (
+                      <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Office Locations</h2>
+                        <div className="space-y-6">
+                          {(() => {
+                            const locationBlocks = locationsMatch[1].split(/(?=📍)/).filter(Boolean)
+                            return locationBlocks.map((block, idx) => {
+                              const lines = block.trim().split('\n').filter(Boolean)
+                              const locationName = lines[0].replace('📍', '').trim().replace(':', '')
+                              const address = lines.find(l => l.match(/^\d+/))
+                              const hours = lines.find(l => l.toLowerCase().includes('hours:'))
+
+                              return (
+                                <div key={idx} className="border-l-4 border-primary-500 pl-4">
+                                  <h3 className="font-semibold text-gray-900 text-lg mb-2">{locationName}</h3>
+                                  {address && (
+                                    <p className="text-gray-600 mb-1">
+                                      <span className="mr-2">📍</span>
+                                      {address.trim()}
+                                    </p>
+                                  )}
+                                  {hours && (
+                                    <p className="text-gray-600">
+                                      <span className="mr-2">🕒</span>
+                                      {hours.replace('Hours:', '').trim()}
+                                    </p>
+                                  )}
+                                </div>
+                              )
+                            })
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Comprehensive Services from Description */}
+                    {comprehensiveServicesMatch && (
+                      <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">All Services</h2>
+                        <div className="text-gray-600">
+                          <p className="leading-relaxed">{comprehensiveServicesMatch[1]}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
 
               {/* Services Section */}
               {provider.services && provider.services.length > 0 && (
@@ -333,33 +409,35 @@ export default async function ProviderDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Service Area</h2>
                 <div className="space-y-3">
-                  <p className="text-gray-600">
-                    <strong>Coverage:</strong> {provider['regions serviced'] || provider.verified_service_areas || formatCoverageDisplay(provider.coverage)}
-                  </p>
-                  {provider.zipCodes && (
-                    <div>
-                      <strong className="text-gray-900">ZIP Codes Served:</strong>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {(() => {
-                          // Handle malformed zip codes
-                          const zipString = String(provider.zipCodes)
-                          // Check if it's a valid format (5 digits or comma-separated 5-digit codes)
-                          const validZipPattern = /^\d{5}(,\s*\d{5})*$/
-
-                          if (validZipPattern.test(zipString.replace(/\s/g, ''))) {
-                            return zipString.split(',').map(zip => (
-                              <span key={zip} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                                {zip.trim()}
-                              </span>
-                            ))
-                          } else {
-                            // Don't display invalid zip codes
-                            return null
-                          }
-                        })()}
-                      </div>
-                    </div>
-                  )}
+                  {/* Show coverage description from description field or fallback */}
+                  {(() => {
+                    // Extract coverage from description if available
+                    if (provider.description) {
+                      const coverageMatch = provider.description.match(/\*\*Coverage Area:\*\*\s*\n((?:•[^\n]+\n?)+)/)
+                      if (coverageMatch) {
+                        const coverageLines = coverageMatch[1].split('\n').filter(line => line.trim())
+                        return (
+                          <div className="text-gray-600">
+                            <strong className="text-gray-900">Coverage:</strong>
+                            <ul className="list-none mt-2 space-y-1">
+                              {coverageLines.map((line, idx) => (
+                                <li key={idx} className="flex items-start">
+                                  <span className="mr-2">📍</span>
+                                  <span>{line.replace('•', '').trim()}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )
+                      }
+                    }
+                    // Fallback to existing fields
+                    return (
+                      <p className="text-gray-600">
+                        <strong>Coverage:</strong> {provider['regions serviced'] || provider.verified_service_areas || formatCoverageDisplay(provider.coverage)}
+                      </p>
+                    )
+                  })()}
                 </div>
               </div>
 
@@ -503,20 +581,6 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                             <strong>Insurance:</strong> {provider.insuranceAmount}
                           </p>
                         )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Languages */}
-                  {languages.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Languages</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {languages.map((lang, index) => (
-                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                            {lang}
-                          </span>
-                        ))}
                       </div>
                     </div>
                   )}
