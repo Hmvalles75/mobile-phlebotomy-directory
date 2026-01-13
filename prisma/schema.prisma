@@ -57,6 +57,10 @@ model Provider {
   logo             String?  // Company logo path
   profileImage     String?  // Business/office photo path
 
+  // Email Notifications (Phase 1 - Featured providers only)
+  notificationEmail  String?  // Override email for lead notifications (defaults to claimEmail or email)
+  notifyEnabled      Boolean @default(true)  // Allow providers to opt-out of email notifications
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -72,6 +76,7 @@ model Provider {
   callLogs     CallLog[]
   corrections  ProviderCorrection[]
   correctionsQueue ProviderCorrections[] @relation("corrections_queue")
+  leadNotifications LeadNotification[]
 
   @@map("providers")
 }
@@ -108,6 +113,7 @@ model Lead {
   status        LeadStatus @default(NEW)
 
   provider      Provider? @relation(fields: [routedToId], references: [id])
+  leadNotifications LeadNotification[]
 
   @@map("leads")
 }
@@ -453,4 +459,30 @@ enum TrialStatus {
   NONE      // No trial (new provider)
   ACTIVE    // Trial active (0-30 days)
   EXPIRED   // Trial expired (>30 days)
+}
+
+// Lead Email Notifications (Phase 1 - Featured providers only)
+model LeadNotification {
+  id            String   @id @default(cuid())
+  leadId        String
+  providerId    String
+  channel       String   @default("email")  // "email" for Phase 1
+  status        NotificationStatus @default(QUEUED)
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  sentAt        DateTime?
+
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  provider      Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([providerId])
+  @@map("lead_notifications")
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
 }

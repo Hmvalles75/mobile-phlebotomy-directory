@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead } from '@/lib/notifyProvider'
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
+import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
     })
 
     console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}`)
+
+    // Send email notifications to featured providers (Phase 1)
+    // Runs async and doesn't block the response
+    notifyFeaturedProvidersForLead(lead.id).catch(err => {
+      console.error('Featured provider email notifications failed:', err)
+    })
 
     // Send SMS blast to all eligible providers in the area (Race to Claim)
     // Runs async and doesn't block the response
