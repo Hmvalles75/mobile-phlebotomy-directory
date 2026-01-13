@@ -52,7 +52,10 @@
       "Bash(find:*)",
       "Bash(nul)",
       "Bash(powershell -Command \"(Get-Content ''C:\\Users\\hmval\\OneDrive\\Desktop\\MobilePhlebotomy\\app\\dashboard\\page.tsx'' | Measure-Object -Line).Lines\")",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(powershell -Command \"curl -H ''Authorization: Bearer JdArKl@!1927'' http://localhost:3000/api/admin/activity | ConvertFrom-Json | Select-Object -First 1\")",
+      "Bash(NUL)",
+      "Bash(powershell -Command \"if (Test-Path nul) { Remove-Item nul -Force }\")"
     ],
     "deny": [],
     "ask": []

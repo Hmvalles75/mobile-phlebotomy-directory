@@ -53,6 +53,10 @@ model Provider {
   serviceZipCodes  String?  // JSON array of paid ZIP codes
   affiliateLink    String?  // Speedy Sticks or other affiliate URL
 
+  // Images
+  logo             String?  // Company logo path
+  profileImage     String?  // Business/office photo path
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

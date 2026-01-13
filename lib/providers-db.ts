@@ -51,6 +51,9 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     listingTier: provider.listingTier,
     isFeatured: provider.isFeatured || false,
     isFeaturedCity: provider.isFeaturedCity || false,
+    // Images
+    logo: provider.logo,
+    profileImage: provider.profileImage,
 
     createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()

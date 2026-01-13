@@ -69,6 +69,8 @@ export const ProviderSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   reviewsCount: z.number().min(0).optional(),
   badges: z.array(BadgeSchema).optional(),
+  logo: z.string().optional(),
+  profileImage: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string()
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -301,9 +302,9 @@ export default function MetroPage({ params }: MetroPageProps) {
 
           <SimpleAccordion
             summary={`Read the full guide to mobile phlebotomy in ${metro.city}`}
-            defaultOpen={true}
+            defaultOpen={false}
           >
-            <section className="space-y-4">
+            <section className="space-y-3">
               <h2 className="text-xl font-semibold text-gray-900">
                 How at-home blood draws work in {metro.city}
               </h2>
@@ -318,7 +319,7 @@ export default function MetroPage({ params }: MetroPageProps) {
               </ul>
             </section>
 
-            <section className="space-y-4 mt-6">
+            <section className="space-y-3 mt-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Typical mobile phlebotomy costs in {metro.city}
               </h2>
@@ -333,7 +334,7 @@ export default function MetroPage({ params }: MetroPageProps) {
               </p>
             </section>
 
-            <section className="space-y-4 mt-6">
+            <section className="space-y-3 mt-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Insurance and medical orders in {metro.city}
               </h2>
@@ -350,7 +351,7 @@ export default function MetroPage({ params }: MetroPageProps) {
               </p>
             </section>
 
-            <section className="space-y-4 mt-6">
+            <section className="space-y-3 mt-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Who benefits from mobile phlebotomy in {metro.city}
               </h2>
@@ -375,18 +376,12 @@ export default function MetroPage({ params }: MetroPageProps) {
         {!loading && categorizedProviders.featured.length > 0 && (
           <div className="mb-8">
             <div className="bg-white rounded-lg shadow-lg border-2 border-amber-300">
-              <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 p-6 border-b border-amber-200">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 p-4 border-b border-amber-200">
+                <div className="flex items-center mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     <span className="text-2xl">⭐</span>
                     Featured Providers in {metro.city}
                   </h2>
-                  <Link
-                    href="/pricing"
-                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium shadow-sm"
-                  >
-                    View Pricing
-                  </Link>
                 </div>
                 <p className="text-gray-700 font-medium">
                   Premium providers with verified credentials and enhanced visibility
@@ -397,10 +392,22 @@ export default function MetroPage({ params }: MetroPageProps) {
                   const isVerified = isProviderRegistered(provider.id)
 
                   return (
-                  <div key={provider.id} className={`p-8 bg-gradient-to-r from-amber-50/40 to-transparent hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                  <div key={provider.id} className={`p-5 bg-gradient-to-r from-amber-50/40 to-transparent hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
                     {/* Provider Header */}
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex-1">
+                      {/* Logo */}
+                      {provider.logo && (
+                        <div className="flex-shrink-0 mr-6">
+                          <Image
+                            src={provider.logo}
+                            alt={`${provider.name} logo`}
+                            width={80}
+                            height={80}
+                            className="rounded-lg shadow-md object-contain bg-white p-2"
+                          />
+                        </div>
+                      )}
                         <div className="flex items-center gap-3 mb-3 flex-wrap">
                           <h3 className="text-3xl font-bold text-gray-900">
                             {provider.name}
@@ -429,16 +436,16 @@ export default function MetroPage({ params }: MetroPageProps) {
 
                     {/* Description */}
                     {provider.description && (
-                      <div className="mb-6 p-4 bg-white/60 rounded-lg border border-gray-200">
+                      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-gray-200">
                         <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                           {provider.description}
                         </p>
                       </div>
                     )}
 
-                    <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
                       {/* Left Column - Contact & Coverage */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {/* Contact Information */}
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
                           <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
@@ -501,7 +508,19 @@ export default function MetroPage({ params }: MetroPageProps) {
                       </div>
 
                       {/* Right Column - Services */}
-                      <div>
+                      <div className="space-y-3">
+                        {/* Profile Image */}
+                        {provider.profileImage && (
+                          <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
+                            <Image
+                              src={provider.profileImage}
+                              alt={`${provider.name} office`}
+                              width={400}
+                              height={300}
+                              className="rounded-lg w-full h-auto object-cover"
+                            />
+                          </div>
+                        )}
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200 h-full">
                           <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Services Offered</h4>
                           <div className="flex flex-wrap gap-2">
@@ -771,7 +790,7 @@ export default function MetroPage({ params }: MetroPageProps) {
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   Frequently Asked Questions
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
                     <h4 className="font-medium text-gray-900 mb-1">
                       How much does mobile phlebotomy cost in {metro.city}?
@@ -839,7 +858,7 @@ export default function MetroPage({ params }: MetroPageProps) {
             About Mobile Phlebotomy in {metro.city}, {metro.state}
           </h2>
 
-          <div className="prose max-w-none text-gray-600 space-y-4">
+          <div className="prose max-w-none text-gray-600 space-y-3">
             <p>
               {metro.city} residents have access to {providers.length} professional mobile phlebotomy providers
               offering convenient at-home blood draw services throughout the metro area. Whether you live in
