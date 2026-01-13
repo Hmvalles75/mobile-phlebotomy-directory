@@ -29,15 +29,29 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
       regions: []
     },
 
-    // Get primary location from first city coverage
-    city: provider.coverage?.find((c: any) => c.cityId)?.city?.name,
-    state: provider.coverage?.find((c: any) => c.stateId)?.state?.abbr,
+    // Get primary location from first city coverage or provider address
+    city: provider.address?.city || provider.coverage?.find((c: any) => c.cityId)?.city?.name,
+    state: provider.address?.state || provider.coverage?.find((c: any) => c.stateId)?.state?.abbr,
+
+    // Include address if available
+    address: provider.address ? {
+      street: provider.address.street || undefined,
+      city: provider.address.city || undefined,
+      state: provider.address.state || undefined,
+      zip: provider.address.zip || undefined
+    } : undefined,
 
     services: [],
     availability: [],
     payment: [],
     badges: provider.status === 'VERIFIED' ? ['Verified'] : [],
     featured: provider.listingTier === 'FEATURED',
+
+    // Add monetization fields (pilot - visibility only)
+    listingTier: provider.listingTier,
+    isFeatured: provider.isFeatured || false,
+    isFeaturedCity: provider.isFeaturedCity || false,
+
     createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()
   }
@@ -52,7 +66,8 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
             state: true,
             city: true
           }
-        }
+        },
+        address: true
       },
       orderBy: {
         createdAt: 'desc'
@@ -76,7 +91,8 @@ export async function getProviderBySlug(slug: string): Promise<EnrichedProvider 
             state: true,
             city: true
           }
-        }
+        },
+        address: true
       }
     })
 

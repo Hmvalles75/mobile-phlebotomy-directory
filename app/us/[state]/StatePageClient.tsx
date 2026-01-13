@@ -140,8 +140,10 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
     const tier = provider.listingTier || 'BASIC'
     // @ts-ignore - isFeaturedCity exists in database
     const isFeaturedCity = provider.isFeaturedCity || false
+    // @ts-ignore - isFeatured exists in database (pilot - visibility only)
+    const isFeatured = provider.isFeatured || false
 
-    if (tier === 'FEATURED' || isFeaturedCity) {
+    if (tier === 'FEATURED' || isFeaturedCity || isFeatured) {
       categorizedProviders.featured.push(provider)
     } else if (tier === 'PREMIUM') {
       categorizedProviders.premium.push(provider)

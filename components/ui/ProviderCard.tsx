@@ -54,6 +54,12 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
 
           {/* Additional Badges */}
           <div className="flex items-center gap-2 mb-2 flex-wrap">
+            {/* Featured Provider Badge (Pilot - Visibility Only) */}
+            {(provider as any).isFeatured && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-300">
+                ⭐ Featured Provider
+              </span>
+            )}
             {/* Nationwide/Multi-State Badge */}
             {(provider as any).is_nationwide === 'Yes' && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">

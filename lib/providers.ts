@@ -62,6 +62,10 @@ export interface EnrichedProvider {
   badges?: string[]
   bookingUrl?: string
   featured?: boolean
+  // Monetization fields (pilot - visibility only)
+  listingTier?: string
+  isFeatured?: boolean
+  isFeaturedCity?: boolean
   createdAt: string
   updatedAt: string
 }
