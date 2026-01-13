@@ -20,7 +20,7 @@ export function ListingTierBadge({ tier, isFeaturedCity }: ListingTierBadgeProps
   if (tier === 'PREMIUM') {
     return (
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 border border-primary-300">
-        PREMIUM
+        ✓ Premium Partner
       </span>
     )
   }
