@@ -376,6 +376,137 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
           </SimpleAccordion>
         </div>
 
+        {/* Featured Providers - Top of Page */}
+        {!loading && categorizedProviders.featured.length > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-lg shadow-md border-2 border-amber-200">
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 border-b border-amber-100">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                    <span className="text-amber-500">⭐</span>
+                    Featured Providers in {stateName}
+                  </h2>
+                  <Link
+                    href="/pricing"
+                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                  >
+                    View Pricing
+                  </Link>
+                </div>
+                <p className="text-gray-600">
+                  Premium providers with verified credentials and enhanced visibility
+                </p>
+              </div>
+              <div className="divide-y divide-gray-200">
+                {categorizedProviders.featured.map((provider) => {
+                  const isVerified = isProviderRegistered(provider.id)
+
+                  return (
+                  <div key={provider.id} className={`p-6 bg-gradient-to-r from-amber-50/30 to-transparent ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="text-2xl font-semibold text-gray-900">
+                            {provider.name}
+                          </h3>
+                          {/* Featured Badge */}
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-300">
+                            ⭐ Featured Provider
+                          </span>
+                          {/* Nationwide/Multi-State Badge */}
+                          {(provider as any).is_nationwide === 'Yes' && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                              🌎 Nationwide Service
+                            </span>
+                          )}
+                        </div>
+                        {provider.description && (
+                          <p className="text-gray-600 mb-3">
+                            {provider.description}
+                          </p>
+                        )}
+
+                        {/* Coverage Area */}
+                        <div className="mb-3">
+                          <span className="text-sm font-medium text-gray-700">Coverage: </span>
+                          <span className="text-sm text-gray-600">
+                            {formatCoverageDisplay(provider.coverage)}
+                          </span>
+                        </div>
+
+                        {/* Services */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {provider.services.slice(0, 5).map((service) => (
+                            <span
+                              key={service}
+                              className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full"
+                            >
+                              {service}
+                            </span>
+                          ))}
+                          {provider.services.length > 5 && (
+                            <span className="text-xs text-gray-500">
+                              +{provider.services.length - 5} more
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Rating & Reviews */}
+                        {provider.rating && (
+                          <div className="flex items-center space-x-2 mb-3">
+                            <div className="flex items-center">
+                              <span className="text-yellow-400">★</span>
+                              <span className="text-sm font-medium text-gray-900 ml-1">
+                                {provider.rating}
+                              </span>
+                            </div>
+                            {provider.reviewsCount && (
+                              <span className="text-sm text-gray-600">
+                                ({provider.reviewsCount} reviews)
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Contact Info */}
+                        <div className="text-sm text-gray-600 space-y-1">
+                          {provider.phone && (
+                            <div>📞 {provider.phone}</div>
+                          )}
+                          {provider.address?.city && (
+                            <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
+                          )}
+                          {provider.website && (
+                            <div>
+                              🌐{' '}
+                              <a
+                                href={provider.website}
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                                className="text-gray-600 hover:text-primary-600 underline text-xs"
+                              >
+                                Website
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <ProviderActions
+                      provider={provider}
+                      currentLocation={stateName}
+                      className="justify-start"
+                    />
+                  </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content - Provider Listings */}
           <div className="lg:col-span-3">
@@ -484,136 +615,6 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                 </div>
               ) : (
                 <>
-                  {/* Featured Providers Section */}
-                  {categorizedProviders.featured.length > 0 && (
-                    <div className="border-b border-gray-200">
-                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 border-b border-amber-100">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <span className="text-amber-500">⭐</span>
-                            Featured Providers
-                          </h3>
-                          <Link
-                            href="/pricing"
-                            className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
-                          >
-                            View Pricing
-                          </Link>
-                        </div>
-                        <p className="text-gray-600 text-sm">
-                          Premium providers with verified credentials and enhanced visibility
-                        </p>
-                      </div>
-                      <div className="divide-y divide-gray-200">
-                        {categorizedProviders.featured.map((provider) => {
-                          const isVerified = isProviderRegistered(provider.id)
-
-                          return (
-                          <div key={provider.id} className={`p-6 bg-gradient-to-r from-amber-50/30 to-transparent ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                  <h3 className="text-xl font-semibold text-gray-900">
-                                    {provider.name}
-                                  </h3>
-                                  {/* Nationwide/Multi-State Badge */}
-                                  {(provider as any).is_nationwide === 'Yes' && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                      🌎 Nationwide Service
-                                    </span>
-                                  )}
-                                  {/* Monetization Tier Badge */}
-                                  <ListingTierBadge
-                                    tier={(provider as any).listingTier || 'BASIC'}
-                                    isFeaturedCity={(provider as any).isFeaturedCity || false}
-                                  />
-                                </div>
-                                {provider.description && (
-                                  <p className="text-gray-600 mb-3">
-                                    {provider.description}
-                                  </p>
-                                )}
-
-                                {/* Coverage Area */}
-                                <div className="mb-3">
-                                  <span className="text-sm font-medium text-gray-700">Coverage: </span>
-                                  <span className="text-sm text-gray-600">
-                                    {formatCoverageDisplay(provider.coverage)}
-                                  </span>
-                                </div>
-
-                                {/* Services */}
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                  {provider.services.slice(0, 3).map((service) => (
-                                    <span
-                                      key={service}
-                                      className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full"
-                                    >
-                                      {service}
-                                    </span>
-                                  ))}
-                                  {provider.services.length > 3 && (
-                                    <span className="text-xs text-gray-500">
-                                      +{provider.services.length - 3} more
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Rating & Reviews */}
-                                {provider.rating && (
-                                  <div className="flex items-center space-x-2 mb-3">
-                                    <div className="flex items-center">
-                                      <span className="text-yellow-400">★</span>
-                                      <span className="text-sm font-medium text-gray-900 ml-1">
-                                        {provider.rating}
-                                      </span>
-                                    </div>
-                                    {provider.reviewsCount && (
-                                      <span className="text-sm text-gray-600">
-                                        ({provider.reviewsCount} reviews)
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-
-                                {/* Contact Info */}
-                                <div className="text-sm text-gray-600 space-y-1">
-                                  {provider.phone && (
-                                    <div>📞 {provider.phone}</div>
-                                  )}
-                                  {provider.address?.city && (
-                                    <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
-                                  )}
-                                  {provider.website && (
-                                    <div>
-                                      🌐{' '}
-                                      <a
-                                        href={provider.website}
-                                        target="_blank"
-                                        rel="noopener noreferrer nofollow"
-                                        className="text-gray-600 hover:text-primary-600 underline text-xs"
-                                      >
-                                        Website
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <ProviderActions
-                              provider={provider}
-                              currentLocation={stateName}
-                              className="justify-start"
-                            />
-                          </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Premium Providers Section */}
                   {categorizedProviders.premium.length > 0 && (
                     <div className="border-b border-gray-200">
