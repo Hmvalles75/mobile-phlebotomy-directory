@@ -64,6 +64,30 @@ export default function AdminActivityPage() {
   const [data, setData] = useState<ActivityData | null>(null)
   const [activeTab, setActiveTab] = useState<'onboarded' | 'recent' | 'all' | 'claims'>('onboarded')
 
+  // Check for existing admin token on page load
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token')
+    if (token) {
+      setPassword(token)
+      // Try to authenticate with existing token
+      fetch('/api/admin/activity', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(result => {
+          if (result.ok) {
+            setIsAuthenticated(true)
+            setData(result)
+          }
+        })
+        .catch(err => {
+          console.error('Failed to authenticate with stored token:', err)
+        })
+    }
+  }, [])
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -81,6 +105,8 @@ export default function AdminActivityPage() {
       if (result.ok) {
         setIsAuthenticated(true)
         setData(result)
+        // Store token for future use
+        localStorage.setItem('admin_token', password)
       } else {
         setError('Invalid password')
       }
