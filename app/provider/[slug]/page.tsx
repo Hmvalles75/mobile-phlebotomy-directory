@@ -369,16 +369,34 @@ export default async function ProviderDetailPage({ params }: PageProps) {
               {provider.services && provider.services.length > 0 && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">Services Offered</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {provider.services.map((service) => (
-                      <span
-                        key={service}
-                        className="bg-gradient-to-r from-primary-100 to-primary-200 text-primary-900 text-sm font-medium px-4 py-2 rounded-full border border-primary-300"
-                      >
-                        {service}
-                      </span>
-                    ))}
-                  </div>
+
+                  {/* Extract detailed services list from description if available */}
+                  {provider.description?.includes('Our Services Include:') ? (
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {provider.description
+                        .split('Our Services Include:')[1]
+                        ?.split('\n')
+                        .filter(line => line.trim().startsWith('•'))
+                        .map((service, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 bg-gradient-to-r from-primary-50 to-transparent rounded-lg border border-primary-100">
+                            <span className="text-primary-600 text-lg mt-0.5">✓</span>
+                            <span className="text-gray-700">{service.replace('•', '').trim()}</span>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {provider.services.map((service) => (
+                        <span
+                          key={service}
+                          className="bg-gradient-to-r from-primary-100 to-primary-200 text-primary-900 text-sm font-medium px-4 py-2 rounded-full border border-primary-300"
+                        >
+                          {service}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {provider.specialties && (
                     <div className="mt-6">
                       <h3 className="font-semibold text-gray-900 mb-2">Specialties</h3>
