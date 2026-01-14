@@ -1,8 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Phone } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
+import { LeadFormModal } from '@/components/ui/LeadFormModal'
 
 interface StickyMobileCTAProps {
   cityNumber?: string
@@ -17,17 +18,19 @@ export function StickyMobileCTA({
   defaultState,
   defaultZip
 }: StickyMobileCTAProps) {
-  const router = useRouter()
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const handleRequestClick = () => {
-    ga4.mobileStickyCTAClick({ cta_type: 'request' })
+    ga4.leadCtaClick({ placement: 'sticky' })
     ga4.leadFormOpen({ city: defaultCity, state: defaultState, zip: defaultZip })
-    router.push('/coming-soon')
+    setLeadFormOpen(true)
   }
 
   const handleCallClick = () => {
-    ga4.mobileStickyCTAClick({ cta_type: 'call' })
-    ga4.callClick({ city: defaultCity, state: defaultState, zip: defaultZip })
+    ga4.providerCallClick({
+      phone: cityNumber || process.env.NEXT_PUBLIC_DEFAULT_PHONE,
+      source_page: 'sticky_cta'
+    })
 
     // Use city tracking number if available, otherwise use default
     const phoneNumber = cityNumber || process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-PHLEBOTOMY'
@@ -35,15 +38,25 @@ export function StickyMobileCTA({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg">
-      <div className="p-3">
-        <button
-          onClick={handleRequestClick}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition text-sm"
-        >
-          Request Blood Draw
-        </button>
+    <>
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg">
+        <div className="p-3">
+          <button
+            onClick={handleRequestClick}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition text-sm"
+          >
+            Request a Mobile Blood Draw
+          </button>
+        </div>
       </div>
-    </div>
+
+      <LeadFormModal
+        isOpen={leadFormOpen}
+        onClose={() => setLeadFormOpen(false)}
+        defaultCity={defaultCity || ''}
+        defaultState={defaultState || ''}
+        defaultZip={defaultZip || ''}
+      />
+    </>
   )
 }

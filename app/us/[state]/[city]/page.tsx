@@ -10,6 +10,7 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { getProviderBadge } from '@/lib/provider-tiers'
+import { ga4 } from '@/lib/ga4'
 
 // Use the standardized coverage display function
 function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
@@ -515,7 +516,7 @@ export default function CityPage({ params }: PageProps) {
                 Looking for Mobile Phlebotomy in {cityName}, {state}?
               </h1>
               <p className="text-xl text-primary-100 mb-6">
-                We don't have providers specifically listed for {cityName} yet, but we can still help you find mobile blood draw services in your area.
+                We don&apos;t have providers specifically listed for {cityName} yet, but we can still help you find mobile blood draw services in your area.
               </p>
             </div>
           </div>
@@ -527,22 +528,25 @@ export default function CityPage({ params }: PageProps) {
             <div className="bg-gradient-to-r from-blue-50 to-primary-50 rounded-xl p-8 shadow-lg border-2 border-primary-200">
               <div className="text-center mb-6">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Submit Your Request - We'll Match You Manually
+                  Submit Your Request - We&apos;ll Match You Manually
                 </h2>
                 <p className="text-lg text-gray-700 mb-2">
-                  Don't have providers listed in {cityName}? No problem.
+                  Don&apos;t have providers listed in {cityName}? No problem.
                 </p>
                 <p className="text-gray-600">
-                  Submit your request and we'll personally connect you with licensed mobile phlebotomists who serve your area.
+                  Submit your request and we&apos;ll personally connect you with licensed mobile phlebotomists who serve your area.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => setLeadFormOpen(true)}
+                  onClick={() => {
+                    ga4.leadCtaClick({ placement: 'not_found' })
+                    setLeadFormOpen(true)
+                  }}
                   className="px-8 py-4 bg-primary-600 text-white font-bold text-lg rounded-lg hover:bg-primary-700 transition-all shadow-md hover:shadow-xl transform hover:scale-105"
                 >
-                  📋 Request Service in {cityName}
+                  📋 Request a Mobile Blood Draw
                 </button>
               </div>
 

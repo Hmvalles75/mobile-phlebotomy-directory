@@ -12,6 +12,7 @@ import { handleCityNameSearch, handleStateNameSearch } from '@/lib/zip-geocoding
 import { StickyMobileCTA } from '@/components/ui/StickyMobileCTA'
 import { ga4 } from '@/lib/ga4'
 import { ZipCodeLeadForm } from '@/components/ZipCodeLeadForm'
+import { LeadFormModal } from '@/components/ui/LeadFormModal'
 
 const featuredMetros = topMetroAreas.slice(0, 12)
 
@@ -35,6 +36,7 @@ export default function HomePage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [providerCounts, setProviderCounts] = useState<Record<string, number>>({})
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return
@@ -355,12 +357,12 @@ export default function HomePage() {
           <div className="text-center">
             <button
               onClick={() => {
-                ga4.heroCTAClick({ cta_type: 'request' })
-                router.push('/coming-soon')
+                ga4.leadCtaClick({ placement: 'hero' })
+                setLeadFormOpen(true)
               }}
               className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
             >
-              Book Your At-Home Blood Draw Today
+              Request a Mobile Blood Draw
             </button>
             <p className="text-gray-600 text-sm mt-3">
               🏥 Licensed & insured professionals · Same-day appointments available
@@ -1161,6 +1163,15 @@ export default function HomePage() {
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
+
+      {/* Lead Form Modal */}
+      <LeadFormModal
+        isOpen={leadFormOpen}
+        onClose={() => setLeadFormOpen(false)}
+        defaultCity=""
+        defaultState=""
+        defaultZip=""
+      />
     </>
   )
 }

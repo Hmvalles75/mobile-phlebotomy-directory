@@ -35,12 +35,20 @@ export function LeadFormModal({
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [formStarted, setFormStarted] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+
+    // Track form start on first field interaction (once per session)
+    if (!formStarted && value.trim().length > 0) {
+      setFormStarted(true)
+      ga4.leadFormStart({ first_field: name })
+    }
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
@@ -105,8 +113,19 @@ export function LeadFormModal({
         throw new Error(data.error || 'Failed to submit request')
       }
 
-      // Track success
+      // Determine location_type from URL
+      let locationType: 'city' | 'metro' | 'state' | 'not_found' = 'city'
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname
+        if (path.includes('/metro/')) locationType = 'metro'
+        else if (path.match(/\/us\/[a-z]{2}$/)) locationType = 'state'
+        else if (!path.includes('/us/')) locationType = 'not_found'
+      }
+
+      // Track success with lead_id and location_type
       ga4.leadSubmitSuccess({
+        lead_id: data.leadId || data.id,
+        location_type: locationType,
         city: formData.city,
         state: formData.state,
         zip: formData.zip,
@@ -133,11 +152,19 @@ export function LeadFormModal({
             notes: ''
           })
           setSubmitted(false)
+          setFormStarted(false)
         }, 300)
       }, 3000)
     } catch (error: any) {
       console.error('Submit error:', error)
-      setSubmitError(error.message || 'Failed to submit request. Please try again.')
+      const errorMessage = error.message || 'Failed to submit request. Please try again.'
+      setSubmitError(errorMessage)
+
+      // Track error
+      ga4.leadSubmitError({
+        error_code: error.code || 'SUBMIT_FAILED',
+        error_message: errorMessage
+      })
     } finally {
       setLoading(false)
     }

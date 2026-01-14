@@ -4,6 +4,7 @@ import { ga4 } from '@/lib/ga4'
 
 interface ProviderWebsiteLinkProps {
   website: string
+  providerId?: string
   providerName: string
   providerCity?: string
   providerState?: string
@@ -14,20 +15,20 @@ interface ProviderWebsiteLinkProps {
 /**
  * Client component wrapper for provider website links with GA4 tracking
  *
- * Tracks 'provider_click' event with:
+ * Tracks 'provider_website_click' event with:
+ * - provider_id
  * - provider_name
- * - provider_city
- * - provider_state
- * - link_type: 'website'
- * - page_path: current page path
+ * - url
+ * - source_page (auto-detected from page_path)
  *
  * To verify in GA4:
  * 1. Go to GA4 Admin -> DebugView
  * 2. Click "Visit Website" link
- * 3. Confirm 'provider_click' event appears with all parameters
+ * 3. Confirm 'provider_website_click' event appears with all parameters
  */
 export function ProviderWebsiteLink({
   website,
+  providerId,
   providerName,
   providerCity,
   providerState,
@@ -35,11 +36,21 @@ export function ProviderWebsiteLink({
   children
 }: ProviderWebsiteLinkProps) {
   const handleClick = () => {
-    ga4.providerClick({
+    // Determine source_page from current URL
+    let sourcePage = 'unknown'
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname
+      if (path.includes('/provider/')) sourcePage = 'provider_detail'
+      else if (path.includes('/metro/')) sourcePage = 'metro'
+      else if (path.match(/\/us\/[a-z]{2}\/[a-z-]+/)) sourcePage = 'city'
+      else if (path.match(/\/us\/[a-z]{2}$/)) sourcePage = 'state'
+    }
+
+    ga4.providerWebsiteClick({
+      provider_id: providerId,
       provider_name: providerName,
-      provider_city: providerCity,
-      provider_state: providerState,
-      link_type: 'website'
+      url: website,
+      source_page: sourcePage
     })
   }
 

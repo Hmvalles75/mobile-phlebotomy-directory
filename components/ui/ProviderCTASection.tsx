@@ -29,12 +29,18 @@ export function ProviderCTASection({
   const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const handleRequestClick = () => {
+    ga4.leadCtaClick({ placement: 'provider_card' })
     ga4.leadFormOpen({ city, state, zip })
     setLeadFormOpen(true)
   }
 
   const handleCallClick = () => {
-    ga4.callClick({ city, state, zip, provider_status: isVerified ? 'verified' : 'unverified' })
+    ga4.providerCallClick({
+      provider_id: providerId,
+      provider_name: providerName,
+      phone: twilioNumber || phone,
+      source_page: 'provider_detail'
+    })
     const phoneNumber = twilioNumber || phone || process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-555-0100'
 
     // On mobile, open tel: link. On desktop, show phone number with copy option
@@ -72,7 +78,7 @@ export function ProviderCTASection({
             onClick={handleRequestClick}
             className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
           >
-            Request Blood Draw
+            Request a Mobile Blood Draw
           </button>
         </div>
 

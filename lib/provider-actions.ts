@@ -2,6 +2,7 @@
 import { type Provider } from './schemas'
 import { secureStorage } from './crypto'
 import { formatPhoneNumber } from './format-phone'
+import { ga4 } from './ga4'
 
 // Fallback function to copy text to clipboard for older browsers
 function copyToClipboardFallback(text: string) {
@@ -72,17 +73,35 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
     location: currentLocation
   }
 
+  // Determine source_page from current URL
+  let sourcePage = 'unknown'
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    if (path.includes('/provider/')) sourcePage = 'provider_detail'
+    else if (path.includes('/metro/')) sourcePage = 'metro'
+    else if (path.match(/\/us\/[a-z]{2}\/[a-z-]+/)) sourcePage = 'city'
+    else if (path.match(/\/us\/[a-z]{2}$/)) sourcePage = 'state'
+  }
+
   // Priority order: phone, email, website contact form, website
   if (provider.phone) {
     event.method = 'phone'
     trackProviderInteraction(event)
+
+    // Track with new granular GA4 event
+    ga4.providerCallClick({
+      provider_id: provider.id,
+      provider_name: provider.name,
+      phone: provider.phone,
+      source_page: sourcePage
+    })
 
     // Show phone number in a user-friendly way instead of using tel: link
     // which can cause "Pick an app" popups on Windows
     const phoneNumber = provider.phone
     const formattedPhone = formatPhoneNumber(phoneNumber)
     const message = `Call ${provider.name} at:\n\n${formattedPhone}\n\nClick OK to copy the phone number to your clipboard.`
-    
+
     if (confirm(message)) {
       // Copy phone number to clipboard
       if (navigator.clipboard && window.isSecureContext) {
@@ -98,11 +117,19 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
     }
     return true
   }
-  
+
   if (provider.email) {
     event.method = 'email'
     trackProviderInteraction(event)
-    
+
+    // Track with new granular GA4 event
+    ga4.providerEmailClick({
+      provider_id: provider.id,
+      provider_name: provider.name,
+      email: provider.email,
+      source_page: sourcePage
+    })
+
     const subject = encodeURIComponent(`Mobile Phlebotomy Service Inquiry - ${provider.name}`)
     const body = encodeURIComponent(
       `Hello ${provider.name},\n\n` +
@@ -111,7 +138,7 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
       `Please let me know your availability and rates.\n\n` +
       `Thank you!`
     )
-    
+
     try {
       window.location.href = `mailto:${provider.email}?subject=${subject}&body=${body}`
     } catch (error) {
@@ -131,11 +158,19 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
     }
     return true
   }
-  
+
   if (provider.website) {
     event.method = 'website'
     trackProviderInteraction(event)
-    
+
+    // Track with new granular GA4 event
+    ga4.providerWebsiteClick({
+      provider_id: provider.id,
+      provider_name: provider.name,
+      url: provider.website,
+      source_page: sourcePage
+    })
+
     // Open website in new tab with proper SEO attributes
     const link = document.createElement('a')
     link.href = provider.website
@@ -145,7 +180,7 @@ export function contactProvider(provider: Provider, currentLocation?: string): b
     link.click()
     return true
   }
-  
+
   // No contact method available
   alert(`Contact information not available for ${provider.name}. Please try searching for other providers in your area.`)
   return false
@@ -166,21 +201,39 @@ export function visitProviderWebsite(provider: Provider, currentLocation?: strin
     timestamp: Date.now(),
     location: currentLocation
   }
-  
+
   trackProviderInteraction(event)
-  
+
+  // Determine source_page from current URL
+  let sourcePage = 'unknown'
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    if (path.includes('/provider/')) sourcePage = 'provider_detail'
+    else if (path.includes('/metro/')) sourcePage = 'metro'
+    else if (path.match(/\/us\/[a-z]{2}\/[a-z-]+/)) sourcePage = 'city'
+    else if (path.match(/\/us\/[a-z]{2}$/)) sourcePage = 'state'
+  }
+
+  // Track with new granular GA4 event
+  ga4.providerWebsiteClick({
+    provider_id: provider.id,
+    provider_name: provider.name,
+    url: provider.website,
+    source_page: sourcePage
+  })
+
   // Create properly attributed link
   const link = document.createElement('a')
   link.href = provider.website
   link.target = '_blank'
   link.rel = 'noopener noreferrer nofollow sponsored' // sponsored for business listings
   link.setAttribute('aria-label', `Visit ${provider.name} official website`)
-  
+
   // Add structured data attributes for better SEO
   link.setAttribute('data-provider-id', provider.id)
   link.setAttribute('data-provider-name', provider.name)
   link.setAttribute('data-action', 'website-visit')
-  
+
   link.click()
   return true
 }

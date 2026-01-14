@@ -161,11 +161,11 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
             rel="noopener noreferrer"
             className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors"
             onClick={() => {
-              ga4.providerClick({
+              ga4.providerWebsiteClick({
+                provider_id: provider.id,
                 provider_name: provider.name,
-                provider_city: provider.address?.city,
-                provider_state: provider.address?.state,
-                link_type: 'website'
+                url: provider.website,
+                source_page: 'provider_card'
               })
             }}
           >

@@ -14,6 +14,7 @@ import { SimpleAccordion } from '@/components/ui/Accordion'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
+import { ga4 } from '@/lib/ga4'
 
 interface MetroPageProps {
   params: {
@@ -572,11 +573,14 @@ export default function MetroPage({ params }: MetroPageProps) {
                       <div className="flex flex-wrap gap-3">
                         {/* Request Blood Draw Button - Primary CTA for Featured Providers */}
                         <button
-                          onClick={() => setLeadFormOpen(true)}
+                          onClick={() => {
+                            ga4.leadCtaClick({ placement: 'provider_card' })
+                            setLeadFormOpen(true)
+                          }}
                           className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg flex items-center gap-2"
                         >
                           <span>📋</span>
-                          Request Blood Draw
+                          Request a Mobile Blood Draw
                         </button>
 
                         {/* Secondary Actions */}

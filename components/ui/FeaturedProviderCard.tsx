@@ -122,11 +122,11 @@ export function FeaturedProviderCard({ provider }: FeaturedProviderCardProps) {
               rel="noopener noreferrer nofollow"
               className="w-full bg-white hover:bg-primary-50 text-primary-600 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-primary-600 hover:border-primary-700 shadow-sm"
               onClick={() => {
-                ga4.providerClick({
+                ga4.providerWebsiteClick({
+                  provider_id: provider.id,
                   provider_name: provider.name,
-                  provider_city: provider.address?.city,
-                  provider_state: provider.address?.state,
-                  link_type: 'website'
+                  url: provider.website,
+                  source_page: 'featured_card'
                 })
               }}
             >
