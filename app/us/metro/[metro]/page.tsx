@@ -112,8 +112,6 @@ export default function MetroPage({ params }: MetroPageProps) {
     )
   }
 
-  const displayedProviders = showAllProviders ? filteredProviders : filteredProviders.slice(0, 10)
-
   // Categorize providers by monetization tier
   const categorizedProviders = {
     featured: [] as Provider[],
@@ -137,6 +135,19 @@ export default function MetroPage({ params }: MetroPageProps) {
       categorizedProviders.basic.push(provider)
     }
   })
+
+  // Exclude featured providers from regular listings to avoid duplication
+  const nonFeaturedProviders = filteredProviders.filter(provider => {
+    // @ts-ignore
+    const tier = provider.listingTier || 'BASIC'
+    // @ts-ignore
+    const isFeaturedCity = provider.isFeaturedCity || false
+    // @ts-ignore
+    const isFeatured = provider.isFeatured || false
+    return tier !== 'FEATURED' && !isFeaturedCity && !isFeatured
+  })
+
+  const displayedProviders = showAllProviders ? nonFeaturedProviders : nonFeaturedProviders.slice(0, 10)
 
   // Sort all sections alphabetically
   categorizedProviders.featured.sort((a, b) => a.name.localeCompare(b.name))

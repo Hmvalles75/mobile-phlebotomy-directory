@@ -41,7 +41,8 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
       zip: provider.address.zip || undefined
     } : undefined,
 
-    services: [],
+    // Include services from ProviderService relationships
+    services: provider.services?.map((ps: any) => ps.service.name) || [],
     availability: [],
     payment: [],
     badges: provider.status === 'VERIFIED' ? ['Verified'] : [],
@@ -70,7 +71,12 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
             city: true
           }
         },
-        address: true
+        address: true,
+        services: {
+          include: {
+            service: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -95,7 +101,12 @@ export async function getProviderBySlug(slug: string): Promise<EnrichedProvider 
             city: true
           }
         },
-        address: true
+        address: true,
+        services: {
+          include: {
+            service: true
+          }
+        }
       }
     })
 
@@ -116,6 +127,11 @@ export async function getProviderById(id: string): Promise<EnrichedProvider | nu
           include: {
             state: true,
             city: true
+          }
+        },
+        services: {
+          include: {
+            service: true
           }
         }
       }
@@ -155,6 +171,11 @@ export async function getProvidersByCity(cityName: string, stateAbbr?: string): 
             state: true,
             city: true
           }
+        },
+        services: {
+          include: {
+            service: true
+          }
         }
       }
     })
@@ -184,6 +205,11 @@ export async function getProvidersByState(stateAbbr: string): Promise<EnrichedPr
             state: true,
             city: true
           }
+        },
+        services: {
+          include: {
+            service: true
+          }
         }
       }
     })
@@ -211,6 +237,11 @@ export async function searchProviders(query: string): Promise<EnrichedProvider[]
             state: true,
             city: true
           }
+        },
+        services: {
+          include: {
+            service: true
+          }
         }
       }
     })
@@ -233,6 +264,11 @@ export async function getFeaturedProviders(): Promise<EnrichedProvider[]> {
           include: {
             state: true,
             city: true
+          }
+        },
+        services: {
+          include: {
+            service: true
           }
         }
       },
@@ -259,6 +295,11 @@ export async function getTopRatedProviders(): Promise<EnrichedProvider[]> {
           include: {
             state: true,
             city: true
+          }
+        },
+        services: {
+          include: {
+            service: true
           }
         }
       },

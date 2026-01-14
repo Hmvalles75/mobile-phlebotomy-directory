@@ -1,8 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Phone } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
+import { LeadFormModal } from '@/components/ui/LeadFormModal'
 
 interface ProviderCTASectionProps {
   providerId: string
@@ -25,11 +26,11 @@ export function ProviderCTASection({
   twilioNumber,
   isVerified
 }: ProviderCTASectionProps) {
-  const router = useRouter()
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const handleRequestClick = () => {
     ga4.leadFormOpen({ city, state, zip })
-    router.push('/coming-soon')
+    setLeadFormOpen(true)
   }
 
   const handleCallClick = () => {
@@ -57,28 +58,38 @@ export function ProviderCTASection({
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-3">
-        Request Service from {providerName}
-      </h3>
-      <p className="text-gray-700 mb-4 text-sm">
-        Book a licensed mobile phlebotomist to come to you. Same-day and next-day slots available.
-      </p>
+    <>
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
+          Request Service from {providerName}
+        </h3>
+        <p className="text-gray-700 mb-4 text-sm">
+          Book a licensed mobile phlebotomist to come to you. Same-day and next-day slots available.
+        </p>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={handleRequestClick}
-          className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
-        >
-          Request Blood Draw
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleRequestClick}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
+          >
+            Request Blood Draw
+          </button>
+        </div>
+
+        {!isVerified && (
+          <p className="text-xs text-gray-600 mt-3">
+            ⚠️ This is an unverified listing. Please confirm details with the provider.
+          </p>
+        )}
       </div>
 
-      {!isVerified && (
-        <p className="text-xs text-gray-600 mt-3">
-          ⚠️ This is an unverified listing. Please confirm details with the provider.
-        </p>
-      )}
-    </div>
+      <LeadFormModal
+        isOpen={leadFormOpen}
+        onClose={() => setLeadFormOpen(false)}
+        defaultCity={city || ''}
+        defaultState={state || ''}
+        defaultZip={zip || ''}
+      />
+    </>
   )
 }
