@@ -3,11 +3,34 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
-    // Verify admin password
+    // Verify admin authentication - accept either session token or raw password
     const authHeader = req.headers.get('authorization')
-    const password = authHeader?.replace('Bearer ', '')
+    const token = authHeader?.replace('Bearer ', '')
 
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
+    if (!token) {
+      return NextResponse.json(
+        { ok: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Check if it's a session token (base64 encoded JSON)
+    let isAuthenticated = false
+
+    try {
+      const decoded = Buffer.from(token, 'base64').toString('utf-8')
+      const session = JSON.parse(decoded)
+      if (session.authenticated && session.expiresAt > Date.now()) {
+        isAuthenticated = true
+      }
+    } catch {
+      // Not a valid session token, check if it's the raw password
+      if (token === process.env.ADMIN_PASSWORD || token === process.env.ADMIN_SECRET) {
+        isAuthenticated = true
+      }
+    }
+
+    if (!isAuthenticated) {
       return NextResponse.json(
         { ok: false, error: 'Unauthorized' },
         { status: 401 }
