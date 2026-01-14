@@ -273,10 +273,28 @@ export async function generateMetadata({ params }: { params: { state: string, ci
   const cityKey = params.city.toLowerCase().replace(/-/g, '')
   const cityInfo = cityMapping[cityKey]
 
+  // For cities not in mapping, create conversion-optimized SEO
   if (!cityInfo) {
+    const cityName = params.city.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    const state = params.state.toUpperCase()
+
+    const title = `Mobile Phlebotomy ${cityName}, ${state} | Find At-Home Blood Draw Services`
+    const description = `Looking for mobile blood draw in ${cityName}? Submit your request and we'll connect you with licensed phlebotomists serving ${state}. Free, fast, no obligation.`
+
     return {
-      title: 'City Not Found',
-      description: 'The requested city was not found.'
+      title,
+      description,
+      keywords: `mobile phlebotomy ${cityName}, at-home blood draw ${cityName} ${state}, phlebotomist ${cityName}, mobile lab services ${state}`,
+      openGraph: {
+        title,
+        description,
+        type: 'website',
+      },
+      twitter: {
+        title,
+        description,
+        card: 'summary_large_image',
+      },
     }
   }
 
