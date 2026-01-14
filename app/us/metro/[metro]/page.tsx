@@ -525,16 +525,33 @@ export default function MetroPage({ params }: MetroPageProps) {
                         )}
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200 h-full">
                           <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Services Offered</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {provider.services.map((service) => (
-                              <span
-                                key={service}
-                                className="bg-gradient-to-r from-primary-100 to-primary-200 text-primary-900 text-xs font-medium px-3 py-1.5 rounded-full border border-primary-300"
-                              >
-                                {service}
-                              </span>
-                            ))}
-                          </div>
+
+                          {/* Extract detailed services list from description if available */}
+                          {provider.description?.includes('Our Services Include:') ? (
+                            <div className="space-y-2">
+                              {provider.description
+                                .split('Our Services Include:')[1]
+                                ?.split('\n')
+                                .filter(line => line.trim().startsWith('•'))
+                                .map((service, idx) => (
+                                  <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                    <span className="text-primary-600 mt-0.5">✓</span>
+                                    <span>{service.replace('•', '').trim()}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {provider.services.map((service) => (
+                                <span
+                                  key={service}
+                                  className="bg-gradient-to-r from-primary-100 to-primary-200 text-primary-900 text-xs font-medium px-3 py-1.5 rounded-full border border-primary-300"
+                                >
+                                  {service}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
