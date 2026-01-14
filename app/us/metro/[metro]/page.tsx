@@ -13,6 +13,7 @@ import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/sche
 import { SimpleAccordion } from '@/components/ui/Accordion'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
+import { LeadFormModal } from '@/components/ui/LeadFormModal'
 
 interface MetroPageProps {
   params: {
@@ -31,6 +32,7 @@ export default function MetroPage({ params }: MetroPageProps) {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAllProviders, setShowAllProviders] = useState(false)
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const metro = getMetroBySlug(params.metro)
 
@@ -539,11 +541,23 @@ export default function MetroPage({ params }: MetroPageProps) {
 
                     {/* Action Buttons */}
                     <div className="pt-4 border-t border-gray-200">
-                      <ProviderActions
-                        provider={provider}
-                        currentLocation={metro.city}
-                        className="justify-start"
-                      />
+                      <div className="flex flex-wrap gap-3">
+                        {/* Request Blood Draw Button - Primary CTA for Featured Providers */}
+                        <button
+                          onClick={() => setLeadFormOpen(true)}
+                          className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-md hover:shadow-lg flex items-center gap-2"
+                        >
+                          <span>📋</span>
+                          Request Blood Draw
+                        </button>
+
+                        {/* Secondary Actions */}
+                        <ProviderActions
+                          provider={provider}
+                          currentLocation={metro.city}
+                          className="justify-start"
+                        />
+                      </div>
                     </div>
                   </div>
                   )
@@ -552,6 +566,15 @@ export default function MetroPage({ params }: MetroPageProps) {
             </div>
           </div>
         )}
+
+        {/* Lead Form Modal */}
+        <LeadFormModal
+          isOpen={leadFormOpen}
+          onClose={() => setLeadFormOpen(false)}
+          defaultCity={metro.city}
+          defaultState={metro.stateAbbr}
+          defaultZip=""
+        />
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Providers Section */}
