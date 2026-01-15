@@ -16,12 +16,28 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Fetch all leads with provider relationship
+    // Fetch all leads with provider relationship and notifications
     const leads = await prisma.lead.findMany({
       include: {
         provider: {
           select: {
-            name: true
+            id: true,
+            name: true,
+            email: true,
+            claimEmail: true
+          }
+        },
+        leadNotifications: {
+          include: {
+            provider: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          },
+          orderBy: {
+            sentAt: 'desc'
           }
         }
       },
@@ -48,7 +64,15 @@ export async function GET(req: NextRequest) {
         routedToId: lead.routedToId,
         routedAt: lead.routedAt?.toISOString(),
         priceCents: lead.priceCents,
-        provider: lead.provider
+        provider: lead.provider,
+        notifications: lead.leadNotifications.map(notif => ({
+          id: notif.id,
+          providerId: notif.providerId,
+          providerName: notif.provider.name,
+          status: notif.status,
+          sentAt: notif.sentAt?.toISOString(),
+          errorMessage: notif.errorMessage
+        }))
       }))
     })
 

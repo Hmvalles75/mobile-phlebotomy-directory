@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from 'react'
 
+interface LeadNotification {
+  id: string
+  providerId: string
+  providerName: string
+  status: 'QUEUED' | 'SENT' | 'FAILED'
+  sentAt: string | null
+  errorMessage: string | null
+}
+
 interface Lead {
   id: string
   createdAt: string
@@ -14,20 +23,24 @@ interface Lead {
   zip: string
   urgency: 'STANDARD' | 'STAT'
   notes: string | null
-  status: string
+  status: 'NEW' | 'OPEN' | 'CLAIMED' | 'DELIVERED' | 'REFUNDED' | 'UNSOLD'
   routedToId: string | null
   routedAt: string | null
   priceCents: number
   provider?: {
+    id: string
     name: string
+    email: string | null
+    claimEmail: string | null
   }
+  notifications?: LeadNotification[]
 }
 
 export function LeadsPanel() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'new' | 'delivered'>('all')
+  const [filter, setFilter] = useState<'all' | 'new' | 'open' | 'claimed' | 'delivered' | 'unsold'>('all')
 
   useEffect(() => {
     loadLeads()
@@ -60,12 +73,38 @@ export function LeadsPanel() {
 
   const filteredLeads = leads.filter(lead => {
     if (filter === 'new') return lead.status === 'NEW'
+    if (filter === 'open') return lead.status === 'OPEN'
+    if (filter === 'claimed') return lead.status === 'CLAIMED'
     if (filter === 'delivered') return lead.status === 'DELIVERED'
+    if (filter === 'unsold') return lead.status === 'UNSOLD'
     return true
   })
 
   const newLeads = leads.filter(l => l.status === 'NEW')
+  const openLeads = leads.filter(l => l.status === 'OPEN')
+  const claimedLeads = leads.filter(l => l.status === 'CLAIMED')
   const deliveredLeads = leads.filter(l => l.status === 'DELIVERED')
+  const unsoldLeads = leads.filter(l => l.status === 'UNSOLD')
+
+  // Helper to get status badge info
+  const getStatusInfo = (status: Lead['status']) => {
+    switch (status) {
+      case 'NEW':
+        return { label: 'New', color: 'bg-blue-100 text-blue-800', description: 'Just received' }
+      case 'OPEN':
+        return { label: 'Open', color: 'bg-purple-100 text-purple-800', description: 'Notified to providers' }
+      case 'CLAIMED':
+        return { label: 'Claimed', color: 'bg-yellow-100 text-yellow-800', description: 'Provider claimed' }
+      case 'DELIVERED':
+        return { label: 'Delivered', color: 'bg-green-100 text-green-800', description: 'Routed to provider' }
+      case 'UNSOLD':
+        return { label: 'Unsold', color: 'bg-gray-100 text-gray-800', description: 'No provider found' }
+      case 'REFUNDED':
+        return { label: 'Refunded', color: 'bg-red-100 text-red-800', description: 'Refunded' }
+      default:
+        return { label: status, color: 'bg-gray-100 text-gray-800', description: '' }
+    }
+  }
 
   if (loading) {
     return (
@@ -78,36 +117,66 @@ export function LeadsPanel() {
   return (
     <div>
       {/* Stats */}
-      <div className="mb-6 flex gap-4 text-sm">
+      <div className="mb-6 flex flex-wrap gap-3 text-sm">
         <button
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg border ${
             filter === 'all'
-              ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium'
+              ? 'bg-gray-100 border-gray-300 text-gray-900 font-semibold'
               : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
-          All Leads: {leads.length}
+          All: {leads.length}
         </button>
         <button
           onClick={() => setFilter('new')}
           className={`px-4 py-2 rounded-lg border ${
             filter === 'new'
-              ? 'bg-yellow-50 border-yellow-200 text-yellow-800 font-medium'
+              ? 'bg-blue-50 border-blue-200 text-blue-800 font-semibold'
               : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
-          Unserved: {newLeads.length}
+          New: {newLeads.length}
+        </button>
+        <button
+          onClick={() => setFilter('open')}
+          className={`px-4 py-2 rounded-lg border ${
+            filter === 'open'
+              ? 'bg-purple-50 border-purple-200 text-purple-800 font-semibold'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Open: {openLeads.length}
+        </button>
+        <button
+          onClick={() => setFilter('claimed')}
+          className={`px-4 py-2 rounded-lg border ${
+            filter === 'claimed'
+              ? 'bg-yellow-50 border-yellow-200 text-yellow-800 font-semibold'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Claimed: {claimedLeads.length}
         </button>
         <button
           onClick={() => setFilter('delivered')}
           className={`px-4 py-2 rounded-lg border ${
             filter === 'delivered'
-              ? 'bg-green-50 border-green-200 text-green-800 font-medium'
+              ? 'bg-green-50 border-green-200 text-green-800 font-semibold'
               : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
         >
           Delivered: {deliveredLeads.length}
+        </button>
+        <button
+          onClick={() => setFilter('unsold')}
+          className={`px-4 py-2 rounded-lg border ${
+            filter === 'unsold'
+              ? 'bg-gray-50 border-gray-300 text-gray-800 font-semibold'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Unsold: {unsoldLeads.length}
         </button>
       </div>
 
@@ -123,46 +192,48 @@ export function LeadsPanel() {
               </div>
             )}
 
-            {filteredLeads.map((lead) => (
-              <div
-                key={lead.id}
-                onClick={() => setSelectedLead(lead)}
-                className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md ${
-                  selectedLead?.id === lead.id ? 'ring-2 ring-primary-500' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{lead.fullName}</h3>
-                    <p className="text-sm text-gray-600">{lead.city}, {lead.state} {lead.zip}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(lead.createdAt).toLocaleString()}
-                    </p>
-                    {lead.provider && (
-                      <p className="text-xs text-green-600 mt-1">
-                        → Routed to: {lead.provider.name}
+            {filteredLeads.map((lead) => {
+              const statusInfo = getStatusInfo(lead.status)
+              return (
+                <div
+                  key={lead.id}
+                  onClick={() => setSelectedLead(lead)}
+                  className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md ${
+                    selectedLead?.id === lead.id ? 'ring-2 ring-primary-500' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900">{lead.fullName}</h3>
+                      <p className="text-sm text-gray-600">{lead.city}, {lead.state} {lead.zip}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(lead.createdAt).toLocaleString()}
                       </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        lead.status === 'NEW'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {lead.status === 'NEW' ? 'Unserved' : 'Delivered'}
-                    </span>
-                    {lead.urgency === 'STAT' && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">
-                        STAT
+                      {lead.provider && (
+                        <p className="text-xs text-green-600 mt-1">
+                          → {lead.provider.name}
+                        </p>
+                      )}
+                      {lead.notifications && lead.notifications.length > 0 && (
+                        <p className="text-xs text-purple-600 mt-1">
+                          ✉ {lead.notifications.length} notification{lead.notifications.length > 1 ? 's' : ''} sent
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusInfo.color}`}>
+                        {statusInfo.label}
                       </span>
-                    )}
+                      {lead.urgency === 'STAT' && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800 font-semibold">
+                          STAT
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -233,27 +304,109 @@ export function LeadsPanel() {
                   </div>
                 )}
 
+                {/* Pipeline Status Tracker */}
                 <div className="border-t pt-4">
-                  <label className="text-sm font-medium text-gray-500">Status</label>
-                  {selectedLead.provider ? (
-                    <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-sm text-green-800">
-                        <strong>✓ Delivered to:</strong> {selectedLead.provider.name}
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Routed: {selectedLead.routedAt ? new Date(selectedLead.routedAt).toLocaleString() : 'Unknown'}
+                  <label className="text-sm font-medium text-gray-500 mb-3 block">Lead Pipeline</label>
+
+                  {/* Visual Pipeline */}
+                  <div className="space-y-3">
+                    {/* Step 1: Received */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        selectedLead.status ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'
+                      }`}>
+                        {selectedLead.status ? '✓' : '1'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Lead Received</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(selectedLead.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Step 2: Notifications Sent */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        selectedLead.notifications && selectedLead.notifications.length > 0
+                          ? 'bg-green-500 text-white'
+                          : selectedLead.status === 'NEW'
+                          ? 'bg-gray-300 text-gray-500'
+                          : 'bg-yellow-500 text-white'
+                      }`}>
+                        {selectedLead.notifications && selectedLead.notifications.length > 0 ? '✓' : '2'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Providers Notified</p>
+                        {selectedLead.notifications && selectedLead.notifications.length > 0 ? (
+                          <div className="mt-1 space-y-1">
+                            {selectedLead.notifications.map((notif, idx) => (
+                              <div key={notif.id} className="text-xs bg-purple-50 border border-purple-200 rounded px-2 py-1">
+                                <span className="font-medium text-purple-900">{notif.providerName}</span>
+                                <span className={`ml-2 ${
+                                  notif.status === 'SENT' ? 'text-green-600' :
+                                  notif.status === 'FAILED' ? 'text-red-600' :
+                                  'text-gray-600'
+                                }`}>
+                                  ({notif.status})
+                                </span>
+                                {notif.sentAt && (
+                                  <span className="ml-2 text-gray-500">
+                                    {new Date(notif.sentAt).toLocaleTimeString()}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-500">No notifications sent yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step 3: Claimed/Routed */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        selectedLead.status === 'CLAIMED' || selectedLead.status === 'DELIVERED'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-300 text-gray-500'
+                      }`}>
+                        {selectedLead.status === 'CLAIMED' || selectedLead.status === 'DELIVERED' ? '✓' : '3'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedLead.status === 'CLAIMED' ? 'Claimed by Provider' : 'Routed to Provider'}
+                        </p>
+                        {selectedLead.provider ? (
+                          <div className="mt-1">
+                            <p className="text-xs text-green-700 font-medium">{selectedLead.provider.name}</p>
+                            {selectedLead.routedAt && (
+                              <p className="text-xs text-gray-500">
+                                {new Date(selectedLead.routedAt).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-500">Awaiting provider response</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Current Status Badge */}
+                    <div className="mt-4 pt-3 border-t">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Current Status:</span>
+                        <span className={`text-sm px-3 py-1.5 rounded-full font-semibold ${
+                          getStatusInfo(selectedLead.status).color
+                        }`}>
+                          {getStatusInfo(selectedLead.status).label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {getStatusInfo(selectedLead.status).description}
                       </p>
                     </div>
-                  ) : (
-                    <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <p className="text-sm text-yellow-800">
-                        <strong>⚠ Unserved Lead</strong>
-                      </p>
-                      <p className="text-xs text-yellow-600 mt-1">
-                        No provider found in {selectedLead.city}, {selectedLead.state}
-                      </p>
-                    </div>
-                  )}
+                  </div>
                 </div>
 
                 <div className="border-t pt-4">
