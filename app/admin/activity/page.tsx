@@ -204,7 +204,15 @@ export default function AdminActivityPage() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Activity className="text-primary-600" size={32} />
-            <h1 className="text-3xl font-bold text-gray-900">Admin Activity Monitor</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Activity Monitor</h1>
+              <a
+                href="/admin"
+                className="text-sm text-primary-600 hover:text-primary-700 hover:underline"
+              >
+                ← Return to Admin Dashboard
+              </a>
+            </div>
           </div>
           <button
             onClick={refreshData}
