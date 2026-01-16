@@ -9,18 +9,11 @@ export function ListingTierBadge({ tier, isFeaturedCity }: ListingTierBadgeProps
     return null
   }
 
-  if (tier === 'FEATURED' || isFeaturedCity) {
+  // Show yellow "Featured Partner" badge for FEATURED tier, PREMIUM tier, or city-featured providers
+  if (tier === 'FEATURED' || tier === 'PREMIUM' || isFeaturedCity) {
     return (
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 shadow-md border-2 border-yellow-600">
-        ⭐ FEATURED SPONSOR
-      </span>
-    )
-  }
-
-  if (tier === 'PREMIUM') {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 border border-primary-300">
-        ✓ Premium Partner
+        ⭐ Featured Partner
       </span>
     )
   }
