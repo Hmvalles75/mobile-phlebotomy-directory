@@ -163,7 +163,7 @@ export default async function MetrosPage() {
                         {metro.city}, {metro.stateAbbr}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {providerCount} {providerCount === 1 ? 'Provider' : 'Providers'} • Pop: {(metro.population / 1000000).toFixed(1)}M
+                        {providerCount} {providerCount === 1 ? 'Provider' : 'Providers'}
                       </p>
                     </div>
                     <span className="text-primary-600 text-2xl">→</span>

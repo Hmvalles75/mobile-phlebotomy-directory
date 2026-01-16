@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { metro: string } }
   }
 
   const title = `Mobile Phlebotomy ${metro.city}, ${metro.stateAbbr} | Best At-Home Blood Draw (2025)`
-  const description = `Find top-rated mobile phlebotomists in ${metro.city}, ${metro.state}! Same-day service available. ${metro.population.toLocaleString()}+ residents served. Insurance accepted. Book online today.`
+  const description = `Find top-rated mobile phlebotomists in ${metro.city}, ${metro.state}! Same-day service available. Insurance accepted. Book online today.`
 
   return {
     title,
