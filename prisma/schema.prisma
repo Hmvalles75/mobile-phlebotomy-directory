@@ -103,6 +103,7 @@ model Lead {
   city          String
   state         String
   zip           String
+  labPreference String   @default("Other/Unsure")  // Quest, Labcorp, Other/Unsure
   urgency       Urgency
   notes         String?
   source        String   // "web_form" | "call"

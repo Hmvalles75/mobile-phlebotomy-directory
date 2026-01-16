@@ -27,6 +27,7 @@ export function LeadFormModal({
     city: defaultCity,
     state: defaultState,
     zip: defaultZip,
+    labPreference: '',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
     notes: ''
   })
@@ -76,6 +77,10 @@ export function LeadFormModal({
 
     if (!formData.zip.trim() || formData.zip.trim().length < 5) {
       newErrors.zip = 'Valid ZIP code is required'
+    }
+
+    if (!formData.labPreference) {
+      newErrors.labPreference = 'Please select your preferred lab drop-off'
     }
 
     setErrors(newErrors)
@@ -148,6 +153,7 @@ export function LeadFormModal({
             city: defaultCity,
             state: defaultState,
             zip: defaultZip,
+            labPreference: '',
             urgency: 'STANDARD',
             notes: ''
           })
@@ -345,6 +351,30 @@ export function LeadFormModal({
                   )}
                 </div>
 
+                {/* Lab Preference */}
+                <div>
+                  <label htmlFor="labPreference" className="block text-sm font-medium text-gray-700 mb-1">
+                    Preferred Lab Drop-Off <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="labPreference"
+                    name="labPreference"
+                    value={formData.labPreference}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border rounded-md ${
+                      errors.labPreference ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  >
+                    <option value="">Select lab...</option>
+                    <option value="Quest">Quest</option>
+                    <option value="Labcorp">Labcorp</option>
+                    <option value="Other/Unsure">Other / Unsure</option>
+                  </select>
+                  {errors.labPreference && (
+                    <p className="text-red-500 text-sm mt-1">{errors.labPreference}</p>
+                  )}
+                </div>
+
                 {/* Urgency */}
                 <div>
                   <label htmlFor="urgency" className="block text-sm font-medium text-gray-700 mb-1">
@@ -357,7 +387,7 @@ export function LeadFormModal({
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="STANDARD">Standard (1-2 business days)</option>
+                    <option value="STANDARD">Standard (earliest availability within 24–48 hours)</option>
                     <option value="STAT">STAT/Urgent (same day)</option>
                   </select>
                 </div>
@@ -376,6 +406,13 @@ export function LeadFormModal({
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Any special requirements or questions..."
                   />
+                </div>
+
+                {/* Expectation Text */}
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <p className="text-sm text-gray-700">
+                    After submitting, a local provider will contact you to confirm availability and scheduling. Response times vary by location and urgency.
+                  </p>
                 </div>
 
                 {/* Privacy Notice */}

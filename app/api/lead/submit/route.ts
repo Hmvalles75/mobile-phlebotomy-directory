@@ -14,6 +14,7 @@ const schema = z.object({
   city: z.string().min(1, 'City is required'),
   state: z.string().length(2, 'State must be 2 characters'),
   zip: z.string().min(5, 'ZIP code must be at least 5 characters'),
+  labPreference: z.string().min(1, 'Lab preference is required'),
   urgency: z.enum(['STANDARD', 'STAT']),
   notes: z.string().optional()
 })

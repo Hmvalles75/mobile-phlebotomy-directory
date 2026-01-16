@@ -52,8 +52,8 @@ export async function sendSMSBlastToEligibleProviders(lead: Lead): Promise<numbe
         const isTrial = provider.trialStatus === 'ACTIVE' && provider.trialExpiresAt && provider.trialExpiresAt > new Date()
 
         const message = isTrial
-          ? `URGENT: New ${lead.urgency} Lead in ${lead.zip}. Click to claim for $0 (Trial): ${claimUrl}`
-          : `URGENT: New ${lead.urgency} Lead in ${lead.zip}. Click to claim for ${price}: ${claimUrl}`
+          ? `New request in ${lead.city}, ${lead.state}. Reply YES if you can contact and schedule the patient now. Claim for $0 (Trial): ${claimUrl}`
+          : `New request in ${lead.city}, ${lead.state}. Reply YES if you can contact and schedule the patient now. Claim for ${price}: ${claimUrl}`
 
         const result = await twilioClient!.messages.create({
           to: provider.phonePublic,

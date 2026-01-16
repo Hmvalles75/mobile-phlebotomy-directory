@@ -153,24 +153,47 @@ export async function emailProviderApproved(to: string, businessName: string, co
     'Your MobilePhlebotomy.org listing is live',
     `Hi ${firstName},
 
-Thanks for submitting ${businessName} to MobilePhlebotomy.org — your listing has been approved and is now live in the directory.
+Your listing for ${businessName} is approved and now live on MobilePhlebotomy.org.
 
-At this stage, there's nothing you need to do. Your business is visible to patients searching in your area.
-
-If you'd like to access the optional provider dashboard (to review requests, manage coverage, or receive notifications), you'll first need to complete onboarding here:
+If you want to receive patient requests in your area, you need to activate dispatch here (takes ~60 seconds):
 👉 https://www.mobilephlebotomy.org/onboard
 
-Once onboarding is complete, you'll be able to access your dashboard using a secure magic link.
+Once activated, you'll:
 
-Email notifications for patient requests are currently limited to a small group of featured providers while we refine routing and volume.
+Get notified when a matching request comes in
 
-If anything needs updating on your listing, feel free to reply to this email.
+Confirm availability by replying YES/NO
 
-📬 Note: Our emails may land in your spam/junk folder initially. Please mark us as "Not Spam" to ensure you receive future updates.
+Only pay when a visit is completed (no subscription)
+
+If you prefer to remain directory-only, you don't need to do anything.
 
 Best,
 Hector
-MobilePhlebotomy.org`
+MobilePhlebotomy.org
+
+P.S. Our emails can land in spam at first — please mark as Not Spam so you don't miss requests.`
+  )
+}
+
+export async function emailOnboardingFollowUp(to: string, businessName: string, contactName: string) {
+  // Extract first name from contact name (e.g., "John Doe" -> "John")
+  const firstName = contactName.split(' ')[0]
+
+  return send(
+    to,
+    'Quick question — should I send you leads?',
+    `Hi ${firstName}, quick one:
+
+Do you want to receive patient requests from MobilePhlebotomy.org in your area?
+
+If yes, activate here:
+👉 https://www.mobilephlebotomy.org/onboard
+
+If not, no worries — your listing stays live in the directory either way.
+
+Best,
+Hector`
   )
 }
 

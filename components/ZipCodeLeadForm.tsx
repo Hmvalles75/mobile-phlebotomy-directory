@@ -31,10 +31,10 @@ export function ZipCodeLeadForm() {
     <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-white/20 max-w-2xl mx-auto">
       <div className="text-center mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-          Need a Blood Draw Now?
+          Request a Mobile Blood Draw
         </h2>
         <p className="text-white/90 text-lg">
-          Check Availability & Get Pricing
+          Get matched with a certified local provider
         </p>
       </div>
 

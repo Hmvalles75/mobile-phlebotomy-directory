@@ -8,6 +8,7 @@ interface Lead {
   city: string
   state: string
   zip: string
+  labPreference: string
   urgency: 'STANDARD' | 'STAT'
   notes?: string | null
 }
@@ -47,12 +48,19 @@ async function sendProviderLeadNotificationEmail(
   const leadType = 'Individual'  // Default for Phase 1
   const notesShort = lead.notes ? lead.notes.substring(0, 200) : 'None'
 
+  // Lab preference note for "Other/Unsure"
+  const labNote = lead.labPreference === 'Other/Unsure'
+    ? 'Lab to be confirmed directly with patient — proceed to schedule draw.'
+    : ''
+
   // Plain text email body
   const textBody = `Hi ${provider.name},
 
-A new mobile phlebotomy request may match your coverage area.
+New request in ${lead.city}, ${lead.state} just came in.
+Please reply ASAP to confirm availability so we can route it.
 
 Location: ${lead.city}, ${lead.state} ${lead.zip}
+Lab preference: ${lead.labPreference}${labNote ? '\n' + labNote : ''}
 Request type: ${leadType}
 Urgency: ${lead.urgency}
 Notes: ${notesShort}${lead.notes && lead.notes.length > 200 ? '...' : ''}
@@ -90,11 +98,16 @@ No action is required if you're unavailable.
     </div>
     <div class="content">
       <p>Hi ${provider.name},</p>
-      <p>A new mobile phlebotomy request may match your coverage area.</p>
+      <p><strong>New request in ${lead.city}, ${lead.state} just came in.</strong><br>
+      Please reply ASAP to confirm availability so we can route it.</p>
 
       <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
         <div class="detail-row">
           <span class="detail-label">Location:</span> ${lead.city}, ${lead.state} ${lead.zip}
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Lab preference:</span> <strong>${lead.labPreference}</strong>
+          ${labNote ? `<br><em style="color: #666; font-size: 13px;">${labNote}</em>` : ''}
         </div>
         <div class="detail-row">
           <span class="detail-label">Request type:</span> ${leadType}
@@ -127,7 +140,7 @@ No action is required if you're unavailable.
     await sg.send({
       to: recipientEmail,
       from: process.env.LEAD_EMAIL_FROM,
-      subject: 'New mobile phlebotomy request in your area',
+      subject: `New request in ${lead.city}, ${lead.state} - Reply ASAP`,
       text: textBody,
       html: htmlBody
     })
@@ -248,6 +261,7 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
         city: true,
         state: true,
         zip: true,
+        labPreference: true,
         urgency: true,
         notes: true
       }
@@ -330,6 +344,7 @@ export async function notifyFeaturedProvidersForLeadDryRun(leadId: string): Prom
         city: true,
         state: true,
         zip: true,
+        labPreference: true,
         urgency: true,
         notes: true
       }
