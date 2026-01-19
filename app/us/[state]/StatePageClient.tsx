@@ -343,6 +343,70 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
               </p>
             </section>
 
+            {/* MICHIGAN SPECIAL: Featured Detroit Metro Section */}
+            {stateAbbr === 'MI' && (
+              <section className="mt-6 mb-8">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-6 border-2 border-primary-200">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">🏙️</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-2xl font-bold text-gray-900">Top Cities in Michigan</h2>
+                        <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
+                      </div>
+                      <p className="text-gray-700 mb-4">
+                        Explore mobile phlebotomy services in Detroit and surrounding metro areas
+                      </p>
+                      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                        <Link
+                          href="/detroit-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border-2 border-primary-300 hover:border-primary-500 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1 text-lg">Detroit</div>
+                          <div className="text-sm text-primary-600 group-hover:text-primary-700">Mobile Phlebotomy →</div>
+                        </Link>
+                        <Link
+                          href="/dearborn-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1">Dearborn</div>
+                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                        </Link>
+                        <Link
+                          href="/livonia-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1">Livonia</div>
+                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                        </Link>
+                        <Link
+                          href="/troy-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1">Troy</div>
+                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                        </Link>
+                        <Link
+                          href="/southfield-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1">Southfield</div>
+                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                        </Link>
+                        <Link
+                          href="/warren-mi/mobile-phlebotomy"
+                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                        >
+                          <div className="font-bold text-gray-900 mb-1">Warren</div>
+                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Major Cities in State - Internal Linking */}
             {(() => {
               const metros = getMetrosByState(stateAbbr)

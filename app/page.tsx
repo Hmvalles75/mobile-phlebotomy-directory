@@ -932,6 +932,42 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {/* NOW SERVING: Detroit Metro - PRIORITY PLACEMENT */}
+            <div className="bg-gradient-to-br from-primary-50 to-white rounded-lg p-6 shadow-md border-2 border-primary-200">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🏙️</span>
+                <h3 className="text-lg font-semibold text-gray-900">Detroit Metro</h3>
+                <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
+              </div>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/detroit-mi/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700 font-medium">
+                    Detroit Mobile Phlebotomy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dearborn-mi/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Dearborn Blood Draw Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/livonia-mi/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Livonia At-Home Phlebotomy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/troy-mi/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Troy Mobile Lab Collection
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/michigan" className="text-gray-600 hover:text-primary-600 font-medium">
+                    View All Michigan Providers →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
             {/* Major Cities with Internal Links */}
             <div className="bg-white rounded-lg p-6 shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">California</h3>

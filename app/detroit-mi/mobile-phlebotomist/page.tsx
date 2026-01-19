@@ -169,6 +169,67 @@ export default function DetroitMobilePhlebotomist() {
             </div>
           )}
 
+          {/* Link to Detroit Mobile Phlebotomy Hub */}
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-8 border-2 border-primary-200">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Looking for Mobile Phlebotomy in Detroit?
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Explore all mobile blood draw services available throughout Detroit and the metro area.
+              Compare providers, read reviews, and find the right phlebotomy service for your needs.
+            </p>
+            <Link
+              href="/detroit-mi/mobile-phlebotomy"
+              className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
+            >
+              View All Detroit Mobile Phlebotomy Services →
+            </Link>
+          </div>
+
+          {/* Nearby Detroit Metro Areas */}
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Mobile Phlebotomists in Nearby Detroit Metro Areas
+            </h2>
+            <p className="text-gray-700 mb-6">
+              We also serve surrounding communities throughout the Detroit metro area:
+            </p>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Link
+                href="/dearborn-mi/mobile-phlebotomy"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Dearborn</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">Mobile phlebotomists →</span>
+              </Link>
+
+              <Link
+                href="/livonia-mi/mobile-phlebotomy"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Livonia</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">Mobile phlebotomists →</span>
+              </Link>
+
+              <Link
+                href="/southfield-mi/mobile-phlebotomy"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Southfield</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">Mobile phlebotomists →</span>
+              </Link>
+            </div>
+          </div>
+
           {loading ? (
             <div className="text-center py-12 bg-white rounded-lg shadow-md">
               <div className="text-gray-400 text-6xl mb-4">⏳</div>

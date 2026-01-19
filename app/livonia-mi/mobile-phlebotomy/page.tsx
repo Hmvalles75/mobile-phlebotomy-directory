@@ -111,6 +111,75 @@ export default function LivoniaMobilePhlebotomy() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
+          {/* Serving Livonia + Detroit Metro - INTERNAL LINKING HUB */}
+          <div className="bg-white rounded-lg shadow-lg border-2 border-primary-100 p-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Serving Livonia + Detroit Metro
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Our network of mobile phlebotomists serves Livonia and the greater Detroit metro area.
+              Find providers in your area or explore nearby communities:
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              <Link
+                href="/detroit-mi/mobile-phlebotomy"
+                className="block bg-gradient-to-br from-primary-50 to-white rounded-lg p-5 hover:from-primary-100 hover:to-primary-50 hover:shadow-md border-2 border-primary-200 hover:border-primary-400 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">🏙️</span>
+                  <span className="font-bold text-gray-900 text-lg">Detroit Mobile Phlebotomy</span>
+                </div>
+                <span className="text-sm text-primary-600 group-hover:text-primary-700 font-medium">View all Detroit area services →</span>
+              </Link>
+
+              <Link
+                href="/dearborn-mi/mobile-phlebotomy"
+                className="block bg-gray-50 rounded-lg p-5 hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Dearborn</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</span>
+              </Link>
+
+              <Link
+                href="/warren-mi/mobile-phlebotomy"
+                className="block bg-gray-50 rounded-lg p-5 hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Warren</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</span>
+              </Link>
+
+              <Link
+                href="/troy-mi/mobile-phlebotomy"
+                className="block bg-gray-50 rounded-lg p-5 hover:bg-primary-50 hover:shadow-md border-2 border-gray-200 hover:border-primary-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">📍</span>
+                  <span className="font-bold text-gray-900">Troy</span>
+                </div>
+                <span className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</span>
+              </Link>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  ga4.leadCtaClick({ placement: 'metro_links' })
+                  setLeadFormOpen(true)
+                }}
+                className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                📋 Request Service in Livonia
+              </button>
+            </div>
+          </div>
+
           {/* Featured Provider Card */}
           {!loading && featuredProvider && (
             <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-yellow-400 rounded-lg p-6 shadow-lg">
@@ -156,19 +225,6 @@ export default function LivoniaMobilePhlebotomy() {
               </div>
             </div>
           )}
-
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Now Serving Livonia & Nearby Areas</h2>
-            <p className="text-gray-700 mb-4">Mobile phlebotomy available in:</p>
-            <div className="grid md:grid-cols-3 gap-4">
-              <Link href="/detroit-mi/mobile-phlebotomy" className="text-primary-600 hover:underline">Detroit →</Link>
-              <Link href="/dearborn-mi/mobile-phlebotomy" className="text-primary-600 hover:underline">Dearborn →</Link>
-              <span className="text-gray-600">Farmington Hills</span>
-              <span className="text-gray-600">Westland</span>
-              <span className="text-gray-600">Redford</span>
-              <span className="text-gray-600">All Wayne County</span>
-            </div>
-          </div>
 
           <div className="bg-white rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">What to Expect</h2>

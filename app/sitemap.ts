@@ -88,5 +88,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   })
 
+  // Add Detroit metro area pages (custom routes)
+  const detroitPages = [
+    // Main hub
+    { slug: 'detroit-mi/mobile-phlebotomy', priority: 0.9 },
+
+    // Suburbs
+    { slug: 'dearborn-mi/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'livonia-mi/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'troy-mi/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'southfield-mi/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'warren-mi/mobile-phlebotomy', priority: 0.8 },
+
+    // Intent variants
+    { slug: 'detroit-mi/in-home-blood-draw', priority: 0.7 },
+    { slug: 'detroit-mi/mobile-phlebotomist', priority: 0.7 },
+    { slug: 'detroit-mi/blood-draw-at-home', priority: 0.7 },
+    { slug: 'detroit-mi/lab-draw-at-home', priority: 0.7 },
+  ]
+
+  detroitPages.forEach((page) => {
+    routes.push({
+      url: `${baseUrl}/${page.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: page.priority,
+    })
+  })
+
   return routes
 }

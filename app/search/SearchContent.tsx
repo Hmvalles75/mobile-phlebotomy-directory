@@ -389,6 +389,28 @@ export default function SearchContent() {
               <p className="text-gray-600">Select your state to find mobile phlebotomy providers in your area</p>
             </div>
 
+            {/* Featured: Detroit Metro Suggestion */}
+            <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-6 mb-8 border-2 border-primary-200">
+              <div className="flex items-start gap-4">
+                <div className="text-4xl">🏙️</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-bold text-gray-900">Popular in Michigan:</h3>
+                    <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    Find mobile phlebotomy providers serving Detroit and the surrounding metro area
+                  </p>
+                  <Link
+                    href="/detroit-mi/mobile-phlebotomy"
+                    className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
+                  >
+                    Detroit Mobile Phlebotomy →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-8">
               {Object.entries(statesByRegion).map(([region, states]) => (
                 <div key={region}>

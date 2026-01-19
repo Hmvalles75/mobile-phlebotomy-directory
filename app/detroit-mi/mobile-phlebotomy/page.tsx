@@ -204,6 +204,79 @@ export default function DetroitMobilePhlebotomy() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
+        {/* Detroit Metro Areas We Serve - PRIMARY INTERNAL LINKING HUB */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-white rounded-lg shadow-lg border-2 border-primary-100 p-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Detroit Metro Areas We Serve
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Our network of mobile phlebotomists serves Detroit and surrounding communities
+              throughout Wayne County. Select your area to find local providers:
+            </p>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+              {detroitSuburbs.map(suburb => (
+                <Link
+                  key={suburb.slug}
+                  href={`/${suburb.slug}/mobile-phlebotomy`}
+                  className="block bg-gradient-to-br from-primary-50 to-white rounded-lg p-5 hover:from-primary-100 hover:to-primary-50 hover:shadow-md border-2 border-primary-200 hover:border-primary-400 transition-all group"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">📍</span>
+                    <span className="font-bold text-gray-900 text-lg">{suburb.name}</span>
+                  </div>
+                  <span className="text-sm text-primary-600 group-hover:text-primary-700 font-medium">View providers →</span>
+                </Link>
+              ))}
+            </div>
+            <div className="pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-600">
+                Also serving: Westland, Redford, Farmington Hills, Royal Oak, Sterling Heights,
+                and all Wayne, Oakland, and Macomb County communities
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Detroit Services - INTENT VARIANTS */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Related Detroit Mobile Phlebotomy Services
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Link
+                href="/detroit-mi/in-home-blood-draw"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md transition-all border-2 border-transparent hover:border-primary-300"
+              >
+                <h3 className="font-bold text-gray-900 mb-2 text-lg">In-Home Blood Draw Services</h3>
+                <p className="text-sm text-gray-600">Detroit at-home blood collection →</p>
+              </Link>
+              <Link
+                href="/detroit-mi/mobile-phlebotomist"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md transition-all border-2 border-transparent hover:border-primary-300"
+              >
+                <h3 className="font-bold text-gray-900 mb-2 text-lg">Mobile Phlebotomist Directory</h3>
+                <p className="text-sm text-gray-600">Find Detroit mobile phlebotomists →</p>
+              </Link>
+              <Link
+                href="/detroit-mi/blood-draw-at-home"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md transition-all border-2 border-transparent hover:border-primary-300"
+              >
+                <h3 className="font-bold text-gray-900 mb-2 text-lg">Blood Draw at Home</h3>
+                <p className="text-sm text-gray-600">Convenient home blood testing →</p>
+              </Link>
+              <Link
+                href="/detroit-mi/lab-draw-at-home"
+                className="block p-5 bg-gray-50 rounded-lg hover:bg-primary-50 hover:shadow-md transition-all border-2 border-transparent hover:border-primary-300"
+              >
+                <h3 className="font-bold text-gray-900 mb-2 text-lg">Lab Draw at Home</h3>
+                <p className="text-sm text-gray-600">Home lab specimen collection →</p>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Featured Provider Card */}
         {featuredProvider && (
           <div className="max-w-4xl mx-auto mb-12">
@@ -249,40 +322,6 @@ export default function DetroitMobilePhlebotomy() {
             </div>
           </div>
         )}
-
-        {/* Now Serving Detroit Metro Section */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Now Serving Detroit Metro
-            </h2>
-            <p className="text-gray-700 mb-6">
-              Our network of mobile phlebotomists serves Detroit and surrounding communities
-              throughout Wayne County. Select your area to find local providers:
-            </p>
-            <div className="grid md:grid-cols-3 gap-4">
-              {detroitSuburbs.map(suburb => (
-                <Link
-                  key={suburb.slug}
-                  href={`/${suburb.slug}/mobile-phlebotomy`}
-                  className="block bg-gray-50 rounded-lg p-4 hover:bg-primary-50 hover:border-primary-500 border-2 border-transparent transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">📍</span>
-                    <span className="font-semibold text-gray-900">{suburb.name}</span>
-                  </div>
-                  <span className="text-sm text-gray-600">View providers →</span>
-                </Link>
-              ))}
-            </div>
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
-                Also serving: Westland, Redford, Farmington Hills, Royal Oak, Sterling Heights,
-                and all Wayne, Oakland, and Macomb County communities
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* What to Expect Section */}
         <div className="max-w-4xl mx-auto mb-12">
