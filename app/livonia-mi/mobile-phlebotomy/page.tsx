@@ -70,6 +70,10 @@ export default function LivoniaMobilePhlebotomy() {
     fetchProviders()
   }, [])
 
+  const featuredProvider = providers.find((p: any) =>
+    p.isFeatured || p.listingTier === 'FEATURED' || p.isFeaturedCity
+  )
+
   return (
     <div className="min-h-screen bg-gray-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -107,6 +111,37 @@ export default function LivoniaMobilePhlebotomy() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
+          {/* Featured Provider Card */}
+          {!loading && featuredProvider && (
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-yellow-400 rounded-lg p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">⭐</span>
+                <h2 className="text-2xl font-bold text-gray-900">Featured Provider in Livonia</h2>
+              </div>
+              <div className="bg-white rounded-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{featuredProvider.name}</h3>
+                {featuredProvider.description && <p className="text-gray-700 mb-4">{featuredProvider.description}</p>}
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  {featuredProvider.phone && (
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <span>📞</span>
+                      <span>{featuredProvider.phone}</span>
+                    </div>
+                  )}
+                  {featuredProvider.website && (
+                    <div className="flex items-center gap-2">
+                      <span>🌐</span>
+                      <a href={featuredProvider.website} target="_blank" rel="noopener noreferrer nofollow" className="text-primary-600 hover:text-primary-700 underline">
+                        Visit Website
+                      </a>
+                    </div>
+                  )}
+                </div>
+                <ProviderActions provider={featuredProvider} currentLocation="Livonia, MI" variant="compact" />
+              </div>
+            </div>
+          )}
+
           {!loading && providers.length > 0 && (
             <div className="bg-white rounded-lg shadow-md p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">{providers.length} Provider{providers.length !== 1 ? 's' : ''} Serving Livonia</h2>
