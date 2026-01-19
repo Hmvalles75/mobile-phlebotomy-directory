@@ -700,6 +700,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                   <ListingTierBadge
                                     tier={(provider as any).listingTier || 'BASIC'}
                                     isFeaturedCity={(provider as any).isFeaturedCity || false}
+                                    isFeatured={(provider as any).isFeatured || false}
                                   />
                                 </div>
                           {provider.description && (
@@ -821,6 +822,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             <ListingTierBadge
                               tier={(provider as any).listingTier || 'BASIC'}
                               isFeaturedCity={(provider as any).isFeaturedCity || false}
+                              isFeatured={(provider as any).isFeatured || false}
                             />
                           </div>
 

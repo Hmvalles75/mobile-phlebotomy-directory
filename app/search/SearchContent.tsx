@@ -282,6 +282,7 @@ params.append('sort', sortBy)
                           <ListingTierBadge
                             tier={(provider as any).listingTier || 'BASIC'}
                             isFeaturedCity={(provider as any).isFeaturedCity || false}
+                            isFeatured={(provider as any).isFeatured || false}
                           />
                         </div>
                         {provider.rating && (
