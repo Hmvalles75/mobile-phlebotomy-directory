@@ -3,10 +3,15 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Get all providers and group by state
+    // Get all providers with primary state (source of truth)
     const providers = await prisma.provider.findMany({
       select: {
-        coverage: true
+        primaryState: true
+      },
+      where: {
+        primaryState: {
+          not: null
+        }
       }
     })
 
@@ -14,19 +19,8 @@ export async function GET() {
     const stateCounts: Record<string, number> = {}
 
     providers.forEach(provider => {
-      const coverage = provider.coverage as any
-
-      // Handle different coverage formats
-      if (coverage && coverage.statesCovered && Array.isArray(coverage.statesCovered)) {
-        coverage.statesCovered.forEach((state: string) => {
-          const stateAbbr = state.toUpperCase()
-          stateCounts[stateAbbr] = (stateCounts[stateAbbr] || 0) + 1
-        })
-      }
-
-      // Also check for state field directly
-      if (coverage && coverage.state) {
-        const stateAbbr = coverage.state.toUpperCase()
+      if (provider.primaryState) {
+        const stateAbbr = provider.primaryState.toUpperCase()
         stateCounts[stateAbbr] = (stateCounts[stateAbbr] || 0) + 1
       }
     })

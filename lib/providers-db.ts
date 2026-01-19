@@ -8,6 +8,10 @@ export type { EnrichedProvider } from './providers'
  * Convert database provider to EnrichedProvider format
  */
 function toEnrichedProvider(provider: any): EnrichedProvider {
+  // Use PRIMARY fields as source of truth, fallback to legacy for backwards compat
+  const primaryState = provider.primaryState || provider.address?.state || provider.coverage?.find((c: any) => c.stateId)?.state?.abbr
+  const primaryCity = provider.primaryCity || provider.address?.city || provider.coverage?.find((c: any) => c.cityId)?.city?.name
+
   return {
     id: provider.id,
     name: provider.name,
@@ -22,16 +26,18 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     totalScore: provider.rating || undefined,
     reviewsCount: provider.reviewCount || undefined,
 
-    // Parse coverage from ProviderCoverage relationships
+    // Coverage: Use primary state + relational coverage cities
     coverage: {
-      states: provider.coverage?.filter((c: any) => !c.cityId).map((c: any) => c.state?.abbr) || [],
+      // PRIMARY STATE goes in states array (single source of truth)
+      states: primaryState ? [primaryState] : [],
+      // Cities from ProviderCoverage relation
       cities: provider.coverage?.filter((c: any) => c.cityId).map((c: any) => c.city?.name) || [],
       regions: []
     },
 
-    // Get primary location from first city coverage or provider address
-    city: provider.address?.city || provider.coverage?.find((c: any) => c.cityId)?.city?.name,
-    state: provider.address?.state || provider.coverage?.find((c: any) => c.stateId)?.state?.abbr,
+    // Use primary location fields
+    city: primaryCity,
+    state: primaryState,
 
     // Include address if available
     address: provider.address ? {
@@ -64,7 +70,34 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
 export async function getAllProviders(): Promise<EnrichedProvider[]> {
   try {
     const providers = await prisma.provider.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        phone: true,
+        phonePublic: true,
+        website: true,
+        email: true,
+        description: true,
+        rating: true,
+        reviewsCount: true,
+        zipCodes: true,
+        status: true,
+        listingTier: true,
+        isFeatured: true,
+        isFeaturedCity: true,
+        logo: true,
+        profileImage: true,
+        createdAt: true,
+        updatedAt: true,
+        // PRIMARY LOCATION FIELDS (Source of Truth)
+        primaryState: true,
+        primaryStateName: true,
+        primaryStateSlug: true,
+        primaryCity: true,
+        primaryCitySlug: true,
+        primaryMetro: true,
+        // Relations
         coverage: {
           include: {
             state: true,
