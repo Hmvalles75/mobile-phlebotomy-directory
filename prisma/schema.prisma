@@ -61,6 +61,14 @@ model Provider {
   notificationEmail  String?  // Override email for lead notifications (defaults to claimEmail or email)
   notifyEnabled      Boolean @default(true)  // Allow providers to opt-out of email notifications
 
+  // PRIMARY LOCATION (Source of Truth) - Required for consistent filtering
+  primaryState      String?  // State abbreviation: "MI", "CA", "TX"
+  primaryStateName  String?  // Full state name: "Michigan", "California", "Texas"
+  primaryStateSlug  String?  // URL slug: "michigan", "california", "texas"
+  primaryCity       String?  // City name: "Detroit", "Los Angeles", "Houston"
+  primaryCitySlug   String?  // URL slug: "detroit", "los-angeles", "houston"
+  primaryMetro      String?  // Metro area: "Detroit", "Los Angeles", "Houston" (optional)
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -78,6 +86,9 @@ model Provider {
   correctionsQueue ProviderCorrections[] @relation("corrections_queue")
   leadNotifications LeadNotification[]
 
+  @@index([primaryState])
+  @@index([primaryCity])
+  @@index([primaryMetro])
   @@map("providers")
 }
 
