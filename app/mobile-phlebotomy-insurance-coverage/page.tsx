@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Mobile Phlebotomy Insurance Coverage: Medicare, Medicaid & Private Plans (2025)',
+  title: 'Mobile Phlebotomy Insurance Coverage: Medicare, Medicaid & Private Plans (2026)',
   description: '💡 YES! Most insurance covers mobile phlebotomy. Medicare pays up to 80%. Get CPT codes, pre-authorization tips, and maximize your benefits. Save hundreds on at-home blood draws.',
   keywords: 'mobile phlebotomy insurance coverage, does insurance cover mobile phlebotomy, Medicare mobile phlebotomy, at home blood draw insurance, mobile blood draw Medicare, phlebotomy insurance billing',
 }

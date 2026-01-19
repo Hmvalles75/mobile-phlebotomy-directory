@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
 export const metadata: Metadata = {
-  title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2025)',
+  title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2026)',
   description: '✓ Skip the lab wait! Get professional at-home blood draws from certified phlebotomists. Compare prices, check insurance coverage, and book same-day appointments. 500+ providers nationwide.',
   keywords: 'at-home blood draw services, mobile blood draw, home phlebotomy services, at home blood work, mobile lab services, home blood collection, traveling phlebotomist, mobile blood testing, in-home blood draw',
   openGraph: {
-    title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2025)',
+    title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2026)',
     description: '✓ Skip the lab wait! Get professional at-home blood draws from certified phlebotomists. Compare prices, check insurance coverage, and book same-day appointments. 500+ providers nationwide.',
     type: 'article',
     publishedTime: '2024-01-01',

@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: { params: { state: string } }
     }
   }
 
-  const title = `Mobile Phlebotomy ${stateInfo.name} | Top At-Home Blood Draw Services (2025)`
+  const title = `Mobile Phlebotomy ${stateInfo.name} | Top At-Home Blood Draw Services (2026)`
   const description = `🏆 #1 mobile phlebotomy directory in ${stateInfo.name}! Find certified, licensed phlebotomists statewide. Same-day service, insurance accepted. 100+ verified providers in ${stateInfo.abbr}.`
 
   return {

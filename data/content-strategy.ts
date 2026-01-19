@@ -21,7 +21,7 @@ export const nonBrandedKeywords: ContentPage[] = [
   // High-volume informational keywords
   {
     slug: 'at-home-blood-draw-services',
-    title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2024)',
+    title: 'At-Home Blood Draw Services: Complete Guide to Mobile Phlebotomy (2026)',
     metaDescription: 'Everything you need to know about at-home blood draw services. Find certified mobile phlebotomists, costs, insurance coverage, and how to book appointments near you.',
     h1: 'At-Home Blood Draw Services: Your Complete Guide',
     keywords: {
@@ -48,7 +48,7 @@ export const nonBrandedKeywords: ContentPage[] = [
   // Cost-focused commercial intent
   {
     slug: 'mobile-phlebotomy-cost',
-    title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2024)',
+    title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2026)',
     metaDescription: 'Mobile phlebotomy costs $60-150 per visit. Learn about pricing factors, insurance coverage, Medicare/Medicaid acceptance, and ways to save money on at-home blood draws.',
     h1: 'How Much Does Mobile Phlebotomy Cost?',
     keywords: {

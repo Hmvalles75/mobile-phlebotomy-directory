@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: {
-    default: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
+    default: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2026)',
     template: '%s | MobilePhlebotomy.org'
   },
   description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
@@ -34,12 +34,12 @@ export const metadata = {
     locale: 'en_US',
     url: '/',
     siteName: 'MobilePhlebotomy.org',
-    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
+    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2026)',
     description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2025)',
+    title: 'Mobile Phlebotomy Near You | At-Home Blood Draw Directory (Updated 2026)',
     description: 'Find certified mobile phlebotomists in your area today! Book same-day at-home blood draws. 500+ verified providers nationwide. Insurance accepted. Compare prices & reviews.',
   },
   robots: {

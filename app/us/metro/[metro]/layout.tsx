@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: { metro: string } }
     }
   }
 
-  const title = `Mobile Phlebotomy ${metro.city}, ${metro.stateAbbr} | Best At-Home Blood Draw (2025)`
+  const title = `Mobile Phlebotomy ${metro.city}, ${metro.stateAbbr} | Best At-Home Blood Draw (2026)`
   const description = `Find top-rated mobile phlebotomists in ${metro.city}, ${metro.state}! Same-day service available. Insurance accepted. Book online today.`
 
   return {

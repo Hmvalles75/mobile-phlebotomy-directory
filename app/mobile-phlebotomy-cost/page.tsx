@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
 export const metadata: Metadata = {
-  title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2025)',
+  title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2026)',
   description: '💰 Mobile phlebotomy costs $60-150 per visit. Get instant price quotes! Most insurance accepted. Medicare/Medicaid covered. Save 50% with these insider tips. Compare providers now.',
   keywords: 'mobile phlebotomy cost, at home blood draw cost, mobile blood draw price, home phlebotomy pricing, blood draw at home cost, mobile lab cost, traveling phlebotomist cost, at home blood work price',
   openGraph: {
-    title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2025)',
+    title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2026)',
     description: '💰 Mobile phlebotomy costs $60-150 per visit. Get instant price quotes! Most insurance accepted. Medicare/Medicaid covered. Save 50% with these insider tips. Compare providers now.',
     type: 'article',
   }
