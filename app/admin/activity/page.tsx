@@ -8,12 +8,15 @@ interface Provider {
   name: string
   email: string | null
   claimEmail: string | null
+  notificationEmail?: string | null
   phone: string | null
   createdAt: string
   claimVerifiedAt?: string | null
   stripePaymentMethodId: string | null
   eligibleForLeads: boolean
   status?: string
+  isFeatured?: boolean
+  featuredTier?: string | null
   _count: {
     leads: number
   }
@@ -43,6 +46,7 @@ interface ActivityData {
       withPayment: number
       whoClaimedLeads: number
       claimedViaOnboard: number
+      featuredReceivingNotifications: number
     }
     leads: {
       total: number
@@ -52,6 +56,7 @@ interface ActivityData {
   }
   recentProviders: Provider[]
   onboardedProviders: Provider[]
+  featuredProviders: Provider[]
   allProviders: Provider[]
   recentLeadClaims: LeadClaim[]
 }
@@ -62,7 +67,7 @@ export default function AdminActivityPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ActivityData | null>(null)
-  const [activeTab, setActiveTab] = useState<'onboarded' | 'recent' | 'all' | 'claims'>('onboarded')
+  const [activeTab, setActiveTab] = useState<'onboarded' | 'featured' | 'recent' | 'all' | 'claims'>('featured')
 
   // Check for existing admin token on page load
   useEffect(() => {
@@ -224,13 +229,31 @@ export default function AdminActivityPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <Users className="text-blue-600" size={24} />
               <h3 className="font-semibold text-gray-900">Total Providers</h3>
             </div>
             <p className="text-3xl font-bold text-gray-900">{data.stats.providers.total}</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-yellow-400">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="text-yellow-600" size={24} />
+              <h3 className="font-semibold text-gray-900">Featured Active</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{data.stats.providers.featuredReceivingNotifications}</p>
+            <p className="text-sm text-gray-600 mt-1">receiving notifications</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="text-purple-600" size={24} />
+              <h3 className="font-semibold text-gray-900">Onboarded</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{data.stats.providers.claimedViaOnboard}</p>
+            <p className="text-sm text-gray-600 mt-1">claimed via /onboard</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-6">
@@ -242,15 +265,6 @@ export default function AdminActivityPage() {
             <p className="text-sm text-gray-600 mt-1">
               {Math.round((data.stats.providers.withPayment / data.stats.providers.total) * 100)}% of total
             </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="text-purple-600" size={24} />
-              <h3 className="font-semibold text-gray-900">Onboarded</h3>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">{data.stats.providers.claimedViaOnboard}</p>
-            <p className="text-sm text-gray-600 mt-1">claimed via /onboard</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-6">
@@ -269,6 +283,16 @@ export default function AdminActivityPage() {
         <div className="bg-white rounded-lg shadow-lg mb-8">
           <div className="border-b border-gray-200">
             <div className="flex gap-4 px-6">
+              <button
+                onClick={() => setActiveTab('featured')}
+                className={`py-4 px-2 border-b-2 font-semibold transition-colors ${
+                  activeTab === 'featured'
+                    ? 'border-yellow-500 text-yellow-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                ⭐ Featured ({data.featuredProviders.length})
+              </button>
               <button
                 onClick={() => setActiveTab('onboarded')}
                 className={`py-4 px-2 border-b-2 font-semibold transition-colors ${
@@ -313,6 +337,70 @@ export default function AdminActivityPage() {
           </div>
 
           <div className="p-6">
+            {/* Featured Providers Tab */}
+            {activeTab === 'featured' && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Featured providers actively receiving lead notifications
+                </p>
+                {data.featuredProviders.length === 0 ? (
+                  <p className="text-gray-600 text-center py-8">No featured providers yet</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Name</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Phone</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Tier</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Onboarded</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {data.featuredProviders.map((provider) => {
+                          const notificationEmail = provider.notificationEmail || provider.claimEmail || provider.email
+                          return (
+                            <tr key={provider.id} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <div className="flex items-center gap-2">
+                                  ⭐ {provider.name}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">{notificationEmail || 'N/A'}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600">{provider.phone || 'N/A'}</td>
+                              <td className="px-4 py-3">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  {provider.featuredTier || 'FEATURED'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  provider.status === 'VERIFIED' ? 'bg-green-100 text-green-800' :
+                                  provider.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {provider.status || 'UNVERIFIED'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                {provider.claimVerifiedAt ? (
+                                  <span className="text-green-600 font-semibold">✓ Yes</span>
+                                ) : (
+                                  <span className="text-orange-600 font-semibold">⚠ No (email only)</span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Onboarded Providers Tab */}
             {activeTab === 'onboarded' && (
               <div className="space-y-4">

@@ -56,6 +56,17 @@ export async function GET(req: NextRequest) {
         claimVerifiedAt: { not: null }
       }
     })
+    const featuredProvidersReceivingNotifications = await prisma.provider.count({
+      where: {
+        isFeatured: true,
+        notifyEnabled: true,
+        OR: [
+          { notificationEmail: { not: null } },
+          { claimEmail: { not: null } },
+          { email: { not: null } }
+        ]
+      }
+    })
 
     // Fetch recent providers (last 30 days)
     const thirtyDaysAgo = new Date()
@@ -102,6 +113,38 @@ export async function GET(req: NextRequest) {
         claimVerifiedAt: true,
         stripePaymentMethodId: true,
         eligibleForLeads: true,
+        status: true,
+        _count: {
+          select: {
+            leads: true
+          }
+        }
+      }
+    })
+
+    // Fetch featured providers receiving notifications
+    const featuredProviders = await prisma.provider.findMany({
+      where: {
+        isFeatured: true,
+        notifyEnabled: true,
+        OR: [
+          { notificationEmail: { not: null } },
+          { claimEmail: { not: null } },
+          { email: { not: null } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        claimEmail: true,
+        notificationEmail: true,
+        phone: true,
+        createdAt: true,
+        claimVerifiedAt: true,
+        isFeatured: true,
+        featuredTier: true,
         status: true,
         _count: {
           select: {
@@ -170,7 +213,8 @@ export async function GET(req: NextRequest) {
           total: totalProviders,
           withPayment: providersWithPayment,
           whoClaimedLeads: providersWhoClaimedLeads,
-          claimedViaOnboard: providersClaimedViaOnboard
+          claimedViaOnboard: providersClaimedViaOnboard,
+          featuredReceivingNotifications: featuredProvidersReceivingNotifications
         },
         leads: {
           total: totalLeads,
@@ -180,6 +224,7 @@ export async function GET(req: NextRequest) {
       },
       recentProviders,
       onboardedProviders,
+      featuredProviders,
       allProviders,
       recentLeadClaims
     })
