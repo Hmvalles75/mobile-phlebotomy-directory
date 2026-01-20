@@ -60,7 +60,7 @@ export const ga4 = {
    * Use this BEFORE opening the lead form modal
    */
   leadCtaClick: (params?: {
-    placement?: 'hero' | 'sticky' | 'inline' | 'provider_card' | 'not_found'
+    placement?: 'hero' | 'sticky' | 'inline' | 'provider_card' | 'not_found' | 'metro_links'
   }) => {
     trackEvent('lead_cta_click', params)
   },
