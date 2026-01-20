@@ -168,30 +168,70 @@ export default function DetroitInHomeBloodDraw() {
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Featured Provider Card */}
           {!loading && featuredProvider && (
-            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-yellow-400 rounded-lg p-6 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">⭐</span>
-                <h2 className="text-2xl font-bold text-gray-900">Featured Provider in Detroit</h2>
-              </div>
-              <div className="bg-white rounded-lg p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{featuredProvider.name}</h3>
-                {featuredProvider.description && <p className="text-gray-700 mb-4">{featuredProvider.description}</p>}
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  {featuredProvider.phone && (
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <span>📞</span>
-                      <span>{featuredProvider.phone}</span>
-                    </div>
-                  )}
-                  {featuredProvider.website && (
-                    <div className="flex items-center gap-2">
-                      <span>🌐</span>
-                      <a href={featuredProvider.website} target="_blank" rel="noopener noreferrer nofollow" className="text-primary-600 hover:text-primary-700 underline">
-                        Visit Website
-                      </a>
-                    </div>
-                  )}
+            <div className="bg-white rounded-lg shadow-lg border-2 border-amber-300">
+              <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 p-4 border-b border-amber-200">
+                <div className="flex items-center mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <span className="text-2xl">⭐</span>
+                    Featured Provider in Detroit
+                  </h2>
                 </div>
+                <p className="text-gray-700 font-medium">
+                  Premium provider with verified credentials and enhanced visibility
+                </p>
+              </div>
+              <div className="p-5 bg-gradient-to-r from-amber-50/40 to-transparent">
+                {/* Provider Header */}
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {featuredProvider.name}
+                  </h3>
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md">
+                    ⭐ Featured Provider
+                  </span>
+                </div>
+
+                {/* Description */}
+                {featuredProvider.description && (
+                  <div className="mb-4 p-3 bg-white/60 rounded-lg border border-gray-200">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {featuredProvider.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Contact & Actions */}
+                <div className="bg-white/60 p-4 rounded-lg border border-gray-200 mb-4">
+                  <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
+                  <div className="space-y-2 text-sm">
+                    {featuredProvider.phone && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary-600">📞</span>
+                        <span className="font-medium text-gray-900">{featuredProvider.phone}</span>
+                      </div>
+                    )}
+                    {featuredProvider.city && featuredProvider.state && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary-600">📍</span>
+                        <span className="text-gray-700">Based in {featuredProvider.city}, {featuredProvider.state}</span>
+                      </div>
+                    )}
+                    {featuredProvider.website && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary-600">🌐</span>
+                        <a
+                          href={featuredProvider.website}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="text-primary-600 hover:text-primary-700 font-medium underline"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <ProviderActions provider={featuredProvider} currentLocation="Detroit, MI" variant="compact" />
               </div>
             </div>
