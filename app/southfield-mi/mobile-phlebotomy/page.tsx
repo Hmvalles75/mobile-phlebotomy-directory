@@ -171,10 +171,10 @@ export default function SouthfieldMobilePhlebotomy() {
                       <span className="font-medium text-gray-900">{featuredProvider.phone}</span>
                     </div>
                   )}
-                  {featuredProvider.primaryCity && featuredProvider.primaryState && (
+                  {featuredProvider.address?.city && featuredProvider.address?.state && (
                     <div className="flex items-center gap-2">
                       <span className="text-primary-600">📍</span>
-                      <span className="text-gray-700">Based in {featuredProvider.primaryCity}, {featuredProvider.primaryState}</span>
+                      <span className="text-gray-700">Based in {featuredProvider.address.city}, {featuredProvider.address.state}</span>
                     </div>
                   )}
                   {featuredProvider.website && (
