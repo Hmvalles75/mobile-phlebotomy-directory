@@ -174,10 +174,10 @@ export default function DetroitLabDrawAtHome() {
                         <span className="font-medium text-gray-900">{featuredProvider.phone}</span>
                       </div>
                     )}
-                    {featuredProvider.city && featuredProvider.state && (
+                    {featuredProvider.primaryCity && featuredProvider.primaryState && (
                       <div className="flex items-center gap-2">
                         <span className="text-primary-600">📍</span>
-                        <span className="text-gray-700">Based in {featuredProvider.city}, {featuredProvider.state}</span>
+                        <span className="text-gray-700">Based in {featuredProvider.primaryCity}, {featuredProvider.primaryState}</span>
                       </div>
                     )}
                     {featuredProvider.website && (
