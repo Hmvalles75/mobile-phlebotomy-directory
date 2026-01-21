@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addPendingSubmission } from '@/lib/pending-submissions'
+import { checkForDuplicate } from '@/lib/duplicate-detection'
 
 /**
  * Send email notification to admin about new submission
@@ -81,6 +82,25 @@ Review at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.json()
+
+    // Check for duplicate provider before accepting submission
+    const duplicateCheck = await checkForDuplicate(
+      formData.businessName,
+      formData.website
+    )
+
+    if (duplicateCheck.isDuplicate) {
+      return NextResponse.json({
+        success: false,
+        error: 'duplicate',
+        message: `A provider with similar name or website already exists in our directory: "${duplicateCheck.existingProvider?.name}". If this is your business and you'd like to claim it, please use our claim listing feature.`,
+        existingProvider: {
+          id: duplicateCheck.existingProvider?.id,
+          name: duplicateCheck.existingProvider?.name,
+          slug: duplicateCheck.existingProvider?.slug
+        }
+      }, { status: 409 })
+    }
 
     // Get IP address and user agent for security tracking
     const ipAddress = request.headers.get('x-forwarded-for') ||

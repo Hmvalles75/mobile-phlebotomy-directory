@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { removeDuplicates } from '@/lib/duplicate-detection'
 import fs from 'fs'
 import path from 'path'
 
@@ -184,12 +185,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // After import, check for and remove duplicates
+    console.log('Checking for duplicates...')
+    const duplicateResult = await removeDuplicates(false) // false = actually delete them
+
     return NextResponse.json({
       success: true,
       imported,
       skipped,
       coverageAdded,
-      total: providers.length
+      total: providers.length,
+      duplicates: duplicateResult
     })
 
   } catch (error: any) {
