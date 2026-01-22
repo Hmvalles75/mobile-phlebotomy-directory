@@ -392,10 +392,16 @@ export default function SearchContent() {
             {/* Featured: Detroit Metro Suggestion */}
             <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-6 mb-8 border-2 border-primary-200">
               <div className="flex items-start gap-4">
-                <div className="text-4xl">🏙️</div>
+                <div className="flex-shrink-0">
+                  <img
+                    src="/images/detroit-metro-map.png"
+                    alt="Detroit Metro Area Map"
+                    className="w-24 h-24 object-cover rounded-lg shadow-sm border-2 border-white"
+                  />
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">Popular in Michigan:</h3>
+                    <h3 className="text-xl font-bold text-gray-900">Featured Area: Detroit Metro</h3>
                     <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
                   </div>
                   <p className="text-gray-700 mb-4">
