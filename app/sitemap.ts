@@ -3,9 +3,10 @@ import statesData from '@/data/states.json'
 import citiesData from '@/data/cities.json'
 import { State, City } from '@/lib/schemas'
 import { getAllProviders } from '@/lib/providers-db'
+import { SITE_URL } from '@/lib/seo'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  const baseUrl = SITE_URL
   const states = statesData as State[]
   const cities = citiesData as City[]
   const providers = await getAllProviders()
@@ -88,26 +89,60 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   })
 
-  // Add Detroit metro area pages (custom routes)
-  const detroitPages = [
+  // Add custom metro area pages (Detroit, NYC, LA)
+  const customPages = [
+    // DETROIT METRO
     // Main hub
     { slug: 'detroit-mi/mobile-phlebotomy', priority: 0.9 },
-
     // Suburbs
     { slug: 'dearborn-mi/mobile-phlebotomy', priority: 0.8 },
     { slug: 'livonia-mi/mobile-phlebotomy', priority: 0.8 },
     { slug: 'troy-mi/mobile-phlebotomy', priority: 0.8 },
     { slug: 'southfield-mi/mobile-phlebotomy', priority: 0.8 },
     { slug: 'warren-mi/mobile-phlebotomy', priority: 0.8 },
-
     // Intent variants
     { slug: 'detroit-mi/in-home-blood-draw', priority: 0.7 },
     { slug: 'detroit-mi/mobile-phlebotomist', priority: 0.7 },
     { slug: 'detroit-mi/blood-draw-at-home', priority: 0.7 },
     { slug: 'detroit-mi/lab-draw-at-home', priority: 0.7 },
+
+    // NYC METRO
+    // Main hub
+    { slug: 'new-york-ny/mobile-phlebotomy', priority: 0.9 },
+    // Five Boroughs
+    { slug: 'manhattan-ny/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'brooklyn-ny/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'queens-ny/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'bronx-ny/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'staten-island-ny/mobile-phlebotomy', priority: 0.85 },
+    // Northern NJ
+    { slug: 'newark-nj/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'jersey-city-nj/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'bayonne-nj/mobile-phlebotomy', priority: 0.8 },
+    // Intent variants
+    { slug: 'new-york-ny/in-home-blood-draw', priority: 0.7 },
+    { slug: 'new-york-ny/blood-draw-at-home', priority: 0.7 },
+    { slug: 'new-york-ny/lab-draw-at-home', priority: 0.7 },
+
+    // LA METRO
+    // Main hub
+    { slug: 'los-angeles-ca/mobile-phlebotomy', priority: 0.9 },
+    // Suburbs
+    { slug: 'pasadena-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'santa-monica-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'burbank-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'glendale-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'long-beach-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'torrance-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'west-hollywood-ca/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'beverly-hills-ca/mobile-phlebotomy', priority: 0.8 },
+    // Intent variants
+    { slug: 'los-angeles-ca/in-home-blood-draw', priority: 0.7 },
+    { slug: 'los-angeles-ca/blood-draw-at-home', priority: 0.7 },
+    { slug: 'los-angeles-ca/lab-draw-at-home', priority: 0.7 },
   ]
 
-  detroitPages.forEach((page) => {
+  customPages.forEach((page) => {
     routes.push({
       url: `${baseUrl}/${page.slug}`,
       lastModified: new Date(),
