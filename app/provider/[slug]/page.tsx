@@ -512,22 +512,6 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {provider.website && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2">🌐</span>
-                      <div>
-                        <ProviderWebsiteLink
-                          website={provider.website}
-                          providerName={provider.name}
-                          providerCity={provider.city || undefined}
-                          providerState={provider.state || undefined}
-                          className="font-semibold text-primary-600 hover:underline"
-                        />
-                        <p className="text-sm text-gray-500">Official Website</p>
-                      </div>
-                    </div>
-                  )}
-
                   {provider.contactPerson && (
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">👤</span>
@@ -600,6 +584,19 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                           </p>
                         )}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Website Link - Buried at bottom to prioritize lead generation */}
+                  {provider.website && (
+                    <div className="pt-4 border-t">
+                      <ProviderWebsiteLink
+                        website={provider.website}
+                        providerName={provider.name}
+                        providerCity={provider.city || undefined}
+                        providerState={provider.state || undefined}
+                        className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900"
+                      />
                     </div>
                   )}
 

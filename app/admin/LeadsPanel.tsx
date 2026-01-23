@@ -27,6 +27,15 @@ interface Lead {
   routedToId: string | null
   routedAt: string | null
   priceCents: number
+  // Provider tracking fields
+  claimedAt: string | null
+  firstContactAt: string | null
+  callAttempts: number
+  outcome: 'CONTACTED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'NO_ANSWER' | 'VOICEMAIL' | 'DECLINED' | 'WRONG_NUMBER' | 'DUPLICATE' | 'NOT_INTERESTED' | 'SCHEDULED_CALLBACK' | null
+  outcomeNotes: string | null
+  appointmentDate: string | null
+  completedAt: string | null
+  providerNotes: string | null
   provider?: {
     id: string
     name: string
@@ -385,6 +394,11 @@ export function LeadsPanel() {
                                 {new Date(selectedLead.routedAt).toLocaleString()}
                               </p>
                             )}
+                            {selectedLead.claimedAt && (
+                              <p className="text-xs text-blue-600">
+                                Claimed: {new Date(selectedLead.claimedAt).toLocaleString()}
+                              </p>
+                            )}
                           </div>
                         ) : (
                           <p className="text-xs text-gray-500">Awaiting provider response</p>
@@ -408,6 +422,87 @@ export function LeadsPanel() {
                     </div>
                   </div>
                 </div>
+
+                {/* Provider Tracking & Outcome */}
+                {(selectedLead.claimedAt || selectedLead.outcome) && (
+                  <div className="border-t pt-4">
+                    <label className="text-sm font-medium text-gray-500 mb-3 block">📊 Provider Tracking</label>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                      {/* Call Attempts */}
+                      {selectedLead.callAttempts > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-700">Call Attempts:</span>
+                          <span className="text-sm font-semibold text-blue-900">{selectedLead.callAttempts}</span>
+                        </div>
+                      )}
+
+                      {/* First Contact */}
+                      {selectedLead.firstContactAt && (
+                        <div>
+                          <span className="text-xs text-gray-600">First Contact:</span>
+                          <p className="text-sm text-gray-900">{new Date(selectedLead.firstContactAt).toLocaleString()}</p>
+                        </div>
+                      )}
+
+                      {/* Outcome */}
+                      {selectedLead.outcome && (
+                        <div className="pt-2 border-t border-blue-300">
+                          <span className="text-xs text-gray-600">Outcome:</span>
+                          <p className={`text-sm font-semibold mt-1 ${
+                            selectedLead.outcome === 'APPOINTMENT_COMPLETED' ? 'text-green-700' :
+                            selectedLead.outcome === 'APPOINTMENT_BOOKED' ? 'text-blue-700' :
+                            selectedLead.outcome === 'CONTACTED' ? 'text-purple-700' :
+                            selectedLead.outcome === 'NO_ANSWER' || selectedLead.outcome === 'VOICEMAIL' ? 'text-yellow-700' :
+                            'text-red-700'
+                          }`}>
+                            {selectedLead.outcome.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Appointment Date */}
+                      {selectedLead.appointmentDate && (
+                        <div className="pt-2">
+                          <span className="text-xs text-gray-600">Appointment Scheduled:</span>
+                          <p className="text-sm font-medium text-green-700">{new Date(selectedLead.appointmentDate).toLocaleString()}</p>
+                        </div>
+                      )}
+
+                      {/* Outcome Notes */}
+                      {selectedLead.outcomeNotes && (
+                        <div className="pt-2">
+                          <span className="text-xs text-gray-600">Outcome Notes:</span>
+                          <p className="text-sm text-gray-900 bg-white p-2 rounded border border-blue-200 mt-1">
+                            {selectedLead.outcomeNotes}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Provider Notes */}
+                      {selectedLead.providerNotes && (
+                        <div className="pt-2">
+                          <span className="text-xs text-gray-600">Provider Notes:</span>
+                          <p className="text-sm text-gray-900 bg-white p-2 rounded border border-blue-200 mt-1">
+                            {selectedLead.providerNotes}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Completed */}
+                      {selectedLead.completedAt && (
+                        <div className="pt-2 border-t border-blue-300">
+                          <span className="text-xs text-gray-600">✅ Service Completed:</span>
+                          <p className="text-sm font-semibold text-green-700">{new Date(selectedLead.completedAt).toLocaleString()}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {!selectedLead.outcome && selectedLead.claimedAt && (
+                      <p className="text-xs text-gray-500 mt-2 italic">Provider has claimed this lead. Awaiting outcome update via email/SMS.</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="border-t pt-4">
                   <label className="text-sm font-medium text-gray-500">Submitted</label>

@@ -168,11 +168,20 @@ export default function OnboardPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Access Your Provider Dashboard
+            Receive Patient Requests in Your Service Area
           </h1>
           <p className="text-lg text-gray-600">
-            Manage your provider listing and optionally receive patient service requests
+            Complete onboarding to receive email/SMS notifications when patients request mobile blood draw services.
           </p>
+          <div className="mt-6 text-sm text-gray-700 max-w-xl mx-auto">
+            <div className="flex items-center justify-center gap-2">
+              <span className="font-medium">1.</span> Claim your listing
+              <span className="text-gray-400">→</span>
+              <span className="font-medium">2.</span> Confirm coverage & availability
+              <span className="text-gray-400">→</span>
+              <span className="font-medium">3.</span> Receive patient requests
+            </div>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -249,6 +258,9 @@ export default function OnboardPage() {
           <p className="text-sm text-gray-600 mb-3">
             Enter your business name, email, or phone number to locate your listing
           </p>
+          <p className="text-sm text-gray-700 mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            Providers who complete onboarding are eligible to receive direct patient service requests. Listings that are not onboarded remain visible but do not receive lead notifications.
+          </p>
           <div className="relative">
             <div className="flex gap-2">
               <input
@@ -306,8 +318,8 @@ export default function OnboardPage() {
               <p className="text-sm text-blue-800 font-semibold mb-2">What happens next:</p>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Click the link in your email to access your dashboard</li>
-                <li>• Review and update your provider listing</li>
-                <li>• Optionally set up payment to receive patient requests</li>
+                <li>• Confirm your service coverage area and availability</li>
+                <li>• Start receiving patient service requests via email/SMS</li>
               </ul>
             </div>
           </div>
@@ -436,11 +448,11 @@ export default function OnboardPage() {
               </p>
               <ul className="text-sm text-blue-800 mt-2 space-y-1">
                 <li>• We&apos;ll send you a secure login link via email</li>
-                <li>• Access your dashboard to manage your listing</li>
-                <li>• Optionally set up payment to receive patient requests</li>
+                <li>• Access your dashboard to confirm coverage and availability</li>
+                <li>• Start receiving patient service requests via email/SMS</li>
               </ul>
               <p className="text-xs text-blue-700 mt-3 italic">
-                Patient requests are optional. Your directory listing remains active regardless.
+                Onboarding is required to receive patient service requests. Directory visibility remains active either way.
               </p>
             </div>
           </div>
@@ -453,17 +465,17 @@ export default function OnboardPage() {
               Get Started
             </h2>
             <p className="text-gray-600 mb-6">
-              If your business appears above, claim it to manage your listing. If not, you can create a provider account below.
+              Claim your listing to receive patient requests and manage your service coverage.
             </p>
             <button
               onClick={() => setShowCreateForm(true)}
               className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold inline-flex items-center gap-2"
             >
               <Plus size={20} />
-              Create New Provider
+              Complete Provider Onboarding
             </button>
             <p className="text-xs text-gray-500 mt-4">
-              Creating or claiming a listing does not require participation in patient requests. Directory exposure remains active either way.
+              Onboarding is required to receive patient service requests. Directory visibility remains active either way.
             </p>
           </div>
         )}

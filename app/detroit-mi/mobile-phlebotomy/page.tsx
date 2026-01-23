@@ -328,19 +328,6 @@ export default function DetroitMobilePhlebotomy() {
                         <span className="text-gray-700">Based in {featuredProvider.address.city}, {featuredProvider.address.state}</span>
                       </div>
                     )}
-                    {featuredProvider.website && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-primary-600">🌐</span>
-                        <a
-                          href={featuredProvider.website}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="text-primary-600 hover:text-primary-700 font-medium underline"
-                        >
-                          Visit Website
-                        </a>
-                      </div>
-                    )}
                   </div>
                 </div>
 

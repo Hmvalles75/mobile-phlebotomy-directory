@@ -64,6 +64,15 @@ export async function GET(req: NextRequest) {
         routedToId: lead.routedToId,
         routedAt: lead.routedAt?.toISOString(),
         priceCents: lead.priceCents,
+        // Provider tracking fields
+        claimedAt: lead.claimedAt?.toISOString(),
+        firstContactAt: lead.firstContactAt?.toISOString(),
+        callAttempts: lead.callAttempts,
+        outcome: lead.outcome,
+        outcomeNotes: lead.outcomeNotes,
+        appointmentDate: lead.appointmentDate?.toISOString(),
+        completedAt: lead.completedAt?.toISOString(),
+        providerNotes: lead.providerNotes,
         provider: lead.provider,
         notifications: lead.leadNotifications.map(notif => ({
           id: notif.id,

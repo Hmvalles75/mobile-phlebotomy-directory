@@ -63,7 +63,8 @@
       "Bash(\"c:/Users/hmval/OneDrive/Desktop/MobilePhlebotomy/app/troy-mi/mobile-phlebotomy/page.tsx\")",
       "Bash(powershell -Command \"Get-Content ''''data\\providers.csv'''' | Select-String ''''ProStik''''\")",
       "Bash(powershell -Command \"curl -H ''Authorization: Bearer JdArKl@!1927'' http://localhost:3000/api/admin/providers | ConvertFrom-Json | Where-Object { $_name -like ''*ProStik*'' } | Select-Object name, state, coverage, verified_service_areas, is_mobile_phlebotomy | ConvertTo-Json -Depth 5\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(nslookup:*)"
     ],
     "deny": [],
     "ask": []

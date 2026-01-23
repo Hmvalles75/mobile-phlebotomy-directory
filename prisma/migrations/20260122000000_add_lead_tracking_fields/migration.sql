@@ -1,0 +1,12 @@
+-- CreateEnum for LeadOutcome
+CREATE TYPE "LeadOutcome" AS ENUM ('CONTACTED', 'APPOINTMENT_BOOKED', 'APPOINTMENT_COMPLETED', 'NO_ANSWER', 'VOICEMAIL', 'DECLINED', 'WRONG_NUMBER', 'DUPLICATE', 'NOT_INTERESTED', 'SCHEDULED_CALLBACK');
+
+-- AlterTable: Add lead tracking fields
+ALTER TABLE "leads" ADD COLUMN "claimedAt" TIMESTAMP(3);
+ALTER TABLE "leads" ADD COLUMN "firstContactAt" TIMESTAMP(3);
+ALTER TABLE "leads" ADD COLUMN "callAttempts" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "leads" ADD COLUMN "outcome" "LeadOutcome";
+ALTER TABLE "leads" ADD COLUMN "outcomeNotes" TEXT;
+ALTER TABLE "leads" ADD COLUMN "appointmentDate" TIMESTAMP(3);
+ALTER TABLE "leads" ADD COLUMN "completedAt" TIMESTAMP(3);
+ALTER TABLE "leads" ADD COLUMN "providerNotes" TEXT;

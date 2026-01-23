@@ -2,7 +2,7 @@
 
 **TO:** {provider.email}
 **FROM:** support@mobilephlebotomy.org
-**SUBJECT:** Welcome to MobilePhlebotomy.org - Your Listing is Live
+**SUBJECT:** Your MobilePhlebotomy.org Listing Is Live
 
 ---
 
@@ -10,57 +10,56 @@
 
 Hi {provider.contact_name},
 
-**Welcome to MobilePhlebotomy.org!**
+Your business, **{provider.business_name}**, is now live on MobilePhlebotomy.org and visible to patients searching for mobile blood draw services in your area.
 
-Your listing for **{provider.business_name}** is now live and helping patients in {service_area} find your mobile phlebotomy services.
+### Your Listing
 
-### 📍 Your Listing
-
-**View Your Profile**: mobilephlebotomy.org/provider/{provider.slug}
+**Profile**: https://www.mobilephlebotomy.org/provider/{provider.slug}
 
 **Service Area**: {coverage_cities_list}
+**Services**: {services_list}
 
-**Services Listed**:
-{services_list}
+### How Patient Requests Are Routed
 
-### 📈 How Patients Find You
+Patients can submit requests directly through MobilePhlebotomy.org.
 
-Your listing appears when patients search for mobile phlebotomy services in:
-- City-specific search results
-- Metro area listings
-- Service-based searches
+To receive automated email/SMS notifications when a request matches your coverage area, you'll need to complete provider onboarding here:
 
-### 🎯 Upgrade to Featured
+👉 **https://www.mobilephlebotomy.org/onboard**
 
-Want more visibility and exclusive lead notifications?
+**Once onboarded:**
+- You'll be notified when requests match your service area
+- Timely acknowledgment helps confirm availability and keeps response times tight
+- If you're unavailable, a quick reply allows us to reroute without patient delay
 
-**Featured Provider Benefits:**
-- ⭐ Premium placement on search results
-- 📧 Direct lead notifications via email
-- 🎨 Logo display and enhanced profile
-- 📊 Priority access to qualified leads
-- 📍 Smart radius-based lead matching
+If you choose not to onboard, your listing will still be visible, but lead notifications are not automatically sent.
 
-**Interested in upgrading?** Reply to this email to learn more.
+### Visibility & Placement
 
-### ⚙️ Managing Your Listing
+Your listing appears in:
+- City and metro-area search results
+- Service-based searches (e.g., mobile blood draws at home)
+- Nearby community directories
 
-To update your information, contact support@mobilephlebotomy.org with:
-- Updated service areas
-- New services offered
-- Changed contact information
-- Business hours
+Some providers are invited to participate in featured placement pilots, which offer priority routing and enhanced visibility as local request volume increases.
+
+### Keeping Your Listing Accurate
+
+To update your listing, email **hector@mobilephlebotomy.org** with:
+- Coverage area changes
+- Updated hours or services
+- New contact information
 - Logo or photos
 
-### 💬 Questions?
-
-**Support Email**: support@mobilephlebotomy.org
-**Response Time**: Within 24 hours
+Updates are typically processed within 24 hours.
 
 ---
 
-**Thank you for joining MobilePhlebotomy.org!**
-The MobilePhlebotomy.org Team
+If you have any questions or want to complete onboarding to receive lead notifications, feel free to reply directly to this email.
+
+Best,
+Hector
+MobilePhlebotomy.org
 
 ---
 

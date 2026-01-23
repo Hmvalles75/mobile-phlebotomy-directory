@@ -36,12 +36,13 @@ export function getSessionExpiration(): Date {
 // Create or update auth token for provider
 export async function createMagicLinkToken(email: string): Promise<{ ok: boolean; error?: string }> {
   try {
-    // Find provider by email
+    // Find provider by email (case-insensitive)
+    const normalizedEmail = email.toLowerCase().trim()
     const provider = await prisma.provider.findFirst({
       where: {
         OR: [
-          { claimEmail: email },
-          { email: email }
+          { claimEmail: { equals: normalizedEmail, mode: 'insensitive' } },
+          { email: { equals: normalizedEmail, mode: 'insensitive' } }
         ]
       }
     })

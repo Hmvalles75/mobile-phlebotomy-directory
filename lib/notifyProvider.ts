@@ -23,7 +23,7 @@ export async function sendLeadToProvider(provider: any, lead: any) {
         twilioClient.messages.create({
           to: provider.phonePublic,
           messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-          body: `New Lead: ${lead.fullName}, ZIP ${lead.zip}, ${lead.urgency}.\nCall: ${lead.phone}\nReply STOP to opt-out.`
+          body: `🔔 New Lead #${lead.id.substring(0, 8)}\n${lead.fullName}, ZIP ${lead.zip}\n${lead.urgency} | Call: ${lead.phone}\n\n💬 Reply: CLAIMED, BOOKED, COMPLETED, NO ANSWER, VOICEMAIL, DECLINED, TOO FAR, UNAVAILABLE, WRONG SERVICE, CALLBACK\n\nReply STOP to opt-out.`
         })
       )
     } catch (error) {
@@ -38,21 +38,63 @@ export async function sendLeadToProvider(provider: any, lead: any) {
         sg.send({
           to: provider.claimEmail,
           from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
-          subject: `New Patient Lead (${lead.urgency}) - ${lead.city}, ${lead.state}`,
-          text: `You have a new patient lead!\n\nName: ${lead.fullName}\nPhone: ${lead.phone}\nEmail: ${lead.email || '—'}\nAddress: ${lead.address1 || '—'}\nCity: ${lead.city}\nState: ${lead.state}\nZIP: ${lead.zip}\nUrgency: ${lead.urgency}\nNotes: ${lead.notes || '—'}\n\nLead Price: ${formatPrice(lead.priceCents)}\n\nPlease contact this patient as soon as possible.`,
+          replyTo: 'leads@inbound.mobilephlebotomy.org',
+          subject: `🔔 New Patient Lead (${lead.urgency}) - ${lead.city}, ${lead.state}`,
+          text: `You have a new patient lead!\n\nLead ID: ${lead.id}\n\nName: ${lead.fullName}\nPhone: ${lead.phone}\nEmail: ${lead.email || '—'}\nAddress: ${lead.address1 || '—'}\nCity: ${lead.city}\nState: ${lead.state}\nZIP: ${lead.zip}\nLab Preference: ${lead.labPreference || 'Other/Unsure'}\nUrgency: ${lead.urgency}\nNotes: ${lead.notes || '—'}\n\nLead Price: ${formatPrice(lead.priceCents)}\n\nPlease contact this patient as soon as possible.\n\n---\nQUICK UPDATE: Reply to this email with a keyword to update lead status:\n• CLAIMED - Mark as claimed\n• BOOKED - Appointment scheduled\n• COMPLETED - Service completed\n• NO ANSWER - Patient didn't answer\n• VOICEMAIL - Left voicemail\n• DECLINED - Patient declined service\n• TOO FAR - Outside service area\n• UNAVAILABLE - No availability\n• WRONG SERVICE - Different service needed\n• CALLBACK - Will call back later`,
           html: `
-            <h2>New Patient Lead!</h2>
-            <p><strong>Urgency:</strong> ${lead.urgency}</p>
-            <hr/>
-            <p><strong>Name:</strong> ${lead.fullName}</p>
-            <p><strong>Phone:</strong> ${lead.phone}</p>
-            <p><strong>Email:</strong> ${lead.email || '—'}</p>
-            <p><strong>Address:</strong> ${lead.address1 || '—'}</p>
-            <p><strong>City:</strong> ${lead.city}, ${lead.state} ${lead.zip}</p>
-            <p><strong>Notes:</strong> ${lead.notes || '—'}</p>
-            <hr/>
-            <p><strong>Lead Price:</strong> ${formatPrice(lead.priceCents)}</p>
-            <p><em>Please contact this patient as soon as possible.</em></p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🔔 New Patient Lead!</h2>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">Lead ID: <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${lead.id}</code></p>
+              </div>
+
+              <div style="background: #f8f9fa; padding: 20px; border-left: 4px solid #667eea;">
+                <p style="margin: 0 0 10px 0;"><strong>⚡ Urgency:</strong> <span style="background: ${lead.urgency === 'STAT' ? '#dc2626' : '#059669'}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold;">${lead.urgency}</span></p>
+              </div>
+
+              <div style="background: white; padding: 20px; border: 1px solid #e5e7eb;">
+                <h3 style="margin-top: 0; color: #374151;">Patient Information</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Name:</strong></td><td style="padding: 8px 0;">${lead.fullName}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Phone:</strong></td><td style="padding: 8px 0;"><a href="tel:${lead.phone}" style="color: #667eea; text-decoration: none; font-weight: bold;">${lead.phone}</a></td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Email:</strong></td><td style="padding: 8px 0;">${lead.email || '—'}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Address:</strong></td><td style="padding: 8px 0;">${lead.address1 || '—'}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>City:</strong></td><td style="padding: 8px 0;">${lead.city}, ${lead.state} ${lead.zip}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Lab Preference:</strong></td><td style="padding: 8px 0;">${lead.labPreference || 'Other/Unsure'}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #6b7280;"><strong>Notes:</strong></td><td style="padding: 8px 0;">${lead.notes || '—'}</td></tr>
+                </table>
+              </div>
+
+              <div style="background: #fef3c7; padding: 15px; margin: 20px 0; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <p style="margin: 0;"><strong>💰 Lead Price:</strong> ${formatPrice(lead.priceCents)}</p>
+              </div>
+
+              <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #1e40af;">💬 Quick Status Update</h4>
+                <p style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Reply to this email with a keyword to update the lead status:</p>
+                <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 1.8;">
+                  <li><strong>CLAIMED</strong> - Mark as claimed</li>
+                  <li><strong>BOOKED</strong> - Appointment scheduled</li>
+                  <li><strong>COMPLETED</strong> - Service completed</li>
+                  <li><strong>NO ANSWER</strong> - Patient didn't answer</li>
+                  <li><strong>VOICEMAIL</strong> - Left voicemail</li>
+                  <li><strong>DECLINED</strong> - Patient declined service</li>
+                  <li><strong>TOO FAR</strong> - Outside service area</li>
+                  <li><strong>UNAVAILABLE</strong> - No availability</li>
+                  <li><strong>WRONG SERVICE</strong> - Different service needed</li>
+                  <li><strong>CALLBACK</strong> - Will call back later</li>
+                </ul>
+                <p style="margin: 10px 0 0 0; color: #6b7280; font-size: 12px;">You can also reply via SMS to update status.</p>
+              </div>
+
+              <div style="text-align: center; padding: 20px; background: #f9fafb;">
+                <p style="margin: 0; color: #374151; font-size: 16px; font-weight: bold;">📞 Please contact this patient as soon as possible</p>
+              </div>
+
+              <div style="background: #1f2937; color: #9ca3af; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px;">
+                <p style="margin: 0;">MobilePhlebotomy.org - Direct Pay Per Lead</p>
+              </div>
+            </div>
           `
         })
       )

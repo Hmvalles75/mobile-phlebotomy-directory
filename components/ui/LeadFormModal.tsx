@@ -207,9 +207,17 @@ export function LeadFormModal({
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Request a Home Blood Draw
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-4">
                 Fill out the form below and a licensed phlebotomist will contact you to schedule your appointment.
               </p>
+
+              {/* Service Scope Clarification */}
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p className="text-sm text-blue-900">
+                  <strong>Service Notice:</strong> This request is for at-home blood draw or lab specimen collection only.
+                  If you need other medical services, please contact providers directly.
+                </p>
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full Name */}

@@ -124,6 +124,16 @@ model Lead {
   priceCents    Int
   status        LeadStatus @default(NEW)
 
+  // Provider tracking fields
+  claimedAt         DateTime?
+  firstContactAt    DateTime?
+  callAttempts      Int       @default(0)
+  outcome           LeadOutcome?
+  outcomeNotes      String?
+  appointmentDate   DateTime?
+  completedAt       DateTime?
+  providerNotes     String?
+
   provider      Provider? @relation(fields: [routedToId], references: [id])
   leadNotifications LeadNotification[]
 
@@ -137,6 +147,22 @@ enum LeadStatus {
   DELIVERED   // Legacy status
   REFUNDED
   UNSOLD
+}
+
+enum LeadOutcome {
+  CONTACTED           // Successfully contacted patient
+  APPOINTMENT_BOOKED  // Appointment scheduled
+  APPOINTMENT_COMPLETED // Service completed
+  NO_ANSWER          // Called but no answer
+  VOICEMAIL          // Left voicemail
+  DECLINED           // Patient declined service
+  WRONG_NUMBER       // Invalid phone number
+  DUPLICATE          // Duplicate lead
+  NOT_INTERESTED     // Patient not interested
+  SCHEDULED_CALLBACK // Will call back later
+  OUTSIDE_SERVICE_AREA // Lead too far / outside coverage area
+  NO_AVAILABILITY    // Provider fully booked / unavailable
+  WRONG_SERVICE      // Patient needs different service type
 }
 
 enum Urgency {
