@@ -343,6 +343,207 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
               </p>
             </section>
 
+            {/* NEW YORK SPECIAL: Featured NYC Metro Section */}
+            {stateAbbr === 'NY' && (
+              <section className="mt-6 mb-8">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-6 border-2 border-primary-200">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">🏙️</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-2xl font-bold text-gray-900">New York City Metro Area</h2>
+                        <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
+                      </div>
+                      <p className="text-gray-700 mb-4">
+                        Mobile phlebotomy services across all five NYC boroughs and Northern New Jersey
+                      </p>
+
+                      {/* NYC Hub */}
+                      <div className="mb-4">
+                        <Link
+                          href="/new-york-ny/mobile-phlebotomy"
+                          className="block p-5 bg-gradient-to-br from-primary-100 to-white rounded-lg hover:from-primary-200 hover:shadow-lg border-2 border-primary-400 transition-all group"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-2xl">🗽</span>
+                            <span className="font-bold text-gray-900 text-xl">New York City Mobile Phlebotomy</span>
+                          </div>
+                          <div className="text-sm text-primary-700 group-hover:text-primary-800 font-medium">View all NYC providers & boroughs →</div>
+                        </Link>
+                      </div>
+
+                      {/* Five Boroughs */}
+                      <div className="mb-4">
+                        <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">NYC Boroughs</h3>
+                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                          <Link
+                            href="/manhattan-ny/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Manhattan</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/brooklyn-ny/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Brooklyn</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/queens-ny/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Queens</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/bronx-ny/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Bronx</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/staten-island-ny/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Staten Island</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Northern NJ */}
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Northern New Jersey</h3>
+                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                          <Link
+                            href="/newark-nj/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Newark, NJ</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/jersey-city-nj/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Jersey City, NJ</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/bayonne-nj/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Bayonne, NJ</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* CALIFORNIA SPECIAL: Featured LA Metro Section */}
+            {stateAbbr === 'CA' && (
+              <section className="mt-6 mb-8">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg shadow-md p-6 border-2 border-primary-200">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">🌴</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-2xl font-bold text-gray-900">Los Angeles Metro Area</h2>
+                        <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
+                      </div>
+                      <p className="text-gray-700 mb-4">
+                        Mobile phlebotomy services throughout Greater Los Angeles and surrounding communities
+                      </p>
+
+                      {/* LA Hub */}
+                      <div className="mb-4">
+                        <Link
+                          href="/los-angeles-ca/mobile-phlebotomy"
+                          className="block p-5 bg-gradient-to-br from-primary-100 to-white rounded-lg hover:from-primary-200 hover:shadow-lg border-2 border-primary-400 transition-all group"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-2xl">🌟</span>
+                            <span className="font-bold text-gray-900 text-xl">Los Angeles Mobile Phlebotomy</span>
+                          </div>
+                          <div className="text-sm text-primary-700 group-hover:text-primary-800 font-medium">View all LA providers & suburbs →</div>
+                        </Link>
+                      </div>
+
+                      {/* LA Suburbs */}
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Greater Los Angeles</h3>
+                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                          <Link
+                            href="/pasadena-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Pasadena</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/santa-monica-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Santa Monica</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/burbank-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Burbank</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/glendale-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Glendale</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/long-beach-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Long Beach</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/torrance-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Torrance</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/west-hollywood-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">West Hollywood</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/beverly-hills-ca/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Beverly Hills</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* MICHIGAN SPECIAL: Featured Detroit Metro Section */}
             {stateAbbr === 'MI' && (
               <section className="mt-6 mb-8">
@@ -351,55 +552,67 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                     <div className="text-4xl">🏙️</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h2 className="text-2xl font-bold text-gray-900">Top Cities in Michigan</h2>
+                        <h2 className="text-2xl font-bold text-gray-900">Detroit Metro Area</h2>
                         <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-medium">NOW SERVING</span>
                       </div>
                       <p className="text-gray-700 mb-4">
-                        Explore mobile phlebotomy services in Detroit and surrounding metro areas
+                        Mobile phlebotomy services in Detroit and surrounding metro areas
                       </p>
-                      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+
+                      {/* Detroit Hub */}
+                      <div className="mb-4">
                         <Link
                           href="/detroit-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border-2 border-primary-300 hover:border-primary-500 transition-all group"
+                          className="block p-5 bg-gradient-to-br from-primary-100 to-white rounded-lg hover:from-primary-200 hover:shadow-lg border-2 border-primary-400 transition-all group"
                         >
-                          <div className="font-bold text-gray-900 mb-1 text-lg">Detroit</div>
-                          <div className="text-sm text-primary-600 group-hover:text-primary-700">Mobile Phlebotomy →</div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-2xl">🚗</span>
+                            <span className="font-bold text-gray-900 text-xl">Detroit Mobile Phlebotomy</span>
+                          </div>
+                          <div className="text-sm text-primary-700 group-hover:text-primary-800 font-medium">View all Detroit providers & suburbs →</div>
                         </Link>
-                        <Link
-                          href="/dearborn-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
-                        >
-                          <div className="font-bold text-gray-900 mb-1">Dearborn</div>
-                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
-                        </Link>
-                        <Link
-                          href="/livonia-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
-                        >
-                          <div className="font-bold text-gray-900 mb-1">Livonia</div>
-                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
-                        </Link>
-                        <Link
-                          href="/troy-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
-                        >
-                          <div className="font-bold text-gray-900 mb-1">Troy</div>
-                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
-                        </Link>
-                        <Link
-                          href="/southfield-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
-                        >
-                          <div className="font-bold text-gray-900 mb-1">Southfield</div>
-                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
-                        </Link>
-                        <Link
-                          href="/warren-mi/mobile-phlebotomy"
-                          className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
-                        >
-                          <div className="font-bold text-gray-900 mb-1">Warren</div>
-                          <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
-                        </Link>
+                      </div>
+
+                      {/* Detroit Suburbs */}
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Metro Detroit</h3>
+                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                          <Link
+                            href="/dearborn-mi/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Dearborn</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/livonia-mi/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Livonia</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/troy-mi/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Troy</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/southfield-mi/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Southfield</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                          <Link
+                            href="/warren-mi/mobile-phlebotomy"
+                            className="block p-4 bg-white rounded-lg hover:bg-primary-50 hover:shadow-md border border-gray-200 hover:border-primary-300 transition-all group"
+                          >
+                            <div className="font-bold text-gray-900 mb-1">Warren</div>
+                            <div className="text-sm text-gray-600 group-hover:text-primary-600">View providers →</div>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

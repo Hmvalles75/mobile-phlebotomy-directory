@@ -877,6 +877,147 @@ export default function MetroPage({ params }: MetroPageProps) {
                 </div>
               </div>
 
+              {/* NYC Boroughs & NJ - Only for New York City */}
+              {metro.slug === 'new-york-city' && (
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">
+                    NYC Boroughs & Northern NJ
+                  </h3>
+                  <div className="space-y-4">
+                    {/* NYC Hub */}
+                    <div>
+                      <Link
+                        href="/new-york-ny/mobile-phlebotomy"
+                        className="block text-primary-700 hover:text-primary-800 font-bold mb-3 text-base"
+                      >
+                        🗽 New York City Overview →
+                      </Link>
+                    </div>
+
+                    {/* Five Boroughs */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Five Boroughs</h4>
+                      <div className="space-y-1.5">
+                        <Link href="/manhattan-ny/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Manhattan →
+                        </Link>
+                        <Link href="/brooklyn-ny/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Brooklyn →
+                        </Link>
+                        <Link href="/queens-ny/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Queens →
+                        </Link>
+                        <Link href="/bronx-ny/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Bronx →
+                        </Link>
+                        <Link href="/staten-island-ny/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Staten Island →
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Northern NJ */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Northern New Jersey</h4>
+                      <div className="space-y-1.5">
+                        <Link href="/newark-nj/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Newark →
+                        </Link>
+                        <Link href="/jersey-city-nj/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Jersey City →
+                        </Link>
+                        <Link href="/bayonne-nj/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                          Bayonne →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* LA Suburbs - Only for Los Angeles */}
+              {metro.slug === 'los-angeles' && (
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">
+                    Greater Los Angeles
+                  </h3>
+                  <div className="space-y-3">
+                    {/* LA Hub */}
+                    <Link
+                      href="/los-angeles-ca/mobile-phlebotomy"
+                      className="block text-primary-700 hover:text-primary-800 font-bold text-base"
+                    >
+                      🌟 Los Angeles Overview →
+                    </Link>
+
+                    {/* LA Suburbs */}
+                    <div className="space-y-1.5">
+                      <Link href="/pasadena-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Pasadena →
+                      </Link>
+                      <Link href="/santa-monica-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Santa Monica →
+                      </Link>
+                      <Link href="/burbank-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Burbank →
+                      </Link>
+                      <Link href="/glendale-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Glendale →
+                      </Link>
+                      <Link href="/long-beach-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Long Beach →
+                      </Link>
+                      <Link href="/torrance-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Torrance →
+                      </Link>
+                      <Link href="/west-hollywood-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        West Hollywood →
+                      </Link>
+                      <Link href="/beverly-hills-ca/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Beverly Hills →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Detroit Suburbs - Only for Detroit */}
+              {metro.slug === 'detroit' && (
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">
+                    Metro Detroit
+                  </h3>
+                  <div className="space-y-3">
+                    {/* Detroit Hub */}
+                    <Link
+                      href="/detroit-mi/mobile-phlebotomy"
+                      className="block text-primary-700 hover:text-primary-800 font-bold text-base"
+                    >
+                      🚗 Detroit Overview →
+                    </Link>
+
+                    {/* Detroit Suburbs */}
+                    <div className="space-y-1.5">
+                      <Link href="/dearborn-mi/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Dearborn →
+                      </Link>
+                      <Link href="/livonia-mi/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Livonia →
+                      </Link>
+                      <Link href="/troy-mi/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Troy →
+                      </Link>
+                      <Link href="/southfield-mi/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Southfield →
+                      </Link>
+                      <Link href="/warren-mi/mobile-phlebotomy" className="block text-sm text-primary-600 hover:text-primary-700">
+                        Warren →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Nearby Cities */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
