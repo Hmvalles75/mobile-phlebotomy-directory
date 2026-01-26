@@ -71,7 +71,12 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
       not: null
     },
     // CRITICAL: Never text someone who opted out
-    smsOptOutAt: null
+    smsOptOutAt: null,
+    // EXCLUDE: Featured providers (handle separately with warm messaging)
+    isFeatured: false,
+    featuredTier: null,
+    // EXCLUDE: Providers who submitted forms (warm leads - use different message)
+    claimEmail: null
   }
 
   // Filter by provider IDs (highest priority)
@@ -81,21 +86,16 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
     }
   }
 
-  // Filter by state
+  // Filter by state (use primaryState field, not address relation)
   if (options.state) {
-    whereClause.address = {
-      state: options.state.toUpperCase()
-    }
+    whereClause.primaryState = options.state.toUpperCase()
   }
 
-  // Filter by city
+  // Filter by city (use primaryCity field, not address relation)
   if (options.city) {
-    whereClause.address = {
-      ...whereClause.address,
-      city: {
-        contains: options.city,
-        mode: 'insensitive'
-      }
+    whereClause.primaryCity = {
+      contains: options.city,
+      mode: 'insensitive'
     }
   }
 
@@ -105,7 +105,8 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
       id: true,
       name: true,
       phonePublic: true,
-      address: true,
+      primaryCity: true,
+      primaryState: true,
       zipCodes: true,
       eligibleForLeads: true
     }
@@ -122,7 +123,7 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
   providers.forEach((p, i) => {
     console.log(`${i + 1}. ${p.name}`)
     console.log(`   📞 ${p.phonePublic}`)
-    console.log(`   📍 ${p.address?.city}, ${p.address?.state}`)
+    console.log(`   📍 ${p.primaryCity}, ${p.primaryState}`)
     console.log(`   ${p.eligibleForLeads ? '✅ Eligible for leads' : '❌ Not eligible for leads'}`)
     console.log(`   Coverage: ${p.zipCodes ? p.zipCodes.split(',').length + ' ZIPs' : 'Not set'}`)
     console.log()
@@ -235,6 +236,10 @@ function parseArgs() {
 ⚠️  STRATEGY: This is a TWO-STEP process:
    Step 1: Get explicit YES/NO permission (this script)
    Step 2: Manually activate + collect coverage details (after YES)
+
+📌 AUTO-FILTERS: This script targets COLD leads only (scraped providers)
+   ❌ Excludes featured/premium providers (use warm messaging)
+   ❌ Excludes providers who submitted forms (already engaged)
 
 Usage:
   npx tsx scripts/send-targeted-sms.ts [options]
