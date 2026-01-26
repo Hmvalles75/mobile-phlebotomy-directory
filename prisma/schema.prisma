@@ -61,6 +61,12 @@ model Provider {
   notificationEmail  String?  // Override email for lead notifications (defaults to claimEmail or email)
   notifyEnabled      Boolean @default(true)  // Allow providers to opt-out of email notifications
 
+  // SMS Opt-In/Opt-Out Tracking (for targeted SMS blasts)
+  smsOptInAt         DateTime?  // When provider replied YES to onboarding message
+  smsOptOutAt        DateTime?  // When provider replied NO or STOP
+  smsOptOutReason    String?    // Why they opted out (e.g., "User replied NO to onboarding", "STOP received")
+  lastSMSSentAt      DateTime?  // Last time we sent them an SMS (prevents double-texting)
+
   // PRIMARY LOCATION (Source of Truth) - Required for consistent filtering
   primaryState      String?  // State abbreviation: "MI", "CA", "TX"
   primaryStateName  String?  // Full state name: "Michigan", "California", "Texas"

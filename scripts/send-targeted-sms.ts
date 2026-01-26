@@ -69,7 +69,9 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
   const whereClause: any = {
     phonePublic: {
       not: null
-    }
+    },
+    // CRITICAL: Never text someone who opted out
+    smsOptOutAt: null
   }
 
   // Filter by provider IDs (highest priority)
@@ -167,6 +169,12 @@ async function sendTargetedSMS(options: TargetedSMSOptions) {
         to: provider.phonePublic!,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
         body: message
+      })
+
+      // Track when we sent this SMS (prevents double-texting)
+      await prisma.provider.update({
+        where: { id: provider.id },
+        data: { lastSMSSentAt: new Date() }
       })
 
       console.log(`✅ ${provider.name} (${provider.phonePublic}) - SID: ${result.sid}`)
