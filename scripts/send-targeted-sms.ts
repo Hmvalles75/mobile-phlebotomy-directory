@@ -40,12 +40,13 @@ interface TargetedSMSOptions {
 
 const DEFAULT_MESSAGES = {
   // COLD (scraped/public directory providers) - Permission-first YES/NO
+  // NO EMOJIS - can trip spam filters and look scammy
   cold: (businessName: string, area: string) =>
-    `Hi ${businessName} — I run MobilePhlebotomy.org. We're getting patient requests near ${area}. Do you want free leads by text? Reply YES or NO. Reply STOP to opt out.`,
+    `Hi ${businessName} - I run MobilePhlebotomy.org (patient referral site). We're getting patient requests near ${area}. Do you want free leads by text? Reply YES or NO. STOP to opt out.`,
 
   // WARM (providers who filled out form) - Already trust you more
   warm: (name: string) =>
-    `Hi ${name} — Hector from MobilePhlebotomy.org. Your listing is live. Want to receive free patient leads by text + email in your service area? Reply YES and I'll activate you. STOP to opt out.`,
+    `Hi ${name} - Hector from MobilePhlebotomy.org. Your listing is live. Want to receive free patient leads by text + email in your service area? Reply YES and I'll activate you. STOP to opt out.`,
 
   // FOLLOW-UP (after they say YES) - Now ask for coverage details
   followUp: (name: string) =>
@@ -53,7 +54,7 @@ const DEFAULT_MESSAGES = {
 
   // Generic fallback
   generic: (area: string) =>
-    `Hi — I run MobilePhlebotomy.org. We're getting patient requests near ${area}. Do you want free leads by text? Reply YES or NO. Reply STOP to opt out.`
+    `Hi - I run MobilePhlebotomy.org (patient referral site). We're getting patient requests near ${area}. Do you want free leads by text? Reply YES or NO. STOP to opt out.`
 }
 
 async function sendTargetedSMS(options: TargetedSMSOptions) {
@@ -246,8 +247,13 @@ Options:
 1️⃣  DRY RUN FIRST (always check who you're targeting):
    npx tsx scripts/send-targeted-sms.ts --city "Los Angeles" --state CA --dry-run
 
-2️⃣  SEND PERMISSION-FIRST MESSAGE (cold providers):
-   npx tsx scripts/send-targeted-sms.ts --city "Los Angeles" --state CA --message "Hi — I run MobilePhlebotomy.org. We're getting patient requests near Los Angeles. Do you want free leads by text? Reply YES or NO. Reply STOP to opt out."
+2️⃣  SEND PERMISSION-FIRST MESSAGE (START SMALL - 10-20 providers):
+   npx tsx scripts/send-targeted-sms.ts --city "Los Angeles" --state CA --message "Hi - I run MobilePhlebotomy.org (patient referral site). We're getting patient requests near Los Angeles. Do you want free leads by text? Reply YES or NO. STOP to opt out."
+
+   NOTE: If dry-run shows 100+ providers, target specific neighborhoods first:
+   - Pasadena: --city "Pasadena" --state CA
+   - Santa Monica: --city "Santa Monica" --state CA
+   - Then expand to full LA metro
 
 3️⃣  MANUALLY PROCESS REPLIES:
    - YES → Mark provider "Active" in DB + request coverage details
@@ -274,8 +280,8 @@ Detroit Metro:
 
 💬 MESSAGE TEMPLATES:
 
-COLD (scraped/public directory providers):
-  "Hi {BusinessName} — I run MobilePhlebotomy.org. We're getting patient requests near {City}. Do you want free leads by text? Reply YES or NO. Reply STOP to opt out."
+COLD (scraped/public directory providers - NO EMOJIS):
+  "Hi {BusinessName} - I run MobilePhlebotomy.org (patient referral site). We're getting patient requests near {City}. Do you want free leads by text? Reply YES or NO. STOP to opt out."
 
 WARM (providers who filled out your form):
   "Hi {Name} — Hector from MobilePhlebotomy.org. Your listing is live. Want to receive free patient leads by text + email in your service area? Reply YES and I'll activate you. STOP to opt out."
@@ -285,18 +291,44 @@ FOLLOW-UP (after YES):
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️  IMPORTANT NOTES:
+⚠️  CRITICAL COMPLIANCE & BEST PRACTICES:
 
-1. Your inbound SMS webhook (/api/webhooks/sms-reply) should:
+1. BATCH SIZE: Start with 10-20 providers at a time
+   - Sanity check phone numbers
+   - Watch reply rate and sentiment
+   - Adjust copy if needed
+   - Don't send 200 at once - you can't take it back
+
+2. OPT-OUT TRACKING (NON-NEGOTIABLE):
+   - If someone replies STOP, you MUST stop texting them
+   - Log opt-outs in your database
+   - Never re-text them in another blast
+   - Twilio handles STOP automatically, but track it locally too
+
+3. CONSISTENT "FROM" NUMBER:
+   - Use ONE Twilio number as your outbound sender
+   - Rotating numbers looks sketchy and kills reply rate
+   - Set TWILIO_MESSAGING_SERVICE_SID to use Messaging Service
+
+4. NO EMOJIS IN COLD MESSAGES:
+   - Emojis trip spam filters
+   - Look scammy to businesses
+   - Save emojis for warm/follow-up messages only
+
+5. LEGITIMACY LINE:
+   - "(patient referral site)" helps them understand who you are
+   - Improves reply rate vs generic messages
+
+6. Your inbound SMS webhook (/api/webhooks/sms-reply) should:
    - Capture YES replies → Mark provider "Confirmed/Active"
    - Capture NO replies → Mark "Do Not Contact"
    - Respect STOP (Twilio handles this automatically)
 
-2. Don't blast nationwide - focus on metros where your SEO pages exist
+7. Don't blast nationwide - focus on metros where your SEO pages exist
 
-3. Rate limit: Script sends 1 msg/second automatically to avoid throttling
+8. Rate limit: Script sends 1 msg/second automatically to avoid throttling
 
-4. Always dry-run first to verify targeting
+9. Always dry-run first to verify targeting
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         `)
