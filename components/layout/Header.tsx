@@ -19,60 +19,34 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
+            {/* Left/Center Navigation */}
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
             <Link href="/search" className="text-gray-600 hover:text-primary-600 transition-colors">
-              Find Providers
-            </Link>
-            {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/metros" className="text-gray-600 hover:text-primary-600 transition-colors">
-              Metro Areas
+              Find a Phlebotomist
             </Link>
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
             <Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors whitespace-nowrap">
-              Group Services
-            </Link>
-            <div className="relative group">
-              <button className="text-gray-600 hover:text-primary-600 transition-colors flex items-center">
-                Resources
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white shadow-lg rounded-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="p-2">
-                  <Link href="/at-home-blood-draw-services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                    At-Home Blood Draw Guide
-                  </Link>
-                  <Link href="/mobile-phlebotomy-cost" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                    Pricing & Costs
-                  </Link>
-                  <Link href="/mobile-blood-draw-near-me" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                    Find Services Near Me
-                  </Link>
-                  <Link href="/mobile-phlebotomy-insurance-coverage" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                    Insurance Coverage
-                  </Link>
-                </div>
-              </div>
-            </div>
-            {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/about" className="text-gray-600 hover:text-primary-600 transition-colors">
-              About
-            </Link>
-            {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/contact" className="text-gray-600 hover:text-primary-600 transition-colors">
-              Contact
+              Facilities & Clinical Services
             </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Link
-              // @ts-ignore - Next.js typedRoutes compatibility
-              href="/add-provider"
-              className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
-            >
-              Add your Business
-            </Link>
+            {/* Right Navigation - For Providers Dropdown */}
+            <div className="relative group">
+              <button className="text-gray-600 hover:text-primary-600 transition-colors flex items-center">
+                For Providers
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="p-2">
+                  <Link href="/add-provider" className="block px-4 py-3 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded">
+                    Add Your Business
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
