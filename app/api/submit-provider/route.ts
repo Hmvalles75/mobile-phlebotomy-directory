@@ -84,20 +84,35 @@ export async function POST(request: NextRequest) {
     const formData = await request.json()
 
     // Check for duplicate provider before accepting submission
+    // Now checks both Provider table AND PendingSubmission table
     const duplicateCheck = await checkForDuplicate(
       formData.businessName,
-      formData.website
+      formData.website,
+      undefined, // excludeId
+      formData.email,
+      formData.phone
     )
 
     if (duplicateCheck.isDuplicate) {
+      const status = duplicateCheck.existingProvider?.status
+
+      // Different messages based on where the duplicate was found
+      let message = ''
+      if (status?.includes('PENDING_SUBMISSION')) {
+        message = `You've already submitted an application for "${duplicateCheck.existingProvider?.name}" which is currently pending review. Please wait for us to process your existing application. We'll contact you within 24-48 hours.`
+      } else {
+        message = `A provider with similar name or website already exists in our directory: "${duplicateCheck.existingProvider?.name}". If this is your business and you'd like to claim it, please use our claim listing feature.`
+      }
+
       return NextResponse.json({
         success: false,
         error: 'duplicate',
-        message: `A provider with similar name or website already exists in our directory: "${duplicateCheck.existingProvider?.name}". If this is your business and you'd like to claim it, please use our claim listing feature.`,
+        message,
         existingProvider: {
           id: duplicateCheck.existingProvider?.id,
           name: duplicateCheck.existingProvider?.name,
-          slug: duplicateCheck.existingProvider?.slug
+          slug: duplicateCheck.existingProvider?.slug,
+          status: status
         }
       }, { status: 409 })
     }

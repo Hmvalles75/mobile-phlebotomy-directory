@@ -169,16 +169,21 @@ export async function removeDuplicates(dryRun = false): Promise<{
 
 /**
  * Check if a provider name would create a duplicate
+ * Checks both Provider table AND PendingSubmission table
  */
 export async function checkForDuplicate(
   name: string,
   website?: string | null,
-  excludeId?: string
+  excludeId?: string,
+  email?: string | null,
+  phone?: string | null
 ): Promise<{ isDuplicate: boolean; existingProvider?: any }> {
   const normalizedName = normalizeName(name)
   const normalizedWebsite = website ? normalizeUrl(website) : null
+  const normalizedEmail = email?.toLowerCase().trim()
+  const normalizedPhone = phone?.replace(/\D/g, '') // Remove non-digits
 
-  // Check for name match
+  // Check existing providers in Provider table
   const providers = await prisma.provider.findMany({
     where: {
       id: excludeId ? { not: excludeId } : undefined
@@ -198,6 +203,66 @@ export async function checkForDuplicate(
       const providerNormalizedWebsite = normalizeUrl(provider.website)
       if (providerNormalizedWebsite === normalizedWebsite) {
         return { isDuplicate: true, existingProvider: provider }
+      }
+    }
+  }
+
+  // NEW: Also check PendingSubmission table to prevent duplicate submissions
+  const pendingSubmissions = await prisma.pendingSubmission.findMany({
+    where: {
+      status: 'PENDING' // Only check pending submissions
+    }
+  })
+
+  for (const submission of pendingSubmissions) {
+    const submissionNormalizedName = normalizeName(submission.businessName)
+    const submissionNormalizedEmail = submission.email.toLowerCase().trim()
+    const submissionNormalizedPhone = submission.phone.replace(/\D/g, '')
+
+    // Check name match
+    if (submissionNormalizedName === normalizedName) {
+      return {
+        isDuplicate: true,
+        existingProvider: {
+          name: submission.businessName,
+          status: 'PENDING_SUBMISSION'
+        }
+      }
+    }
+
+    // Check email match (prevents same provider from submitting multiple times)
+    if (normalizedEmail && submissionNormalizedEmail === normalizedEmail) {
+      return {
+        isDuplicate: true,
+        existingProvider: {
+          name: submission.businessName,
+          status: 'PENDING_SUBMISSION_EMAIL_MATCH'
+        }
+      }
+    }
+
+    // Check phone match
+    if (normalizedPhone && submissionNormalizedPhone === normalizedPhone) {
+      return {
+        isDuplicate: true,
+        existingProvider: {
+          name: submission.businessName,
+          status: 'PENDING_SUBMISSION_PHONE_MATCH'
+        }
+      }
+    }
+
+    // Check website match
+    if (normalizedWebsite && submission.website) {
+      const submissionNormalizedWebsite = normalizeUrl(submission.website)
+      if (submissionNormalizedWebsite === normalizedWebsite) {
+        return {
+          isDuplicate: true,
+          existingProvider: {
+            name: submission.businessName,
+            status: 'PENDING_SUBMISSION_WEBSITE_MATCH'
+          }
+        }
       }
     }
   }

@@ -36,6 +36,12 @@ export default function AddProvider() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent double submission
+    if (isSubmitting) {
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -73,7 +79,8 @@ export default function AddProvider() {
           yearsExperience: '',
         })
       } else {
-        alert(data.error || 'There was an error processing your submission. Please try again or contact us directly at hector@mobilephlebotomy.org')
+        // Show specific error message (including duplicate detection)
+        alert(data.message || data.error || 'There was an error processing your submission. Please try again or contact us directly at hector@mobilephlebotomy.org')
       }
     } catch (error) {
       console.error('Submission error:', error)
