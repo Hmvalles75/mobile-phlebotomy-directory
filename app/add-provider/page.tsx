@@ -33,6 +33,7 @@ export default function AddProvider() {
   ]
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,8 +58,8 @@ export default function AddProvider() {
       const data = await response.json()
 
       if (data.success) {
-        // Show success message
-        alert(data.message || 'Thank you! Your application has been submitted and is pending review. We will contact you within 24-48 hours.')
+        // Show success modal instead of alert
+        setShowSuccessModal(true)
 
         // Reset form
         setFormData({
@@ -389,6 +390,62 @@ export default function AddProvider() {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            {/* Success Icon */}
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+              Application Submitted Successfully!
+            </h3>
+
+            {/* Message */}
+            <div className="space-y-3 text-gray-600 text-sm mb-6">
+              <p className="text-center">
+                Thank you for your interest in joining MobilePhlebotomy.org!
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                <p className="font-semibold text-blue-900">What happens next?</p>
+                <ul className="space-y-1 text-blue-800">
+                  <li className="flex items-start">
+                    <span className="mr-2">1.</span>
+                    <span>Our team will review your application within <strong>24-48 hours</strong></span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">2.</span>
+                    <span>You'll receive an email confirmation at the address you provided</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">3.</span>
+                    <span>Once approved, your listing will go live and you can start receiving patient leads</span>
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-center text-xs text-gray-500">
+                Questions? Email us at <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-600 hover:underline">hector@mobilephlebotomy.org</a>
+              </p>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              Got it, thanks!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
