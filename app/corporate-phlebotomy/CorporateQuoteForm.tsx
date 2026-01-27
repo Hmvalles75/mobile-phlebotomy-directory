@@ -3,12 +3,11 @@
 import { useState } from 'react'
 
 const EVENT_TYPES = [
-  'Healthcare facility/hospital',
-  'Assisted living/nursing home',
+  'Clinical trial / research study',
+  'Healthcare facility',
+  'Assisted living / SNF',
   'Corporate wellness',
-  'Conference/trade show',
-  'Clinical trial/research',
-  'Health fair/community',
+  'Community screening',
   'Other'
 ]
 
@@ -348,10 +347,10 @@ export function CorporateQuoteForm() {
           </div>
         </div>
 
-        {/* Event Type */}
+        {/* Program Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Type of Event <span className="text-red-500">*</span>
+            Program Type <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {EVENT_TYPES.map(type => (

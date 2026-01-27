@@ -58,14 +58,14 @@ const benefits = [
 ]
 
 const audiences = [
+  'Medical and clinical research studies',
+  'Universities and research institutions',
   'Healthcare facilities & hospitals',
   'Assisted living & nursing homes',
   'Corporate wellness programs',
-  'Medical and clinical research studies',
   'Health fairs and community events',
-  'Large conferences and trade shows',
-  'Government agencies and schools',
-  'Universities and research institutions'
+  'Conferences and trade shows',
+  'Government agencies and schools'
 ]
 
 const faqs = [
@@ -88,6 +88,10 @@ const faqs = [
   {
     question: 'Can you support recurring programs?',
     answer: 'Yes. We help coordinate recurring facility support, wellness programs, multi-visit screenings, and ongoing research draws. We work with you to establish consistent provider scheduling.'
+  },
+  {
+    question: 'Are your providers HIPAA compliant?',
+    answer: 'All coordinated phlebotomists follow HIPAA-compliant practices for handling patient information and specimens. We are currently coordinating mobile phlebotomy coverage for research and facility-based programs in multiple U.S. metros.'
   }
 ]
 
@@ -173,6 +177,50 @@ export default function CorporatePhlebotomyPage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Clinical Trial & Research Callout */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50 border-y border-blue-100">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 border border-blue-200">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                Clinical Trial & Research Phlebotomy Coordination
+              </h2>
+              <p className="text-lg text-gray-700 mb-4">
+                We coordinate mobile phlebotomy services for clinical research studies, decentralized trials, and multi-site data collection programs.
+              </p>
+              <p className="text-lg text-gray-700 mb-6">
+                Our network supports protocol-driven blood draws, recurring study visits, and site or in-home collections across major U.S. metros.
+              </p>
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <p className="font-semibold text-gray-900 mb-3">Common use cases include:</p>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start">
+                    <span className="text-blue-600 mr-3">•</span>
+                    <span>Phase I–IV clinical trials</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 mr-3">•</span>
+                    <span>Decentralized and hybrid study models</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 mr-3">•</span>
+                    <span>Home-based participant collections</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 mr-3">•</span>
+                    <span>Skilled nursing and assisted-living research draws</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 mr-3">•</span>
+                    <span>Recurring study visit schedules</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>
