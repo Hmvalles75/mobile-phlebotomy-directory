@@ -19,6 +19,11 @@ export default function AddProvider() {
     insurance: false,
     licensed: false,
     yearsExperience: '',
+    leadOptIn: 'yes' as 'yes' | 'no',
+    leadContactMethod: [] as string[],
+    leadEmail: '',
+    leadPhone: '',
+    availability: [] as string[],
   })
 
   const serviceOptions = [
@@ -78,6 +83,11 @@ export default function AddProvider() {
           insurance: false,
           licensed: false,
           yearsExperience: '',
+          leadOptIn: 'yes',
+          leadContactMethod: [],
+          leadEmail: '',
+          leadPhone: '',
+          availability: [],
         })
       } else {
         // Show specific error message (including duplicate detection)
@@ -97,6 +107,24 @@ export default function AddProvider() {
       services: prev.services.includes(service)
         ? prev.services.filter(s => s !== service)
         : [...prev.services, service]
+    }))
+  }
+
+  const handleContactMethodToggle = (method: string) => {
+    setFormData(prev => ({
+      ...prev,
+      leadContactMethod: prev.leadContactMethod.includes(method)
+        ? prev.leadContactMethod.filter(m => m !== method)
+        : [...prev.leadContactMethod, method]
+    }))
+  }
+
+  const handleAvailabilityToggle = (option: string) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: prev.availability.includes(option)
+        ? prev.availability.filter(a => a !== option)
+        : [...prev.availability, option]
     }))
   }
 
@@ -369,13 +397,119 @@ export default function AddProvider() {
                 </label>
               </div>
 
+              <div className="border-t pt-6 mt-6">
+                <label className="block text-sm font-medium text-gray-900 mb-3">
+                  Would you like to receive patient leads from MobilePhlebotomy.org? *
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="leadOptIn"
+                      value="yes"
+                      checked={formData.leadOptIn === 'yes'}
+                      onChange={(e) => setFormData(prev => ({...prev, leadOptIn: e.target.value as 'yes' | 'no'}))}
+                      className="mr-3"
+                    />
+                    <span className="text-sm text-gray-700">Yes, send me patient requests</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="leadOptIn"
+                      value="no"
+                      checked={formData.leadOptIn === 'no'}
+                      onChange={(e) => setFormData(prev => ({...prev, leadOptIn: e.target.value as 'yes' | 'no'}))}
+                      className="mr-3"
+                    />
+                    <span className="text-sm text-gray-700">Not right now (directory listing only)</span>
+                  </label>
+                </div>
+              </div>
+
+              {formData.leadOptIn === 'yes' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-3">
+                      How should we send you patient requests? *
+                    </label>
+                    <div className="space-y-2">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.leadContactMethod.includes('email')}
+                          onChange={() => handleContactMethodToggle('email')}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
+                        />
+                        <span className="text-sm text-gray-700">Email</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.leadContactMethod.includes('sms')}
+                          onChange={() => handleContactMethodToggle('sms')}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
+                        />
+                        <span className="text-sm text-gray-700">Text message</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Lead notification email (optional)
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.leadEmail}
+                        onChange={(e) => setFormData(prev => ({...prev, leadEmail: e.target.value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="If different from above"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Lead notification phone (optional)
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.leadPhone}
+                        onChange={(e) => setFormData(prev => ({...prev, leadPhone: e.target.value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="If different from above"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-3">
+                      Typical availability (check all that apply) *
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['Weekdays', 'Evenings', 'Weekends', 'Same-day / urgent requests'].map(option => (
+                        <label key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.availability.includes(option)}
+                            onChange={() => handleAvailabilityToggle(option)}
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
+                          />
+                          <span className="text-sm text-gray-700">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-900 mb-2">What happens next?</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• We&apos;ll review your submission within 24-48 hours</li>
-                  <li>• Verify your credentials and insurance</li>
-                  <li>• Add your listing to our directory</li>
-                  <li>• Send you confirmation and next steps</li>
+                  <li>• We review and approve your listing (usually within 24–48 hours)</li>
+                  <li>• Your business becomes discoverable by patients in your service area</li>
+                  <li>• If you opted in, you can start receiving patient requests by email/text</li>
+                  <li>• No obligation — you control which requests you accept</li>
                 </ul>
               </div>
 
@@ -418,15 +552,19 @@ export default function AddProvider() {
                 <ul className="space-y-1 text-blue-800">
                   <li className="flex items-start">
                     <span className="mr-2">1.</span>
-                    <span>Our team will review your application within <strong>24-48 hours</strong></span>
+                    <span>We review and approve your listing (usually within <strong>24–48 hours</strong>)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">2.</span>
-                    <span>You'll receive an email confirmation at the address you provided</span>
+                    <span>Your business becomes discoverable by patients in your service area</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">3.</span>
-                    <span>Once approved, your listing will go live and you can start receiving patient leads</span>
+                    <span>If you opted in, you can start receiving patient requests by email/text</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">4.</span>
+                    <span>No obligation — you control which requests you accept</span>
                   </li>
                 </ul>
               </div>

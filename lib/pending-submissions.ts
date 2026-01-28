@@ -46,6 +46,13 @@ export interface PendingProvider {
   weekendAvailable?: boolean
   logo?: string
 
+  // Lead opt-in fields
+  leadOptIn?: string
+  leadContactMethod?: string | null
+  leadEmail?: string | null
+  leadPhone?: string | null
+  availability?: string | null
+
   // Metadata
   ipAddress?: string
   userAgent?: string
@@ -174,6 +181,11 @@ export async function addPendingSubmission(
           emergencyAvailable: submission.emergencyAvailable ?? false,
           weekendAvailable: submission.weekendAvailable ?? false,
           logo: submission.logo,
+          leadOptIn: submission.leadOptIn,
+          leadContactMethod: submission.leadContactMethod,
+          leadEmail: submission.leadEmail,
+          leadPhone: submission.leadPhone,
+          availability: submission.availability,
           ipAddress: submission.ipAddress,
           userAgent: submission.userAgent
         }
@@ -235,6 +247,11 @@ export async function addPendingSubmission(
     emergencyAvailable: submission.emergencyAvailable,
     weekendAvailable: submission.weekendAvailable,
     logo: submission.logo,
+    leadOptIn: submission.leadOptIn,
+    leadContactMethod: submission.leadContactMethod,
+    leadEmail: submission.leadEmail,
+    leadPhone: submission.leadPhone,
+    availability: submission.availability,
     ipAddress: submission.ipAddress,
     userAgent: submission.userAgent
   }

@@ -145,6 +145,11 @@ export async function POST(request: NextRequest) {
       emergencyAvailable: formData.emergencyAvailable,
       weekendAvailable: formData.weekendAvailable,
       logo: formData.logo,
+      leadOptIn: formData.leadOptIn,
+      leadContactMethod: formData.leadContactMethod ? formData.leadContactMethod.join(',') : null,
+      leadEmail: formData.leadEmail,
+      leadPhone: formData.leadPhone,
+      availability: formData.availability ? formData.availability.join(',') : null,
       ipAddress,
       userAgent
     })

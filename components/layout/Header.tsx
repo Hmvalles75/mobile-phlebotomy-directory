@@ -18,14 +18,14 @@ export function Header() {
             />
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 ml-auto mr-8">
             {/* Left/Center Navigation */}
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/search" className="text-gray-600 hover:text-primary-600 transition-colors">
+            <Link href="/search" className="text-gray-700 hover:text-primary-600 transition-colors font-semibold">
               Find a Phlebotomist
             </Link>
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors whitespace-nowrap">
+            <Link href="/corporate-phlebotomy" className="text-gray-700 hover:text-primary-600 transition-colors whitespace-nowrap font-semibold">
               Facilities & Clinical Services
             </Link>
           </nav>
@@ -33,7 +33,7 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {/* Right Navigation - For Providers Dropdown */}
             <div className="relative group">
-              <button className="text-gray-600 hover:text-primary-600 transition-colors flex items-center">
+              <button className="text-gray-700 hover:text-primary-600 transition-colors flex items-center font-semibold">
                 For Providers
                 <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

@@ -1,101 +1,392 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Provider {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  phone        String?  // legacy field
-  phonePublic  String?  // shown only with "Unverified" badge + disclaimer
-  email        String?  // legacy, hidden from public
-  website      String?
-  bookingUrl   String?
-  description  String?
-  rating       Float?
-  reviewsCount Int?
-  featured     Boolean  @default(false)  // legacy field
-
-  // Lead-gen fields
-  status          ProviderStatus @default(UNVERIFIED)
-  isFeatured      Boolean @default(false)
-  featuredTier    FeaturedTier?
-  stripeCustomerId String?
-  stripePaymentMethodId String?  // saved payment method for direct charging
-  eligibleForLeads Boolean @default(false)  // true when payment method saved
-  trialStatus     TrialStatus @default(NONE)  // NONE, ACTIVE, EXPIRED
-  trialStartedAt  DateTime?  // when 30-day trial started
-  trialExpiresAt  DateTime?  // when 30-day trial ends
-  claimEmail      String?  // email used after claim (hidden on public page)
-  claimToken      String?  // for email verify
-  claimVerifiedAt DateTime?
-  twilioNumber    String?  // dedicated tracking number
-  zipCodes        String?  // comma-separated service coverage ZIPs
-
-  // Availability settings for lead routing
-  operatingDays       String?  // e.g., "MON,TUE,WED,THU,FRI"
-  operatingHoursStart String?  // e.g., "08:00"
-  operatingHoursEnd   String?  // e.g., "17:00"
-  serviceRadiusMiles  Int?     // e.g., 25
-
-  // Monetization fields
-  listingTier      ListingTier @default(BASIC)  // Basic, Premium, Featured
-  isFeaturedCity   Boolean @default(false)  // City-exclusive Featured Sponsor
-  serviceZipCodes  String?  // JSON array of paid ZIP codes
-  affiliateLink    String?  // Speedy Sticks or other affiliate URL
-
-  // Images
-  logo             String?  // Company logo path
-  profileImage     String?  // Business/office photo path
-
-  // Email Notifications (Phase 1 - Featured providers only)
-  notificationEmail  String?  // Override email for lead notifications (defaults to claimEmail or email)
-  notifyEnabled      Boolean @default(true)  // Allow providers to opt-out of email notifications
-
-  // SMS Opt-In/Opt-Out Tracking (for targeted SMS blasts)
-  smsOptInAt         DateTime?  // When provider replied YES to onboarding message
-  smsOptOutAt        DateTime?  // When provider replied NO or STOP
-  smsOptOutReason    String?    // Why they opted out (e.g., "User replied NO to onboarding", "STOP received")
-  lastSMSSentAt      DateTime?  // Last time we sent them an SMS (prevents double-texting)
-
-  // PRIMARY LOCATION (Source of Truth) - Required for consistent filtering
-  primaryState      String?  // State abbreviation: "MI", "CA", "TX"
-  primaryStateName  String?  // Full state name: "Michigan", "California", "Texas"
-  primaryStateSlug  String?  // URL slug: "michigan", "california", "texas"
-  primaryCity       String?  // City name: "Detroit", "Los Angeles", "Houston"
-  primaryCitySlug   String?  // URL slug: "detroit", "los-angeles", "houston"
-  primaryMetro      String?  // Metro area: "Detroit", "Los Angeles", "Houston" (optional)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  services     ProviderService[]
-  coverage     ProviderCoverage[]
-  address      ProviderAddress?
-  coords       ProviderCoords?
-  availability ProviderAvailability[]
-  payment      ProviderPayment[]
-  badges       ProviderBadge[]
-  leads        Lead[]
-  callLogs     CallLog[]
-  corrections  ProviderCorrection[]
-  correctionsQueue ProviderCorrections[] @relation("corrections_queue")
-  leadNotifications LeadNotification[]
+  id                    String                 @id @default(cuid())
+  name                  String
+  slug                  String                 @unique
+  phone                 String?
+  phonePublic           String?
+  email                 String?
+  website               String?
+  bookingUrl            String?
+  description           String?
+  rating                Float?
+  reviewsCount          Int?
+  featured              Boolean                @default(false)
+  status                ProviderStatus         @default(UNVERIFIED)
+  isFeatured            Boolean                @default(false)
+  featuredTier          FeaturedTier?
+  stripeCustomerId      String?
+  claimEmail            String?
+  claimToken            String?
+  claimVerifiedAt       DateTime?
+  twilioNumber          String?
+  zipCodes              String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  affiliateLink         String?
+  isFeaturedCity        Boolean                @default(false)
+  listingTier           ListingTier            @default(BASIC)
+  serviceZipCodes       String?
+  stripePaymentMethodId String?
+  eligibleForLeads      Boolean                @default(false)
+  trialExpiresAt        DateTime?
+  trialStartedAt        DateTime?
+  trialStatus           TrialStatus            @default(NONE)
+  operatingDays         String?
+  operatingHoursEnd     String?
+  operatingHoursStart   String?
+  serviceRadiusMiles    Int?
+  logo                  String?
+  profileImage          String?
+  notificationEmail     String?
+  notifyEnabled         Boolean                @default(true)
+  primaryCity           String?
+  primaryCitySlug       String?
+  primaryMetro          String?
+  primaryState          String?
+  primaryStateName      String?
+  primaryStateSlug      String?
+  lastSMSSentAt         DateTime?
+  smsOptInAt            DateTime?
+  smsOptOutAt           DateTime?
+  smsOptOutReason       String?
+  callLogs              CallLog[]
+  leadNotifications     LeadNotification[]
+  leads                 Lead[]
+  address               ProviderAddress?
+  availability          ProviderAvailability[]
+  badges                ProviderBadge[]
+  coords                ProviderCoords?
+  corrections           ProviderCorrection[]
+  correctionsQueue      ProviderCorrections[]  @relation("corrections_queue")
+  coverage              ProviderCoverage[]
+  payment               ProviderPayment[]
+  services              ProviderService[]
 
   @@index([primaryState])
   @@index([primaryCity])
   @@index([primaryMetro])
   @@map("providers")
+}
+
+model Lead {
+  id                String             @id @default(cuid())
+  createdAt         DateTime           @default(now())
+  fullName          String
+  phone             String
+  email             String?
+  address1          String?
+  city              String
+  state             String
+  zip               String
+  urgency           Urgency
+  notes             String?
+  source            String
+  gclid             String?
+  routedToId        String?
+  routedAt          DateTime?
+  priceCents        Int
+  status            LeadStatus         @default(NEW)
+  labPreference     String             @default("Other/Unsure")
+  claimedAt         DateTime?
+  firstContactAt    DateTime?
+  callAttempts      Int                @default(0)
+  outcome           LeadOutcome?
+  outcomeNotes      String?
+  appointmentDate   DateTime?
+  completedAt       DateTime?
+  providerNotes     String?
+  leadNotifications LeadNotification[]
+  provider          Provider?          @relation(fields: [routedToId], references: [id])
+
+  @@map("leads")
+}
+
+model CallLog {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  fromNumber   String
+  toNumber     String
+  durationSec  Int?
+  callStatus   String?
+  city         String?
+  state        String?
+  zip          String?
+  providerId   String?
+  recordingUrl String?
+  leadId       String?
+  callSid      String?   @unique
+  provider     Provider? @relation(fields: [providerId], references: [id])
+
+  @@map("call_logs")
+}
+
+model CityNumber {
+  id           String  @id @default(cuid())
+  city         String
+  state        String
+  twilioNumber String  @unique
+  providerId   String?
+
+  @@map("city_numbers")
+}
+
+model Service {
+  id        String            @id @default(cuid())
+  name      String            @unique
+  providers ProviderService[]
+
+  @@map("services")
+}
+
+model ProviderService {
+  id         String   @id @default(cuid())
+  providerId String
+  serviceId  String
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service    Service  @relation(fields: [serviceId], references: [id])
+
+  @@unique([providerId, serviceId])
+  @@map("provider_services")
+}
+
+model State {
+  id       String             @id @default(cuid())
+  name     String             @unique
+  abbr     String             @unique
+  cities   City[]
+  coverage ProviderCoverage[]
+
+  @@map("states")
+}
+
+model City {
+  id       String             @id @default(cuid())
+  name     String
+  stateId  String
+  slug     String
+  state    State              @relation(fields: [stateId], references: [id])
+  coverage ProviderCoverage[]
+
+  @@unique([name, stateId])
+  @@map("cities")
+}
+
+model ProviderCoverage {
+  id         String   @id @default(cuid())
+  providerId String
+  stateId    String
+  cityId     String?
+  city       City?    @relation(fields: [cityId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  state      State    @relation(fields: [stateId], references: [id])
+
+  @@unique([providerId, stateId, cityId])
+  @@map("provider_coverage")
+}
+
+model ProviderAddress {
+  id         String   @id @default(cuid())
+  providerId String   @unique
+  street     String?
+  city       String?
+  state      String?
+  zip        String?
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_addresses")
+}
+
+model ProviderCoords {
+  id         String   @id @default(cuid())
+  providerId String   @unique
+  lat        Float
+  lng        Float
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_coords")
+}
+
+model Availability {
+  id        String                 @id @default(cuid())
+  name      String                 @unique
+  providers ProviderAvailability[]
+
+  @@map("availability")
+}
+
+model ProviderAvailability {
+  id             String       @id @default(cuid())
+  providerId     String
+  availabilityId String
+  availability   Availability @relation(fields: [availabilityId], references: [id])
+  provider       Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, availabilityId])
+  @@map("provider_availability")
+}
+
+model Payment {
+  id        String            @id @default(cuid())
+  name      String            @unique
+  providers ProviderPayment[]
+
+  @@map("payments")
+}
+
+model ProviderPayment {
+  id         String   @id @default(cuid())
+  providerId String
+  paymentId  String
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, paymentId])
+  @@map("provider_payments")
+}
+
+model Badge {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  providers ProviderBadge[]
+
+  @@map("badges")
+}
+
+model ProviderBadge {
+  id         String   @id @default(cuid())
+  providerId String
+  badgeId    String
+  badge      Badge    @relation(fields: [badgeId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, badgeId])
+  @@map("provider_badges")
+}
+
+model ProviderCorrection {
+  id            String           @id @default(cuid())
+  createdAt     DateTime         @default(now())
+  providerId    String
+  reporterName  String?
+  reporterEmail String?
+  issueType     String
+  description   String
+  status        CorrectionStatus @default(PENDING)
+  reviewedAt    DateTime?
+  reviewNotes   String?
+  provider      Provider         @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_corrections")
+}
+
+model ProviderCorrections {
+  id           String                @id @default(cuid())
+  providerId   String?
+  urlSlug      String
+  note         String
+  contactEmail String?
+  createdAt    DateTime              @default(now())
+  handledAt    DateTime?
+  handledBy    String?
+  status       CorrectionQueueStatus @default(OPEN)
+  provider     Provider?             @relation("corrections_queue", fields: [providerId], references: [id])
+
+  @@map("provider_corrections_queue")
+}
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  zipCode   String?
+  source    String
+  createdAt DateTime @default(now())
+  notified  Boolean  @default(false)
+
+  @@map("waitlist")
+}
+
+model PendingSubmission {
+  id                 String           @id @default(cuid())
+  submittedAt        DateTime         @default(now())
+  status             SubmissionStatus @default(PENDING)
+  businessName       String
+  contactName        String
+  email              String
+  phone              String
+  website            String?
+  description        String
+  address            String?
+  city               String
+  state              String
+  zipCode            String?
+  serviceArea        String?
+  yearsExperience    String?
+  licensed           Boolean          @default(false)
+  insurance          Boolean          @default(false)
+  certifications     String?
+  specialties        String?
+  emergencyAvailable Boolean          @default(false)
+  weekendAvailable   Boolean          @default(false)
+  logo               String?
+  ipAddress          String?
+  userAgent          String?
+  leadOptIn          String?
+  leadContactMethod  String?
+  leadEmail          String?
+  leadPhone          String?
+  availability       String?
+
+  @@map("pending_submissions")
+}
+
+model CorporateEventInquiry {
+  id                     String                 @id @default(cuid())
+  createdAt              DateTime               @default(now())
+  companyName            String
+  contactName            String
+  email                  String
+  phone                  String
+  eventLocation          String
+  eventVenue             String?
+  eventDates             String
+  estimatedDraws         String
+  estimatedPhlebotomists String?
+  eventType              String
+  additionalDetails      String?
+  status                 CorporateInquiryStatus @default(NEW)
+  ipAddress              String?
+  userAgent              String?
+  urgency                String?
+
+  @@map("corporate_event_inquiries")
+}
+
+model LeadNotification {
+  id           String             @id @default(cuid())
+  leadId       String
+  providerId   String
+  channel      String             @default("email")
+  status       NotificationStatus @default(QUEUED)
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  sentAt       DateTime?
+  lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([providerId])
+  @@map("lead_notifications")
 }
 
 enum ProviderStatus {
@@ -110,263 +401,34 @@ enum FeaturedTier {
   HIGH_DENSITY
 }
 
-model Lead {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  fullName      String
-  phone         String
-  email         String?
-  address1      String?
-  city          String
-  state         String
-  zip           String
-  labPreference String   @default("Other/Unsure")  // Quest, Labcorp, Other/Unsure
-  urgency       Urgency
-  notes         String?
-  source        String   // "web_form" | "call"
-  gclid         String?  // future
-  routedToId    String?
-  routedAt      DateTime?
-  priceCents    Int
-  status        LeadStatus @default(NEW)
-
-  // Provider tracking fields
-  claimedAt         DateTime?
-  firstContactAt    DateTime?
-  callAttempts      Int       @default(0)
-  outcome           LeadOutcome?
-  outcomeNotes      String?
-  appointmentDate   DateTime?
-  completedAt       DateTime?
-  providerNotes     String?
-
-  provider      Provider? @relation(fields: [routedToId], references: [id])
-  leadNotifications LeadNotification[]
-
-  @@map("leads")
-}
-
 enum LeadStatus {
   NEW
-  OPEN        // Available for claiming
-  CLAIMED     // Provider has claimed this lead
-  DELIVERED   // Legacy status
+  DELIVERED
   REFUNDED
   UNSOLD
+  OPEN
+  CLAIMED
 }
 
 enum LeadOutcome {
-  CONTACTED           // Successfully contacted patient
-  APPOINTMENT_BOOKED  // Appointment scheduled
-  APPOINTMENT_COMPLETED // Service completed
-  NO_ANSWER          // Called but no answer
-  VOICEMAIL          // Left voicemail
-  DECLINED           // Patient declined service
-  WRONG_NUMBER       // Invalid phone number
-  DUPLICATE          // Duplicate lead
-  NOT_INTERESTED     // Patient not interested
-  SCHEDULED_CALLBACK // Will call back later
-  OUTSIDE_SERVICE_AREA // Lead too far / outside coverage area
-  NO_AVAILABILITY    // Provider fully booked / unavailable
-  WRONG_SERVICE      // Patient needs different service type
+  CONTACTED
+  APPOINTMENT_BOOKED
+  APPOINTMENT_COMPLETED
+  NO_ANSWER
+  VOICEMAIL
+  DECLINED
+  WRONG_NUMBER
+  DUPLICATE
+  NOT_INTERESTED
+  SCHEDULED_CALLBACK
+  OUTSIDE_SERVICE_AREA
+  NO_AVAILABILITY
+  WRONG_SERVICE
 }
 
 enum Urgency {
   STANDARD
   STAT
-}
-
-model CallLog {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  fromNumber    String
-  toNumber      String
-  durationSec   Int?
-  callStatus    String?
-  city          String?
-  state         String?
-  zip           String?
-  providerId    String?
-  recordingUrl  String?
-  leadId        String?
-  callSid       String?  @unique
-
-  provider      Provider? @relation(fields: [providerId], references: [id])
-
-  @@map("call_logs")
-}
-
-model CityNumber {
-  id          String   @id @default(cuid())
-  city        String
-  state       String
-  twilioNumber String  @unique
-  providerId  String?
-
-  @@map("city_numbers")
-}
-
-model Service {
-  id   String @id @default(cuid())
-  name String @unique
-  
-  providers ProviderService[]
-
-  @@map("services")
-}
-
-model ProviderService {
-  id         String   @id @default(cuid())
-  providerId String
-  serviceId  String
-  
-  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  service    Service  @relation(fields: [serviceId], references: [id])
-
-  @@unique([providerId, serviceId])
-  @@map("provider_services")
-}
-
-model State {
-  id   String @id @default(cuid())
-  name String @unique
-  abbr String @unique
-
-  coverage ProviderCoverage[]
-  cities   City[]
-
-  @@map("states")
-}
-
-model City {
-  id      String @id @default(cuid())
-  name    String
-  stateId String
-  slug    String
-
-  state    State              @relation(fields: [stateId], references: [id])
-  coverage ProviderCoverage[]
-
-  @@unique([name, stateId])
-  @@map("cities")
-}
-
-model ProviderCoverage {
-  id         String  @id @default(cuid())
-  providerId String
-  stateId    String
-  cityId     String?
-  
-  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  state      State    @relation(fields: [stateId], references: [id])
-  city       City?    @relation(fields: [cityId], references: [id])
-
-  @@unique([providerId, stateId, cityId])
-  @@map("provider_coverage")
-}
-
-model ProviderAddress {
-  id         String  @id @default(cuid())
-  providerId String  @unique
-  street     String?
-  city       String?
-  state      String?
-  zip        String?
-  
-  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@map("provider_addresses")
-}
-
-model ProviderCoords {
-  id         String  @id @default(cuid())
-  providerId String  @unique
-  lat        Float
-  lng        Float
-  
-  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@map("provider_coords")
-}
-
-model Availability {
-  id   String @id @default(cuid())
-  name String @unique
-  
-  providers ProviderAvailability[]
-
-  @@map("availability")
-}
-
-model ProviderAvailability {
-  id             String @id @default(cuid())
-  providerId     String
-  availabilityId String
-  
-  provider       Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  availability   Availability @relation(fields: [availabilityId], references: [id])
-
-  @@unique([providerId, availabilityId])
-  @@map("provider_availability")
-}
-
-model Payment {
-  id   String @id @default(cuid())
-  name String @unique
-  
-  providers ProviderPayment[]
-
-  @@map("payments")
-}
-
-model ProviderPayment {
-  id        String @id @default(cuid())
-  providerId String
-  paymentId String
-  
-  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  payment   Payment  @relation(fields: [paymentId], references: [id])
-
-  @@unique([providerId, paymentId])
-  @@map("provider_payments")
-}
-
-model Badge {
-  id   String @id @default(cuid())
-  name String @unique
-  
-  providers ProviderBadge[]
-
-  @@map("badges")
-}
-
-model ProviderBadge {
-  id        String @id @default(cuid())
-  providerId String
-  badgeId   String
-
-  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  badge     Badge    @relation(fields: [badgeId], references: [id])
-
-  @@unique([providerId, badgeId])
-  @@map("provider_badges")
-}
-
-model ProviderCorrection {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  providerId    String
-  reporterName  String?
-  reporterEmail String?
-  issueType     String   // "phone" | "address" | "hours" | "closed" | "other"
-  description   String
-  status        CorrectionStatus @default(PENDING)
-  reviewedAt    DateTime?
-  reviewNotes   String?
-
-  provider      Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@map("provider_corrections")
 }
 
 enum CorrectionStatus {
@@ -376,112 +438,16 @@ enum CorrectionStatus {
   DISMISSED
 }
 
-// Admin-facing corrections queue (alternative structure)
-model ProviderCorrections {
-  id          String   @id @default(cuid())
-  providerId  String?
-  provider    Provider? @relation("corrections_queue", fields: [providerId], references: [id])
-  urlSlug     String   // fallback when providerId unknown
-  note        String
-  contactEmail String?
-  createdAt   DateTime @default(now())
-  handledAt   DateTime?
-  handledBy   String?
-  status      CorrectionQueueStatus @default(OPEN)
-
-  @@map("provider_corrections_queue")
-}
-
 enum CorrectionQueueStatus {
   OPEN
   IN_PROGRESS
   CLOSED
 }
 
-model Waitlist {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  zipCode   String?  // for lead qualification and routing
-  source    String   // "COMING_SOON_PAGE" | "FOOTER" | "OTHER"
-  createdAt DateTime @default(now())
-  notified  Boolean  @default(false)
-
-  @@map("waitlist")
-}
-
-model PendingSubmission {
-  id                  String   @id @default(cuid())
-  submittedAt         DateTime @default(now())
-  status              SubmissionStatus @default(PENDING)
-
-  // Business Information
-  businessName        String
-  contactName         String
-  email               String
-  phone               String
-  website             String?
-  description         String
-
-  // Location
-  address             String?
-  city                String
-  state               String
-  zipCode             String?
-  serviceArea         String?
-
-  // Professional Details
-  yearsExperience     String?
-  licensed            Boolean  @default(false)
-  insurance           Boolean  @default(false)
-  certifications      String?
-  specialties         String?
-
-  // Availability
-  emergencyAvailable  Boolean  @default(false)
-  weekendAvailable    Boolean  @default(false)
-
-  // Optional
-  logo                String?
-
-  // Metadata
-  ipAddress           String?
-  userAgent           String?
-
-  @@map("pending_submissions")
-}
-
 enum SubmissionStatus {
   PENDING
   APPROVED
   REJECTED
-}
-
-model CorporateEventInquiry {
-  id                      String   @id @default(cuid())
-  createdAt               DateTime @default(now())
-
-  // Company Information
-  companyName             String
-  contactName             String
-  email                   String
-  phone                   String
-
-  // Event Details
-  eventLocation           String   // city, state
-  eventVenue              String?
-  eventDates              String   // flexible text field for dates
-  estimatedDraws          String   // can be a range like "50-100"
-  estimatedPhlebotomists  String?  // optional estimate
-  eventType               String   // can store comma-separated or JSON array
-  urgency                 String?  // exploratory or time-sensitive
-  additionalDetails       String?  // textarea
-
-  // Metadata
-  status                  CorporateInquiryStatus @default(NEW)
-  ipAddress               String?
-  userAgent               String?
-
-  @@map("corporate_event_inquiries")
 }
 
 enum CorporateInquiryStatus {
@@ -500,29 +466,9 @@ enum ListingTier {
 }
 
 enum TrialStatus {
-  NONE      // No trial (new provider)
-  ACTIVE    // Trial active (0-30 days)
-  EXPIRED   // Trial expired (>30 days)
-}
-
-// Lead Email Notifications (Phase 1 - Featured providers only)
-model LeadNotification {
-  id            String   @id @default(cuid())
-  leadId        String
-  providerId    String
-  channel       String   @default("email")  // "email" for Phase 1
-  status        NotificationStatus @default(QUEUED)
-  errorMessage  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  sentAt        DateTime?
-
-  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  provider      Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@index([leadId])
-  @@index([providerId])
-  @@map("lead_notifications")
+  NONE
+  ACTIVE
+  EXPIRED
 }
 
 enum NotificationStatus {
