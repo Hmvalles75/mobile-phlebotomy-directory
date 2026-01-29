@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'CAREWITHLUVS LLC - Mobile Phlebotomy Services in Maryland | (240) 575-0041',
@@ -77,16 +78,13 @@ export default function CareWithLuvsPage() {
             {/* Right Column - Flyer Image */}
             <div className="flex justify-center">
               <div className="bg-white rounded-lg shadow-2xl p-2 max-w-sm">
-                <img
+                <Image
                   src="/images/carewithluvs-flyer.png"
                   alt="CAREWITHLUVS LLC - Your Mobile Phlebotomy Agency"
+                  width={400}
+                  height={600}
                   className="w-full h-auto rounded"
-                  onError={(e) => {
-                    // Fallback if image doesn't load - hide the container
-                    const target = e.target as HTMLImageElement;
-                    const container = target.closest('div.bg-white') as HTMLElement | null;
-                    if (container) container.style.display = 'none';
-                  }}
+                  priority
                 />
               </div>
             </div>
