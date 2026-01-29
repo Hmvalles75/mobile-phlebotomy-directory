@@ -78,7 +78,7 @@ export default function CareWithLuvsPage() {
             <div className="flex justify-center">
               <div className="bg-white rounded-lg shadow-2xl p-2 max-w-sm">
                 <img
-                  src="/images/carewithluvs-flyer.jpg"
+                  src="/images/carewithluvs-flyer.png"
                   alt="CAREWITHLUVS LLC - Your Mobile Phlebotomy Agency"
                   className="w-full h-auto rounded"
                   onError={(e) => {
