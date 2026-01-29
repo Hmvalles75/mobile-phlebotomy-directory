@@ -2,14 +2,21 @@ import { MetadataRoute } from 'next'
 import statesData from '@/data/states.json'
 import citiesData from '@/data/cities.json'
 import { State, City } from '@/lib/schemas'
-import { getAllProviders } from '@/lib/providers-db'
+import { prisma } from '@/lib/prisma'
 import { SITE_URL } from '@/lib/seo'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
   const states = statesData as State[]
   const cities = citiesData as City[]
-  const providers = await getAllProviders()
+
+  // Optimized: only fetch fields needed for sitemap (much faster)
+  const providers = await prisma.provider.findMany({
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+  })
 
   const routes: MetadataRoute.Sitemap = [
     {
