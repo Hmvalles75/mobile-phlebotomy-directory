@@ -41,6 +41,22 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
         <div className="flex-1">
           <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
 
+          {/* Founding Partner Badge */}
+          {(provider as any).featuredTier === 'FOUNDING_PARTNER' && (
+            <div className="mb-2">
+              <span
+                className="inline-flex items-center gap-1 rounded-full border border-amber-400 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
+                title="Founding Partners are early premium providers with prioritized visibility and direct lead access."
+                aria-label="Founding Partner Premium Provider"
+              >
+                <svg className="h-3.5 w-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                FOUNDING PARTNER
+              </span>
+            </div>
+          )}
+
           {/* Verification Status Badge */}
           <div className="mb-2">
             {isVerified ? (
