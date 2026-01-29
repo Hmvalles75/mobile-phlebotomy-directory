@@ -26,6 +26,26 @@ const stateAbbrToSlug: Record<string, string> = {
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
+  // Redirect common 404 patterns to homepage
+  const invalidPatterns = [
+    /\/undefined/i,
+    /\/null/i,
+    /\/favicon\.ico$/,
+    /\/\.well-known\//,
+    /\/wp-admin/,
+    /\/wp-login/,
+    /\/xmlrpc\.php/,
+    /\/\.env/,
+    /\/config\./,
+    /\/\.git/,
+  ]
+
+  if (invalidPatterns.some(pattern => pattern.test(pathname))) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url, 301)
+  }
+
   // Handle state/city URL redirects
   if (pathname.startsWith('/us/')) {
     const parts = pathname.split('/')
