@@ -84,7 +84,7 @@ export default function CareWithLuvsPage() {
                   onError={(e) => {
                     // Fallback if image doesn't load - hide the container
                     const target = e.target as HTMLImageElement;
-                    const container = target.closest('div.bg-white');
+                    const container = target.closest('div.bg-white') as HTMLElement | null;
                     if (container) container.style.display = 'none';
                   }}
                 />
