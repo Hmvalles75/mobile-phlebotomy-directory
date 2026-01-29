@@ -91,6 +91,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Add custom metro area pages (Detroit, NYC, LA)
   const customPages = [
+    // PREMIUM PROVIDER LANDING PAGES
+    { slug: 'maryland/carewithluvs-mobile-phlebotomy', priority: 0.95 },
+
     // DETROIT METRO
     // Main hub
     { slug: 'detroit-mi/mobile-phlebotomy', priority: 0.9 },
