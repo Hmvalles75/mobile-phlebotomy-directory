@@ -20,43 +20,76 @@ export default function CareWithLuvsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary-700 to-primary-900 text-white py-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="mb-4">
-            <span
-              className="inline-flex items-center gap-1 rounded-full border border-amber-400 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
-              title="Founding Partners are early premium providers with prioritized visibility and direct lead access."
-            >
-              <svg className="h-3.5 w-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              FOUNDING PARTNER
-            </span>
-          </div>
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            {/* Left Column - Text Content */}
+            <div>
+              <div className="mb-4">
+                <span
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-400 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
+                  title="Founding Partners are early premium providers with prioritized visibility and direct lead access."
+                >
+                  <svg className="h-3.5 w-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  FOUNDING PARTNER
+                </span>
+              </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-            CAREWITHLUVS LLC
-          </h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                CAREWITHLUVS LLC
+              </h1>
 
-          <p className="text-xl text-primary-100 mb-6">
-            Professional Mobile Healthcare Services in Maryland
-          </p>
+              <p className="text-xl text-primary-100 mb-6">
+                Your Mobile Phlebotomy Agency<br />
+                At Home • Nursing Home • Assisted Living
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <a
-              href="tel:2405750041"
-              className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-lg"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              Call (240) 575-0041
-            </a>
-            <a
-              href="mailto:carewithluvshealth@gmail.com"
-              className="inline-flex items-center px-8 py-4 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-900 transition-colors border-2 border-white"
-            >
-              Email Us
-            </a>
+              <p className="text-lg text-primary-50 mb-6">
+                We come to you for all your lab work needs.<br />
+                <span className="text-primary-100 font-semibold">Compassionate • Reliable • Convenient</span>
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <a
+                  href="tel:2405750041"
+                  className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-lg"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  Call (240) 575-0041
+                </a>
+                <a
+                  href="mailto:carewithluvshealth@gmail.com"
+                  className="inline-flex items-center px-8 py-4 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-900 transition-colors border-2 border-white"
+                >
+                  Email Us
+                </a>
+              </div>
+
+              <div className="mt-6 text-primary-100 text-sm">
+                <p className="font-semibold">📍 Location:</p>
+                <p>11140 Rockville Pike, Rockville, MD 20852</p>
+              </div>
+            </div>
+
+            {/* Right Column - Flyer Image */}
+            <div className="flex justify-center">
+              <div className="bg-white rounded-lg shadow-2xl p-2 max-w-sm">
+                <img
+                  src="/images/carewithluvs-flyer.jpg"
+                  alt="CAREWITHLUVS LLC - Your Mobile Phlebotomy Agency"
+                  className="w-full h-auto rounded"
+                  onError={(e) => {
+                    // Fallback if image doesn't load - hide the container
+                    const target = e.target as HTMLImageElement;
+                    const container = target.closest('div.bg-white');
+                    if (container) container.style.display = 'none';
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -67,7 +100,7 @@ export default function CareWithLuvsPage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Services</h2>
 
           <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-            Carewithluvs LLC is a Maryland-based mobile healthcare service offering comprehensive phlebotomy and testing services.
+            Carewithluvs LLC is a Maryland-based mobile healthcare service offering phlebotomy services, breath alcohol testing, nail and hair drug testing, DOT and NON-DOT specimen collection, immigration DNA testing, and early gender reveal DNA testing.
             We provide flexible scheduling, including <strong>evenings and weekends</strong>, to meet client needs quickly and efficiently.
           </p>
 
