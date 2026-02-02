@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminSession, verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/lib/pending-submissions'
 import { prisma } from '@/lib/prisma'
-import { emailProviderApproved } from '@/lib/providerEmails'
+import { emailProviderApprovedWithLeadChoice } from '@/lib/providerEmails'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -221,15 +221,19 @@ export async function POST(
 
       console.log(`✅ Provider ${result.provider.name} added to database with ID ${result.provider.id}`)
 
-      // Send welcome email to the provider
+      // Send personalized welcome email based on lead opt-in choice
       if (submission.email) {
         try {
-          await emailProviderApproved(
+          await emailProviderApprovedWithLeadChoice(
             submission.email,
             submission.businessName,
-            submission.contactName
+            submission.contactName,
+            submission.leadOptIn,
+            submission.leadContactMethod
           )
-          console.log(`📧 Welcome email sent to ${submission.email}`)
+          const emailType = submission.leadOptIn === 'yes' ? 'lead-ready' :
+                           submission.leadOptIn === 'no' ? 'listing-only' : 'standard'
+          console.log(`📧 Welcome email (${emailType}) sent to ${submission.email}`)
         } catch (emailError) {
           console.error('Failed to send welcome email:', emailError)
           // Don't fail the entire approval if email fails

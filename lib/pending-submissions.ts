@@ -140,7 +140,13 @@ export async function getPendingSubmissions(): Promise<PendingProvider[]> {
         weekendAvailable: sub.weekendAvailable,
         logo: sub.logo || undefined,
         ipAddress: sub.ipAddress || undefined,
-        userAgent: sub.userAgent || undefined
+        userAgent: sub.userAgent || undefined,
+        // Lead opt-in fields
+        leadOptIn: sub.leadOptIn || undefined,
+        leadContactMethod: sub.leadContactMethod || undefined,
+        leadEmail: sub.leadEmail || undefined,
+        leadPhone: sub.leadPhone || undefined,
+        availability: sub.availability || undefined
       }))
     } catch (error) {
       console.warn('Database error, falling back to file storage:', error)
@@ -341,7 +347,13 @@ export async function getSubmissionById(id: string): Promise<PendingProvider | n
         weekendAvailable: sub.weekendAvailable,
         logo: sub.logo || undefined,
         ipAddress: sub.ipAddress || undefined,
-        userAgent: sub.userAgent || undefined
+        userAgent: sub.userAgent || undefined,
+        // Lead opt-in fields
+        leadOptIn: sub.leadOptIn || undefined,
+        leadContactMethod: sub.leadContactMethod || undefined,
+        leadEmail: sub.leadEmail || undefined,
+        leadPhone: sub.leadPhone || undefined,
+        availability: sub.availability || undefined
       }
     } catch (error) {
       console.warn('Database error, falling back to file storage:', error)

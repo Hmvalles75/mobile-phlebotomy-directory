@@ -31,6 +31,12 @@ interface PendingProvider {
   weekendAvailable?: boolean
   logo?: string
   ipAddress?: string
+  // Lead opt-in fields
+  leadOptIn?: string
+  leadContactMethod?: string
+  leadEmail?: string
+  leadPhone?: string
+  availability?: string
 }
 
 interface BusinessClaim {
@@ -717,6 +723,32 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(submission.submittedAt).toLocaleString()}
                       </p>
+                      {/* Lead opt-in indicator */}
+                      <div className="mt-2 flex gap-1 flex-wrap">
+                        {submission.leadOptIn === 'yes' ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                            ✅ Wants Leads
+                          </span>
+                        ) : submission.leadOptIn === 'no' ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                            📋 Listing Only
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                            ⚠️ No Preference
+                          </span>
+                        )}
+                        {submission.leadContactMethod?.includes('sms') && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                            📱 SMS
+                          </span>
+                        )}
+                        {submission.leadContactMethod?.includes('email') && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                            📧 Email
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${
@@ -830,6 +862,73 @@ export default function AdminDashboard() {
                       <p className="text-gray-900">{selectedSubmission.specialties}</p>
                     </div>
                   )}
+
+                  {/* Lead Opt-In Section */}
+                  <div className="border-t pt-4 mt-4">
+                    <h3 className="text-sm font-bold text-gray-700 mb-3">📋 Lead Preferences</h3>
+                    <div className={`rounded-lg p-3 ${
+                      selectedSubmission.leadOptIn === 'yes'
+                        ? 'bg-green-50 border border-green-200'
+                        : selectedSubmission.leadOptIn === 'no'
+                        ? 'bg-gray-50 border border-gray-200'
+                        : 'bg-yellow-50 border border-yellow-200'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-lg ${
+                          selectedSubmission.leadOptIn === 'yes' ? '✅' :
+                          selectedSubmission.leadOptIn === 'no' ? '❌' : '⚠️'
+                        }`}>
+                          {selectedSubmission.leadOptIn === 'yes' ? '✅' :
+                           selectedSubmission.leadOptIn === 'no' ? '❌' : '⚠️'}
+                        </span>
+                        <span className={`font-semibold ${
+                          selectedSubmission.leadOptIn === 'yes' ? 'text-green-800' :
+                          selectedSubmission.leadOptIn === 'no' ? 'text-gray-700' : 'text-yellow-800'
+                        }`}>
+                          {selectedSubmission.leadOptIn === 'yes'
+                            ? 'Wants to receive leads'
+                            : selectedSubmission.leadOptIn === 'no'
+                            ? 'Does NOT want leads (listing only)'
+                            : 'No lead preference set (old submission)'}
+                        </span>
+                      </div>
+
+                      {selectedSubmission.leadOptIn === 'yes' && (
+                        <div className="space-y-2 text-sm">
+                          {selectedSubmission.leadContactMethod && (
+                            <div>
+                              <span className="text-gray-600">Contact via: </span>
+                              <span className="font-medium text-gray-900">
+                                {selectedSubmission.leadContactMethod.split(',').map(m =>
+                                  m.trim() === 'email' ? '📧 Email' :
+                                  m.trim() === 'sms' ? '📱 SMS' :
+                                  m.trim() === 'call' ? '📞 Phone Call' : m
+                                ).join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {selectedSubmission.leadEmail && (
+                            <div>
+                              <span className="text-gray-600">Lead email: </span>
+                              <span className="font-medium text-gray-900">{selectedSubmission.leadEmail}</span>
+                            </div>
+                          )}
+                          {selectedSubmission.leadPhone && (
+                            <div>
+                              <span className="text-gray-600">Lead phone: </span>
+                              <span className="font-medium text-gray-900">{selectedSubmission.leadPhone}</span>
+                            </div>
+                          )}
+                          {selectedSubmission.availability && (
+                            <div>
+                              <span className="text-gray-600">Availability: </span>
+                              <span className="font-medium text-gray-900">{selectedSubmission.availability}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="border-t pt-4 mt-4">
                     <label className="text-sm font-medium text-gray-500">Submitted</label>

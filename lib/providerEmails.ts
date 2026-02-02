@@ -176,6 +176,94 @@ P.S. Our emails can land in spam at first — please mark as Not Spam so you don
   )
 }
 
+// New personalized email based on form lead opt-in choice
+export async function emailProviderApprovedWithLeadChoice(
+  to: string,
+  businessName: string,
+  contactName: string,
+  leadOptIn: string | null | undefined,
+  contactMethods: string | null | undefined
+) {
+  const firstName = contactName.split(' ')[0]
+
+  // Parse contact methods
+  const methods = contactMethods?.split(',').map(m => m.trim()) || []
+  const wantsSMS = methods.includes('sms')
+  const wantsEmail = methods.includes('email')
+
+  // Build contact method string
+  let methodStr = ''
+  if (wantsSMS && wantsEmail) {
+    methodStr = 'SMS and email'
+  } else if (wantsSMS) {
+    methodStr = 'SMS'
+  } else if (wantsEmail) {
+    methodStr = 'email'
+  }
+
+  // OPTED IN for leads
+  if (leadOptIn === 'yes') {
+    return send(
+      to,
+      `You're all set to receive leads — ${businessName}`,
+      `Hi ${firstName},
+
+Great news! Your listing for ${businessName} is now live on MobilePhlebotomy.org, and you're all set to receive patient leads.
+
+✅ WHAT HAPPENS NEXT:
+When a patient in your area requests mobile phlebotomy services, we'll notify you via ${methodStr || 'email'}.
+
+You'll receive the patient's:
+• Name and phone number
+• Location (city, state, ZIP)
+• Urgency level
+• Any special notes
+
+📱 HOW TO RESPOND:
+Simply contact the patient directly to schedule their appointment. The faster you respond, the better your chances of booking the visit.
+
+💰 PRICING:
+During our beta phase, all leads are FREE. We're working with a small group of providers to refine the system before introducing pricing.
+
+📬 IMPORTANT:
+Our emails can land in spam at first. Please check your spam folder and mark us as "Not Spam" so you don't miss patient requests.
+
+Questions? Just reply to this email.
+
+Best,
+Hector
+MobilePhlebotomy.org`
+    )
+  }
+
+  // OPTED OUT of leads (listing only)
+  if (leadOptIn === 'no') {
+    return send(
+      to,
+      'Your MobilePhlebotomy.org listing is live',
+      `Hi ${firstName},
+
+Your listing for ${businessName} is now live on MobilePhlebotomy.org.
+
+Patients searching for mobile phlebotomy in your area can now find your business in our directory.
+
+📋 DIRECTORY ONLY:
+As you requested, we won't send you patient leads. Your listing will remain visible to patients who can contact you directly through the information on your profile.
+
+💡 CHANGE YOUR MIND?
+If you ever want to start receiving patient requests, you can activate lead notifications here:
+👉 https://www.mobilephlebotomy.org/onboard
+
+Best,
+Hector
+MobilePhlebotomy.org`
+    )
+  }
+
+  // NO PREFERENCE SET (old submission) - use original email
+  return emailProviderApproved(to, businessName, contactName)
+}
+
 export async function emailOnboardingFollowUp(to: string, businessName: string, contactName: string) {
   // Extract first name from contact name (e.g., "John Doe" -> "John")
   const firstName = contactName.split(' ')[0]
