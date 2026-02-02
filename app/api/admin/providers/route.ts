@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
     // Verify admin authentication
     const authHeader = req.headers.get('authorization')
-    const adminSecret = process.env.ADMIN_SECRET
+    const cookieHeader = req.headers.get('cookie')
+    const isAuthenticated = verifyAdminSessionFromCookies(authHeader || cookieHeader)
 
-    if (!authHeader || authHeader !== `Bearer ${adminSecret}`) {
+    if (!isAuthenticated) {
       return NextResponse.json(
         { ok: false, error: 'Unauthorized' },
         { status: 401 }
