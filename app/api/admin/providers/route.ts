@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Fetch all providers with address
+    // Fetch all providers with address and coverage
     const providers = await prisma.provider.findMany({
       select: {
         id: true,
@@ -35,6 +35,13 @@ export async function GET(req: NextRequest) {
             city: true,
             state: true
           }
+        },
+        coverage: {
+          select: {
+            state: { select: { abbr: true } },
+            city: { select: { name: true } }
+          },
+          take: 1
         }
       },
       orderBy: {
@@ -42,13 +49,18 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // Map to include businessName and flatten address for compatibility
-    const mappedProviders = providers.map(p => ({
-      ...p,
-      businessName: p.name,
-      city: p.address?.city || '',
-      state: p.address?.state || ''
-    }))
+    // Map to include businessName and flatten address/coverage for compatibility
+    const mappedProviders = providers.map(p => {
+      // Try address first, then fall back to first coverage area
+      const city = p.address?.city || p.coverage?.[0]?.city?.name || ''
+      const state = p.address?.state || p.coverage?.[0]?.state?.abbr || ''
+      return {
+        ...p,
+        businessName: p.name,
+        city,
+        state
+      }
+    })
 
     return NextResponse.json({
       ok: true,
