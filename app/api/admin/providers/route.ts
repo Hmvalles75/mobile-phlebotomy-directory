@@ -14,27 +14,43 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Fetch all providers
+    // Fetch all providers with address
     const providers = await prisma.provider.findMany({
       select: {
         id: true,
         name: true,
         email: true,
+        phone: true,
         slug: true,
         status: true,
+        eligibleForLeads: true,
         stripeCustomerId: true,
         stripePaymentMethodId: true,
         trialStatus: true,
-        createdAt: true
+        createdAt: true,
+        address: {
+          select: {
+            city: true,
+            state: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
 
+    // Map to include businessName and flatten address for compatibility
+    const mappedProviders = providers.map(p => ({
+      ...p,
+      businessName: p.name,
+      city: p.address?.city || '',
+      state: p.address?.state || ''
+    }))
+
     return NextResponse.json({
       ok: true,
-      providers
+      providers: mappedProviders
     })
 
   } catch (error: any) {

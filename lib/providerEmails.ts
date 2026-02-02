@@ -1,7 +1,5 @@
 import sg from '@sendgrid/mail'
 
-sg.setApiKey(process.env.SENDGRID_API_KEY!)
-
 type Send = (to: string, subject: string, text: string) => Promise<void>
 
 const send: Send = async (to, subject, text) => {
@@ -9,6 +7,9 @@ const send: Send = async (to, subject, text) => {
     console.error('[providerEmails] LEAD_EMAIL_FROM env var not set')
     return
   }
+
+  // Set API key at send time (not import time) for script compatibility
+  sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
   try {
     await sg.send({
@@ -282,6 +283,50 @@ If not, no worries — your listing stays live in the directory either way.
 
 Best,
 Hector`
+  )
+}
+
+// Outreach email to providers in areas with unserved leads
+export async function emailLeadOutreach(
+  to: string,
+  businessName: string,
+  state: string,
+  recentLeadCount: number
+) {
+  const stateNames: Record<string, string> = {
+    'OH': 'Ohio', 'PA': 'Pennsylvania', 'MI': 'Michigan', 'KY': 'Kentucky',
+    'FL': 'Florida', 'IL': 'Illinois', 'CA': 'California', 'NY': 'New York',
+    'TX': 'Texas', 'NC': 'North Carolina', 'IN': 'Indiana', 'NJ': 'New Jersey'
+  }
+  const stateName = stateNames[state] || state
+
+  return send(
+    to,
+    `Patients in ${stateName} are looking for mobile phlebotomy`,
+    `Hi,
+
+I'm reaching out because we have patients in ${stateName} requesting mobile phlebotomy services, and ${businessName} is listed in our directory.
+
+In the past 30 days, we've received ${recentLeadCount} patient requests in ${stateName} — but we don't have enough providers signed up to receive them.
+
+Would you like to receive these patient requests? It's free during our beta.
+
+Here's how it works:
+• Patient submits request on MobilePhlebotomy.org
+• You get notified via email/SMS with their contact info
+• You reach out directly to schedule the appointment
+• No subscription, no fees during beta
+
+If interested, activate lead notifications here (takes 60 seconds):
+👉 https://www.mobilephlebotomy.org/onboard
+
+If you're not taking new patients right now, no worries — your directory listing stays active either way.
+
+Best,
+Hector
+MobilePhlebotomy.org
+
+P.S. Reply to this email if you have any questions.`
   )
 }
 

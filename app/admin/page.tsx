@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
 import { LeadsPanel } from './LeadsPanel'
 import { ChargeProviderPanel } from './ChargeProviderPanel'
+import { ProvidersManagementPanel } from './ProvidersManagementPanel'
 
 interface PendingProvider {
   id: string
@@ -62,7 +63,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'providers' | 'corporate' | 'leads' | 'billing'>('providers')
+  const [activeTab, setActiveTab] = useState<'submissions' | 'provider-mgmt' | 'corporate' | 'leads' | 'billing'>('submissions')
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -385,7 +386,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <div className="flex gap-3">
-              {activeTab === 'providers' && (
+              {activeTab === 'submissions' && (
                 <>
                   <button
                     onClick={() => setShowAddForm(!showAddForm)}
@@ -418,32 +419,45 @@ export default function AdminDashboard() {
           </div>
 
           {/* Tabs */}
-          <div className="mt-6 flex gap-2 border-b border-gray-200">
+          <div className="mt-6 flex gap-2 border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => {
-                setActiveTab('providers')
+                setActiveTab('submissions')
                 setShowAddForm(false)
               }}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'providers'
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
+                activeTab === 'submissions'
                   ? 'text-primary-600 border-b-2 border-primary-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Provider Submissions
+              Submissions
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('provider-mgmt')
+                setShowAddForm(false)
+              }}
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
+                activeTab === 'provider-mgmt'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Provider Management
             </button>
             <button
               onClick={() => {
                 setActiveTab('leads')
                 setShowAddForm(false)
               }}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'leads'
                   ? 'text-primary-600 border-b-2 border-primary-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Blood Draw Leads
+              Leads
             </button>
             <button
               onClick={() => {
@@ -473,7 +487,7 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {activeTab === 'providers' && (
+          {activeTab === 'submissions' && (
             <div className="mt-4 flex gap-4 text-sm">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
                 <span className="font-medium text-yellow-800">Pending: </span>
@@ -695,7 +709,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Provider Submissions Tab */}
-        {activeTab === 'providers' && (
+        {activeTab === 'submissions' && (
           <div className="grid md:grid-cols-2 gap-8">
             {/* Submissions List */}
             <div>
@@ -973,6 +987,11 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Provider Management Tab */}
+        {activeTab === 'provider-mgmt' && (
+          <ProvidersManagementPanel />
         )}
 
         {/* Leads Tab */}
