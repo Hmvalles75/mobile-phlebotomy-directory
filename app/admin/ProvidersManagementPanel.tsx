@@ -31,9 +31,11 @@ export function ProvidersManagementPanel() {
       const res = await fetch('/api/admin/providers', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (res.ok) {
-        const data = await res.json()
+      const data = await res.json()
+      if (res.ok && data.providers) {
         setProviders(data.providers)
+      } else {
+        console.error('Failed to fetch providers:', data)
       }
     } catch (error) {
       console.error('Failed to fetch providers:', error)
