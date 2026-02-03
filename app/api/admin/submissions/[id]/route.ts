@@ -224,12 +224,16 @@ export async function POST(
       // Send personalized welcome email based on lead opt-in choice
       if (submission.email) {
         try {
+          // Check if provider has a website (for website service upsell)
+          const hasWebsite = !!(submission.website && submission.website.trim() !== '')
+
           await emailProviderApprovedWithLeadChoice(
             submission.email,
             submission.businessName,
             submission.contactName,
             submission.leadOptIn,
-            submission.leadContactMethod
+            submission.leadContactMethod,
+            hasWebsite
           )
           const emailType = submission.leadOptIn === 'yes' ? 'lead-ready' :
                            submission.leadOptIn === 'no' ? 'listing-only' : 'standard'

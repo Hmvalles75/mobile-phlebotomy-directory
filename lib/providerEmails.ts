@@ -183,7 +183,8 @@ export async function emailProviderApprovedWithLeadChoice(
   businessName: string,
   contactName: string,
   leadOptIn: string | null | undefined,
-  contactMethods: string | null | undefined
+  contactMethods: string | null | undefined,
+  hasWebsite: boolean = true
 ) {
   const firstName = contactName.split(' ')[0]
 
@@ -228,7 +229,13 @@ During our beta phase, all leads are FREE. We're working with a small group of p
 
 📬 IMPORTANT:
 Our emails can land in spam at first. Please check your spam folder and mark us as "Not Spam" so you don't miss patient requests.
+${!hasWebsite ? `
+🌐 NEED A PROFESSIONAL WEBSITE?
+We noticed you don't have a website listed. We offer a website setup service ($199 one-time) that includes a professional page, booking integration, and SEO optimization.
 
+See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+Interested? Just reply to this email.
+` : ''}
 Questions? Just reply to this email.
 
 Best,
@@ -254,7 +261,13 @@ As you requested, we won't send you patient leads. Your listing will remain visi
 💡 CHANGE YOUR MIND?
 If you ever want to start receiving patient requests, you can activate lead notifications here:
 👉 https://www.mobilephlebotomy.org/onboard
+${!hasWebsite ? `
+🌐 NEED A PROFESSIONAL WEBSITE?
+We noticed you don't have a website listed. We offer a website setup service ($199 one-time) that includes a professional page, booking integration, and SEO optimization.
 
+See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+Interested? Just reply to this email.
+` : ''}
 Best,
 Hector
 MobilePhlebotomy.org`
