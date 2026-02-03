@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Star, TrendingUp, Award } from 'lucide-react'
+import { Check, Star, TrendingUp, Award, Globe, Palette } from 'lucide-react'
 import Link from 'next/link'
 
 const tiers = [
@@ -142,6 +142,127 @@ export default function PricingPage() {
               </div>
             )
           })}
+        </div>
+
+        {/* Website Service Section */}
+        <div className="mt-20 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Need a Professional Website?
+            </h2>
+            <p className="text-lg text-gray-600">
+              Don't have a website? We'll build you a professional landing page that converts visitors into patients.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* One-Time Setup */}
+            <div className="border-2 border-gray-200 rounded-xl p-8 bg-white shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Globe className="text-purple-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Website Setup</h3>
+                  <p className="text-gray-500 text-sm">One-time fee</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-gray-900">$199</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Perfect for providers who only have social media and need a professional online presence.
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Custom page at mobilephlebotomy.org/p/yourname</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Professional mobile-friendly design</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Online booking integration</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Contact form with email notifications</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">SEO optimized for local search</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Link for Google Business & business cards</span>
+                </li>
+              </ul>
+              <a
+                href="mailto:hector@mobilephlebotomy.org?subject=Website%20Service%20Inquiry"
+                className="block w-full py-3 px-6 rounded-lg font-semibold text-center bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+              >
+                Get Started
+              </a>
+            </div>
+
+            {/* Monthly Hosting */}
+            <div className="border-2 border-gray-200 rounded-xl p-8 bg-white shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Palette className="text-indigo-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Website + Hosting</h3>
+                  <p className="text-gray-500 text-sm">Setup + monthly</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-gray-900">$199</span>
+                <span className="text-gray-600"> + $19/mo</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Everything in Website Setup plus ongoing hosting, updates, and support.
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Everything in Website Setup</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Secure hosting included</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">SSL certificate (https)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Content updates on request</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Priority email support</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-gray-700">Analytics & visitor tracking</span>
+                </li>
+              </ul>
+              <a
+                href="mailto:hector@mobilephlebotomy.org?subject=Website%20%2B%20Hosting%20Inquiry"
+                className="block w-full py-3 px-6 rounded-lg font-semibold text-center bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              >
+                Get Started
+              </a>
+            </div>
+          </div>
+
+          <p className="text-center text-gray-500 mt-6 text-sm">
+            See an example: <a href="/p/carewithluvs" className="text-primary-600 hover:underline">carewithluvs.mobilephlebotomy.org</a>
+          </p>
         </div>
 
         {/* Info Section */}

@@ -409,3 +409,47 @@ MobilePhlebotomy.org
 📬 Note: Lead notifications may land in your spam folder initially. Please mark as "Not Spam" to receive all patient requests.`
   )
 }
+
+// Website service outreach email for providers without websites
+export async function emailWebsiteServiceOutreach(
+  to: string,
+  businessName: string
+) {
+  return send(
+    to,
+    `Professional website for ${businessName} - special offer`,
+    `Hi,
+
+I noticed that ${businessName} is listed on MobilePhlebotomy.org but doesn't have a dedicated website yet.
+
+Having a professional website (beyond just social media) can help you:
+• Rank higher in Google when patients search for mobile phlebotomy
+• Look more professional and trustworthy to potential patients
+• Give patients an easy way to book appointments
+• Provide a link for your Google Business profile and business cards
+
+We're now offering a website service for providers in our directory:
+
+📦 WEBSITE SETUP - $199 (one-time)
+• Custom page at mobilephlebotomy.org/p/yourname
+• Professional, mobile-friendly design
+• Online booking integration
+• Contact form with email notifications
+• SEO optimized for local search
+
+➕ OPTIONAL HOSTING - $19/month
+• Secure hosting included
+• Content updates on request
+• Analytics & visitor tracking
+
+See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+
+If you're interested, just reply to this email and we can discuss your needs.
+
+Best,
+Hector
+MobilePhlebotomy.org
+
+P.S. No pressure at all — your free directory listing stays active either way.`
+  )
+}
