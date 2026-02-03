@@ -19,12 +19,19 @@ async function main() {
     console.log('🚀 LIVE MODE - Emails will be sent!\n')
   }
 
+  // Providers to exclude (already have custom pages or are premium)
+  const excludeSlugs = [
+    'carewithluvs-llc',  // Already has custom page
+  ]
+
   // Find providers without websites who have email
   const providers = await prisma.provider.findMany({
     where: {
       AND: [
         { email: { not: null } },
         { email: { not: '' } },
+        { slug: { notIn: excludeSlugs } },
+        { featuredTier: null },  // Exclude premium providers
         {
           OR: [
             { website: null },

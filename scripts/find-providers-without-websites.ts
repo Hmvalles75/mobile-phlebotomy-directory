@@ -6,15 +6,26 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
+  // Providers to exclude (already have custom pages or are premium)
+  const excludeSlugs = [
+    'carewithluvs-llc',  // Already has custom page
+  ]
+
   // Find providers without websites (no website field or only social media)
   const providers = await prisma.provider.findMany({
     where: {
-      OR: [
-        { website: null },
-        { website: '' },
-        { website: { contains: 'facebook.com' } },
-        { website: { contains: 'instagram.com' } },
-        { website: { contains: 'fb.com' } }
+      AND: [
+        { slug: { notIn: excludeSlugs } },
+        { featuredTier: null },  // Exclude premium providers
+        {
+          OR: [
+            { website: null },
+            { website: '' },
+            { website: { contains: 'facebook.com' } },
+            { website: { contains: 'instagram.com' } },
+            { website: { contains: 'fb.com' } }
+          ]
+        }
       ]
     },
     select: {
