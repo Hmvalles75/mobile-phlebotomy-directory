@@ -41,7 +41,11 @@ export async function GET(req: NextRequest) {
     const totalProviders = await prisma.provider.count()
     const providersWithPayment = await prisma.provider.count({
       where: {
-        stripePaymentMethodId: { not: null }
+        OR: [
+          { stripePaymentMethodId: { not: null } },
+          // Only count Stripe customers who are actually featured (paid subscribers)
+          { stripeCustomerId: { not: null }, isFeatured: true }
+        ]
       }
     })
     const providersWhoClaimedLeads = await prisma.provider.count({
