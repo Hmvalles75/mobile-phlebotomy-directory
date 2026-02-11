@@ -51,10 +51,8 @@ export async function createMagicLinkToken(email: string): Promise<{ ok: boolean
       return { ok: false, error: 'No provider account found with this email' }
     }
 
-    // Only allow verified providers to log in
-    if (provider.status !== 'VERIFIED') {
-      return { ok: false, error: 'Your account is not verified. Please check your email for the verification link.' }
-    }
+    // Allow any provider to request a magic link (for both login and initial verification)
+    // The verify step will handle marking them as verified if needed
 
     // Generate new token
     const token = generateAuthToken()
@@ -87,22 +85,26 @@ export async function verifyMagicLinkToken(token: string): Promise<{ ok: boolean
       return { ok: false, error: 'Invalid or expired magic link' }
     }
 
+    // Clear the token and verify the provider if not already verified
+    // This handles both login (already verified) and initial verification (unverified)
+    const updateData: any = { claimToken: null }
+
     if (provider.status !== 'VERIFIED') {
-      return { ok: false, error: 'Account not verified' }
+      updateData.status = 'VERIFIED'
+      updateData.claimVerifiedAt = new Date()
     }
 
-    // Clear the token (one-time use)
     await prisma.provider.update({
       where: { id: provider.id },
-      data: { claimToken: null }
+      data: updateData
     })
 
-    // Create session
+    // Create session (use VERIFIED status since we just verified them if needed)
     const session: AuthSession = {
       providerId: provider.id,
       email: provider.claimEmail || provider.email || '',
       name: provider.name,
-      status: provider.status,
+      status: 'VERIFIED',
       expiresAt: getSessionExpiration()
     }
 

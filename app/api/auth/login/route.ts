@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createMagicLinkToken } from '@/lib/auth'
-import { emailClaimReceipt } from '@/lib/providerEmails'
 import sg from '@sendgrid/mail'
-
-if (process.env.SENDGRID_API_KEY) {
-  sg.setApiKey(process.env.SENDGRID_API_KEY)
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,11 +35,12 @@ export async function POST(req: NextRequest) {
 
     // Get the provider to send email with token
     const { prisma } = await import('@/lib/prisma')
+    const normalizedEmail = email.toLowerCase().trim()
     const provider = await prisma.provider.findFirst({
       where: {
         OR: [
-          { claimEmail: email },
-          { email: email }
+          { claimEmail: { equals: normalizedEmail, mode: 'insensitive' } },
+          { email: { equals: normalizedEmail, mode: 'insensitive' } }
         ]
       }
     })
@@ -56,10 +52,20 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Set claimEmail if not already set (first time claiming)
+    if (!provider.claimEmail) {
+      await prisma.provider.update({
+        where: { id: provider.id },
+        data: { claimEmail: normalizedEmail }
+      })
+    }
+
     // Send magic link email
     const magicLink = `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/api/auth/verify?token=${provider.claimToken}`
 
     if (process.env.SENDGRID_API_KEY) {
+      // Set API key at send time for compatibility with scripts
+      sg.setApiKey(process.env.SENDGRID_API_KEY)
       await sg.send({
         to: email,
         from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
