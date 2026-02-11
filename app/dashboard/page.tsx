@@ -42,6 +42,7 @@ interface Provider {
   claimEmail: string | null
   zipCodes: string | null
   stripePaymentMethodId: string | null
+  stripeCustomerId: string | null
 }
 
 interface DashboardData {
@@ -69,6 +70,7 @@ function DashboardContent() {
   const [showSettings, setShowSettings] = useState(false)
   const [settingsLoading, setSettingsLoading] = useState(false)
   const [settingsSaved, setSettingsSaved] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
   const [operatingDays, setOperatingDays] = useState({
     MON: false,
     TUE: false,
@@ -216,6 +218,26 @@ function DashboardContent() {
     }
   }
 
+  const handleBillingPortal = async () => {
+    setBillingLoading(true)
+    try {
+      const response = await fetch('/api/stripe/billing-portal', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      const result = await response.json()
+      if (result.ok && result.url) {
+        window.location.href = result.url
+      } else {
+        alert(result.error || 'Failed to open billing portal')
+      }
+    } catch (error) {
+      alert('An error occurred while opening billing portal')
+    } finally {
+      setBillingLoading(false)
+    }
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -337,6 +359,16 @@ function DashboardContent() {
               >
                 View Listing →
               </Link>
+              {provider.stripeCustomerId && (
+                <button
+                  onClick={handleBillingPortal}
+                  disabled={billingLoading}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm disabled:opacity-50"
+                >
+                  <CreditCard size={16} />
+                  {billingLoading ? 'Loading...' : 'Manage Billing'}
+                </button>
+              )}
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm"
