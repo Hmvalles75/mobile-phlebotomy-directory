@@ -2,6 +2,7 @@ import { prisma } from './prisma'
 import twilio from 'twilio'
 import sg from '@sendgrid/mail'
 import { formatPrice } from './leadPricing'
+import { getDistanceBetweenZips, getZipInfo } from './zip-geocode'
 
 // Initialize SendGrid if API key is available
 if (process.env.SENDGRID_API_KEY) {
@@ -118,6 +119,142 @@ export async function notifyAdminUnservedLead(lead: any) {
     })
   } catch (error) {
     console.error('Error notifying admin:', error)
+  }
+}
+
+/**
+ * Reach out to nearby non-opted-in providers when a lead has no coverage
+ * Finds closest providers regardless of eligibleForLeads status and sends them an opportunity email
+ */
+export async function reachOutToNearbyProviders(lead: any, maxDistance: number = 150): Promise<number> {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('SendGrid not configured - cannot reach out to nearby providers')
+    return 0
+  }
+
+  try {
+    // Get all providers with ZIP codes who are NOT already opted in
+    const providers = await prisma.provider.findMany({
+      where: {
+        zipCodes: { not: null },
+        eligibleForLeads: false,  // Only non-opted-in providers
+        status: 'VERIFIED'        // Only verified providers
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        claimEmail: true,
+        zipCodes: true,
+        slug: true
+      }
+    })
+
+    if (providers.length === 0) {
+      console.log('No non-opted-in providers found to reach out to')
+      return 0
+    }
+
+    // Calculate distance and find closest providers
+    const providersWithDistance: Array<{
+      provider: typeof providers[0]
+      distance: number
+    }> = []
+
+    for (const provider of providers) {
+      if (!provider.zipCodes) continue
+
+      const primaryZip = provider.zipCodes.split(',')[0]?.trim()
+      if (!primaryZip || primaryZip.length < 5) continue
+
+      const distance = getDistanceBetweenZips(primaryZip, lead.zip)
+      if (distance !== null && distance <= maxDistance) {
+        providersWithDistance.push({ provider, distance })
+      }
+    }
+
+    // Sort by distance and take closest 5
+    providersWithDistance.sort((a, b) => a.distance - b.distance)
+    const closestProviders = providersWithDistance.slice(0, 5)
+
+    if (closestProviders.length === 0) {
+      console.log(`No non-opted-in providers within ${maxDistance} miles of ${lead.zip}`)
+      return 0
+    }
+
+    console.log(`Found ${closestProviders.length} non-opted-in providers near ${lead.zip} to reach out to`)
+
+    const leadInfo = getZipInfo(lead.zip)
+    const siteUrl = process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+
+    // Send opportunity emails
+    const sendPromises = closestProviders.map(async ({ provider, distance }) => {
+      const email = provider.claimEmail || provider.email
+      if (!email) return null
+
+      try {
+        await sg.send({
+          to: email,
+          from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
+          subject: `Patient Request ${Math.round(distance)} Miles Away - ${lead.city}, ${lead.state}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">New Patient Request Near You!</h2>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">~${Math.round(distance)} miles from your location</p>
+              </div>
+
+              <div style="background: #f0fdf4; padding: 20px; border-left: 4px solid #059669;">
+                <p style="margin: 0;"><strong>📍 Location:</strong> ${lead.city}, ${lead.state} ${lead.zip}</p>
+                <p style="margin: 10px 0 0 0;"><strong>⚡ Urgency:</strong> ${lead.urgency}</p>
+              </div>
+
+              <div style="background: white; padding: 20px; border: 1px solid #e5e7eb;">
+                <p>Hi ${provider.name},</p>
+                <p>A patient in <strong>${lead.city}, ${lead.state}</strong> is looking for mobile phlebotomy services. This location is approximately <strong>${Math.round(distance)} miles</strong> from your service area.</p>
+                <p>You're not currently receiving leads from MobilePhlebotomy.org. <strong>Activate your account now to claim this lead and future leads in your area!</strong></p>
+              </div>
+
+              <div style="text-align: center; padding: 25px; background: #f9fafb;">
+                <a href="${siteUrl}/dashboard/login" style="background: #059669; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Activate & Claim This Lead</a>
+                <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 14px;">Log in to your dashboard to start receiving leads</p>
+              </div>
+
+              <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #1e40af;">Why Activate?</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px;">
+                  <li>Receive real-time SMS/email alerts for leads in your area</li>
+                  <li>FREE leads during our beta period</li>
+                  <li>First-come, first-served - fastest provider wins</li>
+                </ul>
+              </div>
+
+              <div style="background: #1f2937; color: #9ca3af; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px;">
+                <p style="margin: 0;">MobilePhlebotomy.org</p>
+                <p style="margin: 5px 0 0 0; font-size: 11px;">Reply STOP to unsubscribe from opportunity emails</p>
+              </div>
+            </div>
+          `,
+          text: `New Patient Request Near You!\n\nA patient in ${lead.city}, ${lead.state} (${lead.zip}) is looking for mobile phlebotomy services. This location is approximately ${Math.round(distance)} miles from your service area.\n\nActivate your account to claim this lead: ${siteUrl}/dashboard/login\n\nReply STOP to unsubscribe.`
+        })
+
+        console.log(`📧 Opportunity email sent to ${provider.name} (${email}) - ${Math.round(distance)} mi away`)
+        return true
+      } catch (error: any) {
+        console.error(`Failed to send opportunity email to ${provider.name}:`, error.message)
+        return null
+      }
+    })
+
+    const results = await Promise.allSettled(sendPromises)
+    const successCount = results.filter(r => r.status === 'fulfilled' && r.value !== null).length
+
+    console.log(`Opportunity outreach complete: ${successCount}/${closestProviders.length} emails sent`)
+    return successCount
+
+  } catch (error) {
+    console.error('Error in reachOutToNearbyProviders:', error)
+    return 0
   }
 }
 

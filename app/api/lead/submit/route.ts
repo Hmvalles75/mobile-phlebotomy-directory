@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
-import { notifyAdminUnservedLead } from '@/lib/notifyProvider'
+import { notifyAdminUnservedLead, reachOutToNearbyProviders } from '@/lib/notifyProvider'
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 
@@ -53,10 +53,17 @@ export async function POST(req: NextRequest) {
       urgency: payload.urgency,
       city: payload.city,
       state: payload.state
+    }).then(async (count) => {
+      // If no opted-in providers were notified, reach out to nearby non-opted-in providers
+      if (count === 0) {
+        console.log(`No eligible providers for lead ${lead.id} - reaching out to nearby providers`)
+        notifyAdminUnservedLead(lead).catch(console.error)
+        reachOutToNearbyProviders(lead, 150).catch(console.error) // 150 mile radius
+      }
     }).catch(err => {
       console.error('SMS blast failed:', err)
-      // Also notify admin if SMS blast fails
       notifyAdminUnservedLead(lead).catch(console.error)
+      reachOutToNearbyProviders(lead, 150).catch(console.error)
     })
 
     // Return success immediately
