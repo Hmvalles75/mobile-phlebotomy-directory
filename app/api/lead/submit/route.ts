@@ -58,12 +58,12 @@ export async function POST(req: NextRequest) {
       if (count === 0) {
         console.log(`No eligible providers for lead ${lead.id} - reaching out to nearby providers`)
         notifyAdminUnservedLead(lead).catch(console.error)
-        reachOutToNearbyProviders(lead, 150).catch(console.error) // 150 mile radius
+        reachOutToNearbyProviders(lead, 30).catch(console.error) // 30 mile radius
       }
     }).catch(err => {
       console.error('SMS blast failed:', err)
       notifyAdminUnservedLead(lead).catch(console.error)
-      reachOutToNearbyProviders(lead, 150).catch(console.error)
+      reachOutToNearbyProviders(lead, 30).catch(console.error)
     })
 
     // Return success immediately
