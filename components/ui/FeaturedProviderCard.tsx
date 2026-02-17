@@ -3,9 +3,6 @@
 import Link from 'next/link'
 import { type Provider } from '@/lib/schemas'
 import { RatingBadge } from './RatingBadge'
-import { ProviderActions } from './ProviderActions'
-import Image from 'next/image'
-import { ga4 } from '@/lib/ga4'
 
 interface FeaturedProviderCardProps {
   provider: Provider
@@ -112,27 +109,6 @@ export function FeaturedProviderCard({ provider }: FeaturedProviderCardProps) {
               <span className="text-lg">📞</span>
               <span>Call Now: {provider.phone}</span>
             </button>
-          )}
-
-          {/* Website Button */}
-          {provider.website && (
-            <a
-              href={provider.website}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="w-full bg-white hover:bg-primary-50 text-primary-600 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-primary-600 hover:border-primary-700 shadow-sm"
-              onClick={() => {
-                ga4.providerWebsiteClick({
-                  provider_id: provider.id,
-                  provider_name: provider.name,
-                  url: provider.website,
-                  source_page: 'featured_card'
-                })
-              }}
-            >
-              <span className="text-lg">🌐</span>
-              <span>Visit Website</span>
-            </a>
           )}
 
           {/* View Details Link */}

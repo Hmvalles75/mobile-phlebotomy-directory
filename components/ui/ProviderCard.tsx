@@ -4,7 +4,6 @@ import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { formatPhoneNumber } from '@/lib/format-phone'
-import { ga4 } from '@/lib/ga4'
 
 interface ProviderCardProps {
   provider: Provider
@@ -149,18 +148,8 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-        <div>
-          <span className="font-medium">Coverage:</span> {coverageDisplay}
-        </div>
-        {provider.website && (
-          <div>
-            <span className="font-medium">Website:</span>{' '}
-            <a href={provider.website} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
-              {provider.website.replace('https://', '')}
-            </a>
-          </div>
-        )}
+      <div className="text-sm text-gray-600 mb-4">
+        <span className="font-medium">Coverage:</span> {coverageDisplay}
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -170,24 +159,6 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
         >
           View Provider Details
         </Link>
-        {provider.website && (
-          <a
-            href={provider.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors"
-            onClick={() => {
-              ga4.providerWebsiteClick({
-                provider_id: provider.id,
-                provider_name: provider.name,
-                url: provider.website,
-                source_page: 'provider_card'
-              })
-            }}
-          >
-            Visit Website
-          </a>
-        )}
         <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
           Save
         </button>

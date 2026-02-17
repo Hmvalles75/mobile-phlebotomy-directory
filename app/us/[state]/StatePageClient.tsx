@@ -744,19 +744,6 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                 <span className="text-gray-700">Based in {provider.address.city}, {provider.address.state}</span>
                               </div>
                             )}
-                            {provider.website && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-primary-600">🌐</span>
-                                <a
-                                  href={provider.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer nofollow"
-                                  className="text-primary-600 hover:text-primary-700 font-medium underline"
-                                >
-                                  Visit Website
-                                </a>
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -1036,19 +1023,6 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             {provider.address?.city && (
                               <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
                             )}
-                            {provider.website && (
-                              <div>
-                                🌐{' '}
-                                <a
-                                  href={provider.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer nofollow"
-                                  className="text-gray-600 hover:text-primary-600 underline text-xs"
-                                >
-                                  Website
-                                </a>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -1136,19 +1110,6 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             )}
                             {provider.rating && (
                               <span>⭐ {provider.rating}</span>
-                            )}
-                            {provider.website && (
-                              <span>
-                                🌐{' '}
-                                <a
-                                  href={provider.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer nofollow"
-                                  className="text-gray-600 hover:text-primary-600 underline text-xs"
-                                >
-                                  Website
-                                </a>
-                              </span>
                             )}
                           </div>
                         </div>

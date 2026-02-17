@@ -887,23 +887,8 @@ export default function CityPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                  <div>
-                    <span className="font-medium">Coverage:</span> {getProviderCoverageDisplay(provider, cityName)}
-                  </div>
-                  {provider.website && (
-                    <div>
-                      🌐{' '}
-                      <a
-                        href={provider.website}
-                        target="_blank"
-                        rel="noopener noreferrer nofollow"
-                        className="text-gray-600 hover:text-primary-600 underline text-xs"
-                      >
-                        Website
-                      </a>
-                    </div>
-                  )}
+                <div className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Coverage:</span> {getProviderCoverageDisplay(provider, cityName)}
                 </div>
 
                 <div className="flex justify-between items-center">

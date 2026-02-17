@@ -476,19 +476,6 @@ export default function MetroPage({ params }: MetroPageProps) {
                                 <span className="text-gray-700">Based in {provider.address.city}, {provider.address.state}</span>
                               </div>
                             )}
-                            {provider.website && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-primary-600">🌐</span>
-                                <a
-                                  href={provider.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer nofollow"
-                                  className="text-primary-600 hover:text-primary-700 font-medium underline"
-                                >
-                                  Visit Website
-                                </a>
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -752,19 +739,6 @@ export default function MetroPage({ params }: MetroPageProps) {
                           <div>
                             <span className="font-medium">Coverage:</span> {formatCoverageDisplay(provider.coverage)}
                           </div>
-                          {provider.website && (
-                            <div>
-                              🌐{' '}
-                              <a
-                                href={provider.website}
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                                className="text-gray-600 hover:text-primary-600 underline text-xs"
-                              >
-                                Website
-                              </a>
-                            </div>
-                          )}
                         </div>
 
                         <div className="flex justify-center mt-4">
