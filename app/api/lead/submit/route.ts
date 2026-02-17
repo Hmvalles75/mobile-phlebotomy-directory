@@ -41,9 +41,14 @@ export async function POST(req: NextRequest) {
 
     // Send email notifications to featured providers (Phase 1)
     // Runs async and doesn't block the response
-    notifyFeaturedProvidersForLead(lead.id).catch(err => {
-      console.error('Featured provider email notifications failed:', err)
-    })
+    // If this fails, the cron job at /api/cron/catch-missed-notifications will retry
+    notifyFeaturedProvidersForLead(lead.id)
+      .then(count => {
+        console.log(`[Lead ${lead.id}] ✅ Featured provider email: ${count} sent`)
+      })
+      .catch(err => {
+        console.error(`[Lead ${lead.id}] ❌ Featured provider email FAILED:`, err.message || err)
+      })
 
     // Send SMS blast to all eligible providers in the area (Race to Claim)
     // Runs async and doesn't block the response
@@ -54,14 +59,15 @@ export async function POST(req: NextRequest) {
       city: payload.city,
       state: payload.state
     }).then(async (count) => {
+      console.log(`[Lead ${lead.id}] ✅ SMS blast: ${count} sent`)
       // If no opted-in providers were notified, reach out to nearby non-opted-in providers
       if (count === 0) {
-        console.log(`No eligible providers for lead ${lead.id} - reaching out to nearby providers`)
+        console.log(`[Lead ${lead.id}] No eligible providers - reaching out to nearby providers`)
         notifyAdminUnservedLead(lead).catch(console.error)
         reachOutToNearbyProviders(lead, 30).catch(console.error) // 30 mile radius
       }
     }).catch(err => {
-      console.error('SMS blast failed:', err)
+      console.error(`[Lead ${lead.id}] ❌ SMS blast FAILED:`, err.message || err)
       notifyAdminUnservedLead(lead).catch(console.error)
       reachOutToNearbyProviders(lead, 30).catch(console.error)
     })
