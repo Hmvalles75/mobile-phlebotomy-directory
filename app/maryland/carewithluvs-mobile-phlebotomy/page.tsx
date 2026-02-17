@@ -79,7 +79,7 @@ export default function CareWithLuvsPage() {
             <div className="flex justify-center">
               <div className="bg-white rounded-lg shadow-2xl p-2 max-w-sm">
                 <Image
-                  src="/images/carewithluvs-flyer.png"
+                  src="/images/CareWithLuvsPoster.jpg"
                   alt="CAREWITHLUVS LLC - Your Mobile Phlebotomy Agency"
                   width={400}
                   height={600}

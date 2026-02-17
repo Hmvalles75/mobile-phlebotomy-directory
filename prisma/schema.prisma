@@ -59,6 +59,14 @@ model Provider {
   smsOptInAt            DateTime?
   smsOptOutAt           DateTime?
   smsOptOutReason       String?
+  // New fields for compliance-aware provider management
+  source                ProviderSource         @default(SCRAPED)
+  onboardingToken       String?                @unique
+  onboardingStatus      OnboardingStatus       @default(NOT_INVITED)
+  onboardingInvitedAt   DateTime?
+  onboardingCompletedAt DateTime?
+  termsAcceptedAt       DateTime?
+  // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]
   leads                 Lead[]
@@ -75,6 +83,8 @@ model Provider {
   @@index([primaryState])
   @@index([primaryCity])
   @@index([primaryMetro])
+  @@index([onboardingStatus])
+  @@index([source])
   @@map("providers")
 }
 
@@ -105,9 +115,21 @@ model Lead {
   appointmentDate   DateTime?
   completedAt       DateTime?
   providerNotes     String?
+  // New fields for patient SMS qualification flow
+  timeWindow        String?            // e.g. "tomorrow 9-12"
+  patientNotes      String?            // Notes from patient SMS
+  confirmedAt       DateTime?          // When patient confirmed intent
+  qualifiedAt       DateTime?          // When lead became fully qualified
+  lastPatientSmsAt  DateTime?          // Track last SMS to patient
+  patientSmsCount   Int                @default(0)
+  routedProviderIds String[]           // Array of providers we attempted to route to
+  // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])
+  dispatchTasks     DispatchTask[]
 
+  @@index([status])
+  @@index([phone])
   @@map("leads")
 }
 
@@ -389,6 +411,48 @@ model LeadNotification {
   @@map("lead_notifications")
 }
 
+// Coverage gap task queue for admin follow-up
+model DispatchTask {
+  id          String             @id @default(cuid())
+  leadId      String
+  status      DispatchTaskStatus @default(OPEN)
+  reason      DispatchTaskReason
+  notes       String?
+  assignedTo  String?            // Admin user ID or email
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  lead        Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([leadId])
+  @@map("dispatch_tasks")
+}
+
+// SMS event log for idempotency and audit trail
+model SmsEvent {
+  id          String   @id @default(cuid())
+  twilioSid   String   @unique // Ensures idempotency
+  direction   String   // INBOUND or OUTBOUND
+  fromNumber  String
+  toNumber    String
+  body        String?
+  status      String?  // Twilio status
+  leadId      String?
+  providerId  String?
+  eventType   String   // e.g. PATIENT_CONFIRM, PROVIDER_CLAIM, etc.
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  errorMsg    String?
+  createdAt   DateTime @default(now())
+
+  @@index([fromNumber])
+  @@index([toNumber])
+  @@index([leadId])
+  @@map("sms_events")
+}
+
 enum ProviderStatus {
   UNVERIFIED
   PENDING
@@ -408,6 +472,17 @@ enum LeadStatus {
   UNSOLD
   OPEN
   CLAIMED
+  // New statuses for patient SMS qualification flow
+  AWAITING_CONFIRM      // Sent confirm SMS, waiting for patient reply
+  CONFIRMED             // Patient confirmed intent (replied 1)
+  COLLECTING_DETAILS    // Collecting ZIP/time from patient
+  QUALIFIED             // Patient fully qualified, ready for routing
+  ROUTING               // Currently being routed to providers
+  SCHEDULED             // Provider confirmed appointment
+  COMPLETED             // Service completed
+  NEEDS_COVERAGE        // No opted-in providers available
+  CLOSED_UNCONFIRMED    // Patient didn't confirm (timed out)
+  CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
 }
 
 enum LeadOutcome {
@@ -475,4 +550,31 @@ enum NotificationStatus {
   QUEUED
   SENT
   FAILED
+}
+
+// New enums for provider onboarding and patient SMS flow
+enum ProviderSource {
+  SCRAPED       // Imported from external sources - NOT opted in
+  SELF_SIGNUP   // Provider signed up themselves
+  ADMIN_CREATED // Manually created by admin
+}
+
+enum OnboardingStatus {
+  NOT_INVITED   // Never sent invite
+  INVITED       // Invite sent, awaiting action
+  STARTED       // Started onboarding but not complete
+  ACTIVE        // Fully onboarded and opted in
+}
+
+enum DispatchTaskStatus {
+  OPEN          // Needs attention
+  IN_PROGRESS   // Being worked on
+  RESOLVED      // Completed
+}
+
+enum DispatchTaskReason {
+  NO_OPTED_IN_PROVIDERS     // No providers with SMS consent in area
+  ALL_PROVIDERS_DECLINED    // All contacted providers declined
+  PATIENT_UNRESPONSIVE      // Patient stopped responding
+  MANUAL_ESCALATION         // Manually escalated by system
 }

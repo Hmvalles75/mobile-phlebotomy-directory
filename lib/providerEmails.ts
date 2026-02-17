@@ -423,6 +423,58 @@ MobilePhlebotomy.org
   )
 }
 
+// Onboarding invitation email for providers to complete activation with SMS consent
+export async function emailOnboardingInvitation(
+  to: string,
+  businessName: string,
+  contactName: string | null,
+  onboardingUrl: string
+) {
+  const firstName = contactName ? contactName.split(' ')[0] : ''
+  const greeting = firstName ? `Hi ${firstName},` : 'Hi,'
+
+  return send(
+    to,
+    `Activate lead notifications for ${businessName}`,
+    `${greeting}
+
+You're invited to activate lead notifications for ${businessName} on MobilePhlebotomy.org.
+
+Once activated, you'll receive patient requests in your service area directly via SMS and email.
+
+✅ ACTIVATE YOUR ACCOUNT:
+${onboardingUrl}
+
+This secure link will allow you to:
+• Confirm your contact information
+• Set your service area and radius
+• Opt in to receive SMS lead alerts
+• Accept terms of service
+
+The activation takes about 60 seconds.
+
+💰 WHAT'S INCLUDED:
+• Real-time lead notifications via SMS and email
+• Patient name, phone, and location details
+• FREE during beta (no subscription required)
+
+⚡ HOW IT WORKS:
+1. Patient requests mobile phlebotomy in your area
+2. You receive an SMS/email with their info
+3. Reply YES to claim the lead
+4. Contact the patient directly to schedule
+
+Questions? Reply to this email.
+
+Best,
+Hector
+MobilePhlebotomy.org
+
+---
+📬 Check spam and mark us "Not Spam" to receive all notifications.`
+  )
+}
+
 // Website service outreach email for providers without websites
 export async function emailWebsiteServiceOutreach(
   to: string,
