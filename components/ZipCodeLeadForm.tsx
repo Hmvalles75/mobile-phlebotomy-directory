@@ -1,15 +1,86 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { trackEvent } from '@/lib/ga4'
+import {
+  MARKET_CONFIG,
+  isMarketLocked,
+  getMarketRequestPathWithZip,
+  getMarketMetroPath
+} from '@/lib/config/market'
 
+/**
+ * ZipCodeLeadForm
+ *
+ * When market lock is enabled:
+ * - Shows a simplified ZIP-only input
+ * - Routes to /los-angeles/request?zip=XXXXX
+ * - Includes secondary "Browse providers" link
+ *
+ * When market lock is disabled:
+ * - Shows city + state inputs
+ * - Routes to /request-blood-draw?city=...&state=...
+ */
 export function ZipCodeLeadForm() {
   const router = useRouter()
+  const marketLocked = isMarketLocked()
+
+  // ZIP-only state for market-locked flow
+  const [zip, setZip] = useState('')
+  const [zipError, setZipError] = useState('')
+
+  // City/state for national flow
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Track hero view for LA
+  useEffect(() => {
+    if (marketLocked) {
+      trackEvent('la_home_hero_view', { market: MARKET_CONFIG.MARKET_SLUG })
+    }
+  }, [marketLocked])
+
+  // Validate ZIP code (5 digits)
+  const isValidZip = (value: string) => /^\d{5}$/.test(value)
+
+  const handleMarketLockedSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setZipError('')
+
+    const trimmedZip = zip.trim()
+
+    // Track submit attempt
+    trackEvent('la_home_zip_submit', {
+      market: MARKET_CONFIG.MARKET_SLUG,
+      zip: trimmedZip
+    })
+
+    if (!trimmedZip) {
+      trackEvent('la_home_zip_error', { error_message: 'empty_zip' })
+      setZipError('Please enter your ZIP code')
+      return
+    }
+
+    if (!isValidZip(trimmedZip)) {
+      trackEvent('la_home_zip_error', { error_message: 'invalid_zip_format' })
+      setZipError('Please enter a valid 5-digit ZIP code')
+      return
+    }
+
+    // Track successful navigation
+    trackEvent('la_home_to_request', {
+      market: MARKET_CONFIG.MARKET_SLUG,
+      zip: trimmedZip
+    })
+
+    // Route to market-specific request page with ZIP
+    router.push(getMarketRequestPathWithZip(trimmedZip))
+  }
+
+  const handleNationalSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -23,10 +94,65 @@ export function ZipCodeLeadForm() {
       return
     }
 
-    // Route to lead form with city and state
+    // Route to national lead form
     router.push(`/request-blood-draw?city=${encodeURIComponent(city)}&state=${state.toUpperCase()}`)
   }
 
+  // Market-locked: ZIP-focused form - ultra simple, conversion focused
+  if (marketLocked) {
+    return (
+      <div className="max-w-md mx-auto">
+        <form onSubmit={handleMarketLockedSubmit} className="space-y-4">
+          <div>
+            <input
+              type="text"
+              id="zip"
+              value={zip}
+              onChange={(e) => {
+                // Only allow digits, max 5
+                const value = e.target.value.replace(/\D/g, '').slice(0, 5)
+                setZip(value)
+                if (zipError) setZipError('')
+              }}
+              placeholder="Enter your ZIP code"
+              maxLength={5}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className={`w-full px-6 py-4 text-xl text-center border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 font-medium tracking-wider ${
+                zipError ? 'border-red-400' : 'border-gray-200'
+              }`}
+              required
+            />
+            {zipError && (
+              <p className="text-red-200 text-sm mt-2 bg-red-900/30 px-3 py-2 rounded">
+                {zipError}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={zip.length < 5}
+            className="w-full px-8 py-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-bold text-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Get Matched Now
+          </button>
+        </form>
+
+        {/* Subtle secondary link */}
+        <div className="text-center mt-4">
+          <Link
+            href={getMarketMetroPath()}
+            className="text-white/60 hover:text-white/90 text-sm transition-colors"
+          >
+            Browse Los Angeles providers
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // National flow: City + State form
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-white/20 max-w-2xl mx-auto">
       <div className="text-center mb-6">
@@ -38,7 +164,7 @@ export function ZipCodeLeadForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleNationalSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-white mb-2">

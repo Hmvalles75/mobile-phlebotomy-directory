@@ -1,9 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone } from 'lucide-react'
-import { ga4 } from '@/lib/ga4'
+import { useRouter } from 'next/navigation'
+import { ga4, trackEvent } from '@/lib/ga4'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
+import {
+  isMarketLocked,
+  getMarketRequestPath,
+  MARKET_CONFIG
+} from '@/lib/config/market'
 
 interface StickyMobileCTAProps {
   cityNumber?: string
@@ -18,23 +23,21 @@ export function StickyMobileCTA({
   defaultState,
   defaultZip
 }: StickyMobileCTAProps) {
+  const router = useRouter()
   const [leadFormOpen, setLeadFormOpen] = useState(false)
+  const marketLocked = isMarketLocked()
 
   const handleRequestClick = () => {
-    ga4.leadCtaClick({ placement: 'sticky' })
-    ga4.leadFormOpen({ city: defaultCity, state: defaultState, zip: defaultZip })
-    setLeadFormOpen(true)
-  }
-
-  const handleCallClick = () => {
-    ga4.providerCallClick({
-      phone: cityNumber || process.env.NEXT_PUBLIC_DEFAULT_PHONE,
-      source_page: 'sticky_cta'
-    })
-
-    // Use city tracking number if available, otherwise use default
-    const phoneNumber = cityNumber || process.env.NEXT_PUBLIC_DEFAULT_PHONE || '1-800-PHLEBOTOMY'
-    window.location.href = `tel:${phoneNumber}`
+    if (marketLocked) {
+      // Fire LA-specific event
+      trackEvent('sticky_cta_clicked', { market: MARKET_CONFIG.MARKET_SLUG })
+      // Route directly to LA request page
+      router.push(getMarketRequestPath())
+    } else {
+      ga4.leadCtaClick({ placement: 'sticky' })
+      ga4.leadFormOpen({ city: defaultCity, state: defaultState, zip: defaultZip })
+      setLeadFormOpen(true)
+    }
   }
 
   return (
@@ -45,7 +48,7 @@ export function StickyMobileCTA({
             onClick={handleRequestClick}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition text-sm"
           >
-            Request a Mobile Blood Draw
+            {marketLocked ? `Get Matched in ${MARKET_CONFIG.MARKET_NAME}` : 'Request a Mobile Blood Draw'}
           </button>
         </div>
       </div>

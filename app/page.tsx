@@ -250,7 +250,7 @@ export default function HomePage() {
               </h1>
 
               {/* Subhead */}
-              <p className="text-xl lg:text-2xl text-white mb-6">
+              <p className="text-xl lg:text-2xl text-white mb-4">
                 Same-day in-home blood draws. We come to you.
               </p>
 
@@ -263,14 +263,6 @@ export default function HomePage() {
               <div className="mb-6">
                 <ZipCodeLeadForm />
               </div>
-
-              {/* Secondary link */}
-              <Link
-                href={getMarketMetroPath()}
-                className="text-white/80 hover:text-white text-sm underline hover:no-underline transition-colors"
-              >
-                Browse Los Angeles providers
-              </Link>
             </div>
           </div>
         </div>
@@ -427,22 +419,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* CTA - when market locked, show secondary browse link; otherwise open lead form */}
+          {/* CTA - for national, show lead form button */}
           <div className="text-center">
-            {isMarketLocked() ? (
-              <>
-                {/* Secondary browse link for market-locked mode */}
-                <p className="text-gray-600 text-sm mb-3">
-                  🏥 {MARKET_CONFIG.GEO_COPY.trustSignal} · Same-day appointments available
-                </p>
-                <Link
-                  href={getMarketMetroPath()}
-                  className="text-primary-600 hover:text-primary-700 text-sm underline hover:no-underline transition-colors"
-                >
-                  Browse {MARKET_CONFIG.MARKET_NAME} providers
-                </Link>
-              </>
-            ) : (
+            {!isMarketLocked() && (
               <>
                 <button
                   onClick={() => {
@@ -663,42 +642,27 @@ export default function HomePage() {
       </section>
       )}
 
-      {/* All Providers Directory Section - Simplified for LA */}
+      {/* All Providers Directory Section - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-20 bg-white">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              {isMarketLocked()
-                ? `${MARKET_CONFIG.MARKET_NAME} Provider Directory`
-                : 'Complete Provider Directory'}
+              Complete Provider Directory
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              {isMarketLocked()
-                ? `Certified mobile phlebotomy services in ${MARKET_CONFIG.MARKET_AREA}. Enter your ZIP code above to get started.`
-                : 'Browse our full directory of certified mobile phlebotomy services. Filter by location, services, and availability to find the perfect provider for your needs.'}
+              Browse our full directory of certified mobile phlebotomy services. Filter by location, services, and availability to find the perfect provider for your needs.
             </p>
-            {isMarketLocked() ? (
-              // Market locked: secondary browse link
-              <Link
-                href={getMarketMetroPath()}
-                className="text-primary-600 hover:text-primary-700 underline hover:no-underline transition-colors"
-              >
-                Browse {MARKET_CONFIG.MARKET_NAME} providers
-              </Link>
-            ) : (
-              // National: primary button
-              <Link
-                href="/search"
-                className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
-              >
-                View All Providers
-                <span>→</span>
-              </Link>
-            )}
+            <Link
+              href="/search"
+              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
+            >
+              View All Providers
+              <span>→</span>
+            </Link>
           </div>
 
-          {/* Quick Links Grid - Hide when market locked */}
-          {!isMarketLocked() && (
+          {/* Quick Links Grid */}
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
             <div className="bg-gray-50 rounded-lg p-6 text-center hover:bg-gray-100 transition-colors">
               <div className="text-4xl mb-3">🏥</div>
@@ -727,9 +691,9 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          )}
         </div>
       </section>
+      )}
 
       {/* Premium Provider Placement Section - Hide when market locked */}
       {!isMarketLocked() && (
@@ -1011,41 +975,30 @@ export default function HomePage() {
               <div className="bg-primary-50 rounded-lg p-8">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   {isMarketLocked()
-                    ? `Ready to Schedule Your At-Home Blood Draw in ${MARKET_CONFIG.MARKET_NAME}?`
+                    ? `Need a Same-Day Blood Draw in ${MARKET_CONFIG.MARKET_NAME}?`
                     : 'Ready to Schedule Your At-Home Blood Draw?'}
                 </h3>
                 <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
                   {isMarketLocked()
-                    ? `Enter your ZIP code above to get matched with certified phlebotomists in ${MARKET_CONFIG.MARKET_AREA}.`
+                    ? "Enter your ZIP above. We'll connect you fast."
                     : 'Find certified mobile phlebotomy services in your area. Our network includes licensed professionals available 7 days a week across all 50 states.'}
                 </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  {isMarketLocked() ? (
-                    // Market locked: secondary browse link
+                {!isMarketLocked() && (
+                  <div className="flex flex-wrap justify-center gap-4">
                     <Link
-                      href={getMarketMetroPath()}
-                      className="text-primary-600 hover:text-primary-700 underline hover:no-underline transition-colors"
+                      href="/search"
+                      className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
                     >
-                      Browse {MARKET_CONFIG.MARKET_NAME} providers
+                      Find Providers Near You
                     </Link>
-                  ) : (
-                    // National: primary and secondary buttons
-                    <>
-                      <Link
-                        href="/search"
-                        className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                      >
-                        Find Providers Near You
-                      </Link>
-                      <Link
-                        href="/about"
-                        className="border border-primary-600 text-primary-600 px-6 py-3 rounded-lg hover:bg-primary-50 transition-colors"
-                      >
-                        Learn More
-                      </Link>
-                    </>
-                  )}
-                </div>
+                    <Link
+                      href="/about"
+                      className="border border-primary-600 text-primary-600 px-6 py-3 rounded-lg hover:bg-primary-50 transition-colors"
+                    >
+                      Learn More
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

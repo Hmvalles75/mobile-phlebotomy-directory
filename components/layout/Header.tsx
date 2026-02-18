@@ -1,7 +1,21 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import {
+  MARKET_CONFIG,
+  isMarketLocked,
+  getMarketRequestPath,
+  getMarketMetroPath
+} from '@/lib/config/market'
 
 export function Header() {
+  const marketLocked = isMarketLocked()
+
+  // Primary navigation link
+  // - Market locked: goes to request page (lead capture)
+  // - National: goes to search
+  const primaryHref = marketLocked ? getMarketRequestPath() : '/search'
+  const primaryText = marketLocked ? 'Get Matched' : 'Find a Phlebotomist'
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4">
@@ -19,11 +33,25 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8 ml-auto mr-8">
-            {/* Left/Center Navigation */}
+            {/* Primary CTA - request page (market locked) or search (national) */}
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
-            <Link href="/search" className="text-gray-700 hover:text-primary-600 transition-colors font-semibold">
-              Find a Phlebotomist
+            <Link
+              href={primaryHref}
+              className="text-gray-700 hover:text-primary-600 transition-colors font-semibold"
+            >
+              {primaryText}
             </Link>
+
+            {/* Secondary browse link when market locked */}
+            {marketLocked && (
+              <Link
+                href={getMarketMetroPath()}
+                className="text-gray-500 hover:text-primary-600 transition-colors text-sm"
+              >
+                Browse Providers
+              </Link>
+            )}
+
             {/* @ts-ignore - Next.js typedRoutes compatibility */}
             <Link href="/corporate-phlebotomy" className="text-gray-700 hover:text-primary-600 transition-colors whitespace-nowrap font-semibold">
               Facilities & Clinical Services
