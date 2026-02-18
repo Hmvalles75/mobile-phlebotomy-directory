@@ -7,6 +7,7 @@ import { SearchBar } from '@/components/ui/SearchBar'
 import { getSavedProviders } from '@/lib/provider-actions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
+import { PhoneReveal } from '@/components/PhoneReveal'
 
 export default function SavedProviders() {
   const [savedProviderIds, setSavedProviderIds] = useState<string[]>([])
@@ -273,7 +274,14 @@ export default function SavedProviders() {
                           {provider.address?.city && (
                             <span>📍 {provider.address.city}, {provider.address.state}</span>
                           )}
-                          {provider.phone && <span>📞 {provider.phone}</span>}
+                          {provider.phone && !provider.isFeatured && (
+                            <PhoneReveal
+                              phone={provider.phone}
+                              providerId={provider.id}
+                              providerName={provider.name}
+                              variant="compact"
+                            />
+                          )}
                           {provider.rating && provider.reviewsCount && (
                             <span>⭐ {provider.rating} ({provider.reviewsCount} reviews)</span>
                           )}

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { type Provider } from '@/lib/schemas'
 import { RatingBadge } from './RatingBadge'
+import { FeaturedProviderCTA } from '@/components/FeaturedProviderCTA'
 
 interface FeaturedProviderCardProps {
   provider: Provider
@@ -93,23 +94,12 @@ export function FeaturedProviderCard({ provider }: FeaturedProviderCardProps) {
 
         {/* Contact Actions */}
         <div className="flex flex-col gap-3">
-          {/* Phone Button */}
-          {provider.phone && (
-            <button
-              onClick={() => {
-                const message = `Call ${provider.name} at:\n\n${provider.phone}\n\nClick OK to copy the phone number to your clipboard.`
-                if (confirm(message) && provider.phone) {
-                  navigator.clipboard.writeText(provider.phone)
-                    .then(() => alert(`Phone number ${provider.phone} copied to clipboard!`))
-                    .catch(() => alert(`Phone: ${provider.phone}`))
-                }
-              }}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-            >
-              <span className="text-lg">📞</span>
-              <span>Call Now: {provider.phone}</span>
-            </button>
-          )}
+          {/* Primary CTA for featured providers */}
+          <FeaturedProviderCTA
+            providerId={provider.id}
+            providerName={provider.name}
+            variant="large"
+          />
 
           {/* View Details Link */}
           <Link

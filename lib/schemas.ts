@@ -72,7 +72,13 @@ export const ProviderSchema = z.object({
   logo: z.string().optional(),
   profileImage: z.string().optional(),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
+  // Feature flags
+  isFeatured: z.boolean().optional(),
+  isFeaturedCity: z.boolean().optional(),
+  featuredTier: z.string().optional(),
+  listingTier: z.string().optional(),
+  is_nationwide: z.string().optional()
 })
 
 export const StateSchema = z.object({

@@ -122,7 +122,8 @@ model Lead {
   qualifiedAt       DateTime?          // When lead became fully qualified
   lastPatientSmsAt  DateTime?          // Track last SMS to patient
   patientSmsCount   Int                @default(0)
-  routedProviderIds String[]           // Array of providers we attempted to route to
+  routedProviderIds    String[]         // Array of providers we attempted to route to
+  preferredProviderId  String?          // Provider the patient came from (e.g. clicked from provider page)
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])

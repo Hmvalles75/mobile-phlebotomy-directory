@@ -14,6 +14,7 @@ interface ProviderCTASectionProps {
   phone?: string
   twilioNumber?: string
   isVerified: boolean
+  isFeatured?: boolean
 }
 
 export function ProviderCTASection({
@@ -24,7 +25,8 @@ export function ProviderCTASection({
   zip,
   phone,
   twilioNumber,
-  isVerified
+  isVerified,
+  isFeatured = false
 }: ProviderCTASectionProps) {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
 
@@ -95,6 +97,8 @@ export function ProviderCTASection({
         defaultCity={city || ''}
         defaultState={state || ''}
         defaultZip={zip || ''}
+        preferredProviderId={isFeatured ? providerId : undefined}
+        source={isFeatured ? 'featured_provider_cta' : undefined}
       />
     </>
   )

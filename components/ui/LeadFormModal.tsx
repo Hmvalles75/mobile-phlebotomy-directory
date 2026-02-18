@@ -10,6 +10,8 @@ interface LeadFormModalProps {
   defaultCity?: string
   defaultState?: string
   defaultZip?: string
+  preferredProviderId?: string
+  source?: string
 }
 
 export function LeadFormModal({
@@ -17,7 +19,9 @@ export function LeadFormModal({
   onClose,
   defaultCity = '',
   defaultState = '',
-  defaultZip = ''
+  defaultZip = '',
+  preferredProviderId,
+  source
 }: LeadFormModalProps) {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -109,7 +113,11 @@ export function LeadFormModal({
       const response = await fetch('/api/lead/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          ...(preferredProviderId && { preferredProviderId }),
+          ...(source && { source })
+        })
       })
 
       const data = await response.json()

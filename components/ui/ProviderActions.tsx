@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { type Provider } from '@/lib/schemas'
 import {
-  contactProvider,
   formatProviderContact,
   generateProviderStructuredData
 } from '@/lib/provider-actions'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
+import { PhoneReveal } from '@/components/PhoneReveal'
+import { FeaturedProviderCTA } from '@/components/FeaturedProviderCTA'
 
 interface ProviderActionsProps {
   provider: Provider
@@ -29,8 +29,7 @@ export function ProviderActions({
   hideViewDetails = false,
   viewDetailsText
 }: ProviderActionsProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [contactInfo, setContactInfo] = useState(() => formatProviderContact(provider))
+  const contactInfo = formatProviderContact(provider)
 
   // Helper function to create smart button text
   const getButtonText = () => {
@@ -61,15 +60,7 @@ export function ProviderActions({
     return `View ${shortName}`
   }
 
-  const handleContact = async () => {
-    setIsLoading(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 100)) // Brief loading state
-      contactProvider(provider, currentLocation)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const isFeatured = provider.isFeatured
 
 
 
@@ -77,13 +68,22 @@ export function ProviderActions({
   if (variant === 'compact') {
     return (
       <div className={`flex gap-2 ${className}`}>
-        <Link
-          href={`/provider/${provider.slug}`}
-          className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
-          aria-label={`View details for ${provider.name}`}
-        >
-          {getButtonText()}
-        </Link>
+        {isFeatured ? (
+          <FeaturedProviderCTA
+            providerId={provider.id}
+            providerName={provider.name}
+            variant="compact"
+            className="flex-1"
+          />
+        ) : (
+          <Link
+            href={`/provider/${provider.slug}`}
+            className="flex-1 bg-primary-600 text-white px-3 py-2 rounded text-sm hover:bg-primary-700 transition-colors text-center"
+            aria-label={`View details for ${provider.name}`}
+          >
+            {getButtonText()}
+          </Link>
+        )}
       </div>
     )
   }
@@ -111,25 +111,44 @@ export function ProviderActions({
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          {!hideViewDetails && (
-            <Link
-              href={`/provider/${provider.slug}`}
-              className="flex-1 bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
-              aria-label={`View detailed information for ${provider.name}`}
-            >
-              {getButtonText()}
-            </Link>
-          )}
-
-          {provider.phone && (
-            <button
-              onClick={handleContact}
-              disabled={isLoading}
-              className="flex-1 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
-              aria-label={`Contact ${provider.name} via phone`}
-            >
-              {isLoading ? 'Connecting...' : 'Contact Provider'}
-            </button>
+          {isFeatured ? (
+            <>
+              <FeaturedProviderCTA
+                providerId={provider.id}
+                providerName={provider.name}
+                className="flex-1"
+              />
+              {!hideViewDetails && (
+                <Link
+                  href={`/provider/${provider.slug}`}
+                  className="flex-1 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium text-center"
+                  aria-label={`View detailed information for ${provider.name}`}
+                >
+                  View Details
+                </Link>
+              )}
+            </>
+          ) : (
+            <>
+              {!hideViewDetails && (
+                <Link
+                  href={`/provider/${provider.slug}`}
+                  className="flex-1 bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
+                  aria-label={`View detailed information for ${provider.name}`}
+                >
+                  {getButtonText()}
+                </Link>
+              )}
+              {/* Phone: hidden for featured, click-to-reveal for others */}
+              {provider.phone && (
+                <PhoneReveal
+                  phone={provider.phone}
+                  providerId={provider.id}
+                  providerName={provider.name}
+                  className="flex-1"
+                />
+              )}
+            </>
           )}
         </div>
       </div>
@@ -151,29 +170,42 @@ export function ProviderActions({
       )}
 
       <div className={`flex flex-wrap gap-3 ${className}`}>
-        <Link
-          href={`/provider/${provider.slug}`}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-          aria-label={`View detailed information for ${provider.name}`}
-          data-provider-action="view-details"
-          data-provider-id={provider.id}
-        >
-          {getButtonText()}
-        </Link>
+        {isFeatured ? (
+          <FeaturedProviderCTA
+            providerId={provider.id}
+            providerName={provider.name}
+          />
+        ) : (
+          <Link
+            href={`/provider/${provider.slug}`}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            aria-label={`View detailed information for ${provider.name}`}
+            data-provider-action="view-details"
+            data-provider-id={provider.id}
+          >
+            {getButtonText()}
+          </Link>
+        )}
 
-        {/* Contact button for additional actions */}
-        <button
-          onClick={handleContact}
-          disabled={isLoading}
-          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-          aria-label={`Contact ${provider.name} - ${contactInfo.primary}`}
-          data-provider-action="contact"
-          data-provider-id={provider.id}
-        >
-          {isLoading ? 'Connecting...' : 'Contact Provider'}
-        </button>
+        {/* Phone: hidden for featured, click-to-reveal for others */}
+        {provider.phone && !isFeatured && (
+          <PhoneReveal
+            phone={provider.phone}
+            providerId={provider.id}
+            providerName={provider.name}
+          />
+        )}
 
-
+        {/* View details link for featured providers */}
+        {isFeatured && !hideViewDetails && (
+          <Link
+            href={`/provider/${provider.slug}`}
+            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            aria-label={`View detailed information for ${provider.name}`}
+          >
+            View Details
+          </Link>
+        )}
       </div>
     </>
   )

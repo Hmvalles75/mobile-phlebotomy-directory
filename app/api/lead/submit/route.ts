@@ -16,7 +16,10 @@ const schema = z.object({
   zip: z.string().min(5, 'ZIP code must be at least 5 characters'),
   labPreference: z.string().min(1, 'Lab preference is required'),
   urgency: z.enum(['STANDARD', 'STAT']),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  // Optional tracking fields
+  source: z.string().optional(),
+  preferredProviderId: z.string().optional()
 })
 
 export async function POST(req: NextRequest) {
@@ -29,9 +32,18 @@ export async function POST(req: NextRequest) {
     // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
       data: {
-        ...payload,
+        fullName: payload.fullName,
+        phone: payload.phone,
         email: payload.email || null,
-        source: 'web_form',
+        address1: payload.address1,
+        city: payload.city,
+        state: payload.state,
+        zip: payload.zip,
+        labPreference: payload.labPreference,
+        urgency: payload.urgency,
+        notes: payload.notes,
+        source: payload.source || 'web_form',
+        preferredProviderId: payload.preferredProviderId || null,
         priceCents,
         status: 'OPEN'  // Ready for claiming
       }

@@ -3,7 +3,8 @@ import Image from 'next/image'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
-import { formatPhoneNumber } from '@/lib/format-phone'
+import { PhoneReveal } from '@/components/PhoneReveal'
+import { FeaturedProviderCTA } from '@/components/FeaturedProviderCTA'
 
 interface ProviderCardProps {
   provider: Provider
@@ -41,7 +42,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
 
           {/* Founding Partner Badge */}
-          {(provider as any).featuredTier === 'FOUNDING_PARTNER' && (
+          {provider.featuredTier === 'FOUNDING_PARTNER' && (
             <div className="mb-2">
               <span
                 className="inline-flex items-center gap-1 rounded-full border border-amber-400 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
@@ -70,7 +71,7 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           {/* Additional Badges */}
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             {/* Featured Provider Badge (Pilot - Visibility Only) */}
-            {(provider as any).isFeatured && (
+            {provider.isFeatured && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-300">
                 ⭐ Featured Provider
               </span>
@@ -97,7 +98,15 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
           
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
             <span>📍 {provider.address?.city ? `${provider.address.city}, ${provider.address.state} ${provider.address.zip}` : coverageDisplay}</span>
-            {provider.phone && <span>📞 {formatPhoneNumber(provider.phone)}</span>}
+            {/* Phone: hidden for featured, click-to-reveal for others */}
+            {provider.phone && !provider.isFeatured && (
+              <PhoneReveal
+                phone={provider.phone}
+                providerId={provider.id}
+                providerName={provider.name}
+                variant="compact"
+              />
+            )}
             {provider.rating && provider.reviewsCount && (
               <span>⭐ {provider.rating} ({provider.reviewsCount} reviews)</span>
             )}
@@ -153,15 +162,25 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
       </div>
 
       <div className="flex flex-wrap gap-3">
+        {provider.isFeatured ? (
+          <FeaturedProviderCTA
+            providerId={provider.id}
+            providerName={provider.name}
+          />
+        ) : (
+          <Link
+            href={`/provider/${provider.slug}`}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          >
+            View Provider Details
+          </Link>
+        )}
         <Link
           href={`/provider/${provider.slug}`}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          View Provider Details
+          View Details
         </Link>
-        <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-          Save
-        </button>
       </div>
     </div>
   )

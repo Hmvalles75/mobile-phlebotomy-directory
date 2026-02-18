@@ -11,9 +11,9 @@ import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
 import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
 import { ReportIssueButton } from '@/components/ui/ReportIssueButton'
-import { formatPhoneNumber } from '@/lib/format-phone'
 import Link from 'next/link'
 import { ProviderWebsiteLink } from '@/components/ui/ProviderWebsiteLink'
+import { PhoneReveal } from '@/components/PhoneReveal'
 
 interface PageProps {
   params: {
@@ -120,6 +120,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
   // Check if provider is verified (based on database status)
   const isVerified = provider.status === 'VERIFIED'
+  const isFeatured = provider.isFeatured === true
 
   return (
     <>
@@ -242,11 +243,15 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
                 <div className="flex flex-wrap gap-4 text-gray-600 mb-2">
                   <span className="flex items-center">📍 {location}</span>
-                  {provider.phone && (
+                  {/* Phone: hidden for featured, click-to-reveal for others */}
+                  {provider.phone && !isFeatured && (
                     <div className="flex flex-col">
-                      <a href={`tel:${provider.phone}`} className="flex items-center hover:text-primary-600">
-                        📞 {formatPhoneNumber(provider.phone)}
-                      </a>
+                      <PhoneReveal
+                        phone={provider.phone}
+                        providerId={provider.id}
+                        providerName={provider.name}
+                        variant="compact"
+                      />
                       {!isVerified && (
                         <span className="text-xs text-gray-500 mt-1 leading-tight">
                           Phone number unverified. Please request a draw for fastest service.
@@ -508,6 +513,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 zip={provider.zipCodes?.split(',')[0] || undefined}
                 phone={provider.phone || undefined}
                 isVerified={isVerified}
+                isFeatured={isFeatured}
               />
 
               {/* Contact Card */}
@@ -515,11 +521,17 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
 
                 <div className="space-y-4 mb-6">
-                  {provider.phone && (
+                  {/* Phone: hidden for featured, click-to-reveal for others */}
+                  {provider.phone && !isFeatured && (
                     <div className="flex items-start">
                       <span className="text-gray-500 mr-2">📞</span>
                       <div>
-                        <p className="font-semibold text-gray-900">{formatPhoneNumber(provider.phone)}</p>
+                        <PhoneReveal
+                          phone={provider.phone}
+                          providerId={provider.id}
+                          providerName={provider.name}
+                          variant="compact"
+                        />
                         <p className="text-sm text-gray-500">Primary Phone</p>
                         {!isVerified && (
                           <p className="text-xs text-amber-600 mt-1">⚠️ Unverified - confirm details</p>
@@ -603,8 +615,8 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* Website Link - Buried at bottom to prioritize lead generation */}
-                  {provider.website && (
+                  {/* Website Link - Hidden for featured providers, buried at bottom for others */}
+                  {provider.website && !isFeatured && (
                     <div className="pt-4 border-t">
                       <ProviderWebsiteLink
                         website={provider.website}
