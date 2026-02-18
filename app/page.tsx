@@ -7,14 +7,32 @@ import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { Tag } from '@/components/ui/Tag'
 import { Badge } from '@/components/ui/Badge'
 import { type Provider } from '@/lib/schemas'
-import { topMetroAreas } from '@/data/top-metros'
+import { topMetroAreas, getMetroBySlug } from '@/data/top-metros'
 import { handleCityNameSearch, handleStateNameSearch } from '@/lib/zip-geocoding'
 import { StickyMobileCTA } from '@/components/ui/StickyMobileCTA'
 import { ga4 } from '@/lib/ga4'
 import { ZipCodeLeadForm } from '@/components/ZipCodeLeadForm'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
+import {
+  MARKET_CONFIG,
+  isMarketLocked,
+  getMarketMetroPath,
+  getMarketRequestPath
+} from '@/lib/config/market'
 
-const featuredMetros = topMetroAreas.slice(0, 12)
+// When market is locked, prioritize that metro in the featured list
+const featuredMetros = (() => {
+  const metros = topMetroAreas.slice(0, 12)
+  if (isMarketLocked()) {
+    // Move locked market to front if it exists in list
+    const lockedMetro = getMetroBySlug(MARKET_CONFIG.MARKET_SLUG)
+    if (lockedMetro) {
+      const filtered = metros.filter(m => m.slug !== MARKET_CONFIG.MARKET_SLUG)
+      return [lockedMetro, ...filtered.slice(0, 11)]
+    }
+  }
+  return metros
+})()
 
 const topServices = [
   'At-Home Blood Draw',
@@ -213,100 +231,156 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       
-      <div 
-        className="relative bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/hero-bg.jpg')"
-        }}
-      >
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        
-        <div className="relative container py-16 lg:py-24">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Professional <span className="text-primary-400">Mobile Phlebotomy & At-Home Blood Draws</span> Nationwide
-            </h1>
-            <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
-              Skip the clinic. Licensed phlebotomists come to you for safe, convenient blood collection.
-              Get matched with a certified provider in your area today.
-            </p>
+      {/* HERO SECTION - Market-locked vs National */}
+      {isMarketLocked() ? (
+        /* LA CONVERSION LANDING PAGE - Above the fold */
+        <div
+          className="relative bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/hero-bg.jpg')"
+          }}
+        >
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
-            {/* ZIP Code Lead Segmentation Form */}
-            <div className="mb-8">
-              <ZipCodeLeadForm />
-            </div>
+          <div className="relative container py-20 lg:py-32">
+            <div className="text-center max-w-2xl mx-auto">
+              {/* H1 */}
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Mobile Phlebotomy in Los Angeles
+              </h1>
 
-            {/* Compliance disclaimer */}
-            <div className="text-white/80 text-xs max-w-2xl mx-auto mb-6 leading-relaxed">
-              MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy services.
-              Providers marked as Verified have confirmed service availability and licensing.
-            </div>
+              {/* Subhead */}
+              <p className="text-xl lg:text-2xl text-white mb-6">
+                Same-day in-home blood draws. We come to you.
+              </p>
 
-            {/* Or browse providers */}
-            <div className="text-white/90 text-sm mb-4">or browse our provider directory:</div>
+              {/* Trust line */}
+              <p className="text-white/90 text-sm mb-8">
+                Certified mobile phlebotomists serving Los Angeles County · Most patients contacted within 10–15 minutes
+              </p>
 
-            <AutocompleteSearchBar
-              onSearch={handleSearch}
-              placeholder="Enter your ZIP code or city..."
-              className="mb-6"
-              enableZipCodeRouting={true}
-            />
+              {/* ZIP input + primary CTA */}
+              <div className="mb-6">
+                <ZipCodeLeadForm />
+              </div>
 
-            {/* Link to comprehensive guide */}
-            <div className="mb-4">
+              {/* Secondary link */}
               <Link
-                href="/mobile-phlebotomy-near-me"
-                className="text-white/90 hover:text-white text-sm underline hover:no-underline transition-all"
+                href={getMarketMetroPath()}
+                className="text-white/80 hover:text-white text-sm underline hover:no-underline transition-colors"
               >
-                Learn more about mobile phlebotomy near you →
+                Browse Los Angeles providers
               </Link>
             </div>
+          </div>
+        </div>
+      ) : (
+        /* NATIONAL DIRECTORY HERO */
+        <div
+          className="relative bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/hero-bg.jpg')"
+          }}
+        >
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
 
-            <div className="flex flex-wrap justify-center gap-2">
-              {topServices.map((service) => (
+          <div className="relative container py-16 lg:py-24">
+            <div className="text-center max-w-4xl mx-auto">
+              <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+                Professional <span className="text-primary-400">Mobile Phlebotomy & At-Home Blood Draws</span> Nationwide
+              </h1>
+              <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
+                Skip the clinic. Licensed phlebotomists come to you for safe, convenient blood collection. Get matched with a certified provider in your area today.
+              </p>
+
+              {/* ZIP Code Lead Segmentation Form */}
+              <div className="mb-8">
+                <ZipCodeLeadForm />
+              </div>
+
+              {/* Compliance disclaimer */}
+              <div className="text-white/80 text-xs max-w-2xl mx-auto mb-6 leading-relaxed">
+                MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy services.
+                Providers marked as Verified have confirmed service availability and licensing.
+              </div>
+
+              {/* Or browse providers */}
+              <div className="text-white/90 text-sm mb-4">or browse our provider directory:</div>
+
+              <AutocompleteSearchBar
+                onSearch={handleSearch}
+                placeholder="Enter your ZIP code or city..."
+                className="mb-6"
+                enableZipCodeRouting={true}
+              />
+
+              {/* Link to comprehensive guide */}
+              <div className="mb-4">
                 <Link
-                  key={service}
-                  // @ts-ignore - Next.js typedRoutes compatibility
-                  href={`/search?services=${encodeURIComponent(service)}`}
-                  className="inline-block"
+                  href="/mobile-phlebotomy-near-me"
+                  className="text-white/90 hover:text-white text-sm underline hover:no-underline transition-all"
                 >
-                  <Tag variant="primary" className="hover:bg-primary-200 transition-colors cursor-pointer">
-                    {service}
-                  </Tag>
+                  Learn more about mobile phlebotomy near you →
                 </Link>
-              ))}
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-2">
+                {topServices.map((service) => (
+                  <Link
+                    key={service}
+                    // @ts-ignore - Next.js typedRoutes compatibility
+                    href={`/search?services=${encodeURIComponent(service)}`}
+                    className="inline-block"
+                  >
+                    <Tag variant="primary" className="hover:bg-primary-200 transition-colors cursor-pointer">
+                      {service}
+                    </Tag>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Social Trust Section */}
-      <section className="py-8 bg-white border-b border-gray-100">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
-              <span className="text-green-600 text-xl">✅</span>
-              <span className="text-gray-700 font-medium">Licensed professionals</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
-              <span className="text-blue-600 text-xl">🏥</span>
-              <span className="text-gray-700 font-medium">Insurance-friendly providers available</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
-              <span className="text-purple-600 text-xl">🏠</span>
-              <span className="text-gray-700 font-medium">Homebound patients welcome</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 text-sm md:text-base">
-              <span className="text-orange-600 text-xl">⏱️</span>
-              <span className="text-gray-700 font-medium">No waiting rooms</span>
+      {/* Social Trust Section - Simplified for LA */}
+      {isMarketLocked() ? (
+        <section className="py-6 bg-white border-b border-gray-100">
+          <div className="container">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+              <span>✅ Licensed & Insured</span>
+              <span>🏥 Lab drop-off included</span>
+              <span>⏱️ Same-day available</span>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="py-8 bg-white border-b border-gray-100">
+          <div className="container">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+                <span className="text-green-600 text-xl">✅</span>
+                <span className="text-gray-700 font-medium">Licensed professionals</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+                <span className="text-blue-600 text-xl">🏥</span>
+                <span className="text-gray-700 font-medium">Insurance-friendly providers available</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+                <span className="text-purple-600 text-xl">🏠</span>
+                <span className="text-gray-700 font-medium">Homebound patients welcome</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm md:text-base">
+                <span className="text-orange-600 text-xl">⏱️</span>
+                <span className="text-gray-700 font-medium">No waiting rooms</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* How It Works Section */}
-      <section className="py-16 bg-gray-50">
+      {/* How It Works Section - Show for both, but simplified CTA for LA */}
+      <section className="py-16 bg-gray-50" id="how-it-works">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -353,25 +427,43 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* CTA */}
+          {/* CTA - when market locked, show secondary browse link; otherwise open lead form */}
           <div className="text-center">
-            <button
-              onClick={() => {
-                ga4.leadCtaClick({ placement: 'hero' })
-                setLeadFormOpen(true)
-              }}
-              className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
-            >
-              Request a Mobile Blood Draw
-            </button>
-            <p className="text-gray-600 text-sm mt-3">
-              🏥 Licensed & insured professionals · Same-day appointments available
-            </p>
+            {isMarketLocked() ? (
+              <>
+                {/* Secondary browse link for market-locked mode */}
+                <p className="text-gray-600 text-sm mb-3">
+                  🏥 {MARKET_CONFIG.GEO_COPY.trustSignal} · Same-day appointments available
+                </p>
+                <Link
+                  href={getMarketMetroPath()}
+                  className="text-primary-600 hover:text-primary-700 text-sm underline hover:no-underline transition-colors"
+                >
+                  Browse {MARKET_CONFIG.MARKET_NAME} providers
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    ga4.leadCtaClick({ placement: 'hero' })
+                    setLeadFormOpen(true)
+                  }}
+                  className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
+                >
+                  Request a Mobile Blood Draw
+                </button>
+                <p className="text-gray-600 text-sm mt-3">
+                  🏥 Licensed & insured professionals · Same-day appointments available
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Corporate Services Section */}
+      {/* Corporate Services Section - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-16 bg-gradient-to-br from-primary-600 to-primary-700">
         <div className="container">
           <div className="max-w-5xl mx-auto">
@@ -442,8 +534,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Popular States Section - SEO Internal Linking */}
+      {/* Popular States Section - SEO Internal Linking - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-16 bg-white border-y">
         <div className="container">
           <div className="text-center mb-12">
@@ -515,8 +609,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Top Metro Areas Section */}
+      {/* Top Metro Areas Section - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
@@ -565,28 +661,44 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* All Providers Directory Section */}
+      {/* All Providers Directory Section - Simplified for LA */}
       <section className="py-20 bg-white">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Complete Provider Directory
+              {isMarketLocked()
+                ? `${MARKET_CONFIG.MARKET_NAME} Provider Directory`
+                : 'Complete Provider Directory'}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              Browse our full directory of certified mobile phlebotomy services. Filter by location,
-              services, and availability to find the perfect provider for your needs.
+              {isMarketLocked()
+                ? `Certified mobile phlebotomy services in ${MARKET_CONFIG.MARKET_AREA}. Enter your ZIP code above to get started.`
+                : 'Browse our full directory of certified mobile phlebotomy services. Filter by location, services, and availability to find the perfect provider for your needs.'}
             </p>
-            <Link
-              href="/search"
-              className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
-            >
-              View All Providers
-              <span>→</span>
-            </Link>
+            {isMarketLocked() ? (
+              // Market locked: secondary browse link
+              <Link
+                href={getMarketMetroPath()}
+                className="text-primary-600 hover:text-primary-700 underline hover:no-underline transition-colors"
+              >
+                Browse {MARKET_CONFIG.MARKET_NAME} providers
+              </Link>
+            ) : (
+              // National: primary button
+              <Link
+                href="/search"
+                className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
+              >
+                View All Providers
+                <span>→</span>
+              </Link>
+            )}
           </div>
 
-          {/* Quick Links Grid */}
+          {/* Quick Links Grid - Hide when market locked */}
+          {!isMarketLocked() && (
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
             <div className="bg-gray-50 rounded-lg p-6 text-center hover:bg-gray-100 transition-colors">
               <div className="text-4xl mb-3">🏥</div>
@@ -615,10 +727,12 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+          )}
         </div>
       </section>
 
-      {/* Premium Provider Placement Section */}
+      {/* Premium Provider Placement Section - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-12 bg-gradient-to-b from-primary-50 to-white">
         <div className="container">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-primary-100 p-8 md:p-10 text-center">
@@ -652,8 +766,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Browse by State Section - Internal Linking */}
+      {/* Browse by State Section - Internal Linking - Hide when market locked */}
+      {!isMarketLocked() && (
       <section id="browse-by-state" className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container">
           <div className="text-center mb-12">
@@ -769,8 +885,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* FAQ Section for SEO */}
+      {/* FAQ Section for SEO - Keep for both LA and national */}
       <section className="py-16 bg-white">
         <div className="container">
           <div className="text-center mb-12">
@@ -791,9 +908,9 @@ export default function HomePage() {
                     How does mobile phlebotomy work?
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Mobile phlebotomy brings professional blood draw services directly to your location. 
-                    A certified phlebotomist travels to your home, office, or preferred location with all 
-                    necessary equipment. They collect your blood samples safely and transport them to 
+                    Mobile phlebotomy brings professional blood draw services directly to your location.
+                    A certified phlebotomist travels to your home, office, or preferred location with all
+                    necessary equipment. They collect your blood samples safely and transport them to
                     the laboratory for testing. Results are typically available within 24-48 hours.
                   </p>
                 </div>
@@ -893,25 +1010,41 @@ export default function HomePage() {
             <div className="mt-12 text-center">
               <div className="bg-primary-50 rounded-lg p-8">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Ready to Schedule Your At-Home Blood Draw?
+                  {isMarketLocked()
+                    ? `Ready to Schedule Your At-Home Blood Draw in ${MARKET_CONFIG.MARKET_NAME}?`
+                    : 'Ready to Schedule Your At-Home Blood Draw?'}
                 </h3>
                 <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                  Find certified mobile phlebotomy services in your area. Our network includes 
-                  licensed professionals available 7 days a week across all 50 states.
+                  {isMarketLocked()
+                    ? `Enter your ZIP code above to get matched with certified phlebotomists in ${MARKET_CONFIG.MARKET_AREA}.`
+                    : 'Find certified mobile phlebotomy services in your area. Our network includes licensed professionals available 7 days a week across all 50 states.'}
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Link
-                    href="/search"
-                    className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                  >
-                    Find Providers Near You
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="border border-primary-600 text-primary-600 px-6 py-3 rounded-lg hover:bg-primary-50 transition-colors"
-                  >
-                    Learn More
-                  </Link>
+                  {isMarketLocked() ? (
+                    // Market locked: secondary browse link
+                    <Link
+                      href={getMarketMetroPath()}
+                      className="text-primary-600 hover:text-primary-700 underline hover:no-underline transition-colors"
+                    >
+                      Browse {MARKET_CONFIG.MARKET_NAME} providers
+                    </Link>
+                  ) : (
+                    // National: primary and secondary buttons
+                    <>
+                      <Link
+                        href="/search"
+                        className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                      >
+                        Find Providers Near You
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="border border-primary-600 text-primary-600 px-6 py-3 rounded-lg hover:bg-primary-50 transition-colors"
+                      >
+                        Learn More
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -919,7 +1052,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Internal Linking & Related Content Section for SEO */}
+      {/* Internal Linking & Related Content Section for SEO - Hide when market locked */}
+      {!isMarketLocked() && (
       <section className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
@@ -1196,17 +1330,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
 
-      {/* Lead Form Modal */}
+      {/* Lead Form Modal - pre-populate with market defaults when locked */}
       <LeadFormModal
         isOpen={leadFormOpen}
         onClose={() => setLeadFormOpen(false)}
-        defaultCity=""
-        defaultState=""
-        defaultZip=""
+        defaultCity={isMarketLocked() ? MARKET_CONFIG.MARKET_NAME : ''}
+        defaultState={isMarketLocked() ? MARKET_CONFIG.MARKET_STATE : ''}
+        defaultZip={isMarketLocked() ? MARKET_CONFIG.DEFAULT_ZIPS[0] : ''}
       />
     </>
   )
