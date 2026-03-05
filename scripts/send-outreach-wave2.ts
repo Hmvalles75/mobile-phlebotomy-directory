@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
 import sg from '@sendgrid/mail'
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -70,17 +71,11 @@ const providers = [
   }
 ]
 
-export async function POST(req: NextRequest) {
-  // Simple auth check
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const results: { provider: string; status: string; error?: string }[] = []
+async function main() {
+  console.log(`Sending outreach to ${providers.length} providers...\n`)
 
   for (const provider of providers) {
-    const subject = `Following up: Patient referrals for ${provider.name}`
+    const subject = `Patient referrals for ${provider.name}`
 
     const text = `Hi,
 
@@ -139,11 +134,13 @@ hector@mobilephlebotomy.org`
         text,
         html
       })
-      results.push({ provider: provider.name, status: 'sent' })
+      console.log(`✅ ${provider.name} (${provider.email}) - ${provider.state}`)
     } catch (err: any) {
-      results.push({ provider: provider.name, status: 'failed', error: err.message })
+      console.error(`❌ ${provider.name}: ${err.message}`)
     }
   }
 
-  return NextResponse.json({ ok: true, results })
+  console.log('\nDone!')
 }
+
+main()
