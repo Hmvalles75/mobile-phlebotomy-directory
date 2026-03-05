@@ -102,6 +102,45 @@ export default function Terms() {
                 </p>
               </section>
 
+              <section className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">SMS/Text Message Terms</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  <strong>MobilePhlebotomy.org Lead Alerts</strong> — By providing your phone number and opting in,
+                  you consent to receive SMS/text messages from MobilePhlebotomy.org regarding service requests,
+                  appointment confirmations, and provider notifications.
+                </p>
+                <div className="space-y-3 text-gray-700">
+                  <p>
+                    <strong>Message Frequency:</strong> Message frequency varies based on your activity and service requests.
+                    You may receive multiple messages per week.
+                  </p>
+                  <p>
+                    <strong>Msg &amp; Data Rates:</strong> Message and data rates may apply. Check with your mobile carrier
+                    for details about your text messaging plan.
+                  </p>
+                  <p>
+                    <strong>Opt-Out:</strong> To stop receiving SMS messages, reply <strong>STOP</strong> to any message.
+                    You will receive a confirmation message and no further texts will be sent.
+                  </p>
+                  <p>
+                    <strong>Help:</strong> For help, reply <strong>HELP</strong> to any message or contact us at{' '}
+                    <a href="mailto:support@mobilephlebotomy.org" className="text-primary-600 hover:text-primary-700 font-medium">
+                      support@mobilephlebotomy.org
+                    </a>
+                  </p>
+                  <p>
+                    <strong>Carriers:</strong> Supported carriers include AT&amp;T, T-Mobile, Verizon, Sprint, and most major US carriers.
+                    Carriers are not liable for delayed or undelivered messages.
+                  </p>
+                  <p>
+                    <strong>Privacy:</strong> Your phone number and information are handled according to our{' '}
+                    <Link href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">
+                      Privacy Policy
+                    </Link>. We do not sell or share your phone number with third parties for marketing purposes.
+                  </p>
+                </div>
+              </section>
+
               <section className="border-t border-gray-200 pt-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Contact us</h3>
                 <p className="text-gray-700 mb-4">

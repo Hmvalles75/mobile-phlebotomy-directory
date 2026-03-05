@@ -39,3 +39,6 @@ next-env.d.ts
 /data/submissions.json
 /data/pending-submissions.json
 /generated/prisma
+
+.vercel
+.env*.local

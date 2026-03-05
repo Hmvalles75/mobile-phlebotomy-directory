@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
-import { notifyAdminUnservedLead, reachOutToNearbyProviders } from '@/lib/notifyProvider'
+import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 
@@ -51,40 +51,52 @@ export async function POST(req: NextRequest) {
 
     console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}`)
 
-    // Send email notifications to featured providers (Phase 1)
-    // Runs async and doesn't block the response
-    // If this fails, the cron job at /api/cron/catch-missed-notifications will retry
-    notifyFeaturedProvidersForLead(lead.id)
-      .then(count => {
-        console.log(`[Lead ${lead.id}] ✅ Featured provider email: ${count} sent`)
-      })
-      .catch(err => {
-        console.error(`[Lead ${lead.id}] ❌ Featured provider email FAILED:`, err.message || err)
-      })
+    // Send notifications synchronously to ensure they complete before function terminates
+    // This adds ~1-3 seconds to response time but guarantees delivery
+    let emailCount = 0
+    let smsCount = 0
 
-    // Send SMS blast to all eligible providers in the area (Race to Claim)
-    // Runs async and doesn't block the response
-    sendSMSBlastToEligibleProviders({
-      id: lead.id,
-      zip: payload.zip,
-      urgency: payload.urgency,
-      city: payload.city,
-      state: payload.state
-    }).then(async (count) => {
-      console.log(`[Lead ${lead.id}] ✅ SMS blast: ${count} sent`)
-      // If no opted-in providers were notified, reach out to nearby non-opted-in providers
-      if (count === 0) {
-        console.log(`[Lead ${lead.id}] No eligible providers - reaching out to nearby providers`)
-        notifyAdminUnservedLead(lead).catch(console.error)
-        reachOutToNearbyProviders(lead, 30).catch(console.error) // 30 mile radius
-      }
-    }).catch(err => {
+    try {
+      // Send email notifications to featured providers (Phase 1)
+      emailCount = await notifyFeaturedProvidersForLead(lead.id)
+      console.log(`[Lead ${lead.id}] ✅ Featured provider email: ${emailCount} sent`)
+    } catch (err: any) {
+      console.error(`[Lead ${lead.id}] ❌ Featured provider email FAILED:`, err.message || err)
+    }
+
+    try {
+      // Send SMS blast to all eligible providers in the area (Race to Claim)
+      smsCount = await sendSMSBlastToEligibleProviders({
+        id: lead.id,
+        zip: payload.zip,
+        urgency: payload.urgency,
+        city: payload.city,
+        state: payload.state
+      })
+      console.log(`[Lead ${lead.id}] ✅ SMS blast: ${smsCount} sent`)
+    } catch (err: any) {
       console.error(`[Lead ${lead.id}] ❌ SMS blast FAILED:`, err.message || err)
-      notifyAdminUnservedLead(lead).catch(console.error)
-      reachOutToNearbyProviders(lead, 30).catch(console.error)
-    })
+    }
 
-    // Return success immediately
+    // If NO providers were notified at all, this is an uncovered area
+    // Send expansion email to the lead and notify admin
+    if (emailCount === 0 && smsCount === 0) {
+      console.log(`[Lead ${lead.id}] No coverage in ${payload.city}, ${payload.state} - sending expansion email`)
+
+      // Send expansion email to the lead
+      await sendExpansionEmailToLead({
+        id: lead.id,
+        fullName: payload.fullName,
+        email: payload.email,
+        city: payload.city,
+        state: payload.state
+      }).catch(console.error)
+
+      // Still notify admin about unserved lead
+      await notifyAdminUnservedLead(lead).catch(console.error)
+    }
+
+    // Return success
     return NextResponse.json({
       ok: true,
       leadId: lead.id,

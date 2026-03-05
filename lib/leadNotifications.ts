@@ -324,6 +324,38 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     }
 
     console.log(`[LeadNotifications] ✅ Sent ${successCount}/${providers.length} email notifications`)
+
+    // Update lead with routing info if any emails were sent
+    if (successCount > 0) {
+      const routedProviderIds = providers.map(p => p.id)
+
+      // Only update if not already routed (SMS blast may have already set this)
+      const currentLead = await prisma.lead.findUnique({
+        where: { id: leadId },
+        select: { routedAt: true, routedProviderIds: true }
+      })
+
+      if (!currentLead?.routedAt) {
+        await prisma.lead.update({
+          where: { id: leadId },
+          data: {
+            routedAt: new Date(),
+            routedProviderIds
+          }
+        })
+        console.log(`[LeadNotifications] Updated routedAt and routedProviderIds (${routedProviderIds.length} providers)`)
+      } else {
+        // Merge provider IDs if already routed
+        const existingIds = currentLead.routedProviderIds || []
+        const mergedIds = [...new Set([...existingIds, ...routedProviderIds])]
+        await prisma.lead.update({
+          where: { id: leadId },
+          data: { routedProviderIds: mergedIds }
+        })
+        console.log(`[LeadNotifications] Merged routedProviderIds (now ${mergedIds.length} providers)`)
+      }
+    }
+
     return successCount
   } catch (error) {
     console.error('[LeadNotifications] Error in notifyFeaturedProvidersForLead:', error)

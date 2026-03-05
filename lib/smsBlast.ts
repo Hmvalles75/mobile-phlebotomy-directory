@@ -78,6 +78,22 @@ export async function sendSMSBlastToEligibleProviders(lead: Lead): Promise<numbe
 
     console.log(`SMS Blast complete: ${successCount}/${eligibleProviders.length} messages sent`)
 
+    // Update lead with routing info if any SMS were sent
+    if (successCount > 0) {
+      const routedProviderIds = eligibleProviders
+        .filter(p => p.phonePublic)
+        .map(p => p.id)
+
+      await prisma.lead.update({
+        where: { id: lead.id },
+        data: {
+          routedAt: new Date(),
+          routedProviderIds
+        }
+      })
+      console.log(`[Lead ${lead.id}] Updated routedAt and routedProviderIds (${routedProviderIds.length} providers)`)
+    }
+
     return successCount
   } catch (error) {
     console.error('SMS blast error:', error)

@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { useZipLookup, isValidZip } from '@/hooks/useZipLookup'
-import { ga4 } from '@/lib/ga4'
-import { MARKET_CONFIG, getMarketMetroPath } from '@/lib/config/market'
+import { ga4, trackEvent } from '@/lib/ga4'
+import { MARKET_CONFIG, getMarketMetroPath, isInLACountyCoverage } from '@/lib/config/market'
 
 /**
  * Los Angeles Request Page
@@ -134,6 +134,15 @@ function LARequestForm() {
     })
 
     try {
+      // Determine source based on ZIP coverage and provider attribution
+      const inCoverage = isInLACountyCoverage(formData.zip)
+      let source = 'la_request_page'
+      if (providerId) {
+        source = 'featured_provider_cta'
+      } else if (!inCoverage) {
+        source = 'la_request_out_of_area'
+      }
+
       const payload = {
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
@@ -145,8 +154,8 @@ function LARequestForm() {
         labPreference: formData.labPreference,
         urgency: formData.urgency,
         notes: formData.notes || '',
-        // Tracking fields - use featured_provider_cta source if providerId is present
-        source: providerId ? 'featured_provider_cta' : 'la_request_page',
+        // Tracking fields
+        source,
         preferredProviderId: providerId || undefined
       }
 
@@ -168,6 +177,13 @@ function LARequestForm() {
         city,
         state,
         zip: formData.zip
+      })
+
+      trackEvent('lead_submit_success', {
+        source,
+        zip: formData.zip,
+        city,
+        urgency: formData.urgency
       })
 
       setSubmitted(true)
@@ -335,6 +351,13 @@ function LARequestForm() {
                       <>{city}, {state}</>
                     )}
                   </p>
+                )}
+                {/* Out-of-area message - show expansion notice */}
+                {isValidZip(formData.zip) && !isInLACountyCoverage(formData.zip) && (
+                  <div className="text-amber-700 text-sm mt-2 bg-amber-50 px-4 py-3 rounded border border-amber-200">
+                    <p className="font-medium mb-1">We&apos;re currently expanding to your area.</p>
+                    <p className="text-amber-600">Submit your info and we&apos;ll notify you when service becomes available.</p>
+                  </div>
                 )}
               </div>
 

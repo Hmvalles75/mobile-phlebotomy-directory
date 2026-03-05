@@ -60,7 +60,7 @@ export interface MarketConfig {
  */
 export const MARKET_CONFIG: MarketConfig = {
   // Toggle this to enable/disable market lock
-  ENABLE_MARKET_LOCK: true,
+  ENABLE_MARKET_LOCK: false,
 
   // Los Angeles market settings
   MARKET_SLUG: 'los-angeles',
@@ -169,4 +169,23 @@ export function getPrimaryCtaPath(): string {
  */
 export function isLockedMarket(slug: string): boolean {
   return MARKET_CONFIG.ENABLE_MARKET_LOCK && slug === MARKET_CONFIG.MARKET_SLUG
+}
+
+/**
+ * LA County ZIP code prefixes
+ * Covers core LA (900-905), Long Beach (907-908), and San Fernando/Pasadena areas (910-918)
+ */
+const LA_COUNTY_ZIP_PREFIXES = [
+  '900', '901', '902', '903', '904', '905', '906', '907', '908',
+  '910', '911', '912', '913', '914', '915', '916', '917', '918'
+]
+
+/**
+ * Check if a ZIP code is within LA County coverage area
+ * Returns true for ZIPs with LA County prefixes, false otherwise
+ */
+export function isInLACountyCoverage(zip: string): boolean {
+  if (!zip || zip.length !== 5) return false
+  const prefix = zip.slice(0, 3)
+  return LA_COUNTY_ZIP_PREFIXES.includes(prefix)
 }

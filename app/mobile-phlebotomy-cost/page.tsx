@@ -3,12 +3,12 @@ import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
 export const metadata: Metadata = {
-  title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2026)',
-  description: '💰 Mobile phlebotomy costs $60-150 per visit. Get instant price quotes! Most insurance accepted. Medicare/Medicaid covered. Save 50% with these insider tips. Compare providers now.',
-  keywords: 'mobile phlebotomy cost, at home blood draw cost, mobile blood draw price, home phlebotomy pricing, blood draw at home cost, mobile lab cost, traveling phlebotomist cost, at home blood work price',
+  title: 'How Much Does Mobile Phlebotomy Cost? $60-150 (2026 Prices)',
+  description: 'Mobile phlebotomy costs $60-150 per visit. See exact pricing by city, what insurance covers, and 5 ways to pay less. Most Medicare & Medicaid patients pay $0-25. Get a free quote today.',
+  keywords: 'mobile phlebotomy cost, at home blood draw cost, mobile blood draw price, home phlebotomy pricing, blood draw at home cost, mobile lab cost, traveling phlebotomist cost, at home blood work price, how much does mobile phlebotomy cost',
   openGraph: {
-    title: 'Mobile Phlebotomy Cost: Pricing Guide & Insurance Coverage (2026)',
-    description: '💰 Mobile phlebotomy costs $60-150 per visit. Get instant price quotes! Most insurance accepted. Medicare/Medicaid covered. Save 50% with these insider tips. Compare providers now.',
+    title: 'How Much Does Mobile Phlebotomy Cost? $60-150 (2026 Prices)',
+    description: 'Mobile phlebotomy costs $60-150 per visit. See exact pricing by city, what insurance covers, and 5 ways to pay less. Most Medicare & Medicaid patients pay $0-25.',
     type: 'article',
   }
 }

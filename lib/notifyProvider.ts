@@ -350,3 +350,73 @@ export async function notifyProviderOfLead(providerId: string, leadId: string, c
     throw error
   }
 }
+
+/**
+ * Send expansion email to a lead when there's no provider coverage in their area
+ */
+export async function sendExpansionEmailToLead(lead: {
+  id: string
+  fullName: string
+  email?: string | null
+  city: string
+  state: string
+}): Promise<boolean> {
+  if (!lead.email) {
+    console.log(`[Lead ${lead.id}] No email - cannot send expansion notification`)
+    return false
+  }
+
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error('[Expansion Email] SendGrid not configured')
+    return false
+  }
+
+  const firstName = lead.fullName.split(' ')[0]
+
+  const subject = `We're Expanding to ${lead.city}`
+
+  const text = `Hi ${firstName},
+
+Thanks for submitting your mobile phlebotomy request in ${lead.city}.
+
+We're currently expanding into your area and building provider coverage. While we don't have an active provider there just yet, your request helps us prioritize new markets.
+
+If you'd like to be notified when service becomes available, just reply "YES" and I'll make sure you're first to know.
+
+Thank you for your patience,
+Hector
+MobilePhlebotomy.org`
+
+  const html = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+  <p>Hi ${firstName},</p>
+
+  <p>Thanks for submitting your mobile phlebotomy request in <strong>${lead.city}</strong>.</p>
+
+  <p>We're currently expanding into your area and building provider coverage. While we don't have an active provider there just yet, <strong>your request helps us prioritize new markets</strong>.</p>
+
+  <p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+    If you'd like to be notified when service becomes available, just <strong>reply "YES"</strong> and I'll make sure you're first to know.
+  </p>
+
+  <p>Thank you for your patience,</p>
+
+  <p><strong>Hector</strong><br>
+  <a href="https://mobilephlebotomy.org">MobilePhlebotomy.org</a></p>
+</div>`
+
+  try {
+    await sg.send({
+      to: lead.email,
+      from: 'hector@mobilephlebotomy.org',
+      subject,
+      text,
+      html
+    })
+    console.log(`[Lead ${lead.id}] ✅ Expansion email sent to ${lead.email}`)
+    return true
+  } catch (error: any) {
+    console.error(`[Lead ${lead.id}] ❌ Failed to send expansion email:`, error.message)
+    return false
+  }
+}
