@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, DollarSign, Zap, Settings, MapPin, Calendar, Save, CheckCircle } from 'lucide-react'
+import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, Zap, Settings, MapPin, Calendar, Save, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumPricingModal } from '@/components/ui/PremiumPricingModal'
 
@@ -404,27 +404,27 @@ function DashboardContent() {
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <DollarSign className="text-blue-600" size={24} />
-              <span className="text-3xl font-bold text-gray-900">
-                $0
+              <Star className="text-yellow-600" size={24} />
+              <span className="text-2xl font-bold text-gray-900">
+                ACTIVE
               </span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">Total Spent</p>
+            <p className="text-gray-600 text-sm font-medium">Account Status</p>
             <p className="text-xs text-gray-500 mt-1">
-              FREE during beta
+              Receiving leads
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <Star className="text-yellow-600" size={24} />
-              <span className="text-2xl font-bold text-gray-900">
-                BETA
+              <TrendingUp className="text-blue-600" size={24} />
+              <span className="text-3xl font-bold text-gray-900">
+                {stats.totalLeads}
               </span>
             </div>
-            <p className="text-gray-600 text-sm font-medium">Account Status</p>
+            <p className="text-gray-600 text-sm font-medium">Total Leads</p>
             <p className="text-xs text-gray-500 mt-1">
-              Beta - Free leads
+              All time
             </p>
           </div>
         </div>
@@ -638,9 +638,6 @@ function DashboardContent() {
                       Urgency
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Posted
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -663,15 +660,6 @@ function DashboardContent() {
                         }`}>
                           {lead.urgency === 'STAT' ? '🚨 STAT' : '📋 Standard'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                        {isTrialActive ? (
-                          <span className="text-green-600">
-                            FREE <span className="line-through text-gray-400 ml-1">${(lead.priceCents / 100).toFixed(2)}</span>
-                          </span>
-                        ) : (
-                          <span className="text-gray-900">${(lead.priceCents / 100).toFixed(2)}</span>
-                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(lead.createdAt)}
@@ -722,9 +710,6 @@ function DashboardContent() {
                       Urgency
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cost
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Claimed
                     </th>
                   </tr>
@@ -748,9 +733,6 @@ function DashboardContent() {
                         }`}>
                           {lead.urgency}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span className="text-gray-600">Included</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(lead.routedAt || lead.createdAt)}
@@ -786,7 +768,7 @@ function DashboardContent() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Premium</h3>
             <p className="text-gray-600 mb-4">
-              Get premium placement and more visibility with a Premium subscription starting at $49/month.
+              Get premium placement, a featured badge, and priority lead routing starting at $49/month.
             </p>
             <button
               onClick={() => setShowPricingModal(true)}

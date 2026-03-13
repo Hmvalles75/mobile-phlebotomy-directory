@@ -15,6 +15,7 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { ga4 } from '@/lib/ga4'
+import { PhoneReveal } from '@/components/PhoneReveal'
 
 interface MetroPageProps {
   params: {
@@ -464,10 +465,14 @@ export default function MetroPage({ params }: MetroPageProps) {
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
                           <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
                           <div className="space-y-2 text-sm">
-                            {provider.phone && (
+                            {provider.phone && !provider.isFeatured && (
                               <div className="flex items-center gap-2">
-                                <span className="text-primary-600">📞</span>
-                                <span className="font-medium text-gray-900">{provider.phone}</span>
+                                <PhoneReveal
+                                  phone={provider.phone}
+                                  providerId={provider.id}
+                                  providerName={provider.name}
+                                  variant="compact"
+                                />
                               </div>
                             )}
                             {provider.address?.city && (
@@ -677,7 +682,14 @@ export default function MetroPage({ params }: MetroPageProps) {
                               {provider.address?.city && provider.address.city.trim() && (
                                 <span>📍 {provider.address.city}{provider.address.state ? `, ${provider.address.state}` : ''}</span>
                               )}
-                              {provider.phone && <span>📞 {provider.phone}</span>}
+                              {provider.phone && !provider.isFeatured && (
+                                <PhoneReveal
+                                  phone={provider.phone}
+                                  providerId={provider.id}
+                                  providerName={provider.name}
+                                  variant="compact"
+                                />
+                              )}
                               {provider.rating && provider.reviewsCount && (
                                 <div className="flex items-center">
                                   <span className="text-yellow-400">

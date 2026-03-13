@@ -11,6 +11,7 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { getProviderBadge } from '@/lib/provider-tiers'
 import { ga4 } from '@/lib/ga4'
+import { PhoneReveal } from '@/components/PhoneReveal'
 
 // Use the standardized coverage display function
 function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
@@ -168,6 +169,7 @@ const cityMapping: Record<string, {name: string, state: string}> = {
   'irving': { name: 'Irving', state: 'TX' },
   'jackson': { name: 'Jackson', state: 'TN' },
   'jackson-township': { name: 'Jackson Township', state: 'NJ' },
+  'jacksonville': { name: 'Jacksonville', state: 'FL' },
   'jamaica': { name: 'Jamaica', state: 'NY' },
   'jenkintown': { name: 'Jenkintown', state: 'PA' },
   'johnstown': { name: 'Johnstown', state: 'NY' },
@@ -820,7 +822,14 @@ export default function CityPage({ params }: PageProps) {
                       ) : (
                         <span>🌐 Online Services</span>
                       )}
-                      {provider.phone && <span>📞 {provider.phone}</span>}
+                      {provider.phone && !provider.isFeatured && (
+                        <PhoneReveal
+                          phone={provider.phone}
+                          providerId={provider.id}
+                          providerName={provider.name}
+                          variant="compact"
+                        />
+                      )}
                       {provider.rating && provider.reviewsCount && (
                         <div className="flex items-center">
                           <span className="text-yellow-400">

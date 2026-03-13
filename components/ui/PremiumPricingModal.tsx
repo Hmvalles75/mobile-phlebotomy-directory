@@ -17,50 +17,44 @@ interface PricingTier {
 const tiers: PricingTier[] = [
   {
     id: 'FOUNDING_PARTNER',
-    name: 'Founding Partner Premium',
+    name: 'Founding Partner',
     price: 49,
-    description: 'Launch offer for providers in new, unserved markets',
-    badge: 'Limited Time',
+    description: 'Early-bird rate — locked in forever at this price',
+    badge: 'Best Value',
     popular: true,
     icon: Award,
     features: [
-      'Premium placement in search results',
-      'Featured badge on your listing',
-      'Priority lead routing in your area',
-      'Exclusive market coverage opportunity',
-      'Founding Partner designation',
-      'Lock in this rate permanently'
+      'Everything listed above',
+      '"Founding Partner" label on your profile',
+      'Be the first premium provider in your market',
+      'This $49/mo rate never increases, even when prices go up'
     ]
   },
   {
     id: 'STANDARD_PREMIUM',
-    name: 'Standard Premium',
+    name: 'Premium',
     price: 79,
-    description: 'Standard premium listing for established markets',
+    description: 'The standard plan for most providers',
     icon: Star,
     features: [
-      'Premium placement in search results',
-      'Featured badge on your listing',
-      'Priority lead routing',
-      'Enhanced profile visibility',
-      'Analytics dashboard',
-      'Monthly performance reports'
+      'Everything listed above',
+      'Larger, more visible profile card highlighting your services',
+      'Monthly listing views and click stats',
+      'Monthly performance report emailed to you'
     ]
   },
   {
     id: 'HIGH_DENSITY',
-    name: 'High-Density Metro',
+    name: 'Metro Premium',
     price: 149,
-    description: 'Maximum visibility in major metro markets',
+    description: 'For providers in competitive major metros',
     icon: TrendingUp,
     features: [
-      'Top placement in major metros',
-      'Featured badge on your listing',
-      'Highest priority lead routing',
-      'City-exclusive featured sponsor option',
-      'Advanced analytics & insights',
-      'Dedicated account support',
-      'Premium lead quality guarantee'
+      'Everything in Premium, plus:',
+      'Top spot on your city page — the #1 listing patients see',
+      'Option to be the exclusive featured sponsor for your city',
+      'Detailed analytics: views, clicks, and conversion rates',
+      'Direct support line for account questions'
     ]
   }
 ]
@@ -123,8 +117,8 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
           {/* Header */}
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Upgrade to Premium</h2>
-              <p className="text-gray-600 mt-1">Choose the plan that fits your market</p>
+              <h2 className="text-2xl font-bold text-gray-900">Upgrade Your Listing</h2>
+              <p className="text-gray-600 mt-1">Get more visibility and more patients — flat monthly rate, no per-lead fees</p>
             </div>
             <button
               onClick={onClose}
@@ -143,6 +137,19 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
 
           {/* Pricing Cards */}
           <div className="p-6">
+            {/* What every plan includes */}
+            <div className="mb-8 bg-green-50 border border-green-200 rounded-lg p-5">
+              <h3 className="font-bold text-green-900 mb-3">Every premium plan includes:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-800">
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Higher placement on city &amp; state pages</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Gold &quot;Featured Provider&quot; badge</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Priority lead routing in your area</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> No per-lead fees — leads are free to claim</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Cancel anytime, no contracts</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Listing upgraded instantly</div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {tiers.map((tier) => {
                 const Icon = tier.icon
@@ -218,13 +225,14 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
             {/* Info Footer */}
             <div className="mt-8 bg-blue-50 rounded-lg p-4">
               <h4 className="font-semibold text-blue-900 mb-2">
-                How Premium Listings Work
+                How It Works
               </h4>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Your listing will appear above basic listings in search results</li>
-                <li>• Premium badge increases trust and click-through rates</li>
-                <li>• Priority routing sends you leads first in your coverage area</li>
-                <li>• Cancel anytime - no long-term commitment required</li>
+                <li>• <strong>Instant upgrade</strong> — your listing is upgraded the moment you subscribe</li>
+                <li>• <strong>Higher placement</strong> — premium listings appear above free listings when patients search your city</li>
+                <li>• <strong>Featured badge</strong> — a gold badge on your listing builds trust and increases clicks</li>
+                <li>• <strong>First dibs on leads</strong> — when a patient requests a phlebotomist in your area, you get notified first</li>
+                <li>• <strong>Cancel anytime</strong> — no contracts, no setup fees, cancel with one click</li>
               </ul>
             </div>
           </div>

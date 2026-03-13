@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { AlertCircle, CheckCircle, Clock, DollarSign, MapPin, Phone, Mail, FileText } from 'lucide-react'
+import { AlertCircle, CheckCircle, Clock, MapPin, Phone, Mail, FileText } from 'lucide-react'
 
 interface Lead {
   id: string
@@ -28,7 +28,6 @@ export default function ClaimLeadPage() {
   const [claimed, setClaimed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [leadData, setLeadData] = useState<Lead | null>(null)
-  const [chargeAmount, setChargeAmount] = useState<number>(0)
   const [isTrial, setIsTrial] = useState(false)
   const [providerId, setProviderId] = useState<string>('')
   const [providerName, setProviderName] = useState<string>('')
@@ -109,7 +108,6 @@ export default function ClaimLeadPage() {
 
       if (data.ok) {
         setLeadData(data.lead)
-        setChargeAmount(data.chargeAmount)
         setIsTrial(data.isTrial)
         setClaimed(true)
         setLeadStatus('claimed')
@@ -173,12 +171,10 @@ export default function ClaimLeadPage() {
               <CheckCircle className="text-green-600 flex-shrink-0" size={32} />
               <div>
                 <h1 className="text-2xl font-bold text-green-900 mb-2">
-                  Lead Claimed Successfully! {isTrial && '🎉 FREE TRIAL'}
+                  Lead Claimed Successfully!
                 </h1>
                 <p className="text-green-800">
-                  {isTrial
-                    ? '✅ This lead is FREE as part of your 30-day trial'
-                    : `✅ Charged $${(chargeAmount / 100).toFixed(2)} to your saved payment method`}
+                  You now have access to this patient&apos;s contact information. Reach out ASAP!
                 </p>
               </div>
             </div>
@@ -230,24 +226,15 @@ export default function ClaimLeadPage() {
                 </p>
               </div>
 
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Urgency</label>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                    leadData.urgency === 'STAT'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {leadData.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
-                  </span>
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Price</label>
-                  <span className="text-lg font-semibold text-gray-900">
-                    {isTrial ? '$0 (Trial)' : `$${(leadData.priceCents / 100).toFixed(2)}`}
-                  </span>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Urgency</label>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                  leadData.urgency === 'STAT'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {leadData.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
+                </span>
               </div>
 
               {leadData.notes && (
@@ -352,24 +339,7 @@ export default function ClaimLeadPage() {
                   {leadPreview.urgency === 'STAT' ? '🚨 STAT (Urgent)' : '📋 Standard'}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-blue-700">Price:</span>
-                <span className="font-semibold text-blue-900">
-                  {isTrialActive ? (
-                    <span className="text-green-600">$0.00 (Trial) <span className="line-through text-gray-400 ml-2">${(leadPreview.priceCents / 100).toFixed(2)}</span></span>
-                  ) : (
-                    `$${(leadPreview.priceCents / 100).toFixed(2)}`
-                  )}
-                </span>
-              </div>
             </div>
-            {isTrialActive && (
-              <div className="mt-3 bg-green-100 border border-green-300 rounded p-2">
-                <p className="text-xs text-green-800 font-semibold">
-                  🎉 FREE during your 30-day trial!
-                </p>
-              </div>
-            )}
             <p className="text-xs text-blue-600 mt-3 italic">
               Full patient contact info will be revealed after you claim this lead.
             </p>
@@ -393,8 +363,7 @@ export default function ClaimLeadPage() {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>Note:</strong> By claiming this lead, you agree to be charged the lead price
-            (or $0 if you&apos;re on trial) and will receive full patient contact information.
+            <strong>Note:</strong> By claiming this lead, you will receive the patient&apos;s full contact information. Please reach out to them promptly.
           </p>
         </div>
       </div>

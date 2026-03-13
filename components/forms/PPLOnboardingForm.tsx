@@ -38,7 +38,6 @@ export function PPLOnboardingForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [providerId, setProviderId] = useState<string | null>(null)
-  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const handleLabToggle = (lab: string) => {
     setFormData(prev => ({
@@ -55,7 +54,7 @@ export function PPLOnboardingForm() {
     setIsSubmitting(true)
 
     if (!formData.agreedToTerms) {
-      setError('You must agree to the Pay-Per-Lead terms to continue')
+      setError('You must agree to the terms to continue')
       setIsSubmitting(false)
       return
     }
@@ -75,47 +74,10 @@ export function PPLOnboardingForm() {
 
       setProviderId(data.providerId)
       setSuccess(true)
-
-      // Redirect to payment setup
-      if (data.requiresPaymentSetup && data.providerId) {
-        setIsRedirecting(true)
-
-        const setupResponse = await fetch('/api/provider/createSetupSession', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ providerId: data.providerId })
-        })
-
-        const setupData = await setupResponse.json()
-
-        if (setupData.ok && setupData.url) {
-          // Redirect to Stripe Checkout for payment method setup
-          window.location.href = setupData.url
-        } else {
-          throw new Error('Failed to initialize payment setup')
-        }
-      }
     } catch (err: any) {
       setError(err.message || 'An error occurred')
       setIsSubmitting(false)
-      setIsRedirecting(false)
     }
-  }
-
-  if (success && isRedirecting) {
-    return (
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Redirecting to Payment Setup...
-          </h2>
-          <p className="text-gray-600">
-            Setting up your payment method to start receiving leads.
-          </p>
-        </div>
-      </div>
-    )
   }
 
   if (success) {
@@ -127,7 +89,7 @@ export function PPLOnboardingForm() {
             Application Submitted!
           </h2>
           <p className="text-gray-600 mb-6">
-            Your Pay-Per-Lead application has been received. Please complete payment setup to start receiving patient leads.
+            Your application has been received. You&apos;ll start receiving patient leads in your service area soon.
           </p>
           <a
             href="/dashboard"
@@ -143,10 +105,10 @@ export function PPLOnboardingForm() {
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
       <h2 className="text-3xl font-bold text-gray-900 mb-2">
-        Pay-Per-Lead Enrollment
+        Provider Enrollment
       </h2>
       <p className="text-gray-600 mb-6">
-        Join our lead generation network and receive qualified patient requests in your service area.
+        Join our network and receive patient requests in your service area.
       </p>
 
       {error && (
@@ -250,14 +212,12 @@ export function PPLOnboardingForm() {
 
         {/* Terms Agreement */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Direct Pay-Per-Lead Terms</h3>
+          <h3 className="font-semibold text-blue-900 mb-2">Lead Network Terms</h3>
           <ul className="text-sm text-blue-800 space-y-1 mb-4">
-            <li>• Standard leads: <strong>$20</strong> per qualified patient request</li>
-            <li>• STAT (urgent) leads: <strong>$50</strong> per qualified patient request</li>
-            <li>• You are charged directly when a lead is routed to you</li>
-            <li>• Payment is processed automatically via your saved card</li>
             <li>• All leads are exclusive and delivered in real-time</li>
-            <li>• No upfront costs - only pay when you receive a lead</li>
+            <li>• You will be notified by email and SMS when a lead is available in your area</li>
+            <li>• First provider to claim a lead gets full patient contact info</li>
+            <li>• Please respond to patients promptly after claiming a lead</li>
           </ul>
           <label className="flex items-start gap-3 cursor-pointer">
             <input
@@ -268,7 +228,7 @@ export function PPLOnboardingForm() {
               className="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
             <span className="text-sm text-gray-700">
-              <span className="text-red-600">*</span> I agree to the Direct Pay-Per-Lead terms, including a <strong>$20 to $50 charge</strong> per lead delivered to me
+              <span className="text-red-600">*</span> I agree to the lead network terms and will respond to patients promptly
             </span>
           </label>
         </div>

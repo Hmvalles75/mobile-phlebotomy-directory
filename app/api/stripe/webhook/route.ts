@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
+import sg from '@sendgrid/mail'
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-10-29.clover' })
   : null
+
+const ADMIN_EMAIL = 'hector@mobilephlebotomy.org'
+
+const TIER_LABELS: Record<string, string> = {
+  FOUNDING_PARTNER: 'Founding Partner ($49/mo)',
+  STANDARD_PREMIUM: 'Standard Premium ($79/mo)',
+  HIGH_DENSITY: 'High-Density Metro ($149/mo)'
+}
+
+async function notifyAdmin(subject: string, body: string) {
+  try {
+    if (!process.env.SENDGRID_API_KEY) return
+    sg.setApiKey(process.env.SENDGRID_API_KEY)
+    await sg.send({
+      to: ADMIN_EMAIL,
+      from: ADMIN_EMAIL,
+      subject: `[MobilePhlebotomy] ${subject}`,
+      text: body
+    })
+  } catch (err: any) {
+    console.error('Failed to send admin notification:', err.message)
+  }
+}
 
 export async function POST(req: NextRequest) {
   if (!stripe) {
@@ -82,14 +106,29 @@ export async function POST(req: NextRequest) {
         if (type === 'featured_subscription') {
           const tier = session.metadata?.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
           if (tier) {
-            await prisma.provider.update({
+            const updated = await prisma.provider.update({
               where: { id: providerId },
               data: {
-                listingTier: 'PREMIUM',
-                featuredTier: tier
+                listingTier: tier === 'HIGH_DENSITY' ? 'FEATURED' : 'PREMIUM',
+                featuredTier: tier,
+                isFeatured: true,
+                featured: true
               }
             })
             console.log(`Activated ${tier} premium tier for provider ${providerId}`)
+
+            // Notify admin
+            await notifyAdmin(
+              `New Premium Subscription: ${updated.name}`,
+              `A provider just subscribed to a premium tier!\n\n` +
+              `Provider: ${updated.name}\n` +
+              `Email: ${updated.claimEmail || session.customer_email || 'unknown'}\n` +
+              `Tier: ${TIER_LABELS[tier] || tier}\n` +
+              `Stripe Customer: ${session.customer || 'N/A'}\n` +
+              `Provider ID: ${providerId}\n\n` +
+              `Their listing has been automatically upgraded.\n` +
+              `Dashboard: https://mobilephlebotomy.org/provider/${updated.slug}`
+            )
           }
         }
         break
@@ -109,12 +148,15 @@ export async function POST(req: NextRequest) {
           // Extract tier from metadata if available
           const metadata = subscription.metadata || {}
           const tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | undefined
+          const effectiveTier = tier || provider.featuredTier
 
           await prisma.provider.update({
             where: { id: provider.id },
             data: {
-              listingTier: 'PREMIUM',
-              featuredTier: tier || provider.featuredTier
+              listingTier: effectiveTier === 'HIGH_DENSITY' ? 'FEATURED' : 'PREMIUM',
+              featuredTier: effectiveTier,
+              isFeatured: true,
+              featured: true
             }
           })
           console.log(`Subscription active for provider ${provider.id}`)
@@ -135,10 +177,21 @@ export async function POST(req: NextRequest) {
             where: { id: provider.id },
             data: {
               listingTier: 'BASIC',
-              featuredTier: null
+              featuredTier: null,
+              isFeatured: false,
+              featured: false
             }
           })
           console.log(`Subscription cancelled for provider ${provider.id}`)
+
+          await notifyAdmin(
+            `Subscription Cancelled: ${provider.name}`,
+            `A provider cancelled their premium subscription.\n\n` +
+            `Provider: ${provider.name}\n` +
+            `Email: ${provider.claimEmail || 'unknown'}\n` +
+            `Provider ID: ${provider.id}\n\n` +
+            `Their listing has been downgraded to BASIC.`
+          )
         }
         break
       }

@@ -14,6 +14,7 @@ import { SimpleAccordion } from '@/components/ui/Accordion'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { SITE_URL } from '@/lib/seo'
 import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
+import { PhoneReveal } from '@/components/PhoneReveal'
 
 // State data with full names and abbreviations
 const stateData: Record<string, {name: string, abbr: string}> = {
@@ -732,10 +733,14 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
                           <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
                           <div className="space-y-2 text-sm">
-                            {provider.phone && (
+                            {provider.phone && !provider.isFeatured && (
                               <div className="flex items-center gap-2">
-                                <span className="text-primary-600">📞</span>
-                                <span className="font-medium text-gray-900">{provider.phone}</span>
+                                <PhoneReveal
+                                  phone={provider.phone}
+                                  providerId={provider.id}
+                                  providerName={provider.name}
+                                  variant="compact"
+                                />
                               </div>
                             )}
                             {provider.address?.city && (
@@ -963,8 +968,8 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                   {/* Monetization Tier Badge */}
                                   <ListingTierBadge
                                     tier={(provider as any).listingTier || 'BASIC'}
-                                    isFeaturedCity={(provider as any).isFeaturedCity || false}
-                                    isFeatured={(provider as any).isFeatured || false}
+                                    isFeaturedCity={provider.isFeaturedCity || false}
+                                    isFeatured={provider.isFeatured || false}
                                   />
                                 </div>
                           {provider.description && (
@@ -1017,8 +1022,13 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
 
                           {/* Contact Info */}
                           <div className="text-sm text-gray-600 space-y-1">
-                            {provider.phone && (
-                              <div>📞 {provider.phone}</div>
+                            {provider.phone && !provider.isFeatured && (
+                              <PhoneReveal
+                                phone={provider.phone}
+                                providerId={provider.id}
+                                providerName={provider.name}
+                                variant="compact"
+                              />
                             )}
                             {provider.address?.city && (
                               <div>📍 Based in {provider.address.city}, {provider.address.state}</div>
@@ -1072,8 +1082,8 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             {/* Monetization Tier Badge */}
                             <ListingTierBadge
                               tier={(provider as any).listingTier || 'BASIC'}
-                              isFeaturedCity={(provider as any).isFeaturedCity || false}
-                              isFeatured={(provider as any).isFeatured || false}
+                              isFeaturedCity={provider.isFeaturedCity || false}
+                              isFeatured={provider.isFeatured || false}
                             />
                           </div>
 
@@ -1102,8 +1112,13 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
 
                           {/* Contact Info - Compact */}
                           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                            {provider.phone && (
-                              <span>📞 {provider.phone}</span>
+                            {provider.phone && !provider.isFeatured && (
+                              <PhoneReveal
+                                phone={provider.phone}
+                                providerId={provider.id}
+                                providerName={provider.name}
+                                variant="compact"
+                              />
                             )}
                             {provider.address?.city && (
                               <span>📍 {provider.address.city}, {provider.address.state}</span>
