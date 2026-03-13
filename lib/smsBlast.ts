@@ -35,11 +35,8 @@ export async function sendSMSBlastToEligibleProviders(lead: Lead): Promise<numbe
 
     console.log(`Found ${eligibleProviders.length} eligible providers for SMS blast near ZIP ${lead.zip}`)
 
-    // Determine pricing based on urgency
-    const price = lead.urgency === 'STAT' ? '$50' : '$20'
-
-    // Construct claim URL
-    const claimUrl = `${process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/claim/${lead.id}`
+    // Construct claim URL (provider-specific for one-click claim)
+    const siteUrl = process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
 
     // Send SMS to each provider
     const sendPromises = eligibleProviders.map(async (provider) => {
@@ -49,15 +46,11 @@ export async function sendSMSBlastToEligibleProviders(lead: Lead): Promise<numbe
       }
 
       try {
-        // Determine if provider is on trial
-        const isTrial = provider.trialStatus === 'ACTIVE' && provider.trialExpiresAt && provider.trialExpiresAt > new Date()
-
         // Include distance in message if available
         const distanceInfo = provider.distance ? ` (~${Math.round(provider.distance)} mi)` : ''
+        const claimUrl = `${siteUrl}/claim/${lead.id}?provider=${provider.id}`
 
-        const message = isTrial
-          ? `New request in ${lead.city}, ${lead.state}${distanceInfo}. Reply YES if you can contact and schedule the patient now. Claim for $0 (Trial): ${claimUrl}`
-          : `New request in ${lead.city}, ${lead.state}${distanceInfo}. Reply YES if you can contact and schedule the patient now. Claim for ${price}: ${claimUrl}`
+        const message = `New patient request in ${lead.city}, ${lead.state}${distanceInfo}. Claim to see their contact info (free): ${claimUrl}`
 
         const result = await twilioClient!.messages.create({
           to: provider.phonePublic,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { AlertCircle, CheckCircle, Clock, MapPin, Phone, Mail, FileText } from 'lucide-react'
 
 interface Lead {
@@ -20,7 +20,9 @@ interface Lead {
 
 export default function ClaimLeadPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const leadId = params.leadId as string
+  const providerFromUrl = searchParams.get('provider')
 
   const [loading, setLoading] = useState(true)
   const [leadStatus, setLeadStatus] = useState<'open' | 'claimed' | 'unknown'>('unknown')
@@ -41,10 +43,47 @@ export default function ClaimLeadPage() {
   } | null>(null)
 
   useEffect(() => {
-    checkLeadStatus()
-    fetchProviderSession()
+    // If provider ID is in the URL (one-click claim from email), auto-claim
+    if (providerFromUrl) {
+      setProviderId(providerFromUrl)
+      autoClaim(providerFromUrl)
+    } else {
+      checkLeadStatus()
+      fetchProviderSession()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leadId])
+  }, [leadId, providerFromUrl])
+
+  async function autoClaim(pid: string) {
+    setClaiming(true)
+    try {
+      const response = await fetch('/api/lead/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadId, providerId: pid })
+      })
+      const data = await response.json()
+
+      if (data.ok) {
+        setLeadData(data.lead)
+        setIsTrial(data.isTrial)
+        setClaimed(true)
+        setLeadStatus('claimed')
+      } else {
+        if (data.error === 'ALREADY_CLAIMED') {
+          setLeadStatus('claimed')
+          setError('This patient has already been claimed by another provider.')
+        } else {
+          setError(data.error || 'Failed to claim lead')
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to claim lead')
+    } finally {
+      setClaiming(false)
+      setLoading(false)
+    }
+  }
 
   async function fetchProviderSession() {
     try {

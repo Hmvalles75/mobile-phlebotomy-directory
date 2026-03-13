@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { notifyProviderOfLead } from '@/lib/notifyProvider'
-
-const stripe = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-10-29.clover' })
-  : null
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,180 +14,103 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Use transaction to ensure atomicity
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Fetch lead and verify it's still available
-      const lead = await tx.lead.findUnique({
-        where: { id: leadId }
+    // Verify provider exists
+    const provider = await prisma.provider.findUnique({
+      where: { id: providerId },
+      select: { id: true, name: true }
+    })
+
+    if (!provider) {
+      return NextResponse.json(
+        { ok: false, error: 'Provider not found' },
+        { status: 404 }
+      )
+    }
+
+    // Atomic claim: only updates if status is still OPEN
+    // This prevents race conditions — if two providers click simultaneously,
+    // only the first UPDATE will match the WHERE clause
+    const claimed = await prisma.lead.updateMany({
+      where: {
+        id: leadId,
+        status: 'OPEN'
+      },
+      data: {
+        status: 'CLAIMED',
+        routedToId: providerId,
+        claimedAt: new Date()
+      }
+    })
+
+    // If no rows were updated, the lead was already claimed or doesn't exist
+    if (claimed.count === 0) {
+      // Check why — not found vs already claimed
+      const lead = await prisma.lead.findUnique({
+        where: { id: leadId },
+        select: { status: true }
       })
 
       if (!lead) {
-        throw new Error('Lead not found')
+        return NextResponse.json(
+          { ok: false, error: 'Lead not found' },
+          { status: 404 }
+        )
       }
 
-      if (lead.status === 'CLAIMED') {
-        throw new Error('ALREADY_CLAIMED')
-      }
-
-      if (lead.status !== 'OPEN') {
-        throw new Error('Lead is not available for claiming')
-      }
-
-      // 2. Fetch provider and verify eligibility
-      const provider = await tx.provider.findUnique({
-        where: { id: providerId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          claimEmail: true,
-          phone: true,
-          phonePublic: true,
-          eligibleForLeads: true,
-          trialStatus: true,
-          trialExpiresAt: true,
-          stripeCustomerId: true,
-          stripePaymentMethodId: true
-        }
-      })
-
-      if (!provider) {
-        throw new Error('Provider not found')
-      }
-
-      // PAYMENT DISABLED: All leads are FREE until pay-per-lead is activated
-      // Uncomment these checks when ready to enable payments:
-
-      // if (!provider.eligibleForLeads) {
-      //   throw new Error('Provider is not eligible to claim leads. Please add a payment method.')
-      // }
-
-      // if (!provider.stripeCustomerId || !provider.stripePaymentMethodId) {
-      //   throw new Error('Provider must have a payment method saved')
-      // }
-
-      // 3. Check trial status and determine charge amount
-      // PAYMENT DISABLED: Always charge $0 until pay-per-lead is activated
-      let chargeAmount = 0  // Force free
-      let isTrial = true    // Treat everything as free trial
-
-      // When ready to enable payments, uncomment this logic:
-      /*
-      let chargeAmount = lead.priceCents
-      let isTrial = false
-
-      // Check if trial is still active
-      if (provider.trialStatus === 'ACTIVE' && provider.trialExpiresAt) {
-        const now = new Date()
-        if (provider.trialExpiresAt > now) {
-          // Trial is active - charge $0
-          chargeAmount = 0
-          isTrial = true
-        } else {
-          // Trial expired - update status
-          await tx.provider.update({
-            where: { id: providerId },
-            data: { trialStatus: 'EXPIRED' }
-          })
-        }
-      }
-      */
-
-      // 4. Charge provider (if not trial)
-      let paymentIntentId: string | null = null
-
-      if (!isTrial && chargeAmount > 0) {
-        if (!stripe) {
-          throw new Error('Stripe not configured - cannot process payment')
-        }
-
-        try {
-          const paymentIntent = await stripe.paymentIntents.create({
-            amount: chargeAmount,
-            currency: 'usd',
-            customer: provider.stripeCustomerId || undefined,
-            payment_method: provider.stripePaymentMethodId || undefined,
-            off_session: true,
-            confirm: true,
-            description: `Lead Claim: ${lead.fullName} - ${lead.city}, ${lead.state}`,
-            metadata: {
-              leadId: lead.id,
-              providerId: provider.id,
-              urgency: lead.urgency,
-              claimType: 'race_to_claim'
-            }
-          })
-
-          if (paymentIntent.status !== 'succeeded') {
-            throw new Error('Payment failed')
-          }
-
-          paymentIntentId = paymentIntent.id
-        } catch (error: any) {
-          // Payment failed
-          throw new Error(`Payment declined: ${error.message}`)
-        }
-      }
-
-      // 5. Update lead status to CLAIMED
-      const updatedLead = await tx.lead.update({
-        where: { id: leadId },
-        data: {
-          status: 'CLAIMED',
-          routedToId: providerId,
-          routedAt: new Date()
-        }
-      })
-
-      return {
-        lead: updatedLead,
-        provider,
-        chargeAmount,
-        isTrial,
-        paymentIntentId
-      }
-    })
-
-    // 6. Send notification to provider (async, don't block)
-    notifyProviderOfLead(providerId, leadId, result.chargeAmount).catch(err => {
-      console.error('Failed to send claim notification:', err)
-    })
-
-    console.log(`✅ Lead ${leadId} claimed by provider ${providerId}. Charged: $${(result.chargeAmount / 100).toFixed(2)}${result.isTrial ? ' (TRIAL)' : ''}`)
-
-    // 7. Return success with lead details
-    return NextResponse.json({
-      ok: true,
-      message: result.isTrial
-        ? 'Lead claimed successfully - FREE TRIAL'
-        : `Lead claimed successfully - Charged $${(result.chargeAmount / 100).toFixed(2)}`,
-      lead: {
-        id: result.lead.id,
-        fullName: result.lead.fullName,
-        phone: result.lead.phone,
-        email: result.lead.email,
-        address1: result.lead.address1,
-        city: result.lead.city,
-        state: result.lead.state,
-        zip: result.lead.zip,
-        urgency: result.lead.urgency,
-        notes: result.lead.notes,
-        priceCents: result.lead.priceCents
-      },
-      chargeAmount: result.chargeAmount,
-      isTrial: result.isTrial
-    })
-
-  } catch (error: any) {
-    console.error('Claim error:', error)
-
-    // Special handling for "already claimed"
-    if (error.message === 'ALREADY_CLAIMED') {
       return NextResponse.json(
         { ok: false, error: 'ALREADY_CLAIMED', message: 'This lead has already been claimed by another provider' },
         { status: 409 }
       )
     }
+
+    // Fetch the full lead data to return to the provider
+    const lead = await prisma.lead.findUnique({
+      where: { id: leadId }
+    })
+
+    if (!lead) {
+      return NextResponse.json(
+        { ok: false, error: 'Lead not found after claim' },
+        { status: 500 }
+      )
+    }
+
+    // Calculate response time (time from first notification to claim)
+    let responseTimeMinutes: number | null = null
+    if (lead.routedAt) {
+      responseTimeMinutes = Math.round((Date.now() - lead.routedAt.getTime()) / 60000)
+    }
+
+    // Send confirmation notification to provider (async, don't block)
+    notifyProviderOfLead(providerId, leadId, 0).catch(err => {
+      console.error('Failed to send claim notification:', err)
+    })
+
+    console.log(`✅ Lead ${leadId} claimed by ${provider.name} (${providerId}). Response time: ${responseTimeMinutes !== null ? responseTimeMinutes + ' min' : 'N/A'}`)
+
+    return NextResponse.json({
+      ok: true,
+      message: 'Lead claimed successfully',
+      lead: {
+        id: lead.id,
+        fullName: lead.fullName,
+        phone: lead.phone,
+        email: lead.email,
+        address1: lead.address1,
+        city: lead.city,
+        state: lead.state,
+        zip: lead.zip,
+        urgency: lead.urgency,
+        notes: lead.notes,
+        priceCents: lead.priceCents
+      },
+      chargeAmount: 0,
+      isTrial: true,
+      responseTimeMinutes
+    })
+
+  } catch (error: any) {
+    console.error('Claim error:', error)
 
     return NextResponse.json(
       { ok: false, error: error.message || 'Failed to claim lead' },

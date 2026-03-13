@@ -44,7 +44,8 @@ async function sendProviderLeadNotificationEmail(
     return { success: false, error: 'Missing EMAIL_FROM config' }
   }
 
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  const claimUrl = `${siteUrl}/claim/${lead.id}?provider=${provider.id}`
   const leadType = 'Individual'  // Default for Phase 1
   const notesShort = lead.notes ? lead.notes.substring(0, 200) : 'None'
 
@@ -56,8 +57,7 @@ async function sendProviderLeadNotificationEmail(
   // Plain text email body
   const textBody = `Hi ${provider.name},
 
-New request in ${lead.city}, ${lead.state} just came in.
-Please reply ASAP to confirm availability so we can route it.
+New patient request in ${lead.city}, ${lead.state} just came in!
 
 Location: ${lead.city}, ${lead.state} ${lead.zip}
 Lab preference: ${lead.labPreference}${labNote ? '\n' + labNote : ''}
@@ -65,8 +65,10 @@ Request type: ${leadType}
 Urgency: ${lead.urgency}
 Notes: ${notesShort}${lead.notes && lead.notes.length > 200 ? '...' : ''}
 
-Review the request here:
-${dashboardUrl}
+Click below to claim this patient and see their full contact info:
+${claimUrl}
+
+First provider to claim gets the patient. No fees — this referral is completely free.
 
 No action is required if you're unavailable.
 
@@ -86,20 +88,19 @@ No action is required if you're unavailable.
     .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; border-top: none; }
     .detail-row { margin: 10px 0; }
     .detail-label { font-weight: bold; color: #555; }
-    .button { display: inline-block; padding: 15px 30px; background-color: #0066cc; color: white !important; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
-    .button:hover { background-color: #0052a3; }
+    .button { display: inline-block; padding: 18px 40px; background-color: #28a745; color: white !important; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 18px; }
+    .button:hover { background-color: #218838; }
     .footer { padding: 20px; text-align: center; color: #777; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h2 style="margin: 0;">New Mobile Phlebotomy Request</h2>
+      <h2 style="margin: 0;">New Patient Request</h2>
     </div>
     <div class="content">
       <p>Hi ${provider.name},</p>
-      <p><strong>New request in ${lead.city}, ${lead.state} just came in.</strong><br>
-      Please reply ASAP to confirm availability so we can route it.</p>
+      <p><strong>New patient request in ${lead.city}, ${lead.state} just came in!</strong></p>
 
       <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
         <div class="detail-row">
@@ -113,7 +114,7 @@ No action is required if you're unavailable.
           <span class="detail-label">Request type:</span> ${leadType}
         </div>
         <div class="detail-row">
-          <span class="detail-label">Urgency:</span> <strong>${lead.urgency}</strong>
+          <span class="detail-label">Urgency:</span> <strong style="color: ${lead.urgency === 'STAT' ? '#dc3545' : '#0066cc'};">${lead.urgency === 'STAT' ? 'STAT (Urgent)' : 'Standard'}</strong>
         </div>
         ${lead.notes ? `<div class="detail-row">
           <span class="detail-label">Notes:</span> ${notesShort}${lead.notes.length > 200 ? '...' : ''}
@@ -121,11 +122,13 @@ No action is required if you're unavailable.
       </div>
 
       <center>
-        <a href="${dashboardUrl}" class="button">Review Request</a>
+        <a href="${claimUrl}" class="button">Claim This Patient</a>
+        <br>
+        <span style="color: #28a745; font-size: 14px; font-weight: bold;">One click — no login required. Completely free.</span>
       </center>
 
       <p style="color: #777; font-size: 14px; margin-top: 30px;">
-        No action is required if you're unavailable.
+        First provider to claim gets the patient's full contact info. No action is required if you're unavailable.
       </p>
     </div>
     <div class="footer">
