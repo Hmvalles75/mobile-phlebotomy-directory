@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
 import sg from '@sendgrid/mail'
+import { isLeadInServiceRadius } from './zip-geocode'
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -176,9 +177,6 @@ async function findFeaturedProvidersForNotification(
     where: {
       isFeatured: true,
       notifyEnabled: true,
-      zipCodes: {
-        not: null
-      }
     },
     select: {
       id: true,
@@ -187,6 +185,8 @@ async function findFeaturedProvidersForNotification(
       claimEmail: true,
       email: true,
       zipCodes: true,
+      serviceRadiusMiles: true,
+      primaryState: true,
       coverage: {
         select: {
           state: {
@@ -199,44 +199,54 @@ async function findFeaturedProvidersForNotification(
     }
   })
 
-  // Filter by geographic coverage
+  // Filter by geographic coverage using radius-based matching
   const matchingProviders = providers.filter(provider => {
     // Check if provider has any email
     const hasEmail = provider.notificationEmail || provider.claimEmail || provider.email
     if (!hasEmail) return false
 
-    // Check state coverage first
+    // Must be in the same state (quick filter)
     const coverageStates = provider.coverage.map(c => c.state.abbr)
-    if (coverageStates.includes(leadState)) {
-      return true
+    const inSameState = coverageStates.includes(leadState) || provider.primaryState === leadState
+    if (!inSameState) return false
+
+    // If provider has ZIP codes, use radius-based matching
+    if (provider.zipCodes) {
+      const serviceZips = provider.zipCodes
+        .split(',')
+        .map(z => z.trim())
+        .filter(z => z.length >= 5)
+
+      if (serviceZips.length > 0) {
+        const primaryZip = serviceZips[0]
+        const radius = provider.serviceRadiusMiles || 25
+
+        // Check radius from provider's primary ZIP
+        if (isLeadInServiceRadius(primaryZip, leadZip, radius)) {
+          return true
+        }
+
+        // Also check explicit ZIP matches (exact, wildcard, range)
+        return serviceZips.some(serviceZip => {
+          if (serviceZip === leadZip) return true
+          if (serviceZip.includes('*')) {
+            const prefix = serviceZip.replace('*', '')
+            return leadZip.startsWith(prefix)
+          }
+          if (serviceZip.includes('-') && !serviceZip.startsWith('-')) {
+            const [start, end] = serviceZip.split('-').map(z => z.trim())
+            if (start.length >= 5 && end.length >= 5) {
+              return leadZip >= start && leadZip <= end
+            }
+          }
+          return false
+        })
+      }
     }
 
-    // Check ZIP code coverage
-    if (!provider.zipCodes) return false
-
-    const serviceZips = provider.zipCodes
-      .split(',')
-      .map(z => z.trim())
-      .filter(z => z.length > 0)
-
-    return serviceZips.some(serviceZip => {
-      // Exact match
-      if (serviceZip === leadZip) return true
-
-      // Wildcard match (e.g., "902*" matches "90210")
-      if (serviceZip.includes('*')) {
-        const prefix = serviceZip.replace('*', '')
-        return leadZip.startsWith(prefix)
-      }
-
-      // Range match (e.g., "90210-90220")
-      if (serviceZip.includes('-')) {
-        const [start, end] = serviceZip.split('-').map(z => z.trim())
-        return leadZip >= start && leadZip <= end
-      }
-
-      return false
-    })
+    // No ZIP codes set — skip (don't notify for entire state)
+    console.log(`[LeadNotifications] Skipping ${provider.name} — no ZIP codes configured, cannot determine proximity`)
+    return false
   })
 
   return matchingProviders.map(p => ({
