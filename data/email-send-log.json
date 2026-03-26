@@ -397,5 +397,40 @@
     "campaign": "fl-outreach-2026-03",
     "sentAt": "2026-03-13T01:30:16.722Z",
     "status": "sent"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "info@phlebotomy2go.com",
+    "sentAt": "2026-03-26T18:28:17.060Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "info@expressmobilephlebotomy.com",
+    "sentAt": "2026-03-26T18:28:17.102Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "smpofflorida@gmail.com",
+    "sentAt": "2026-03-26T18:28:17.158Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "info@handsthatcaremobilephlebotomy.com",
+    "sentAt": "2026-03-26T18:28:17.209Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "info@oasisphlebotomy.com",
+    "sentAt": "2026-03-26T18:28:17.256Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "info@rootedcaremobilephlebotomy.com",
+    "sentAt": "2026-03-26T18:44:30.554Z"
+  },
+  {
+    "campaign": "fl-targeted-outreach-2026-03",
+    "email": "premiermobilephlebotomy@outlook.com",
+    "sentAt": "2026-03-26T18:49:08.576Z"
   }
 ]
