@@ -122,7 +122,7 @@ export default function GetPatientsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       {/* Hero Answer Block */}
-      <section className="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-16">
+      <section className="bg-primary-700 text-white py-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <p className="text-sm text-primary-200 mb-2">Last updated: March 2026</p>
           <h1 className="text-3xl md:text-4xl font-bold mb-6">

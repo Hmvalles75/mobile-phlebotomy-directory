@@ -66,7 +66,7 @@ export default function ForNetworksPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20">
+      <section className="bg-gray-900 text-white py-20">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <p className="text-sm text-gray-400 uppercase tracking-wide mb-4">For Draw Networks, Labs & Healthcare Organizations</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
