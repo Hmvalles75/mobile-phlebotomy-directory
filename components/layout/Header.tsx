@@ -72,6 +72,9 @@ export function Header() {
                   <Link href="/add-provider" className="block px-4 py-3 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded">
                     Add Your Business
                   </Link>
+                  <Link href="/resources" className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded">
+                    Provider Resources
+                  </Link>
                 </div>
               </div>
             </div>
