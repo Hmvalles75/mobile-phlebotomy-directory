@@ -106,6 +106,29 @@ export default function ResourcesPage() {
         </div>
       </section>
 
+      {/* Newsletter */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="bg-primary-50 rounded-xl p-8 md:p-12 text-center">
+            <span className="text-3xl mb-4 block">📬</span>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Stay Ahead of the Industry
+            </h2>
+            <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto mb-6 text-lg">
+              <strong>The Draw Report</strong> — the free business newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice. Delivered to your inbox.
+            </p>
+            <a
+              href="https://thedrawreport.beehiiv.com/subscribe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors"
+            >
+              Subscribe Free
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4 max-w-3xl text-center">
