@@ -74,6 +74,7 @@ model Provider {
   availability          ProviderAvailability[]
   badges                ProviderBadge[]
   coords                ProviderCoords?
+  businessClaims        BusinessClaim[]
   corrections           ProviderCorrection[]
   correctionsQueue      ProviderCorrections[]  @relation("corrections_queue")
   coverage              ProviderCoverage[]
@@ -325,6 +326,35 @@ model ProviderCorrections {
   provider     Provider?             @relation("corrections_queue", fields: [providerId], references: [id])
 
   @@map("provider_corrections_queue")
+}
+
+model BusinessClaim {
+  id                 String             @id @default(cuid())
+  createdAt          DateTime           @default(now())
+  status             BusinessClaimStatus @default(PENDING)
+  providerId         String
+  providerName       String
+  claimantName       String
+  claimantEmail      String
+  claimantPhone      String
+  requestedUpdates   String
+  isOwnerConfirmed   Boolean            @default(false)
+  verifiedAt         DateTime?
+  verificationMethod String?
+  verificationNotes  String?
+  ipAddress          String?
+  userAgent          String?
+  provider           Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([status])
+  @@map("business_claims")
+}
+
+enum BusinessClaimStatus {
+  PENDING
+  REGISTERED
+  REJECTED
 }
 
 model Waitlist {

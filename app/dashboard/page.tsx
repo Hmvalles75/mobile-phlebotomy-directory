@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, Zap, Settings, MapPin, Calendar, Save, CheckCircle } from 'lucide-react'
+import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, Zap, Settings, MapPin, Calendar, Save, CheckCircle, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumPricingModal } from '@/components/ui/PremiumPricingModal'
 
@@ -84,9 +84,25 @@ function DashboardContent() {
   const [operatingHoursEnd, setOperatingHoursEnd] = useState('17:00')
   const [serviceRadiusMiles, setServiceRadiusMiles] = useState(25)
 
+  // Profile state
+  const [showProfile, setShowProfile] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+  const [profileData, setProfileData] = useState({
+    businessName: '',
+    phone: '',
+    notificationEmail: '',
+    website: '',
+    description: '',
+    zipCodes: '',
+  })
+  const [allServices, setAllServices] = useState<{id: string, name: string}[]>([])
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+
   useEffect(() => {
     fetchDashboardData()
     fetchSettings()
+    fetchProfile()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -123,6 +139,67 @@ function DashboardContent() {
     } catch (error) {
       console.error('Failed to fetch settings:', error)
     }
+  }
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/provider/profile', { credentials: 'include' })
+      if (response.ok) {
+        const result = await response.json()
+        if (result.ok) {
+          setProfileData({
+            businessName: result.profile.businessName || '',
+            phone: result.profile.phone || '',
+            notificationEmail: result.profile.notificationEmail || '',
+            website: result.profile.website || '',
+            description: result.profile.description || '',
+            zipCodes: result.profile.zipCodes || '',
+          })
+          setAllServices(result.allServices || [])
+          setSelectedServiceIds(result.services?.map((s: any) => s.id) || [])
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+    }
+  }
+
+  const saveProfile = async () => {
+    setProfileLoading(true)
+    setProfileSaved(false)
+
+    try {
+      const response = await fetch('/api/provider/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...profileData,
+          serviceIds: selectedServiceIds
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.ok) {
+        setProfileSaved(true)
+        setTimeout(() => setProfileSaved(false), 3000)
+      } else {
+        alert(result.error || 'Failed to save profile')
+      }
+    } catch {
+      alert('An error occurred while saving your profile')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const toggleService = (serviceId: string) => {
+    setSelectedServiceIds(prev =>
+      prev.includes(serviceId)
+        ? prev.filter(id => id !== serviceId)
+        : [...prev, serviceId]
+    )
   }
 
   const saveSettings = async () => {
@@ -427,6 +504,165 @@ function DashboardContent() {
               All time
             </p>
           </div>
+        </div>
+
+        {/* Business Profile */}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="text-green-600" size={24} />
+                <h2 className="text-xl font-bold text-gray-900">Business Profile</h2>
+              </div>
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="text-green-600 hover:text-green-700 font-medium text-sm"
+              >
+                {showProfile ? 'Hide' : 'Edit'}
+              </button>
+            </div>
+            {!showProfile && (
+              <p className="text-sm text-gray-600 mt-1">
+                {profileData.businessName || 'Loading...'}
+                {profileData.phone && ` \u00b7 ${profileData.phone}`}
+              </p>
+            )}
+          </div>
+
+          {showProfile && (
+            <div className="px-6 py-6">
+              <p className="text-gray-600 mb-6 text-sm">
+                Update your business information. Changes are saved immediately and reflected on your public listing.
+              </p>
+
+              {/* Business Name */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Business Name</label>
+                <input
+                  type="text"
+                  value={profileData.businessName}
+                  onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Phone & Notification Email */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Notification Email</label>
+                  <input
+                    type="email"
+                    value={profileData.notificationEmail}
+                    onChange={(e) => setProfileData({ ...profileData, notificationEmail: e.target.value })}
+                    placeholder="Where lead notifications are sent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+              </div>
+
+              {/* Website */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Website</label>
+                <input
+                  type="url"
+                  value={profileData.website}
+                  onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
+                  placeholder="https://www.example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Description */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Business Description</label>
+                <textarea
+                  rows={4}
+                  value={profileData.description}
+                  onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                  placeholder="Describe your services, experience, and what makes your business unique..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">{profileData.description.length}/2000 characters</p>
+              </div>
+
+              {/* Service ZIP Codes */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Service ZIP Codes</label>
+                <input
+                  type="text"
+                  value={profileData.zipCodes}
+                  onChange={(e) => setProfileData({ ...profileData, zipCodes: e.target.value })}
+                  placeholder="e.g. 90210, 90211, 90212"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Comma-separated ZIP codes you serve</p>
+              </div>
+
+              {/* Services Offered */}
+              {allServices.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Services Offered</label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {allServices.map((service) => (
+                      <button
+                        key={service.id}
+                        onClick={() => toggleService(service.id)}
+                        className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-colors text-left ${
+                          selectedServiceIds.includes(service.id)
+                            ? 'border-green-600 bg-green-50 text-green-900'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        {service.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Save Button */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={saveProfile}
+                  disabled={profileLoading}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                >
+                  {profileLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      Save Profile
+                    </>
+                  )}
+                </button>
+                {profileSaved && (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle size={20} />
+                    <span className="font-medium text-sm">Saved!</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!showProfile && (
+            <div className="px-6 py-4 text-center text-sm text-gray-600">
+              Click &quot;Edit&quot; to update your business name, phone, description, and services
+            </div>
+          )}
         </div>
 
         {/* Availability Settings */}

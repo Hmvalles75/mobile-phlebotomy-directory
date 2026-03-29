@@ -24,7 +24,7 @@ export async function POST(
     const { id } = await params
     const { action, verificationMethod, verificationNotes } = await request.json()
 
-    const claim = getClaimById(id)
+    const claim = await getClaimById(id)
 
     if (!claim) {
       return NextResponse.json(
@@ -35,7 +35,7 @@ export async function POST(
 
     if (action === 'register') {
       // Update status to registered
-      const success = updateClaimStatus(id, 'registered', {
+      const success = await updateClaimStatus(id, 'REGISTERED', {
         verificationMethod: verificationMethod || 'email_reply',
         verificationNotes
       })
@@ -59,7 +59,7 @@ export async function POST(
 
     } else if (action === 'reject') {
       // Update status to rejected
-      const success = updateClaimStatus(id, 'rejected', {
+      const success = await updateClaimStatus(id, 'REJECTED', {
         verificationNotes
       })
 
@@ -112,7 +112,7 @@ export async function DELETE(
 
     const { id } = await params
 
-    const success = deleteClaim(id)
+    const success = await deleteClaim(id)
 
     if (!success) {
       return NextResponse.json(

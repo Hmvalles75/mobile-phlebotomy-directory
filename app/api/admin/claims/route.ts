@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const claims = getAllClaims()
+    const claims = await getAllClaims()
 
     return NextResponse.json({
       success: true,

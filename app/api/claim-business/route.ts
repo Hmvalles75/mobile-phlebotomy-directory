@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'Unknown'
 
     // Save business claim
-    const claim = addBusinessClaim({
+    const claim = await addBusinessClaim({
       providerId: formData.providerId,
       providerName: formData.providerName,
       claimantName: formData.claimantName,
