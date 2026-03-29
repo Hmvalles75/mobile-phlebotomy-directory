@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import DrawReportCTA from '@/components/DrawReportCTA'
 
 export const metadata: Metadata = {
   title: 'Can Mobile Phlebotomists Bill Medicare? Yes — Here\'s How (2026)',
@@ -192,8 +193,10 @@ export default function MedicareBillingPage() {
             </ul>
           </div>
 
+          <DrawReportCTA />
+
           {/* CTA */}
-          <div className="bg-primary-50 border border-primary-200 rounded-xl p-8 text-center">
+          <div className="bg-primary-50 border border-primary-200 rounded-xl p-8 text-center mt-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Start Getting Patient Referrals</h2>
             <p className="text-gray-600 mb-6">List your mobile phlebotomy business on MobilePhlebotomy.org — completely free. We send you patient leads with no fees and no commission.</p>
             <Link href="/add-provider" className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors">

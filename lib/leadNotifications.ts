@@ -73,7 +73,11 @@ First provider to claim gets the patient. No fees — this referral is completel
 
 No action is required if you're unavailable.
 
-— MobilePhlebotomy.org`
+— MobilePhlebotomy.org
+
+---
+📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`
 
   // HTML email body
   const htmlBody = `
@@ -134,6 +138,10 @@ No action is required if you're unavailable.
     </div>
     <div class="footer">
       <p>MobilePhlebotomy.org</p>
+      <p style="margin-top: 12px; font-size: 13px; color: #555;">
+        📬 <strong><a href="https://thedrawreport.beehiiv.com/subscribe" style="color: #0066cc; text-decoration: none;">The Draw Report</a></strong> — free newsletter for mobile phlebotomists.<br>
+        Tips on getting patients, billing insurance, landing contracts, and growing your practice.
+      </p>
     </div>
   </div>
 </body>

@@ -572,6 +572,22 @@ export default function AddProvider() {
               <p className="text-center text-xs text-gray-500">
                 Questions? Email us at <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-600 hover:underline">hector@mobilephlebotomy.org</a>
               </p>
+
+              {/* Newsletter */}
+              <div className="bg-primary-50 rounded-lg p-4 text-center">
+                <p className="font-bold text-gray-900 text-sm mb-1">📬 The Draw Report</p>
+                <p className="text-xs text-gray-600 mb-3">
+                  Free newsletter for mobile phlebotomists — tips on getting patients, billing, contracts, and growing your practice.
+                </p>
+                <a
+                  href="https://thedrawreport.beehiiv.com/subscribe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-primary-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary-700 transition-colors"
+                >
+                  Subscribe Free
+                </a>
+              </div>
             </div>
 
             {/* Close Button */}

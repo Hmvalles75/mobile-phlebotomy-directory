@@ -173,7 +173,11 @@ Best,
 Hector
 MobilePhlebotomy.org
 
-P.S. Our emails can land in spam at first — please mark as Not Spam so you don't miss requests.`
+P.S. Our emails can land in spam at first — please mark as Not Spam so you don't miss requests.
+
+---
+📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`
   )
 }
 
@@ -240,7 +244,11 @@ Questions? Just reply to this email.
 
 Best,
 Hector
-MobilePhlebotomy.org`
+MobilePhlebotomy.org
+
+---
+📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`
     )
   }
 
@@ -270,7 +278,11 @@ Interested? Just reply to this email.
 ` : ''}
 Best,
 Hector
-MobilePhlebotomy.org`
+MobilePhlebotomy.org
+
+---
+📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`
     )
   }
 

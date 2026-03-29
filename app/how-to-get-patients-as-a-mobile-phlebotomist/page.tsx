@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import DrawReportCTA from '@/components/DrawReportCTA'
 
 export const metadata: Metadata = {
   title: 'How to Get Patients as a Mobile Phlebotomist — 7 Proven Methods (2026)',
@@ -178,7 +179,9 @@ export default function GetPatientsPage() {
             </ul>
           </div>
 
-          <div className="bg-primary-50 border border-primary-200 rounded-xl p-8 text-center">
+          <DrawReportCTA />
+
+          <div className="bg-primary-50 border border-primary-200 rounded-xl p-8 text-center mt-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Get Patients Sent to You — Free</h2>
             <p className="text-gray-600 mb-6">List your business on MobilePhlebotomy.org and start receiving patient referrals. No fees, no commission — we send you the patient&apos;s contact info and you book the appointment.</p>
             <Link href="/add-provider" className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors">
