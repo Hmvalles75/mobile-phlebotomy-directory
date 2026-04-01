@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = `${SITE_URL}/us/${stateSlug}`
 
   return {
-    title: `Mobile Phlebotomy in ${stateName} – At-Home Blood Draw Services | MobilePhlebotomy.org`,
-    description: `Find certified mobile phlebotomists for at-home blood draws throughout ${stateName}. Browse local providers and request a mobile blood draw in your area.`,
+    title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
+    description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
     alternates: {
       canonical: url,
     },
@@ -36,15 +36,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: `Mobile Phlebotomy in ${stateName} – At-Home Blood Draw Services`,
-      description: `Find certified mobile phlebotomists for at-home blood draws throughout ${stateName}. Browse local providers and request a mobile blood draw in your area.`,
+      title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
+      description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
       url,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Mobile Phlebotomy in ${stateName} – At-Home Blood Draw Services`,
-      description: `Find certified mobile phlebotomists for at-home blood draws throughout ${stateName}. Browse local providers and request a mobile blood draw in your area.`,
+      title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
+      description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
     },
   }
 }

@@ -298,8 +298,8 @@ export async function generateMetadata({ params }: { params: { state: string, ci
     }
   }
 
-  const title = `Mobile Phlebotomy ${cityInfo.name}, ${cityInfo.state} | Expert At-Home Blood Draw (2026)`
-  const description = `⭐ Top mobile phlebotomists in ${cityInfo.name}! Licensed professionals come to you. Same-day appointments, insurance billing, HIPAA compliant. Book your at-home blood draw today.`
+  const title = `Mobile Phlebotomy ${cityInfo.name} | At-Home Blood Draw Near You (2026)`
+  const description = `Licensed mobile phlebotomists serving ${cityInfo.name}, ${cityInfo.state} and surrounding areas. At-home blood draws \u2014 same-day and next-day available.`
 
   return {
     title,

@@ -2,9 +2,14 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Mobile Phlebotomy Insurance Coverage: Medicare, Medicaid & Private Plans (2026)',
-  description: '💡 YES! Most insurance covers mobile phlebotomy. Medicare pays up to 80%. Get CPT codes, pre-authorization tips, and maximize your benefits. Save hundreds on at-home blood draws.',
+  title: 'Does Insurance Cover Mobile Phlebotomy? Medicare, Medicaid & Private Plans',
+  description: 'Yes \u2014 many insurance plans cover mobile phlebotomy. Medicare pays 80% for homebound patients. See what your plan covers and how to get pre-authorization.',
   keywords: 'mobile phlebotomy insurance coverage, does insurance cover mobile phlebotomy, Medicare mobile phlebotomy, at home blood draw insurance, mobile blood draw Medicare, phlebotomy insurance billing',
+  openGraph: {
+    title: 'Does Insurance Cover Mobile Phlebotomy? Medicare, Medicaid & Private Plans',
+    description: 'Yes \u2014 many insurance plans cover mobile phlebotomy. Medicare pays 80% for homebound patients. See what your plan covers and how to get pre-authorization.',
+    type: 'article',
+  }
 }
 
 export default function InsuranceCoveragePage() {
