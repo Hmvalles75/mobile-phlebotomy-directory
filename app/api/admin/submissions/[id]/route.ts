@@ -131,6 +131,38 @@ async function addProviderToDatabase(submission: any) {
     counter++
   }
 
+  // Determine if provider opted into leads
+  const wantsLeads = submission.leadOptIn === 'yes'
+
+  // Generate city slug
+  const primaryCitySlug = submission.city
+    ? submission.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    : null
+
+  // Derive state name and slug from abbreviation
+  const STATE_NAMES: Record<string, string> = {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+    CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+    HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+    KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+    MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+    MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+    NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+    OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+    SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+    VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+    DC: 'District of Columbia', PR: 'Puerto Rico',
+  }
+
+  const stateAbbr = submission.state?.toUpperCase() || null
+  const stateName = stateAbbr ? STATE_NAMES[stateAbbr] || null : null
+  const stateSlug = stateName ? stateName.toLowerCase().replace(/\s+/g, '-') : null
+
+  // Log warnings for missing critical fields
+  if (!stateAbbr) console.warn(`⚠️ Provider ${submission.businessName}: no state provided`)
+  if (!submission.email) console.warn(`⚠️ Provider ${submission.businessName}: no email provided`)
+  if (!submission.zipCode) console.warn(`⚠️ Provider ${submission.businessName}: no ZIP code provided`)
+
   // Create the provider
   const provider = await prisma.provider.create({
     data: {
@@ -140,10 +172,21 @@ async function addProviderToDatabase(submission: any) {
       phonePublic: submission.phone || null,
       website: submission.website || null,
       email: submission.email || null,
+      notificationEmail: submission.leadEmail || submission.email || null,
       description: submission.description || null,
-      zipCodes: submission.zipCode || null, // Store submitted ZIP for legacy compatibility
-      status: 'VERIFIED', // Admin approved submissions get verified badge
-      listingTier: 'BASIC' // Default to BASIC tier for free listings
+      zipCodes: submission.zipCode || null,
+      primaryCity: submission.city || null,
+      primaryCitySlug,
+      primaryState: stateAbbr,
+      primaryStateName: stateName,
+      primaryStateSlug: stateSlug,
+      status: 'VERIFIED',
+      listingTier: 'BASIC',
+      source: 'SELF_SIGNUP',
+      eligibleForLeads: wantsLeads,
+      isFeatured: wantsLeads,
+      notifyEnabled: wantsLeads,
+      serviceRadiusMiles: 25,
     }
   })
 
