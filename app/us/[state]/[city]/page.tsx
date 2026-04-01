@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { SearchBar } from '@/components/ui/SearchBar'
+import InlineLeadForm from '@/components/InlineLeadForm'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
@@ -766,14 +767,7 @@ export default function CityPage({ params }: PageProps) {
               <p className="text-gray-600">Please wait while we find providers in {cityName}.</p>
             </div>
           ) : filteredProviders.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">No providers found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or check our general search page.</p>
-              <a href="/search" className="inline-block mt-4 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
-                View All Providers
-              </a>
-            </div>
+            <InlineLeadForm city={cityName} state={state} variant="no-results" />
           ) : (
             filteredProviders.map((provider) => {
               // Determine provider type for visual indicator
@@ -917,6 +911,11 @@ export default function CityPage({ params }: PageProps) {
               )
             })
           )}
+        </div>
+
+        {/* Inline Lead Form */}
+        <div className="mt-12">
+          <InlineLeadForm city={cityName} state={state} />
         </div>
 
         {/* Local Info Section */}

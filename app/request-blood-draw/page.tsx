@@ -72,7 +72,7 @@ function RequestBloodDrawForm() {
       const response = await fetch('/api/lead/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, labPreference: 'Other/Unsure' })
       })
 
       const data = await response.json()

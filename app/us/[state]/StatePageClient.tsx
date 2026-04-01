@@ -8,6 +8,7 @@ import { BreadcrumbNav } from '@/components/seo/BreadcrumbSchema'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
+import InlineLeadForm from '@/components/InlineLeadForm'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { getMetrosByState } from '@/data/top-metros'
 import { SimpleAccordion } from '@/components/ui/Accordion'
@@ -245,22 +246,9 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Lead Form CTA */}
+        {/* Inline Lead Form */}
         <div className="max-w-4xl mx-auto mb-8">
-          <div className="bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Get Matched with a Mobile Phlebotomist in {stateName}
-            </h2>
-            <p className="text-gray-700 mb-6 text-lg">
-              Tell us your location and needs – we&apos;ll connect you with qualified providers in your area.
-            </p>
-            <button
-              onClick={() => setShowLeadForm(true)}
-              className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg shadow-md hover:shadow-lg"
-            >
-              Match me with a mobile phlebotomist in {stateName}
-            </button>
-          </div>
+          <InlineLeadForm city="" state={stateAbbr} />
         </div>
 
         {/* SEO Content - Summary + Accordion */}
