@@ -234,10 +234,11 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 {/* Unverified Warning Message */}
                 {!isVerified && (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-amber-900 leading-relaxed">
+                    <p className="text-sm text-amber-900 leading-relaxed mb-3">
                       <strong>Information on this page may be outdated or incomplete.</strong><br />
-                      If this is your business, <Link href="/add-provider" className="text-primary-600 hover:text-primary-700 underline font-medium">claim this listing</Link> to verify details and receive referrals.
+                      If this is your business, claim it below to verify details and receive referrals.
                     </p>
+                    <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
                   </div>
                 )}
 
