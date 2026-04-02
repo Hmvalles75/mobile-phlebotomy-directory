@@ -130,7 +130,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href="/providers/claim"
+                  href="/add-provider"
                   className={`block w-full py-4 px-6 rounded-lg font-semibold text-center transition-colors ${
                     tier.popular
                       ? 'bg-primary-600 text-white hover:bg-primary-700'
@@ -297,7 +297,7 @@ export default function PricingPage() {
               Ready to grow your mobile phlebotomy business?
             </p>
             <Link
-              href="/providers/claim"
+              href="/add-provider"
               className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-lg"
             >
               Claim Your Listing & Upgrade
