@@ -237,7 +237,7 @@ ${!hasWebsite ? `
 🌐 NEED A PROFESSIONAL WEBSITE?
 We noticed you don't have a website listed. We offer a website setup service ($199 one-time) that includes a professional page, booking integration, and SEO optimization.
 
-See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+See an example: https://www.mobilephlebotomy.org/provider/carewithluvs-llc
 Interested? Just reply to this email.
 ` : ''}
 Questions? Just reply to this email.
@@ -273,7 +273,7 @@ ${!hasWebsite ? `
 🌐 NEED A PROFESSIONAL WEBSITE?
 We noticed you don't have a website listed. We offer a website setup service ($199 one-time) that includes a professional page, booking integration, and SEO optimization.
 
-See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+See an example: https://www.mobilephlebotomy.org/provider/carewithluvs-llc
 Interested? Just reply to this email.
 ` : ''}
 Best,
@@ -519,7 +519,7 @@ We're now offering a website service for providers in our directory:
 • Content updates on request
 • Analytics & visitor tracking
 
-See an example: https://www.mobilephlebotomy.org/p/carewithluvs
+See an example: https://www.mobilephlebotomy.org/provider/carewithluvs-llc
 
 If you're interested, just reply to this email and we can discuss your needs.
 

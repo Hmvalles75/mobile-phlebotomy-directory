@@ -261,7 +261,7 @@ export default function PricingPage() {
           </div>
 
           <p className="text-center text-gray-500 mt-6 text-sm">
-            See an example: <a href="/p/carewithluvs" className="text-primary-600 hover:underline">carewithluvs.mobilephlebotomy.org</a>
+            See an example: <a href="/provider/carewithluvs-llc" className="text-primary-600 hover:underline">CAREWITHLUVS LLC</a>
           </p>
         </div>
 
