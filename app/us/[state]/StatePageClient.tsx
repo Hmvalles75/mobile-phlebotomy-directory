@@ -66,6 +66,7 @@ const stateData: Record<string, {name: string, abbr: string}> = {
   'vermont': { name: 'Vermont', abbr: 'VT' },
   'virginia': { name: 'Virginia', abbr: 'VA' },
   'washington': { name: 'Washington', abbr: 'WA' },
+  'washington-dc': { name: 'Washington, D.C.', abbr: 'DC' },
   'west-virginia': { name: 'West Virginia', abbr: 'WV' },
   'wisconsin': { name: 'Wisconsin', abbr: 'WI' },
   'wyoming': { name: 'Wyoming', abbr: 'WY' }
