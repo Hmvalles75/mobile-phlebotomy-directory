@@ -1070,7 +1070,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/us/california/san-diego" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/san-diego-ca/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
                     San Diego Mobile Lab Services
                   </Link>
                 </li>
@@ -1112,7 +1112,7 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Texas</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/us/texas/houston" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/houston-tx/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
                     Houston Mobile Phlebotomy
                   </Link>
                 </li>
@@ -1164,7 +1164,7 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Illinois</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/us/illinois/chicago" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/chicago-il/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
                     Chicago Mobile Phlebotomy
                   </Link>
                 </li>
@@ -1181,6 +1181,58 @@ export default function HomePage() {
                 <li>
                   <Link href="/us/illinois" className="text-gray-600 hover:text-primary-600 font-medium">
                     View All Illinois Providers →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Ohio</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/columbus-oh/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Columbus Mobile Phlebotomy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/ohio/cleveland" className="text-primary-600 hover:text-primary-700">
+                    Cleveland At-Home Blood Draw
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/ohio/cincinnati" className="text-primary-600 hover:text-primary-700">
+                    Cincinnati Mobile Lab Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/ohio" className="text-gray-600 hover:text-primary-600 font-medium">
+                    View All Ohio Providers →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">North Carolina</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/charlotte-nc/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Charlotte Mobile Phlebotomy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/north-carolina/raleigh" className="text-primary-600 hover:text-primary-700">
+                    Raleigh At-Home Blood Draw
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/north-carolina/durham" className="text-primary-600 hover:text-primary-700">
+                    Durham Mobile Lab Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/north-carolina" className="text-gray-600 hover:text-primary-600 font-medium">
+                    View All North Carolina Providers →
                   </Link>
                 </li>
               </ul>
