@@ -198,6 +198,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'los-angeles-ca/in-home-blood-draw', priority: 0.7 },
     { slug: 'los-angeles-ca/blood-draw-at-home', priority: 0.7 },
     { slug: 'los-angeles-ca/lab-draw-at-home', priority: 0.7 },
+
+    // HOUSTON METRO
+    { slug: 'houston-tx/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'houston-tx/in-home-blood-draw', priority: 0.7 },
+    { slug: 'houston-tx/blood-draw-at-home', priority: 0.7 },
+
+    // CHICAGO METRO
+    { slug: 'chicago-il/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'chicago-il/in-home-blood-draw', priority: 0.7 },
+    { slug: 'chicago-il/blood-draw-at-home', priority: 0.7 },
+
+    // SAN DIEGO METRO
+    { slug: 'san-diego-ca/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'san-diego-ca/in-home-blood-draw', priority: 0.7 },
+    { slug: 'san-diego-ca/blood-draw-at-home', priority: 0.7 },
+
+    // COLUMBUS METRO
+    { slug: 'columbus-oh/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'columbus-oh/in-home-blood-draw', priority: 0.7 },
+    { slug: 'columbus-oh/blood-draw-at-home', priority: 0.7 },
+
+    // CHARLOTTE METRO
+    { slug: 'charlotte-nc/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'charlotte-nc/in-home-blood-draw', priority: 0.7 },
+    { slug: 'charlotte-nc/blood-draw-at-home', priority: 0.7 },
   ]
 
   customPages.forEach((page) => {
