@@ -47,7 +47,6 @@ export async function GET(req: NextRequest) {
       ok: true,
       status,
       leadId: lead.id,
-      priceCents: lead.priceCents,
       urgency: lead.urgency,
       zip: lead.zip,
       city: lead.city,

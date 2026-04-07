@@ -1,6 +1,6 @@
 export const BASE_PRICING = {
-  STANDARD: 2000, // $20
-  STAT: 5000      // $50
+  STANDARD: 0, // Free during beta
+  STAT: 0      // Free during beta
 } as const
 
 export function priceFor(urgency: 'STANDARD' | 'STAT') {

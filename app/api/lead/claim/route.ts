@@ -102,7 +102,6 @@ export async function POST(req: NextRequest) {
         zip: lead.zip,
         urgency: lead.urgency,
         notes: lead.notes,
-        priceCents: lead.priceCents
       },
       chargeAmount: 0,
       isTrial: true,
