@@ -71,6 +71,8 @@ ${claimUrl}
 
 First provider to claim gets the patient. No fees — this referral is completely free.
 
+How payment works: You bill the patient directly at your own rate. We don't charge fees or take a commission.
+
 No action is required if you're unavailable.
 
 — MobilePhlebotomy.org
@@ -134,6 +136,9 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
 
       <p style="color: #777; font-size: 14px; margin-top: 30px;">
         First provider to claim gets the patient's full contact info. No action is required if you're unavailable.
+      </p>
+      <p style="color: #777; font-size: 13px;">
+        <strong>How payment works:</strong> You bill the patient directly at your own rate. We don't charge fees or take a commission.
       </p>
     </div>
     <div class="footer">
