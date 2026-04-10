@@ -122,6 +122,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="POWVkQbxx+tXzSQd0J2tOw" async></script>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4637268935804126"
+          crossOrigin="anonymous"
+        ></script>
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />
