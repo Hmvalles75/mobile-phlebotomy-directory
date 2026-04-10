@@ -4,11 +4,11 @@ import { topMetroAreas } from '@/data/top-metros'
 
 export const metadata: Metadata = {
   title: 'How Much Does Mobile Phlebotomy Cost? $60\u2013$150 Per Visit (2026)',
-  description: 'Mobile phlebotomy costs $60\u2013$150 per visit. Medicare patients often pay $0\u2013$25. See prices by state, what insurance covers, and how to book a provider near you.',
+  description: 'Mobile phlebotomy costs $75\u2013$150 per visit. See prices by state, 5 ways to pay less, and get a free quote today. Most Medicare & Medicaid patients pay $0\u2013$25.',
   keywords: 'mobile phlebotomy cost, at home blood draw cost, mobile blood draw price, home phlebotomy pricing, blood draw at home cost, mobile lab cost, traveling phlebotomist cost, at home blood work price, how much does mobile phlebotomy cost',
   openGraph: {
     title: 'How Much Does Mobile Phlebotomy Cost? $60\u2013$150 Per Visit (2026)',
-    description: 'Mobile phlebotomy costs $60\u2013$150 per visit. Medicare patients often pay $0\u2013$25. See prices by state, what insurance covers, and how to book a provider near you.',
+    description: 'Mobile phlebotomy costs $75\u2013$150 per visit. See prices by state, 5 ways to pay less, and get a free quote today. Most Medicare & Medicaid patients pay $0\u2013$25.',
     type: 'article',
   }
 }
@@ -180,7 +180,7 @@ export default function MobilePhlebotomyCostPage() {
             </h1>
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-4">
               <p className="text-lg text-gray-900 leading-relaxed mb-3">
-                <strong>Mobile phlebotomy typically costs $60–$150 per visit</strong> for the phlebotomist&apos;s service fee. Lab testing is billed separately by your lab.
+                <strong>Mobile phlebotomy typically costs $75–$150 per visit</strong> for the phlebotomist&apos;s service fee. Lab testing is billed separately by your lab.
               </p>
               <p className="text-lg text-gray-900 leading-relaxed">
                 Medicare and Medicaid patients often pay <strong>$0–$25</strong> when a doctor orders the draw and documents medical necessity.
