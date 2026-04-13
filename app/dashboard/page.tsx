@@ -95,6 +95,7 @@ function DashboardContent() {
     website: '',
     description: '',
     zipCodes: '',
+    languages: '',
   })
   const [allServices, setAllServices] = useState<{id: string, name: string}[]>([])
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
@@ -154,6 +155,7 @@ function DashboardContent() {
             website: result.profile.website || '',
             description: result.profile.description || '',
             zipCodes: result.profile.zipCodes || '',
+            languages: result.profile.languages || '',
           })
           setAllServices(result.allServices || [])
           setSelectedServiceIds(result.services?.map((s: any) => s.id) || [])
@@ -605,6 +607,19 @@ function DashboardContent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">Comma-separated ZIP codes you serve</p>
+              </div>
+
+              {/* Languages */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Languages Spoken</label>
+                <input
+                  type="text"
+                  value={profileData.languages}
+                  onChange={(e) => setProfileData({ ...profileData, languages: e.target.value })}
+                  placeholder="e.g. English, Spanish, Creole"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Comma-separated. Languages other than English will show as a badge on your profile.</p>
               </div>
 
               {/* Services Offered */}

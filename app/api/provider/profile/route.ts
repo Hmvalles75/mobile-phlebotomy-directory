@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
         description: true,
         zipCodes: true,
         serviceZipCodes: true,
+        languages: true,
         services: {
           select: {
             service: {
@@ -57,6 +58,7 @@ export async function GET(req: NextRequest) {
         website: provider.website || '',
         description: provider.description || '',
         zipCodes: provider.zipCodes || provider.serviceZipCodes || '',
+        languages: provider.languages || '',
       },
       services: provider.services.map(s => s.service),
       allServices
@@ -84,7 +86,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds } = body
+    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages } = body
 
     // Validate required fields
     if (!businessName || businessName.trim().length === 0) {
@@ -127,6 +129,7 @@ export async function POST(req: NextRequest) {
         website: website?.trim() || null,
         description: description?.trim() || null,
         zipCodes: zipCodes?.trim() || null,
+        languages: languages?.trim() || null,
       }
     })
 

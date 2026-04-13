@@ -66,6 +66,7 @@ model Provider {
   onboardingInvitedAt   DateTime?
   onboardingCompletedAt DateTime?
   termsAcceptedAt       DateTime?
+  languages             String?                // Comma-separated: "English,Spanish"
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]

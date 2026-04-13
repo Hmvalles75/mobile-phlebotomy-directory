@@ -229,6 +229,12 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                       {registeredBadge.icon} {registeredBadge.text}
                     </span>
                   )}
+                  {/* Language Badges */}
+                  {(provider as any).languages && (provider as any).languages.split(',').filter((l: string) => l.trim() !== 'English').map((lang: string) => (
+                    <span key={lang.trim()} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                      🗣️ {lang.trim()}
+                    </span>
+                  ))}
                 </div>
 
                 {/* Unverified Warning Message */}

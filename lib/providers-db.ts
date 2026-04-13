@@ -58,6 +58,8 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     listingTier: provider.listingTier,
     isFeatured: provider.isFeatured || false,
     isFeaturedCity: provider.isFeaturedCity || false,
+    // Languages
+    languages: provider.languages || undefined,
     // Images
     logo: provider.logo,
     profileImage: provider.profileImage,
