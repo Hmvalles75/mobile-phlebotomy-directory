@@ -3,6 +3,7 @@ import { verifyAdminSession, verifyAdminSessionFromCookies } from '@/lib/admin-a
 import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/lib/pending-submissions'
 import { prisma } from '@/lib/prisma'
 import { emailProviderApprovedWithLeadChoice } from '@/lib/providerEmails'
+import { normalizeCityName, citySlug } from '@/lib/city-normalize'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -134,10 +135,9 @@ async function addProviderToDatabase(submission: any) {
   // Determine if provider opted into leads
   const wantsLeads = submission.leadOptIn === 'yes'
 
-  // Generate city slug
-  const primaryCitySlug = submission.city
-    ? submission.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    : null
+  // Normalize city and generate slug
+  const normalizedCity = normalizeCityName(submission.city)
+  const primaryCitySlug = citySlug(normalizedCity)
 
   // Derive state name and slug from abbreviation
   const STATE_NAMES: Record<string, string> = {
@@ -175,7 +175,7 @@ async function addProviderToDatabase(submission: any) {
       notificationEmail: submission.leadEmail || submission.email || null,
       description: submission.description || null,
       zipCodes: submission.zipCode || null,
-      primaryCity: submission.city || null,
+      primaryCity: normalizedCity,
       primaryCitySlug,
       primaryState: stateAbbr,
       primaryStateName: stateName,
