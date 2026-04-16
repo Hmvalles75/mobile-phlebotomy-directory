@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   MapPin, Phone, Mail, Clock, Shield, CheckCircle, Award, Globe,
-  Calendar, Heart, Star, ChevronRight, User, Droplet, Users, Home,
+  Calendar, Heart, Star, ChevronRight, User, Droplet, Home,
   Briefcase, Activity, Stethoscope, FileCheck
 } from 'lucide-react'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
@@ -14,16 +14,49 @@ interface PremiumProviderPageProps {
   provider: EnrichedProvider
 }
 
-// Map service names to icons for a more visual presentation
-function getServiceIcon(service: string) {
+// Map service names to icons and unique descriptions for visual presentation
+function getServiceDetails(service: string): { icon: typeof Droplet, description: string } {
   const s = service.toLowerCase()
-  if (s.includes('blood') || s.includes('draw') || s.includes('phlebotomy')) return Droplet
-  if (s.includes('corporate') || s.includes('wellness') || s.includes('screening')) return Briefcase
-  if (s.includes('pediatric') || s.includes('geriatric') || s.includes('elderly')) return Heart
-  if (s.includes('iv') || s.includes('therapy') || s.includes('hydration')) return Activity
-  if (s.includes('home') || s.includes('mobile')) return Home
-  if (s.includes('specimen') || s.includes('collection') || s.includes('lab')) return Stethoscope
-  return FileCheck
+  if (s.includes('blood') || s.includes('draw') || s.includes('phlebotomy')) {
+    return { icon: Droplet, description: 'Routine and specialty venipuncture for doctor-ordered lab work, done at your home or office.' }
+  }
+  if (s.includes('corporate') || s.includes('wellness')) {
+    return { icon: Briefcase, description: 'On-site biometric screenings and wellness panels for employers, HR programs, and company benefits days.' }
+  }
+  if (s.includes('screening')) {
+    return { icon: Briefcase, description: 'Pre-employment, insurance, and health screenings performed at your preferred location.' }
+  }
+  if (s.includes('pediatric')) {
+    return { icon: Heart, description: 'Gentle, child-focused draws performed by phlebotomists trained in pediatric technique.' }
+  }
+  if (s.includes('geriatric') || s.includes('elderly')) {
+    return { icon: Heart, description: 'In-home care for seniors and homebound patients who can\'t easily travel to a lab.' }
+  }
+  if (s.includes('iv') || s.includes('therapy') || s.includes('hydration')) {
+    return { icon: Activity, description: 'Mobile IV infusions and hydration therapy administered by licensed professionals at your location.' }
+  }
+  if (s.includes('diagnostic') || s.includes('monitoring')) {
+    return { icon: Activity, description: 'Ongoing diagnostic testing and health monitoring delivered to your door on a regular schedule.' }
+  }
+  if (s.includes('specimen') || s.includes('collection')) {
+    return { icon: Stethoscope, description: 'Urine, saliva, and other specimen collection following lab chain-of-custody protocols.' }
+  }
+  if (s.includes('lab')) {
+    return { icon: Stethoscope, description: 'Full-service mobile lab collection — we handle pickup and delivery to Quest, Labcorp, or your preferred lab.' }
+  }
+  if (s.includes('home') || s.includes('mobile')) {
+    return { icon: Home, description: 'We come to you — homes, offices, assisted living, or anywhere you need professional draw services.' }
+  }
+  return { icon: FileCheck, description: 'Professional service delivered with care, on your schedule, at the location you choose.' }
+}
+
+// Format phone to (XXX) XXX-XXXX
+function formatPhone(phone: string | undefined | null): string | null {
+  if (!phone) return null
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+  if (digits.length === 11 && digits[0] === '1') return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  return phone // fallback to original if unexpected format
 }
 
 export default function PremiumProviderPage({ provider }: PremiumProviderPageProps) {
@@ -45,27 +78,9 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
     { icon: FileCheck, title: 'HIPAA Compliant', description: 'Your medical information is protected under strict HIPAA privacy standards' },
   ]
 
-  // Placeholder testimonials — real provider testimonials can replace these
-  const testimonials = [
-    {
-      quote: `${provider.name} made my home blood draw so easy. The technician was professional, gentle, and on time. I'll never go back to a lab waiting room again.`,
-      author: 'Sarah M.',
-      location: provider.city || 'Patient',
-      rating: 5,
-    },
-    {
-      quote: 'Exceptional service for my elderly mother. The phlebotomist was patient, kind, and made her feel comfortable. Highly recommend for anyone with mobility issues.',
-      author: 'James R.',
-      location: provider.city || 'Family caregiver',
-      rating: 5,
-    },
-    {
-      quote: `Needed a quick draw for my doctor's orders. ${provider.name} came the next morning, was in and out in 15 minutes. Professional and HIPAA-compliant — exactly what I needed.`,
-      author: 'Priya K.',
-      location: provider.city || 'Patient',
-      rating: 5,
-    },
-  ]
+  // Real testimonials will appear once the provider collects them
+  // (Never ship fabricated reviews — section shows placeholder state until provider supplies real ones)
+  const testimonials: Array<{ quote: string, author: string, location: string, rating: number }> = []
 
   // Parse ZIP codes for coverage display
   const zipList = provider.zipCodes
@@ -73,6 +88,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
     : []
 
   const bookingPhone = provider.phone
+  const bookingPhoneFormatted = formatPhone(provider.phone)
   const bookingEmail = provider.email
 
   return (
@@ -127,7 +143,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
                   className="bg-teal-800/60 hover:bg-teal-800/80 backdrop-blur-sm border border-white/30 text-white font-semibold text-lg px-10 py-4 rounded-lg transition-all duration-200 inline-flex items-center gap-2"
                 >
                   <Phone size={20} />
-                  Call {bookingPhone}
+                  Call {bookingPhoneFormatted}
                 </a>
               )}
             </div>
@@ -221,7 +237,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
               'Home Health Services',
               'Clinical Trials Support',
             ]).map((service) => {
-              const Icon = getServiceIcon(service)
+              const { icon: Icon, description } = getServiceDetails(service)
               return (
                 <div
                   key={service}
@@ -231,9 +247,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
                     <Icon className="text-white" size={28} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{service}</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Professional, timely, and compassionate service delivered at your location.
-                  </p>
+                  <p className="text-gray-600 leading-relaxed">{description}</p>
                 </div>
               )
             })}
@@ -274,7 +288,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
                   onClick={() => setLeadFormOpen(true)}
                   className="inline-flex items-center gap-2 text-teal-700 font-semibold hover:text-teal-800 transition-colors"
                 >
-                  Check your area
+                  Check if we serve your ZIP code
                   <ChevronRight size={18} />
                 </button>
               </div>
@@ -339,36 +353,57 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
       {/* ═══════════════════════════════════════════════════════════
           6. TESTIMONIALS SECTION
           ═══════════════════════════════════════════════════════════ */}
-      <section className="py-20 md:py-24 bg-white">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="text-center mb-16">
-            <div className="text-sm font-bold text-teal-600 tracking-wider uppercase mb-3">Patient Reviews</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What our patients are saying
-            </h2>
-          </div>
+      {testimonials.length > 0 ? (
+        <section className="py-20 md:py-24 bg-white">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="text-center mb-16">
+              <div className="text-sm font-bold text-teal-600 tracking-wider uppercase mb-3">Patient Reviews</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                What our patients are saying
+              </h2>
+            </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={i}
-                className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-sm border border-gray-100 relative"
-              >
-                <div className="flex gap-1 mb-5">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <Star key={j} className="text-amber-400 fill-amber-400" size={20} />
-                  ))}
+            <div className="grid md:grid-cols-3 gap-8">
+              {testimonials.map((t, i) => (
+                <div
+                  key={i}
+                  className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-sm border border-gray-100 relative"
+                >
+                  <div className="flex gap-1 mb-5">
+                    {[...Array(t.rating)].map((_, j) => (
+                      <Star key={j} className="text-amber-400 fill-amber-400" size={20} />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 leading-relaxed mb-6 italic">&ldquo;{t.quote}&rdquo;</p>
+                  <div className="border-t border-gray-100 pt-4">
+                    <div className="font-bold text-gray-900">{t.author}</div>
+                    <div className="text-sm text-gray-500">{t.location}</div>
+                  </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed mb-6 italic">&ldquo;{t.quote}&rdquo;</p>
-                <div className="border-t border-gray-100 pt-4">
-                  <div className="font-bold text-gray-900">{t.author}</div>
-                  <div className="text-sm text-gray-500">{t.location}</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="py-20 md:py-24 bg-white">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="text-center">
+              <div className="text-sm font-bold text-teal-600 tracking-wider uppercase mb-3">Patient Reviews</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Reviews coming soon
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                We&apos;re collecting patient feedback. If you&apos;ve worked with {provider.name}, we&apos;d love to hear about your experience.
+              </p>
+              <div className="flex justify-center gap-1 opacity-30">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="text-amber-400 fill-amber-400" size={28} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════
           7. CONTACT / BOOKING SECTION
@@ -397,7 +432,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
                       </div>
                       <div>
                         <div className="text-sm text-gray-500">Call us</div>
-                        <div className="font-bold text-gray-900 text-lg">{bookingPhone}</div>
+                        <div className="font-bold text-gray-900 text-lg">{bookingPhoneFormatted}</div>
                       </div>
                     </a>
                   )}
