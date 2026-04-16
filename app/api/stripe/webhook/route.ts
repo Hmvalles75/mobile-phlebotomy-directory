@@ -139,15 +139,57 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription
         const customerId = subscription.customer as string
 
-        // Find provider by Stripe customer ID
-        const provider = await prisma.provider.findFirst({
+        // Find provider by Stripe customer ID first
+        let provider = await prisma.provider.findFirst({
           where: { stripeCustomerId: customerId }
         })
 
+        // Fallback: match by customer email if no provider linked yet
+        // This catches payments via direct Stripe Payment Links where metadata is absent
+        if (!provider && customerId) {
+          const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer
+          if (customer && !customer.deleted && customer.email) {
+            provider = await prisma.provider.findFirst({
+              where: {
+                OR: [
+                  { email: { equals: customer.email, mode: 'insensitive' } },
+                  { notificationEmail: { equals: customer.email, mode: 'insensitive' } },
+                  { claimEmail: { equals: customer.email, mode: 'insensitive' } },
+                ]
+              }
+            })
+            if (provider) {
+              // Link the Stripe customer to the provider for future events
+              await prisma.provider.update({
+                where: { id: provider.id },
+                data: { stripeCustomerId: customerId }
+              })
+              console.log(`Linked Stripe customer ${customerId} to provider ${provider.id} via email fallback`)
+            } else {
+              await notifyAdmin(
+                'ORPHANED STRIPE SUBSCRIPTION',
+                `A Stripe subscription was created but no matching provider was found.\n\n` +
+                `Stripe Customer: ${customerId}\n` +
+                `Customer Email: ${customer.email}\n` +
+                `Subscription ID: ${subscription.id}\n\n` +
+                `Manually link this customer in the Stripe dashboard and the database.`
+              )
+            }
+          }
+        }
+
         if (provider && subscription.status === 'active') {
-          // Extract tier from metadata if available
+          // Try to detect tier from subscription price ID if metadata is missing
           const metadata = subscription.metadata || {}
-          const tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | undefined
+          let tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | undefined
+
+          if (!tier && subscription.items?.data?.[0]?.price?.id) {
+            const priceId = subscription.items.data[0].price.id
+            if (priceId === process.env.STRIPE_PRICE_HIGH_DENSITY) tier = 'HIGH_DENSITY'
+            else if (priceId === process.env.STRIPE_PRICE_STANDARD_PREMIUM) tier = 'STANDARD_PREMIUM'
+            else if (priceId === process.env.STRIPE_PRICE_FOUNDING_PARTNER) tier = 'FOUNDING_PARTNER'
+          }
+
           const effectiveTier = tier || provider.featuredTier
 
           await prisma.provider.update({
@@ -159,7 +201,23 @@ export async function POST(req: NextRequest) {
               featured: true
             }
           })
-          console.log(`Subscription active for provider ${provider.id}`)
+          console.log(`Subscription active for provider ${provider.id} at tier ${effectiveTier}`)
+
+          // If this is a NEW linkage (first time we've confirmed the subscription),
+          // notify admin so you know who upgraded
+          if (event.type === 'customer.subscription.created') {
+            await notifyAdmin(
+              `New Premium Subscription: ${provider.name}`,
+              `A provider just subscribed to a premium tier!\n\n` +
+              `Provider: ${provider.name}\n` +
+              `Email: ${provider.email || provider.claimEmail || 'unknown'}\n` +
+              `Tier: ${TIER_LABELS[effectiveTier || ''] || effectiveTier || 'unknown'}\n` +
+              `Stripe Customer: ${customerId}\n` +
+              `Subscription: ${subscription.id}\n\n` +
+              `Their listing has been automatically upgraded.\n` +
+              `Profile: https://mobilephlebotomy.org/provider/${provider.slug}`
+            )
+          }
         }
         break
       }
