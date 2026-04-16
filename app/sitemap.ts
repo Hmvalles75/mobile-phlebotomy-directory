@@ -223,6 +223,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'charlotte-nc/mobile-phlebotomy', priority: 0.85 },
     { slug: 'charlotte-nc/in-home-blood-draw', priority: 0.7 },
     { slug: 'charlotte-nc/blood-draw-at-home', priority: 0.7 },
+
+    // BOSTON METRO (MA)
+    { slug: 'boston-ma/mobile-phlebotomy', priority: 0.9 },
+    { slug: 'boston-ma/in-home-blood-draw', priority: 0.75 },
+    { slug: 'boston-ma/blood-draw-at-home', priority: 0.75 },
+
+    // WORCESTER METRO (MA)
+    { slug: 'worcester-ma/mobile-phlebotomy', priority: 0.85 },
+    { slug: 'worcester-ma/in-home-blood-draw', priority: 0.7 },
+    { slug: 'worcester-ma/blood-draw-at-home', priority: 0.7 },
+
+    // LOWELL / MERRIMACK VALLEY (MA)
+    { slug: 'lowell-ma/mobile-phlebotomy', priority: 0.8 },
+    { slug: 'lowell-ma/in-home-blood-draw', priority: 0.7 },
+    { slug: 'lowell-ma/blood-draw-at-home', priority: 0.7 },
+
+    // MIAMI METRO (FL)
+    { slug: 'miami-fl/mobile-phlebotomy', priority: 0.9 },
+    { slug: 'miami-fl/in-home-blood-draw', priority: 0.75 },
+    { slug: 'miami-fl/blood-draw-at-home', priority: 0.75 },
+
+    // DALLAS METRO (TX)
+    { slug: 'dallas-tx/mobile-phlebotomy', priority: 0.9 },
+    { slug: 'dallas-tx/in-home-blood-draw', priority: 0.75 },
+    { slug: 'dallas-tx/blood-draw-at-home', priority: 0.75 },
   ]
 
   customPages.forEach((page) => {

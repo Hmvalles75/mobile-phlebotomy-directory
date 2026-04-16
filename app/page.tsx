@@ -1086,7 +1086,7 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Florida</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/us/florida/miami" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/miami-fl/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
                     Mobile Phlebotomy in Miami
                   </Link>
                 </li>
@@ -1117,7 +1117,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/us/texas/dallas" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/dallas-tx/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
                     Dallas-Fort Worth Blood Draw
                   </Link>
                 </li>
@@ -1233,6 +1233,32 @@ export default function HomePage() {
                 <li>
                   <Link href="/us/north-carolina" className="text-gray-600 hover:text-primary-600 font-medium">
                     View All North Carolina Providers →
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Massachusetts</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/boston-ma/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Boston Mobile Phlebotomy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/worcester-ma/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Worcester Blood Draw Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/lowell-ma/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                    Lowell Mobile Lab Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/us/massachusetts" className="text-gray-600 hover:text-primary-600 font-medium">
+                    View All Massachusetts Providers →
                   </Link>
                 </li>
               </ul>
