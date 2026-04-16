@@ -67,6 +67,7 @@ model Provider {
   onboardingCompletedAt DateTime?
   termsAcceptedAt       DateTime?
   languages             String?                // Comma-separated: "English,Spanish"
+  premiumPage           Boolean                @default(false)  // Renders premium $199 template
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]

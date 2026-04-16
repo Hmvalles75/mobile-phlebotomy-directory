@@ -66,6 +66,7 @@ export interface EnrichedProvider {
   listingTier?: string
   isFeatured?: boolean
   isFeaturedCity?: boolean
+  premiumPage?: boolean
   createdAt: string
   updatedAt: string
 }

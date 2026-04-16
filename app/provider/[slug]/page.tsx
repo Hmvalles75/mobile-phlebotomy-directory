@@ -14,6 +14,7 @@ import { ReportIssueButton } from '@/components/ui/ReportIssueButton'
 import Link from 'next/link'
 import { ProviderWebsiteLink } from '@/components/ui/ProviderWebsiteLink'
 import { PhoneReveal } from '@/components/PhoneReveal'
+import PremiumProviderPage from '@/components/provider/PremiumProviderPage'
 
 interface PageProps {
   params: {
@@ -74,6 +75,11 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
   if (!provider) {
     notFound()
+  }
+
+  // Premium provider page template — paid $199 upgrade
+  if (provider.premiumPage) {
+    return <PremiumProviderPage provider={provider} />
   }
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
