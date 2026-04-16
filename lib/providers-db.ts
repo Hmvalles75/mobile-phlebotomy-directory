@@ -60,7 +60,8 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     isFeaturedCity: provider.isFeaturedCity || false,
     // Languages
     languages: provider.languages || undefined,
-    // Premium page flag
+    // Featured tier and premium page flag
+    featuredTier: provider.featuredTier || null,
     premiumPage: provider.premiumPage || false,
     // Images
     logo: provider.logo,

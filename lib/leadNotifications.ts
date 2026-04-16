@@ -20,6 +20,7 @@ interface Provider {
   notificationEmail: string | null
   claimEmail: string | null
   email: string | null
+  featuredTier: string | null
 }
 
 /**
@@ -30,7 +31,8 @@ interface Provider {
  */
 async function sendProviderLeadNotificationEmail(
   provider: Provider,
-  lead: Lead
+  lead: Lead,
+  delaySeconds: number = 0
 ): Promise<{ success: boolean; error?: string }> {
   // Determine recipient email (priority: notificationEmail > claimEmail > email)
   const recipientEmail = provider.notificationEmail || provider.claimEmail || provider.email
@@ -154,15 +156,25 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
 `
 
   try {
-    await sg.send({
+    const sendPayload: any = {
       to: recipientEmail,
       from: process.env.LEAD_EMAIL_FROM,
       subject: `New request in ${lead.city}, ${lead.state} - Reply ASAP`,
       text: textBody,
       html: htmlBody
-    })
+    }
 
-    console.log(`[LeadNotifications] ✅ Email sent to provider ${provider.id} (${recipientEmail})`)
+    // SendGrid's sendAt holds the email on their side and delivers at the specified timestamp.
+    // Used for tier-priority routing: HIGH_DENSITY providers get immediate delivery (delaySeconds=0),
+    // other featured providers get a 60-second delay so HIGH_DENSITY has a head start to claim.
+    if (delaySeconds > 0) {
+      sendPayload.sendAt = Math.floor(Date.now() / 1000) + delaySeconds
+    }
+
+    await sg.send(sendPayload)
+
+    const delayNote = delaySeconds > 0 ? ` (scheduled +${delaySeconds}s)` : ''
+    console.log(`[LeadNotifications] ✅ Email sent to provider ${provider.id} (${recipientEmail})${delayNote}`)
     return { success: true }
   } catch (error: any) {
     console.error(`[LeadNotifications] ❌ Failed to send email to provider ${provider.id}:`, error.response?.body || error.message)
@@ -197,6 +209,7 @@ async function findFeaturedProvidersForNotification(
       notificationEmail: true,
       claimEmail: true,
       email: true,
+      featuredTier: true,
       zipCodes: true,
       serviceRadiusMiles: true,
       primaryState: true,
@@ -267,7 +280,8 @@ async function findFeaturedProvidersForNotification(
     name: p.name,
     notificationEmail: p.notificationEmail,
     claimEmail: p.claimEmail,
-    email: p.email
+    email: p.email,
+    featuredTier: p.featuredTier
   }))
 }
 
@@ -310,11 +324,20 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
 
     console.log(`[LeadNotifications] Found ${providers.length} featured provider(s) to notify`)
 
-    // Send emails and track in database
-    let successCount = 0
+    // Split providers into priority waves by tier.
+    // HIGH_DENSITY gets the lead first — 60-second head start.
+    // Everyone else gets notified after the head-start window.
+    const priorityProviders = providers.filter(p => p.featuredTier === 'HIGH_DENSITY')
+    const standardProviders = providers.filter(p => p.featuredTier !== 'HIGH_DENSITY')
 
-    for (const provider of providers) {
-      // Create notification record (QUEUED status)
+    if (priorityProviders.length > 0) {
+      console.log(`[LeadNotifications] Priority wave: ${priorityProviders.length} HIGH_DENSITY provider(s) notified immediately`)
+    }
+    if (standardProviders.length > 0 && priorityProviders.length > 0) {
+      console.log(`[LeadNotifications] Standard wave: ${standardProviders.length} provider(s) — 60-second delay`)
+    }
+
+    const sendToProvider = async (provider: Provider, delaySeconds: number) => {
       const notification = await prisma.leadNotification.create({
         data: {
           leadId: lead.id,
@@ -324,29 +347,37 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
         }
       })
 
-      // Attempt to send email
-      const result = await sendProviderLeadNotificationEmail(provider, lead)
+      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds)
 
       if (result.success) {
-        // Update notification to SENT
         await prisma.leadNotification.update({
           where: { id: notification.id },
-          data: {
-            status: 'SENT',
-            sentAt: new Date()
-          }
+          data: { status: 'SENT', sentAt: new Date() }
         })
-        successCount++
+        return true
       } else {
-        // Update notification to FAILED
         await prisma.leadNotification.update({
           where: { id: notification.id },
-          data: {
-            status: 'FAILED',
-            errorMessage: result.error || 'Unknown error'
-          }
+          data: { status: 'FAILED', errorMessage: result.error || 'Unknown error' }
         })
+        return false
       }
+    }
+
+    // Wave 2 delay is only applied if there's actually a priority wave to give a head start to.
+    const standardDelay = priorityProviders.length > 0 ? 60 : 0
+    let successCount = 0
+
+    // Wave 1: HIGH_DENSITY providers — delivered immediately by SendGrid
+    for (const provider of priorityProviders) {
+      const ok = await sendToProvider(provider, 0)
+      if (ok) successCount++
+    }
+
+    // Wave 2: Other featured providers — SendGrid holds for 60 seconds, then delivers
+    for (const provider of standardProviders) {
+      const ok = await sendToProvider(provider, standardDelay)
+      if (ok) successCount++
     }
 
     console.log(`[LeadNotifications] ✅ Sent ${successCount}/${providers.length} email notifications`)

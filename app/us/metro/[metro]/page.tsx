@@ -16,6 +16,7 @@ import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { ga4 } from '@/lib/ga4'
 import { PhoneReveal } from '@/components/PhoneReveal'
+import { sortByTier, getTierBadge } from '@/lib/featured-tier'
 
 interface MetroPageProps {
   params: {
@@ -152,7 +153,7 @@ export default function MetroPage({ params }: MetroPageProps) {
   const displayedProviders = showAllProviders ? nonFeaturedProviders : nonFeaturedProviders.slice(0, 10)
 
   // Sort all sections alphabetically
-  categorizedProviders.featured.sort((a, b) => a.name.localeCompare(b.name))
+  categorizedProviders.featured = sortByTier(categorizedProviders.featured)
   categorizedProviders.premium.sort((a, b) => a.name.localeCompare(b.name))
   categorizedProviders.basic.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -405,9 +406,11 @@ export default function MetroPage({ params }: MetroPageProps) {
               <div className="divide-y divide-gray-200">
                 {categorizedProviders.featured.map((provider) => {
                   const isVerified = isProviderRegistered(provider.id)
+                  const tierBadge = getTierBadge(provider.featuredTier as any)
+                  const isHighDensity = provider.featuredTier === 'HIGH_DENSITY'
 
                   return (
-                  <div key={provider.id} className={`p-5 bg-gradient-to-r from-amber-50/40 to-transparent hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                  <div key={provider.id} className={`p-5 bg-gradient-to-r ${isHighDensity ? 'from-amber-100/60 via-yellow-50/40 to-transparent' : 'from-amber-50/40 to-transparent'} hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
                     {/* Provider Header */}
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex-1">
@@ -427,9 +430,9 @@ export default function MetroPage({ params }: MetroPageProps) {
                           <h3 className="text-3xl font-bold text-gray-900">
                             {provider.name}
                           </h3>
-                          {/* Featured Badge */}
-                          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md">
-                            ⭐ Featured Provider
+                          {/* Tier-Specific Featured Badge */}
+                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold ${tierBadge.gradient} ${tierBadge.textColor} ${tierBadge.shadow}`}>
+                            {tierBadge.icon} {tierBadge.label}
                           </span>
                         </div>
 
