@@ -43,12 +43,18 @@ export default function ClaimLeadPage() {
   } | null>(null)
 
   useEffect(() => {
-    // If provider ID is in the URL (one-click claim from email), auto-claim
+    // If provider ID is in the URL (one-click claim from email), auto-claim OR
+    // if the lead is already claimed BY THEM, surface the patient details
     if (providerFromUrl) {
       setProviderId(providerFromUrl)
-      autoClaim(providerFromUrl)
+      checkLeadStatus(providerFromUrl).then(alreadyOwnedByViewer => {
+        if (!alreadyOwnedByViewer) {
+          autoClaim(providerFromUrl)
+        }
+      })
     } else {
-      checkLeadStatus()
+      // Dashboard flow — use session cookie; API will detect ownership automatically
+      checkLeadStatus(null)
       fetchProviderSession()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,28 +106,46 @@ export default function ClaimLeadPage() {
     }
   }
 
-  async function checkLeadStatus() {
+  async function checkLeadStatus(providerIdOverride?: string | null): Promise<boolean> {
+    // Returns true if the lead is already claimed by the current viewer (so caller can skip auto-claim)
     try {
-      const response = await fetch(`/api/lead/status?leadId=${leadId}`)
+      // Pass providerId from URL if available so the API can detect claim ownership
+      // even when there's no dashboard session cookie (email link flow)
+      const qs = new URLSearchParams({ leadId })
+      if (providerIdOverride) qs.set('providerId', providerIdOverride)
+      const response = await fetch(`/api/lead/status?${qs.toString()}`)
       const data = await response.json()
 
-      if (data.ok) {
-        setLeadStatus(data.status)
-        // Store preview info
-        if (data.zip && data.city && data.state) {
-          setLeadPreview({
-            zip: data.zip,
-            city: data.city,
-            state: data.state,
-            urgency: data.urgency,
-            priceCents: data.priceCents
-          })
-        }
-      } else {
+      if (!data.ok) {
         setError(data.error || 'Failed to check lead status')
+        return false
       }
+
+      setLeadStatus(data.status)
+
+      // If the viewer owns the claim, surface the patient details immediately.
+      // This fixes the case where a provider claims successfully, then revisits
+      // the URL and previously got an "already claimed by someone else" page.
+      if (data.isClaimedByYou && data.lead) {
+        setLeadData(data.lead)
+        setClaimed(true)
+        return true
+      }
+
+      // Otherwise store preview info (no PHI) for open leads
+      if (data.zip && data.city && data.state) {
+        setLeadPreview({
+          zip: data.zip,
+          city: data.city,
+          state: data.state,
+          urgency: data.urgency,
+          priceCents: data.priceCents,
+        })
+      }
+      return false
     } catch (err: any) {
       setError(err.message || 'Failed to check lead status')
+      return false
     } finally {
       setLoading(false)
     }
