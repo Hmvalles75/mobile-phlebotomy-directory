@@ -56,6 +56,14 @@ export interface PendingProvider {
   // Metadata
   ipAddress?: string
   userAgent?: string
+
+  // Attribution tracking
+  attributionSource?: string | null
+  utmSource?: string | null
+  utmMedium?: string | null
+  utmCampaign?: string | null
+  referrer?: string | null
+  landingPage?: string | null
 }
 
 const SUBMISSIONS_FILE = path.join(process.cwd(), 'data', 'pending-submissions.json')
@@ -146,7 +154,14 @@ export async function getPendingSubmissions(): Promise<PendingProvider[]> {
         leadContactMethod: sub.leadContactMethod || undefined,
         leadEmail: sub.leadEmail || undefined,
         leadPhone: sub.leadPhone || undefined,
-        availability: sub.availability || undefined
+        availability: sub.availability || undefined,
+        // Attribution tracking
+        attributionSource: sub.attributionSource || undefined,
+        utmSource: sub.utmSource || undefined,
+        utmMedium: sub.utmMedium || undefined,
+        utmCampaign: sub.utmCampaign || undefined,
+        referrer: sub.referrer || undefined,
+        landingPage: sub.landingPage || undefined,
       }))
     } catch (error) {
       console.warn('Database error, falling back to file storage:', error)
@@ -193,7 +208,14 @@ export async function addPendingSubmission(
           leadPhone: submission.leadPhone,
           availability: submission.availability,
           ipAddress: submission.ipAddress,
-          userAgent: submission.userAgent
+          userAgent: submission.userAgent,
+          // Attribution fields — nullable, fallback gracefully if not provided
+          attributionSource: submission.attributionSource || null,
+          utmSource: submission.utmSource || null,
+          utmMedium: submission.utmMedium || null,
+          utmCampaign: submission.utmCampaign || null,
+          referrer: submission.referrer || null,
+          landingPage: submission.landingPage || null,
         }
       })
 
@@ -221,7 +243,13 @@ export async function addPendingSubmission(
         weekendAvailable: newSubmission.weekendAvailable,
         logo: newSubmission.logo || undefined,
         ipAddress: newSubmission.ipAddress || undefined,
-        userAgent: newSubmission.userAgent || undefined
+        userAgent: newSubmission.userAgent || undefined,
+        attributionSource: newSubmission.attributionSource || undefined,
+        utmSource: newSubmission.utmSource || undefined,
+        utmMedium: newSubmission.utmMedium || undefined,
+        utmCampaign: newSubmission.utmCampaign || undefined,
+        referrer: newSubmission.referrer || undefined,
+        landingPage: newSubmission.landingPage || undefined,
       }
     } catch (error) {
       console.warn('Database error, falling back to file storage:', error)

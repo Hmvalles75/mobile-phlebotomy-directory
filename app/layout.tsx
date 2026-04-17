@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
+import { AttributionTracker } from '@/components/analytics/AttributionTracker'
 import { SITE_URL, absoluteUrl } from '@/lib/seo'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -130,6 +131,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />
+        <AttributionTracker />
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">

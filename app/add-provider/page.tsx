@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { captureAttribution } from '@/lib/attribution'
 
 export default function AddProvider() {
   const [formData, setFormData] = useState({
@@ -51,13 +52,16 @@ export default function AddProvider() {
     setIsSubmitting(true)
 
     try {
+      // Capture attribution data (UTM params, referrer, landing page)
+      const attribution = captureAttribution()
+
       // Submit to API endpoint
       const response = await fetch('/api/submit-provider', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, attribution }),
       })
 
       const data = await response.json()

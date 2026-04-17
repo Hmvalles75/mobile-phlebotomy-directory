@@ -44,6 +44,14 @@ CREDENTIALS:
 ${submission.certifications ? `- Certifications: ${submission.certifications}` : ''}
 ${submission.specialties ? `- Specialties: ${submission.specialties}` : ''}
 
+ATTRIBUTION:
+- Source: ${submission.attributionSource || 'direct'}
+${submission.utmSource ? `- UTM Source: ${submission.utmSource}` : ''}
+${submission.utmMedium ? `- UTM Medium: ${submission.utmMedium}` : ''}
+${submission.utmCampaign ? `- UTM Campaign: ${submission.utmCampaign}` : ''}
+${submission.referrer ? `- Referrer: ${submission.referrer}` : ''}
+${submission.landingPage ? `- Landing Page: ${submission.landingPage}` : ''}
+
 ---
 Submitted: ${new Date(submission.submittedAt).toLocaleString()}
 IP Address: ${submission.ipAddress}
@@ -151,7 +159,14 @@ export async function POST(request: NextRequest) {
       leadPhone: formData.leadPhone,
       availability: formData.availability ? formData.availability.join(',') : null,
       ipAddress,
-      userAgent
+      userAgent,
+      // Attribution data (optional — defaults to null if not provided)
+      attributionSource: formData.attribution?.attributionSource || null,
+      utmSource: formData.attribution?.utmSource || null,
+      utmMedium: formData.attribution?.utmMedium || null,
+      utmCampaign: formData.attribution?.utmCampaign || null,
+      referrer: formData.attribution?.referrer || null,
+      landingPage: formData.attribution?.landingPage || null,
     })
 
     console.log('Provider submission saved for review:', submission.id)

@@ -400,6 +400,13 @@ model PendingSubmission {
   leadEmail          String?
   leadPhone          String?
   availability       String?
+  // Attribution tracking
+  attributionSource  String?          // Normalized source: 'facebook', 'google', 'direct', etc.
+  utmSource          String?          // Raw utm_source param
+  utmMedium          String?          // Raw utm_medium param
+  utmCampaign        String?          // Raw utm_campaign param
+  referrer           String?          // document.referrer value
+  landingPage        String?          // First page they landed on
 
   @@map("pending_submissions")
 }

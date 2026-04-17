@@ -38,6 +38,13 @@ interface PendingProvider {
   leadEmail?: string
   leadPhone?: string
   availability?: string
+  // Attribution tracking
+  attributionSource?: string
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+  referrer?: string
+  landingPage?: string
 }
 
 interface BusinessClaim {
@@ -760,6 +767,19 @@ export default function AdminDashboard() {
                         {submission.leadContactMethod?.includes('email') && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
                             📧 Email
+                          </span>
+                        )}
+                        {/* Attribution source badge */}
+                        {submission.attributionSource && (
+                          <span
+                            className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-medium capitalize"
+                            title={[
+                              submission.utmCampaign && `Campaign: ${submission.utmCampaign}`,
+                              submission.referrer && `Referrer: ${submission.referrer}`,
+                              submission.landingPage && `Landing: ${submission.landingPage}`,
+                            ].filter(Boolean).join(' | ') || undefined}
+                          >
+                            📍 {submission.attributionSource}
                           </span>
                         )}
                       </div>
