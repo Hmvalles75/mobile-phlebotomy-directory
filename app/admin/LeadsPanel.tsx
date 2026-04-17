@@ -189,7 +189,7 @@ export function LeadsPanel() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start">
         {/* Leads List */}
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Blood Draw Requests</h2>
@@ -246,10 +246,22 @@ export function LeadsPanel() {
           </div>
         </div>
 
-        {/* Selected Lead Details */}
-        <div>
+        {/* Selected Lead Details
+            Desktop: sticky sidebar / Mobile: fullscreen modal overlay */}
+        <div className={
+          selectedLead
+            ? 'fixed inset-0 z-50 bg-black/50 flex items-end md:items-start justify-center md:static md:z-auto md:bg-transparent md:block'
+            : 'hidden md:block'
+        }>
           {selectedLead ? (
-            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
+            <div className="bg-white rounded-t-lg md:rounded-lg shadow-2xl md:shadow p-6 md:sticky md:top-4 w-full md:w-auto max-h-[90vh] md:max-h-[calc(100vh-2rem)] overflow-y-auto relative">
+              <button
+                onClick={() => setSelectedLead(null)}
+                className="md:hidden absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600"
+                aria-label="Close details"
+              >
+                ✕
+              </button>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Lead Details</h2>
 
               <div className="space-y-4">
@@ -516,7 +528,7 @@ export function LeadsPanel() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+            <div className="hidden md:block bg-white rounded-lg shadow p-6 text-center text-gray-500 sticky top-4">
               Select a lead to view details
             </div>
           )}
