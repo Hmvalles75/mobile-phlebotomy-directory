@@ -93,10 +93,13 @@ export async function GET(req: NextRequest) {
       const primaryZip = providerZipCodes[0] || null
       const serviceRadius = provider.serviceRadiusMiles || 25 // Default 25 miles
 
-      // Fetch all OPEN leads (we'll filter by radius in memory)
+      // Fetch all OPEN leads from the last 14 days (we'll filter by radius in memory)
+      // Older than 14 days = stale; patient most likely got service elsewhere
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
       const allOpenLeads = await prisma.lead.findMany({
         where: {
-          status: 'OPEN'
+          status: 'OPEN',
+          createdAt: { gte: fourteenDaysAgo },
         },
         orderBy: {
           createdAt: 'desc'
