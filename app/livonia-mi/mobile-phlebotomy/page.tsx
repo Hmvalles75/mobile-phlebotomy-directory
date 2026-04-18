@@ -6,6 +6,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -280,6 +281,8 @@ export default function LivoniaMobilePhlebotomy() {
             </div>
           </div>
         </div>
+
+        <CityIntentVariantLinks citySlug="livonia-mi" cityName="Livonia, MI" current="mobile-phlebotomy" />
       </div>
 
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Livonia" defaultState="MI" defaultZip="" />

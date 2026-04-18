@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function LongBeachMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -181,6 +182,8 @@ export default function LongBeachMobilePhlebotomy() {
           <h2 className="text-2xl font-bold mb-4">What to Expect</h2>
           <p className="text-gray-700">Licensed phlebotomists come to your Long Beach location for convenient blood draws. Same-day and next-day appointments typically available.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="long-beach-ca" cityName="Long Beach, CA" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Long Beach" defaultState="CA" defaultZip="" />
     </div>

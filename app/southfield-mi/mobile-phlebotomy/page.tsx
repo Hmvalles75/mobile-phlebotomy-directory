@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function SouthfieldMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -188,6 +189,8 @@ export default function SouthfieldMobilePhlebotomy() {
           <h2 className="text-2xl font-bold mb-4">What to Expect</h2>
           <p className="text-gray-700">Licensed phlebotomists come to your Southfield location for convenient blood draws. Appointments typically within 24-48 hours.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="southfield-mi" cityName="Southfield, MI" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Southfield" defaultState="MI" defaultZip="" />
     </div>
