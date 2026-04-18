@@ -1,14 +1,11 @@
 import { MetadataRoute } from 'next'
-import statesData from '@/data/states.json'
-import citiesData from '@/data/cities.json'
-import { State, City } from '@/lib/schemas'
+import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
+import { CITY_MAPPING } from '@/data/cities-full'
 import { prisma } from '@/lib/prisma'
 import { SITE_URL } from '@/lib/seo'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
-  const states = statesData as State[]
-  const cities = citiesData as City[]
 
   // Optimized: only fetch fields needed for sitemap (much faster)
   const providers = await prisma.provider.findMany({
@@ -121,28 +118,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   })
 
-  // Add state pages
-  states.forEach((state) => {
+  // Add all 51 state pages (50 states + DC)
+  for (const stateSlug of Object.keys(STATE_DATA)) {
     routes.push({
-      url: `${baseUrl}/us/${state.slug}`,
+      url: `${baseUrl}/us/${stateSlug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
     })
-  })
+  }
 
-  // Add city pages
-  cities.forEach((city) => {
-    const state = states.find(s => s.abbr === city.stateAbbr)
-    if (state) {
+  // Add all ~260 city pages from the full city mapping
+  for (const [citySlug, cityInfo] of Object.entries(CITY_MAPPING)) {
+    const stateSlug = ABBR_TO_SLUG[cityInfo.state]
+    if (stateSlug) {
       routes.push({
-        url: `${baseUrl}/us/${state.slug}/${city.slug}`,
+        url: `${baseUrl}/us/${stateSlug}/${citySlug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly',
         priority: 0.6,
       })
     }
-  })
+  }
 
   // Add custom metro area pages (Detroit, NYC, LA)
   const customPages = [

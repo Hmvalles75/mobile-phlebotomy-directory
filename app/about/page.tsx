@@ -1,3 +1,16 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About MobilePhlebotomy.org | Our Mission & Provider Network',
+  description: 'Learn about MobilePhlebotomy.org \u2014 the nationwide directory connecting patients with certified mobile phlebotomists for convenient at-home blood draws.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About MobilePhlebotomy.org',
+    description: 'The nationwide directory connecting patients with certified mobile phlebotomists for at-home blood draws.',
+    type: 'website',
+  },
+}
+
 export default function About() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
