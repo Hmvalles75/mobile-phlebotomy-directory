@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function WorcesterBloodDrawAtHome() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -88,6 +89,8 @@ export default function WorcesterBloodDrawAtHome() {
           <h2 className="text-2xl font-bold mb-4">About Mobile Phlebotomy in Worcester</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Worcester-area location for convenient blood draws. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the greater Worcester metro area.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="worcester-ma" cityName="Worcester, MA" current="blood-draw-at-home" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Worcester" defaultState="MA" defaultZip="" />
     </div>

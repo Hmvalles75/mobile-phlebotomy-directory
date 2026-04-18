@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function SanDiegoMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -90,6 +91,8 @@ export default function SanDiegoMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Common services in San Diego include draws for Scripps Health and UC San Diego Health lab orders, fertility and IVF blood work, military family health screenings near Camp Pendleton, and concierge wellness panels for the biotech corridor in Sorrento Valley and UTC.</p>
           <p className="text-gray-700 leading-relaxed">San Diego mobile phlebotomy visits typically cost $80&ndash;$160. California requires phlebotomists to hold a CPT1 certification, so all providers listed here carry valid state credentials.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="san-diego-ca" cityName="San Diego, CA" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="San Diego" defaultState="CA" defaultZip="" />
     </div>

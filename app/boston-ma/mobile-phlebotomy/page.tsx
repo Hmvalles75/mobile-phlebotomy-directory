@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function BostonMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -90,6 +91,8 @@ export default function BostonMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Boston-area mobile phlebotomists serve patients with routine lab draws for MGB (Mass General Brigham) orders, IVF and fertility panels for the region&apos;s major reproductive endocrinology practices, corporate wellness programs for Cambridge biotech and Financial District firms, and home health collections for homebound seniors in Dorchester, Jamaica Plain, and Roxbury.</p>
           <p className="text-gray-700 leading-relaxed">Boston mobile phlebotomy visits typically cost $85&ndash;$160, with a small parking premium in the city proper. Massachusetts phlebotomists must operate under a CLIA-certified lab, and all providers listed here carry the appropriate clinical credentials.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="boston-ma" cityName="Boston, MA" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Boston" defaultState="MA" defaultZip="" />
     </div>

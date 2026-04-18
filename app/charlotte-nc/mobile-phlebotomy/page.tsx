@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function CharlotteMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -90,6 +91,8 @@ export default function CharlotteMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Common services in the Charlotte metro include routine venipuncture for Atrium Health and Novant Health lab orders, corporate wellness screenings for Uptown offices, pre-employment and DOT drug testing for distribution centers along I-85, and home health draws for agencies serving Mecklenburg County.</p>
           <p className="text-gray-700 leading-relaxed">Charlotte-area mobile phlebotomy visits typically cost $60&ndash;$120. North Carolina does not require a separate phlebotomy license, but all providers on our platform carry relevant clinical certifications.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="charlotte-nc" cityName="Charlotte, NC" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Charlotte" defaultState="NC" defaultZip="" />
     </div>

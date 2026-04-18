@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function MiamiMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -90,6 +91,8 @@ export default function MiamiMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Florida providers in the Miami area serve a mix of needs: routine draws for Jackson Health System, Baptist Health, and Cleveland Clinic Florida lab orders, Spanish-speaking patient care (critical in a city where 70%+ of residents speak Spanish at home), fertility and specialty testing for the region&apos;s concierge medical practices, and home health collections for Miami&apos;s substantial retiree population.</p>
           <p className="text-gray-700 leading-relaxed">Miami-area mobile phlebotomy typically costs $75&ndash;$140. Florida doesn&apos;t require a separate state phlebotomy license, but all providers on our platform carry national certifications (ASCP, NHA, or AMT) and work under CLIA-approved lab supervision.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="miami-fl" cityName="Miami, FL" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Miami" defaultState="FL" defaultZip="" />
     </div>

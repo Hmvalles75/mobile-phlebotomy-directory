@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 
 export default function WorcesterMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -90,6 +91,8 @@ export default function WorcesterMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Mobile phlebotomists in the Worcester area handle routine venipuncture for UMass Memorial and Reliant Medical Group orders, pre-employment drug testing for the region&apos;s many manufacturing employers, home health draws for post-surgical patients, and bilingual services for Worcester&apos;s diverse Latino and Vietnamese communities.</p>
           <p className="text-gray-700 leading-relaxed">Expect to pay $75&ndash;$145 per visit in Worcester. Massachusetts requires phlebotomists to work under CLIA-certified lab supervision, and MassHealth covers mobile draws for homebound patients with proper physician documentation.</p>
         </div>
+
+        <CityIntentVariantLinks citySlug="worcester-ma" cityName="Worcester, MA" current="mobile-phlebotomy" />
       </div>
       <LeadFormModal isOpen={leadFormOpen} onClose={() => setLeadFormOpen(false)} defaultCity="Worcester" defaultState="MA" defaultZip="" />
     </div>
