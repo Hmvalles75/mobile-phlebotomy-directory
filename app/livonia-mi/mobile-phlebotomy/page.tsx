@@ -7,6 +7,7 @@ import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -77,6 +78,7 @@ export default function LivoniaMobilePhlebotomy() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="livonia-mi" cityShort="Livonia" variant="mobile-phlebotomy" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">

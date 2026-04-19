@@ -5,6 +5,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 export default function NewYorkMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -75,6 +76,7 @@ export default function NewYorkMobilePhlebotomy() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="new-york-ny" cityShort="New York" variant="mobile-phlebotomy" />
       {/* FAQ Schema */}
       <script
         type="application/ld+json"

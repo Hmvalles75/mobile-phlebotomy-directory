@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { ga4 } from '@/lib/ga4'
 import CityFAQ from '@/components/seo/CityFAQ'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 export default function NYCBloodDrawAtHome() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="new-york-ny" cityShort="New York" variant="blood-draw-at-home" />
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-4xl font-bold mb-4">Blood Draw at Home in New York City</h1>

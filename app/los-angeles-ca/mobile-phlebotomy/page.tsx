@@ -7,6 +7,7 @@ import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 const laSuburbs = [
   { name: 'Pasadena', slug: 'pasadena-ca' },
@@ -134,6 +135,7 @@ export default function LosAngelesMobilePhlebotomy() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="los-angeles-ca" cityShort="Los Angeles" variant="mobile-phlebotomy" />
       {/* FAQ Schema */}
       <script
         type="application/ld+json"

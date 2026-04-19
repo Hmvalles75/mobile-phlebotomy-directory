@@ -7,6 +7,7 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import CityFAQ from '@/components/seo/CityFAQ'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 export default function GlendaleMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -46,6 +47,7 @@ export default function GlendaleMobilePhlebotomy() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="glendale-ca" cityShort="Glendale" variant="mobile-phlebotomy" />
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-4xl font-bold mb-4">Mobile Phlebotomy in Glendale, CA</h1>

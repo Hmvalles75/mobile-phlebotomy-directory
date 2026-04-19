@@ -7,6 +7,7 @@ import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityFAQ from '@/components/seo/CityFAQ'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 export default function SantaMonicaInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -29,6 +30,7 @@ export default function SantaMonicaInHomeBloodDraw() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="santa-monica-ca" cityShort="Santa Monica" variant="in-home-blood-draw" />
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-4xl font-bold mb-4">In-Home Blood Draw Services in Santa Monica, CA</h1>

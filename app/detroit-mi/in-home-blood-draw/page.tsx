@@ -6,6 +6,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
+import CityBreadcrumb from '@/components/seo/CityBreadcrumb'
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -92,6 +93,7 @@ export default function DetroitInHomeBloodDraw() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <CityBreadcrumb citySlug="detroit-mi" cityShort="Detroit" variant="in-home-blood-draw" />
       {/* FAQ Schema */}
       <script
         type="application/ld+json"
