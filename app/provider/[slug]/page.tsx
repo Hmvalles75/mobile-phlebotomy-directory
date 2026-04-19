@@ -6,6 +6,8 @@ import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
+import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
+import { STATE_DATA } from '@/data/states-full'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
@@ -128,9 +130,29 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   const isVerified = provider.status === 'VERIFIED'
   const isFeatured = provider.isFeatured === true
 
+  // Build canonical breadcrumb items (Home > State > City > Provider).
+  // Resolves state slug from STATE_DATA whether provider.state is an abbr (CA) or full name (California).
+  const breadcrumbItems: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
+  if (provider.state) {
+    const raw = provider.state.trim()
+    const stateEntry = Object.entries(STATE_DATA).find(
+      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
+    )
+    if (stateEntry) {
+      const [stateSlug, stateInfo] = stateEntry
+      breadcrumbItems.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
+      if (provider.city) {
+        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
+        breadcrumbItems.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
+      }
+    }
+  }
+  breadcrumbItems.push({ name: provider.name, url: `/provider/${provider.slug}` })
+
   return (
     <>
       <ProviderSchema provider={providerForSchema as any} />
+      <BreadcrumbSchema items={breadcrumbItems} />
 
       <div className="min-h-screen bg-gray-50">
         {/* Header Section */}
