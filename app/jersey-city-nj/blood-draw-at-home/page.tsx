@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function JerseyCityBloodDrawAtHome() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function JerseyCityBloodDrawAtHome() {
           <h2 className="text-2xl font-bold mb-4">About Blood Draw at Home in Jersey City</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Jersey City-area location for convenient blood draw at home. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Jersey City area.</p>
         </div>
+
+        <CityFAQ cityName="Jersey City, NJ" cityShort="Jersey City" variant="blood-draw-at-home" />
 
         <CityIntentVariantLinks citySlug="jersey-city-nj" cityName="Jersey City, NJ" current="blood-draw-at-home" />
       </div>

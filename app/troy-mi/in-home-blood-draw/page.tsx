@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function TroyInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function TroyInHomeBloodDraw() {
           <h2 className="text-2xl font-bold mb-4">About In-Home Blood Draw Services in Troy</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Troy-area location for convenient in-home blood draw services. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Troy area.</p>
         </div>
+
+        <CityFAQ cityName="Troy, MI" cityShort="Troy" variant="in-home-blood-draw" />
 
         <CityIntentVariantLinks citySlug="troy-mi" cityName="Troy, MI" current="in-home-blood-draw" />
       </div>

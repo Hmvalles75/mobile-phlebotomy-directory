@@ -6,6 +6,7 @@ import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function JerseyCityMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -159,6 +160,8 @@ export default function JerseyCityMobilePhlebotomy() {
           <h2 className="text-2xl font-bold mb-4">What to Expect</h2>
           <p className="text-gray-700">Licensed phlebotomists come to your Jersey City location for convenient blood draws. Same-day and next-day appointments typically available when scheduling allows.</p>
         </div>
+
+        <CityFAQ cityName="Jersey City, NJ" cityShort="Jersey City" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="jersey-city-nj" cityName="Jersey City, NJ" current="mobile-phlebotomy" />
       </div>

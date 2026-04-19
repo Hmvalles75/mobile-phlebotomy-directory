@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function WarrenInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function WarrenInHomeBloodDraw() {
           <h2 className="text-2xl font-bold mb-4">About In-Home Blood Draw Services in Warren</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Warren-area location for convenient in-home blood draw services. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Warren area.</p>
         </div>
+
+        <CityFAQ cityName="Warren, MI" cityShort="Warren" variant="in-home-blood-draw" />
 
         <CityIntentVariantLinks citySlug="warren-mi" cityName="Warren, MI" current="in-home-blood-draw" />
       </div>

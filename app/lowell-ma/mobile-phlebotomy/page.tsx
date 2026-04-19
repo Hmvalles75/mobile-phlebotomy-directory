@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function LowellMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function LowellMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Local providers serve Lowell General Hospital and Circle Health lab orders, UMass Lowell student and faculty health draws, home health collections throughout the Merrimack Valley, and corporate wellness for the biotech and defense contractors along Route 3. Coverage typically extends to Chelmsford, Dracut, Tewksbury, Billerica, Andover, and Lawrence.</p>
           <p className="text-gray-700 leading-relaxed">Mobile phlebotomy visits in the Lowell area run $75&ndash;$145. Massachusetts phlebotomists operate under CLIA-certified lab oversight, and MassHealth covers home draws for homebound patients with a physician&apos;s order documenting medical necessity.</p>
         </div>
+
+        <CityFAQ cityName="Lowell, MA" cityShort="Lowell" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="lowell-ma" cityName="Lowell, MA" current="mobile-phlebotomy" />
       </div>

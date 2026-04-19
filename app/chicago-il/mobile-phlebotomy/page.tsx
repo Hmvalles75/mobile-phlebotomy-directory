@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function ChicagoMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function ChicagoMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Services commonly requested in the Chicago area include routine lab work for Northwestern Medicine and Rush orders, corporate wellness screenings for downtown offices, pre-employment drug testing, and home health collections for agencies serving Cook County.</p>
           <p className="text-gray-700 leading-relaxed">Expect to pay $70&ndash;$130 per visit in the Chicago metro. Providers in the city proper may charge a small parking surcharge. Illinois Medicaid covers mobile draws for homebound patients with a physician&apos;s order.</p>
         </div>
+
+        <CityFAQ cityName="Chicago, IL" cityShort="Chicago" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="chicago-il" cityName="Chicago, IL" current="mobile-phlebotomy" />
       </div>

@@ -6,6 +6,7 @@ import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function WestHollywoodMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -182,6 +183,8 @@ export default function WestHollywoodMobilePhlebotomy() {
           <h2 className="text-2xl font-bold mb-4">What to Expect</h2>
           <p className="text-gray-700">Licensed phlebotomists come to your West Hollywood location for convenient blood draws. Same-day and next-day appointments typically available.</p>
         </div>
+
+        <CityFAQ cityName="West Hollywood, CA" cityShort="West Hollywood" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="west-hollywood-ca" cityName="West Hollywood, CA" current="mobile-phlebotomy" />
       </div>

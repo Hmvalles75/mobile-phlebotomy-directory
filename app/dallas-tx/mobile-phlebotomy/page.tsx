@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function DallasMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function DallasMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">DFW mobile phlebotomists handle routine lab draws for UT Southwestern and Baylor orders, pre-employment and DOT drug testing for the region&apos;s logistics and transportation companies, corporate wellness programs for the many Fortune 500 HQs in the metro, and home health collections for Dallas&apos;s growing retiree population across Collin and Denton counties.</p>
           <p className="text-gray-700 leading-relaxed">Dallas-area mobile phlebotomy typically runs $65&ndash;$130 per visit, below the national average. Texas requires phlebotomists to work under a CLIA-certified lab and carry appropriate certifications; all providers listed here meet those requirements.</p>
         </div>
+
+        <CityFAQ cityName="Dallas, TX" cityShort="Dallas" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="dallas-tx" cityName="Dallas, TX" current="mobile-phlebotomy" />
       </div>

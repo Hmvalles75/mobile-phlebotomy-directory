@@ -6,6 +6,7 @@ import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import { ga4 } from '@/lib/ga4'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function BronxMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -162,6 +163,8 @@ export default function BronxMobilePhlebotomy() {
           <h2 className="text-2xl font-bold mb-4">What to Expect</h2>
           <p className="text-gray-700">Licensed phlebotomists come to your Bronx location for convenient blood draws. Same-day and next-day appointments typically available when scheduling allows.</p>
         </div>
+
+        <CityFAQ cityName="Bronx, NY" cityShort="Bronx" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="bronx-ny" cityName="Bronx, NY" current="mobile-phlebotomy" />
       </div>

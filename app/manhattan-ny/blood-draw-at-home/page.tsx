@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function ManhattanBloodDrawAtHome() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function ManhattanBloodDrawAtHome() {
           <h2 className="text-2xl font-bold mb-4">About Blood Draw at Home in Manhattan</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Manhattan-area location for convenient blood draw at home. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Manhattan area.</p>
         </div>
+
+        <CityFAQ cityName="Manhattan, NY" cityShort="Manhattan" variant="blood-draw-at-home" />
 
         <CityIntentVariantLinks citySlug="manhattan-ny" cityName="Manhattan, NY" current="blood-draw-at-home" />
       </div>

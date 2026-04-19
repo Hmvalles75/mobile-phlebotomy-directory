@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function PasadenaInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function PasadenaInHomeBloodDraw() {
           <h2 className="text-2xl font-bold mb-4">About In-Home Blood Draw Services in Pasadena</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Pasadena-area location for convenient in-home blood draw services. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Pasadena area.</p>
         </div>
+
+        <CityFAQ cityName="Pasadena, CA" cityShort="Pasadena" variant="in-home-blood-draw" />
 
         <CityIntentVariantLinks citySlug="pasadena-ca" cityName="Pasadena, CA" current="in-home-blood-draw" />
       </div>

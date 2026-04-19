@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { ga4 } from '@/lib/ga4'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function LAInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -131,8 +132,9 @@ export default function LAInHomeBloodDraw() {
             Request Service Now
           </button>
         </div>
-      </div>
 
+        <CityFAQ cityName="Los Angeles, CA" cityShort="Los Angeles" variant="in-home-blood-draw" />
+      </div>
       <LeadFormModal
         isOpen={leadFormOpen}
         onClose={() => setLeadFormOpen(false)}

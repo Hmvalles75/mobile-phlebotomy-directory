@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function LivoniaInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function LivoniaInHomeBloodDraw() {
           <h2 className="text-2xl font-bold mb-4">About In-Home Blood Draw Services in Livonia</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Livonia-area location for convenient in-home blood draw services. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Livonia area.</p>
         </div>
+
+        <CityFAQ cityName="Livonia, MI" cityShort="Livonia" variant="in-home-blood-draw" />
 
         <CityIntentVariantLinks citySlug="livonia-mi" cityName="Livonia, MI" current="in-home-blood-draw" />
       </div>

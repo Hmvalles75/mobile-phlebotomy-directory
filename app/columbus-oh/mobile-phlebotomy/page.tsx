@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function ColumbusMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function ColumbusMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Columbus-area phlebotomists handle routine lab draws for OhioHealth and Mount Carmel orders, corporate drug testing for warehouse and logistics companies along I-70, home health collections for post-surgical patients, and FRAT testing kit collections.</p>
           <p className="text-gray-700 leading-relaxed">Pricing in Columbus is typically $60&ndash;$110 per visit — below the national average. Ohio Medicaid covers mobile phlebotomy for homebound patients with proper documentation from a referring physician.</p>
         </div>
+
+        <CityFAQ cityName="Columbus, OH" cityShort="Columbus" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="columbus-oh" cityName="Columbus, OH" current="mobile-phlebotomy" />
       </div>

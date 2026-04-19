@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function HoustonMobilePhlebotomy() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function HoustonMobilePhlebotomy() {
           <p className="text-gray-700 leading-relaxed mb-4">Mobile phlebotomists in Houston typically serve the entire metro area within a 30&ndash;50 mile radius. Services include routine venipuncture for Quest and Labcorp orders, drug and alcohol testing, DOT physicals collections, wellness panels, and specialty draws for clinical trials at MD Anderson and Houston Methodist.</p>
           <p className="text-gray-700 leading-relaxed">Most Houston-area providers charge $60&ndash;$120 per visit for the draw fee, with lab processing billed separately. Medicare patients with homebound documentation typically pay $0&ndash;$25.</p>
         </div>
+
+        <CityFAQ cityName="Houston, TX" cityShort="Houston" variant="mobile-phlebotomy" />
 
         <CityIntentVariantLinks citySlug="houston-tx" cityName="Houston, TX" current="mobile-phlebotomy" />
       </div>

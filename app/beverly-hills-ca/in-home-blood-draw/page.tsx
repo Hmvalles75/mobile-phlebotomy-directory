@@ -6,6 +6,7 @@ import InlineLeadForm from '@/components/InlineLeadForm'
 import CityIntentVariantLinks from '@/components/CityIntentVariantLinks'
 import { type Provider } from '@/lib/schemas'
 import { ProviderActions } from '@/components/ui/ProviderActions'
+import CityFAQ from '@/components/seo/CityFAQ'
 
 export default function BeverlyHillsInHomeBloodDraw() {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
@@ -59,6 +60,8 @@ export default function BeverlyHillsInHomeBloodDraw() {
           <h2 className="text-2xl font-bold mb-4">About In-Home Blood Draw Services in Beverly Hills</h2>
           <p className="text-gray-700 leading-relaxed">Licensed phlebotomists come to your Beverly Hills-area location for convenient in-home blood draw services. Services include routine lab work, drug testing, wellness panels, and specialty collections. Same-day and next-day appointments are typically available throughout the Beverly Hills area.</p>
         </div>
+
+        <CityFAQ cityName="Beverly Hills, CA" cityShort="Beverly Hills" variant="in-home-blood-draw" />
 
         <CityIntentVariantLinks citySlug="beverly-hills-ca" cityName="Beverly Hills, CA" current="in-home-blood-draw" />
       </div>
