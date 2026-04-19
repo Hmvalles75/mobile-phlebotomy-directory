@@ -16,6 +16,7 @@ import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { SITE_URL } from '@/lib/seo'
 import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
 import { PhoneReveal } from '@/components/PhoneReveal'
+import StateSEOContent from '@/components/seo/StateSEOContent'
 
 // State data imported from shared source of truth — see data/states-full.ts
 import { STATE_DATA as stateData } from '@/data/states-full'
@@ -1185,25 +1186,8 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
           </div>
         </div>
 
-        {/* SEO Content */}
-        <div className="mt-12 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            About Mobile Phlebotomy Services in {stateName}
-          </h2>
-          <div className="prose max-w-none text-gray-600">
-            <p>
-              Mobile phlebotomy services in {stateName} provide convenient at-home blood draws
-              for patients who prefer the comfort and safety of their own environment. Our network
-              of certified phlebotomists serves all major cities and regions throughout the state.
-            </p>
-            <p className="mt-4">
-              Whether you&apos;re in a major metropolitan area or a smaller community, you can find
-              qualified mobile phlebotomy professionals who offer flexible scheduling, competitive
-              pricing, and professional service. Many providers accept insurance and offer same-day
-              or next-day appointments.
-            </p>
-          </div>
-        </div>
+        {/* SEO Content — per-state for top 15, improved generic for rest */}
+        <StateSEOContent stateName={stateName} stateAbbr={stateAbbr} />
       </div>
 
       {/* Lead Form Modal */}
