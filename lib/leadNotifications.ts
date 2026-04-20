@@ -21,6 +21,7 @@ interface Provider {
   claimEmail: string | null
   email: string | null
   featuredTier: string | null
+  isFeatured: boolean
 }
 
 /**
@@ -183,25 +184,33 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
 }
 
 /**
- * Find featured providers that match the lead's location
+ * Find providers that match the lead's location across all notification-eligible tiers.
+ * Returns Featured providers AND verified non-Featured providers who've opted into
+ * lead notifications. The caller splits them into priority waves based on tier.
+ *
  * Criteria:
- * 1. isFeatured = true (pilot flag)
- * 2. notifyEnabled = true
- * 3. Service area includes the lead's state or ZIP
- * 4. Has a valid notification email
+ *  - notifyEnabled = true
+ *  - isFeatured = true  OR  (eligibleForLeads = true AND status = VERIFIED)
+ *  - Service area includes the lead's state
+ *  - ZIP or radius matches the lead's ZIP
+ *  - Has a valid notification email
+ *
  * @param leadZip - The ZIP code of the lead
  * @param leadState - The state of the lead
- * @returns Array of matching providers
+ * @returns Array of matching providers (all tiers mixed — caller splits into waves)
  */
 async function findFeaturedProvidersForNotification(
   leadZip: string,
   leadState: string
 ): Promise<Provider[]> {
-  // Find all featured providers with notifications enabled
+  // Find all providers eligible for lead notifications (Featured + opted-in free providers)
   const providers = await prisma.provider.findMany({
     where: {
-      isFeatured: true,
       notifyEnabled: true,
+      OR: [
+        { isFeatured: true },
+        { AND: [{ eligibleForLeads: true }, { status: 'VERIFIED' }] },
+      ],
     },
     select: {
       id: true,
@@ -210,6 +219,7 @@ async function findFeaturedProvidersForNotification(
       claimEmail: true,
       email: true,
       featuredTier: true,
+      isFeatured: true,
       zipCodes: true,
       serviceRadiusMiles: true,
       primaryState: true,
@@ -281,7 +291,8 @@ async function findFeaturedProvidersForNotification(
     notificationEmail: p.notificationEmail,
     claimEmail: p.claimEmail,
     email: p.email,
-    featuredTier: p.featuredTier
+    featuredTier: p.featuredTier,
+    isFeatured: p.isFeatured,
   }))
 }
 
@@ -322,19 +333,26 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       return 0
     }
 
-    console.log(`[LeadNotifications] Found ${providers.length} featured provider(s) to notify`)
+    console.log(`[LeadNotifications] Found ${providers.length} provider(s) to notify`)
 
     // Split providers into priority waves by tier.
-    // HIGH_DENSITY gets the lead first — 60-second head start.
-    // Everyone else gets notified after the head-start window.
-    const priorityProviders = providers.filter(p => p.featuredTier === 'HIGH_DENSITY')
-    const standardProviders = providers.filter(p => p.featuredTier !== 'HIGH_DENSITY')
+    //   Wave 1 (immediate):        HIGH_DENSITY — top paid tier, first look
+    //   Wave 2 (+60 seconds):      Other Featured — paid tier, priority access
+    //   Wave 3 (+600 seconds):     Non-Featured opted-in — free tier, 10-minute delay
+    //                              so Featured has a real head-start in competitive ZIPs
+    const priorityProviders = providers.filter(p => p.isFeatured && p.featuredTier === 'HIGH_DENSITY')
+    const standardProviders = providers.filter(p => p.isFeatured && p.featuredTier !== 'HIGH_DENSITY')
+    const freeProviders     = providers.filter(p => !p.isFeatured)
 
     if (priorityProviders.length > 0) {
-      console.log(`[LeadNotifications] Priority wave: ${priorityProviders.length} HIGH_DENSITY provider(s) notified immediately`)
+      console.log(`[LeadNotifications] Wave 1 (HIGH_DENSITY): ${priorityProviders.length} provider(s), immediate`)
     }
-    if (standardProviders.length > 0 && priorityProviders.length > 0) {
-      console.log(`[LeadNotifications] Standard wave: ${standardProviders.length} provider(s) — 60-second delay`)
+    if (standardProviders.length > 0) {
+      console.log(`[LeadNotifications] Wave 2 (Featured): ${standardProviders.length} provider(s), ${priorityProviders.length > 0 ? '60s delay' : 'immediate'}`)
+    }
+    if (freeProviders.length > 0) {
+      const hasPaidWave = priorityProviders.length > 0 || standardProviders.length > 0
+      console.log(`[LeadNotifications] Wave 3 (Free): ${freeProviders.length} provider(s), ${hasPaidWave ? '600s delay' : 'immediate'}`)
     }
 
     const sendToProvider = async (provider: Provider, delaySeconds: number) => {
@@ -364,8 +382,10 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       }
     }
 
-    // Wave 2 delay is only applied if there's actually a priority wave to give a head start to.
+    // Delays only apply if there's an earlier wave to give a head start to.
     const standardDelay = priorityProviders.length > 0 ? 60 : 0
+    const hasPaidWave = priorityProviders.length > 0 || standardProviders.length > 0
+    const freeDelay = hasPaidWave ? 600 : 0
     let successCount = 0
 
     // Wave 1: HIGH_DENSITY providers — delivered immediately by SendGrid
@@ -377,6 +397,12 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     // Wave 2: Other featured providers — SendGrid holds for 60 seconds, then delivers
     for (const provider of standardProviders) {
       const ok = await sendToProvider(provider, standardDelay)
+      if (ok) successCount++
+    }
+
+    // Wave 3: Free opted-in providers — SendGrid holds for 10 minutes, then delivers
+    for (const provider of freeProviders) {
+      const ok = await sendToProvider(provider, freeDelay)
       if (ok) successCount++
     }
 
