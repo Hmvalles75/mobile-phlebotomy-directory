@@ -5,6 +5,7 @@ import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
+import { normalizeCity } from '@/lib/normalizeCity'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -28,6 +29,8 @@ export async function POST(req: NextRequest) {
     const payload = schema.parse(body)
 
     const priceCents = priceFor(payload.urgency)
+    // Normalize city at write time so analytics + routing see consistent values
+    const city = normalizeCity(payload.city)
 
     // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
@@ -36,7 +39,7 @@ export async function POST(req: NextRequest) {
         phone: payload.phone,
         email: payload.email || null,
         address1: payload.address1,
-        city: payload.city,
+        city,
         state: payload.state,
         zip: payload.zip,
         labPreference: payload.labPreference,
@@ -70,7 +73,7 @@ export async function POST(req: NextRequest) {
         id: lead.id,
         zip: payload.zip,
         urgency: payload.urgency,
-        city: payload.city,
+        city,
         state: payload.state
       })
       console.log(`[Lead ${lead.id}] ✅ SMS blast: ${smsCount} sent`)
@@ -81,14 +84,14 @@ export async function POST(req: NextRequest) {
     // If NO providers were notified at all, this is an uncovered area
     // Send expansion email to the lead and notify admin
     if (emailCount === 0 && smsCount === 0) {
-      console.log(`[Lead ${lead.id}] No coverage in ${payload.city}, ${payload.state} - sending expansion email`)
+      console.log(`[Lead ${lead.id}] No coverage in ${city}, ${payload.state} - sending expansion email`)
 
       // Send expansion email to the lead
       await sendExpansionEmailToLead({
         id: lead.id,
         fullName: payload.fullName,
         email: payload.email,
-        city: payload.city,
+        city,
         state: payload.state
       }).catch(console.error)
 
