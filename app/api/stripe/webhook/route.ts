@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
+import { sendProviderWelcomeEmail } from '@/lib/providerWelcomeEmail'
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-10-29.clover' })
@@ -204,7 +205,7 @@ export async function POST(req: NextRequest) {
           console.log(`Subscription active for provider ${provider.id} at tier ${effectiveTier}`)
 
           // If this is a NEW linkage (first time we've confirmed the subscription),
-          // notify admin so you know who upgraded
+          // notify admin AND send the provider their welcome email
           if (event.type === 'customer.subscription.created') {
             await notifyAdmin(
               `New Premium Subscription: ${provider.name}`,
@@ -217,6 +218,33 @@ export async function POST(req: NextRequest) {
               `Their listing has been automatically upgraded.\n` +
               `Profile: https://mobilephlebotomy.org/provider/${provider.slug}`
             )
+
+            if (effectiveTier) {
+              const welcome = await sendProviderWelcomeEmail(
+                {
+                  id: provider.id,
+                  name: provider.name,
+                  slug: provider.slug,
+                  email: provider.email,
+                  claimEmail: provider.claimEmail,
+                  notificationEmail: provider.notificationEmail,
+                  primaryCity: provider.primaryCity,
+                  primaryCitySlug: provider.primaryCitySlug,
+                  primaryState: provider.primaryState,
+                  primaryStateSlug: provider.primaryStateSlug,
+                },
+                effectiveTier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
+              )
+              if (!welcome.success) {
+                await notifyAdmin(
+                  `Welcome email FAILED: ${provider.name}`,
+                  `The automatic welcome email for ${provider.name} could not be sent.\n\n` +
+                  `Error: ${welcome.error}\n` +
+                  `Provider ID: ${provider.id}\n` +
+                  `Send a manual welcome so they know the upgrade is live.`
+                )
+              }
+            }
           }
         }
         break
