@@ -23,6 +23,17 @@ const stateAbbrToSlug: Record<string, string> = {
   'wi': 'wisconsin', 'wy': 'wyoming', 'dc': 'washington-dc'
 }
 
+// Metro slug remaps — metros that were renamed. Keys are the OLD URL slug
+// (captured by Google before the rename), values are the current slug.
+const METRO_REMAP: Record<string, string> = {
+  'new-york-metro': 'new-york-city',
+}
+
+// Placeholder provider slug pattern — /provider/provider-123 etc. These were
+// never real listings; we return 410 Gone so Google drops them permanently
+// instead of treating them as transient 404s.
+const PLACEHOLDER_PROVIDER_SLUG = /^provider-\d+$/
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
@@ -44,6 +55,42 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url, 301)
+  }
+
+  // 410 Gone for placeholder provider slugs (/provider/provider-123 etc.)
+  // Signals to Google these are permanently removed and speeds up de-indexing.
+  if (pathname.startsWith('/provider/')) {
+    const slug = pathname.replace('/provider/', '').replace(/\/$/, '')
+    if (PLACEHOLDER_PROVIDER_SLUG.test(slug)) {
+      return new NextResponse('This provider listing has been permanently removed.', {
+        status: 410,
+        headers: { 'Content-Type': 'text/plain' },
+      })
+    }
+  }
+
+  // /providers/claim?id=* — drop the legacy id query param.
+  // Google indexed these under the old routing; the current claim flow uses
+  // the path alone with no query params.
+  if (pathname === '/providers/claim' && request.nextUrl.searchParams.has('id')) {
+    const url = request.nextUrl.clone()
+    url.searchParams.delete('id')
+    return NextResponse.redirect(url, 301)
+  }
+
+  // /us/metro/{slug}-metro → /us/metro/{slug}  (the -metro suffix was dropped)
+  // Also handles explicit renames (new-york-metro → new-york-city).
+  if (pathname.startsWith('/us/metro/')) {
+    const slug = pathname.replace('/us/metro/', '').replace(/\/$/, '')
+    let newSlug: string | null = METRO_REMAP[slug] || null
+    if (!newSlug && slug.endsWith('-metro')) {
+      newSlug = slug.slice(0, -'-metro'.length)
+    }
+    if (newSlug && newSlug !== slug) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/us/metro/${newSlug}`
+      return NextResponse.redirect(url, 301)
+    }
   }
 
   // Handle state/city URL redirects
