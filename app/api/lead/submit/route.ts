@@ -6,6 +6,12 @@ import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailT
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { normalizeCity } from '@/lib/normalizeCity'
+import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
+
+const DRAW_COUNTS = ['1', '2-5', '6-20', '20+'] as const
+const REQUEST_TYPES = ['individual', 'organization', 'business'] as const
+type DrawCount = typeof DRAW_COUNTS[number]
+type RequestType = typeof REQUEST_TYPES[number]
 
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -20,8 +26,31 @@ const schema = z.object({
   notes: z.string().optional(),
   // Optional tracking fields
   source: z.string().optional(),
-  preferredProviderId: z.string().optional()
+  preferredProviderId: z.string().optional(),
+  // High-value capture (all optional; form defaults to individual/1-person)
+  drawCount: z.enum(DRAW_COUNTS).optional(),
+  requestType: z.enum(REQUEST_TYPES).optional(),
+  organizationName: z.string().optional(),
+  timeframe: z.string().optional(),
 })
+
+/**
+ * Classifies a lead as high-value when the patient is requesting for a group
+ * of 6+ people OR when the requester is an organization/business (not an
+ * individual/family). Returns the derived fields to persist on the lead row.
+ */
+function classifyLead(drawCount: DrawCount | undefined, requestType: RequestType | undefined) {
+  const dc = drawCount || '1'
+  const rt = requestType || 'individual'
+  const isGroup = dc === '6-20' || dc === '20+'
+  const isOrganization = rt === 'organization' || rt === 'business'
+  const isHighValue = isGroup || isOrganization
+  const estimatedValueCents =
+    dc === '20+' ? 300000 :
+    dc === '6-20' ? 150000 :
+    0
+  return { drawCount: dc, requestType: rt, isHighValue, estimatedValueCents }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,6 +60,8 @@ export async function POST(req: NextRequest) {
     const priceCents = priceFor(payload.urgency)
     // Normalize city at write time so analytics + routing see consistent values
     const city = normalizeCity(payload.city)
+    const { drawCount, requestType, isHighValue, estimatedValueCents } =
+      classifyLead(payload.drawCount, payload.requestType)
 
     // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
@@ -48,11 +79,39 @@ export async function POST(req: NextRequest) {
         source: payload.source || 'web_form',
         preferredProviderId: payload.preferredProviderId || null,
         priceCents,
-        status: 'OPEN'  // Ready for claiming
+        status: 'OPEN',  // Ready for claiming
+        drawCount,
+        requestType,
+        isHighValue,
+        estimatedValueCents,
+        organizationName: payload.organizationName || null,
+        timeframe: payload.timeframe || null,
       }
     })
 
-    console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}`)
+    console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}${isHighValue ? ' [HIGH VALUE]' : ''}`)
+
+    // High-value leads — immediate admin notification so group/org requests get
+    // hands-on follow-up regardless of normal routing outcomes. Fire-and-forget;
+    // don't block the patient response on this email delivering.
+    if (isHighValue) {
+      notifyHighValueLead({
+        id: lead.id,
+        fullName: lead.fullName,
+        phone: lead.phone,
+        email: lead.email,
+        city: lead.city,
+        state: lead.state,
+        zip: lead.zip,
+        urgency: lead.urgency,
+        notes: lead.notes,
+        drawCount: lead.drawCount,
+        requestType: lead.requestType,
+        organizationName: lead.organizationName,
+        timeframe: lead.timeframe,
+        estimatedValueCents: lead.estimatedValueCents,
+      }).catch(err => console.error(`[Lead ${lead.id}] ❌ High-value admin email FAILED:`, err.message || err))
+    }
 
     // Send notifications synchronously to ensure they complete before function terminates
     // This adds ~1-3 seconds to response time but guarantees delivery

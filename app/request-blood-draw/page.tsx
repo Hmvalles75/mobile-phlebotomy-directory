@@ -20,8 +20,22 @@ function RequestBloodDrawForm() {
     state: initialState,
     address1: '',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
-    notes: ''
+    notes: '',
+    // High-value capture (Step 1: how many people, then conditional reveals)
+    drawCount: '1' as '1' | '2-5' | '6-20' | '20+',
+    requestType: 'individual' as 'individual' | 'organization' | 'business',
+    organizationName: '',
+    timeframe: '',
   })
+
+  // Conditional reveal logic:
+  //  - Step 2 ("who is this for?") shows once the patient picks 2-5, 6-20, or 20+
+  //  - Step 3 (org name, timeframe, est count) shows if group (6-20 / 20+) OR
+  //    they pick organization/business as requester
+  const showRequesterQuestion = formData.drawCount !== '1'
+  const isGroup = formData.drawCount === '6-20' || formData.drawCount === '20+'
+  const isOrganization = formData.requestType === 'organization' || formData.requestType === 'business'
+  const showOrgFields = isGroup || (showRequesterQuestion && isOrganization)
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -69,10 +83,23 @@ function RequestBloodDrawForm() {
     setError('')
 
     try {
+      // Only send organization fields when they're meaningful (group or org/business requester)
+      const orgPayload = showOrgFields
+        ? {
+            organizationName: formData.organizationName || undefined,
+            timeframe: formData.timeframe || undefined,
+          }
+        : {}
       const response = await fetch('/api/lead/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, labPreference: 'Other/Unsure' })
+        body: JSON.stringify({
+          ...formData,
+          labPreference: 'Other/Unsure',
+          drawCount: formData.drawCount,
+          requestType: showRequesterQuestion ? formData.requestType : 'individual',
+          ...orgPayload,
+        })
       })
 
       const data = await response.json()
@@ -159,6 +186,100 @@ function RequestBloodDrawForm() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Step 1 — Draw count (first question, always visible) */}
+              <div className="border-b pb-6">
+                <label className="block text-lg font-semibold text-gray-900 mb-3">
+                  How many people need blood draws? <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { value: '1',     label: 'Just me', hint: '1 person' },
+                    { value: '2-5',   label: 'A few people', hint: '2–5 people' },
+                    { value: '6-20',  label: 'A group', hint: '6–20 people' },
+                    { value: '20+',   label: 'Large group or organization', hint: '20+ people' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, drawCount: opt.value as typeof formData.drawCount }))}
+                      className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
+                        formData.drawCount === opt.value
+                          ? 'border-primary-600 bg-primary-50 text-primary-900'
+                          : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <div className="font-semibold">{opt.label}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{opt.hint}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Step 2 — Who is this for? (appears when 2+ people) */}
+              {showRequesterQuestion && (
+                <div className="border-b pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <label className="block text-lg font-semibold text-gray-900 mb-3">
+                    Who is this request for? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { value: 'individual',   label: 'Myself or family member' },
+                      { value: 'organization', label: 'A clinic, lab, or research organization' },
+                      { value: 'business',     label: 'A business or employer' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, requestType: opt.value as typeof formData.requestType }))}
+                        className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
+                          formData.requestType === opt.value
+                            ? 'border-primary-600 bg-primary-50 text-primary-900'
+                            : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                        }`}
+                      >
+                        <div className="font-semibold">{opt.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3 — Organization details (appears for groups or org/business requesters) */}
+              {showOrgFields && (
+                <div className="border-b pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Organization Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Organization Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="organizationName"
+                        value={formData.organizationName}
+                        onChange={handleChange}
+                        required={showOrgFields}
+                        placeholder="Acme Clinic, Inc."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Timeframe / When Needed
+                      </label>
+                      <input
+                        type="text"
+                        name="timeframe"
+                        value={formData.timeframe}
+                        onChange={handleChange}
+                        placeholder="Next week, end of month, ongoing, etc."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Contact Information */}
               <div className="border-b pb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>

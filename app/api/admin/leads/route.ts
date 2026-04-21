@@ -74,6 +74,13 @@ export async function GET(req: NextRequest) {
         completedAt: lead.completedAt?.toISOString(),
         providerNotes: lead.providerNotes,
         provider: lead.provider,
+        // High-value capture fields
+        drawCount: lead.drawCount,
+        requestType: lead.requestType,
+        isHighValue: lead.isHighValue,
+        estimatedValueCents: lead.estimatedValueCents,
+        organizationName: lead.organizationName,
+        timeframe: lead.timeframe,
         notifications: lead.leadNotifications.map(notif => ({
           id: notif.id,
           providerId: notif.providerId,

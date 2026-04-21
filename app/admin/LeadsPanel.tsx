@@ -43,6 +43,13 @@ interface Lead {
     claimEmail: string | null
   }
   notifications?: LeadNotification[]
+  // High-value capture
+  drawCount?: string | null
+  requestType?: string | null
+  isHighValue?: boolean
+  estimatedValueCents?: number
+  organizationName?: string | null
+  timeframe?: string | null
 }
 
 export function LeadsPanel() {
@@ -238,6 +245,11 @@ export function LeadsPanel() {
                           STAT
                         </span>
                       )}
+                      {lead.isHighValue && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-amber-900 font-bold border border-amber-600 shadow-sm">
+                          ⭐ HIGH VALUE
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -263,6 +275,49 @@ export function LeadsPanel() {
                 ✕
               </button>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Lead Details</h2>
+
+              {selectedLead.isHighValue && (
+                <div className="mb-4 p-4 rounded-lg bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-amber-400 shadow-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">⭐</span>
+                    <span className="text-sm font-bold uppercase tracking-wide text-amber-900">High-Value Lead</span>
+                  </div>
+                  {typeof selectedLead.estimatedValueCents === 'number' && selectedLead.estimatedValueCents > 0 && (
+                    <div className="mb-3">
+                      <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Estimated Value</label>
+                      <p className="text-3xl font-bold text-amber-900">
+                        ${(selectedLead.estimatedValueCents / 100).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {selectedLead.drawCount && (
+                      <div>
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Draw Count</label>
+                        <p className="font-semibold text-amber-900">{selectedLead.drawCount}</p>
+                      </div>
+                    )}
+                    {selectedLead.requestType && (
+                      <div>
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Request Type</label>
+                        <p className="font-semibold text-amber-900 capitalize">{selectedLead.requestType}</p>
+                      </div>
+                    )}
+                    {selectedLead.organizationName && (
+                      <div className="col-span-2">
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Organization</label>
+                        <p className="font-semibold text-amber-900">{selectedLead.organizationName}</p>
+                      </div>
+                    )}
+                    {selectedLead.timeframe && (
+                      <div className="col-span-2">
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Timeframe</label>
+                        <p className="font-semibold text-amber-900">{selectedLead.timeframe}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div>
