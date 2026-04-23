@@ -127,13 +127,15 @@ model Lead {
   patientSmsCount   Int                @default(0)
   routedProviderIds    String[]         // Array of providers we attempted to route to
   preferredProviderId  String?          // Provider the patient came from (e.g. clicked from provider page)
-  // High-value lead capture (2026-04-20) — flagged here, routing gates come later
-  drawCount            String?          // "1" | "2-5" | "6-20" | "20+"
-  requestType          String?          // "individual" | "organization" | "business"
-  isHighValue          Boolean          @default(false)  // drawCount >= 6-20 OR requestType != individual
-  estimatedValueCents  Int              @default(0)      // $1,500 for 6-20, $3,000 for 20+, else $0
+  // Lead screening (2026-04-20, refined 2026-04-22) — routes unqualified leads out before they hit providers
+  drawCount            String?          // "1-3" | "4-19" | "20+"
+  requestType          String?          // "individual" | "organization" | "business" (legacy field, still captured)
+  hasDoctorOrder       String?          // "yes" | "no" | "need_help"
+  paymentMethod        String?          // "insurance" | "out_of_pocket" | "not_sure"
+  isHighValue          Boolean          @default(false)  // drawCount = "20+" OR requestType in (organization, business)
+  estimatedValueCents  Int              @default(0)      // draws × $75 (bucket midpoint × 7500)
   organizationName     String?
-  timeframe            String?          // Free-text: "next week", "end of month", etc.
+  timeframe            String?
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])

@@ -43,13 +43,15 @@ interface Lead {
     claimEmail: string | null
   }
   notifications?: LeadNotification[]
-  // High-value capture
+  // High-value + screening capture
   drawCount?: string | null
   requestType?: string | null
   isHighValue?: boolean
   estimatedValueCents?: number
   organizationName?: string | null
   timeframe?: string | null
+  hasDoctorOrder?: string | null
+  paymentMethod?: string | null
 }
 
 export function LeadsPanel() {
@@ -303,6 +305,18 @@ export function LeadsPanel() {
                         <p className="font-semibold text-amber-900 capitalize">{selectedLead.requestType}</p>
                       </div>
                     )}
+                    {selectedLead.hasDoctorOrder && (
+                      <div>
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Doctor's Order</label>
+                        <p className="font-semibold text-amber-900">{selectedLead.hasDoctorOrder === 'yes' ? 'Yes' : selectedLead.hasDoctorOrder === 'no' ? 'No' : 'Needs help'}</p>
+                      </div>
+                    )}
+                    {selectedLead.paymentMethod && (
+                      <div>
+                        <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Payment</label>
+                        <p className="font-semibold text-amber-900">{selectedLead.paymentMethod === 'insurance' ? 'Insurance' : selectedLead.paymentMethod === 'out_of_pocket' ? 'Out of pocket' : 'Not sure'}</p>
+                      </div>
+                    )}
                     {selectedLead.organizationName && (
                       <div className="col-span-2">
                         <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Organization</label>
@@ -313,6 +327,33 @@ export function LeadsPanel() {
                       <div className="col-span-2">
                         <label className="text-xs font-medium text-amber-800 uppercase tracking-wide">Timeframe</label>
                         <p className="font-semibold text-amber-900">{selectedLead.timeframe}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Screening fields — always shown (even on non-high-value leads) so admin can see qualification signal */}
+              {!selectedLead.isHighValue && (selectedLead.drawCount || selectedLead.hasDoctorOrder || selectedLead.paymentMethod) && (
+                <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <label className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2 block">Screening</label>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    {selectedLead.drawCount && (
+                      <div>
+                        <span className="text-xs text-gray-500">Draws:</span>{' '}
+                        <span className="font-medium text-gray-900">{selectedLead.drawCount}</span>
+                      </div>
+                    )}
+                    {selectedLead.hasDoctorOrder && (
+                      <div>
+                        <span className="text-xs text-gray-500">Order:</span>{' '}
+                        <span className="font-medium text-gray-900">{selectedLead.hasDoctorOrder === 'yes' ? 'Yes' : selectedLead.hasDoctorOrder === 'no' ? 'No' : 'Help'}</span>
+                      </div>
+                    )}
+                    {selectedLead.paymentMethod && (
+                      <div>
+                        <span className="text-xs text-gray-500">Pay:</span>{' '}
+                        <span className="font-medium text-gray-900">{selectedLead.paymentMethod === 'insurance' ? 'Ins.' : selectedLead.paymentMethod === 'out_of_pocket' ? 'OOP' : '?'}</span>
                       </div>
                     )}
                   </div>

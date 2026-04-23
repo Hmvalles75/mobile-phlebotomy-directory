@@ -8,8 +8,13 @@ import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 
-const DRAW_COUNTS = ['1', '2-5', '6-20', '20+'] as const
+// Updated draw-count buckets (2026-04-22): 1-3 standard, 4-19 medium, 20+ high.
+// Also keep backward-compat for the older bucket values submitted by the LeadFormModal /
+// ZipCodeLeadForm / InlineLeadForm paths until those are updated.
+const DRAW_COUNTS = ['1-3', '4-19', '20+', '1', '2-5', '6-20'] as const
 const REQUEST_TYPES = ['individual', 'organization', 'business'] as const
+const DOCTOR_ORDER = ['yes', 'no', 'need_help'] as const
+const PAYMENT_METHOD = ['insurance', 'out_of_pocket', 'not_sure'] as const
 type DrawCount = typeof DRAW_COUNTS[number]
 type RequestType = typeof REQUEST_TYPES[number]
 
@@ -24,31 +29,47 @@ const schema = z.object({
   labPreference: z.string().min(1, 'Lab preference is required'),
   urgency: z.enum(['STANDARD', 'STAT']),
   notes: z.string().optional(),
-  // Optional tracking fields
   source: z.string().optional(),
   preferredProviderId: z.string().optional(),
-  // High-value capture (all optional; form defaults to individual/1-person)
+  // Lead-screening capture (all optional so legacy form paths keep working)
   drawCount: z.enum(DRAW_COUNTS).optional(),
   requestType: z.enum(REQUEST_TYPES).optional(),
+  hasDoctorOrder: z.enum(DOCTOR_ORDER).optional(),
+  paymentMethod: z.enum(PAYMENT_METHOD).optional(),
   organizationName: z.string().optional(),
   timeframe: z.string().optional(),
 })
 
 /**
- * Classifies a lead as high-value when the patient is requesting for a group
- * of 6+ people OR when the requester is an organization/business (not an
- * individual/family). Returns the derived fields to persist on the lead row.
+ * Classifies a lead from the submitted drawCount + requestType. Returns the
+ * derived fields to persist on the lead row.
+ *
+ * - isHighValue: true when drawCount == "20+" OR requestType is organization/business
+ * - estimatedValueCents: draws × $75 using the low/mid of each bucket:
+ *     "1-3"   → $0       (standard individual, not a value lead)
+ *     "4-19"  → $825     (midpoint 11 × $75)
+ *     "20+"   → $1,500   (conservative low 20 × $75)
+ *   Legacy buckets ("2-5", "6-20", "1") are mapped to the closest new bucket.
  */
 function classifyLead(drawCount: DrawCount | undefined, requestType: RequestType | undefined) {
-  const dc = drawCount || '1'
+  const rawDc = drawCount || '1-3'
+  // Legacy bucket normalization — map old values to new buckets
+  const dc: '1-3' | '4-19' | '20+' =
+    rawDc === '20+' ? '20+' :
+    rawDc === '6-20' ? '20+' :             // old "6-20" -> treat as 20+ for classification
+    rawDc === '4-19' ? '4-19' :
+    rawDc === '2-5' ? '4-19' :             // old "2-5" -> treat as medium
+    rawDc === '1-3' ? '1-3' :
+    '1-3'                                  // old "1" -> standard
+
   const rt = requestType || 'individual'
-  const isGroup = dc === '6-20' || dc === '20+'
   const isOrganization = rt === 'organization' || rt === 'business'
-  const isHighValue = isGroup || isOrganization
+  const isHighValue = dc === '20+' || isOrganization
   const estimatedValueCents =
-    dc === '20+' ? 300000 :
-    dc === '6-20' ? 150000 :
+    dc === '20+' ? 150000 :                // 20 × $75 = $1,500 conservative low
+    dc === '4-19' ? 82500 :                // 11 × $75 = $825 midpoint
     0
+
   return { drawCount: dc, requestType: rt, isHighValue, estimatedValueCents }
 }
 
@@ -86,6 +107,8 @@ export async function POST(req: NextRequest) {
         estimatedValueCents,
         organizationName: payload.organizationName || null,
         timeframe: payload.timeframe || null,
+        hasDoctorOrder: payload.hasDoctorOrder || null,
+        paymentMethod: payload.paymentMethod || null,
       }
     })
 
@@ -110,6 +133,8 @@ export async function POST(req: NextRequest) {
         organizationName: lead.organizationName,
         timeframe: lead.timeframe,
         estimatedValueCents: lead.estimatedValueCents,
+        hasDoctorOrder: lead.hasDoctorOrder,
+        paymentMethod: lead.paymentMethod,
       }).catch(err => console.error(`[Lead ${lead.id}] ❌ High-value admin email FAILED:`, err.message || err))
     }
 

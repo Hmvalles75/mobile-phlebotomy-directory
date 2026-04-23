@@ -22,6 +22,20 @@ interface HighValueLeadPayload {
   organizationName: string | null
   timeframe: string | null
   estimatedValueCents: number
+  hasDoctorOrder: string | null
+  paymentMethod: string | null
+}
+
+const DOCTOR_ORDER_LABEL: Record<string, string> = {
+  'yes': 'Has doctor\'s order',
+  'no': 'No order yet',
+  'need_help': 'Needs help getting an order',
+}
+
+const PAYMENT_LABEL: Record<string, string> = {
+  'insurance': 'Insurance',
+  'out_of_pocket': 'Out of pocket',
+  'not_sure': 'Not sure / asking about pricing',
 }
 
 function formatDollars(cents: number): string {
@@ -54,6 +68,8 @@ export async function notifyHighValueLead(lead: HighValueLeadPayload): Promise<v
     `Estimated value:      ${formatDollars(lead.estimatedValueCents)}`,
     `Draw count:           ${lead.drawCount || '(unspecified)'}`,
     `Request type:         ${lead.requestType || '(unspecified)'}`,
+    lead.hasDoctorOrder ? `Doctor's order:       ${DOCTOR_ORDER_LABEL[lead.hasDoctorOrder] || lead.hasDoctorOrder}` : null,
+    lead.paymentMethod ? `Payment method:       ${PAYMENT_LABEL[lead.paymentMethod] || lead.paymentMethod}` : null,
     lead.organizationName ? `Organization:         ${lead.organizationName}` : null,
     lead.timeframe ? `Timeframe:            ${lead.timeframe}` : null,
     ``,
@@ -97,6 +113,8 @@ export async function notifyHighValueLead(lead: HighValueLeadPayload): Promise<v
       <dl>
         <dt>Draw count</dt><dd>${lead.drawCount || '(unspecified)'}</dd>
         <dt>Request type</dt><dd>${lead.requestType || '(unspecified)'}</dd>
+        ${lead.hasDoctorOrder ? `<dt>Doctor's order</dt><dd>${DOCTOR_ORDER_LABEL[lead.hasDoctorOrder] || lead.hasDoctorOrder}</dd>` : ''}
+        ${lead.paymentMethod ? `<dt>Payment method</dt><dd>${PAYMENT_LABEL[lead.paymentMethod] || lead.paymentMethod}</dd>` : ''}
         ${lead.organizationName ? `<dt>Organization</dt><dd>${lead.organizationName}</dd>` : ''}
         ${lead.timeframe ? `<dt>Timeframe</dt><dd>${lead.timeframe}</dd>` : ''}
       </dl>

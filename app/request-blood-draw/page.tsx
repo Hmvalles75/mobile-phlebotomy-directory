@@ -21,21 +21,14 @@ function RequestBloodDrawForm() {
     address1: '',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
     notes: '',
-    // High-value capture (Step 1: how many people, then conditional reveals)
-    drawCount: '1' as '1' | '2-5' | '6-20' | '20+',
-    requestType: 'individual' as 'individual' | 'organization' | 'business',
-    organizationName: '',
-    timeframe: '',
+    // Lead screening (replaces the old 3-step conditional flow)
+    drawCount: '1-3' as '1-3' | '4-19' | '20+',
+    hasDoctorOrder: '' as '' | 'yes' | 'no' | 'need_help',
+    paymentMethod: '' as '' | 'insurance' | 'out_of_pocket' | 'not_sure',
   })
 
-  // Conditional reveal logic:
-  //  - Step 2 ("who is this for?") shows once the patient picks 2-5, 6-20, or 20+
-  //  - Step 3 (org name, timeframe, est count) shows if group (6-20 / 20+) OR
-  //    they pick organization/business as requester
-  const showRequesterQuestion = formData.drawCount !== '1'
-  const isGroup = formData.drawCount === '6-20' || formData.drawCount === '20+'
-  const isOrganization = formData.requestType === 'organization' || formData.requestType === 'business'
-  const showOrgFields = isGroup || (showRequesterQuestion && isOrganization)
+  const showDoctorOrderWarning = formData.hasDoctorOrder === 'no'
+  const showPricingNote = formData.paymentMethod === 'not_sure'
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -79,17 +72,23 @@ function RequestBloodDrawForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Require the two screening questions since they're button inputs (no native "required")
+    if (!formData.hasDoctorOrder) {
+      setError('Please answer whether you have a doctor\'s order.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (!formData.paymentMethod) {
+      setError('Please select how you\'ll be paying.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
     setLoading(true)
     setError('')
 
     try {
-      // Only send organization fields when they're meaningful (group or org/business requester)
-      const orgPayload = showOrgFields
-        ? {
-            organizationName: formData.organizationName || undefined,
-            timeframe: formData.timeframe || undefined,
-          }
-        : {}
       const response = await fetch('/api/lead/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,8 +96,8 @@ function RequestBloodDrawForm() {
           ...formData,
           labPreference: 'Other/Unsure',
           drawCount: formData.drawCount,
-          requestType: showRequesterQuestion ? formData.requestType : 'individual',
-          ...orgPayload,
+          hasDoctorOrder: formData.hasDoctorOrder || undefined,
+          paymentMethod: formData.paymentMethod || undefined,
         })
       })
 
@@ -186,17 +185,16 @@ function RequestBloodDrawForm() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Step 1 — Draw count (first question, always visible) */}
+              {/* Step 1 — Draw count (first screening question) */}
               <div className="border-b pb-6">
                 <label className="block text-lg font-semibold text-gray-900 mb-3">
-                  How many people need blood draws? <span className="text-red-500">*</span>
+                  How many draws do you need? <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { value: '1',     label: 'Just me', hint: '1 person' },
-                    { value: '2-5',   label: 'A few people', hint: '2–5 people' },
-                    { value: '6-20',  label: 'A group', hint: '6–20 people' },
-                    { value: '20+',   label: 'Large group or organization', hint: '20+ people' },
+                    { value: '1-3',   label: '1–3 draws',     hint: 'One person or family' },
+                    { value: '4-19',  label: '4–19 draws',    hint: 'Small group or clinic' },
+                    { value: '20+',   label: '20+ draws',     hint: 'Organization or clinical study' },
                   ].map(opt => (
                     <button
                       key={opt.value}
@@ -215,70 +213,69 @@ function RequestBloodDrawForm() {
                 </div>
               </div>
 
-              {/* Step 2 — Who is this for? (appears when 2+ people) */}
-              {showRequesterQuestion && (
-                <div className="border-b pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <label className="block text-lg font-semibold text-gray-900 mb-3">
-                    Who is this request for? <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-1 gap-3">
-                    {[
-                      { value: 'individual',   label: 'Myself or family member' },
-                      { value: 'organization', label: 'A clinic, lab, or research organization' },
-                      { value: 'business',     label: 'A business or employer' },
-                    ].map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, requestType: opt.value as typeof formData.requestType }))}
-                        className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
-                          formData.requestType === opt.value
-                            ? 'border-primary-600 bg-primary-50 text-primary-900'
-                            : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
-                        }`}
-                      >
-                        <div className="font-semibold">{opt.label}</div>
-                      </button>
-                    ))}
-                  </div>
+              {/* Step 2 — Doctor's order (required, soft-warn on "no") */}
+              <div className="border-b pb-6">
+                <label className="block text-lg font-semibold text-gray-900 mb-3">
+                  Do you have a doctor&apos;s order? <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { value: 'yes',       label: 'Yes' },
+                    { value: 'no',        label: 'No' },
+                    { value: 'need_help', label: 'I need help getting one' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, hasDoctorOrder: opt.value as typeof formData.hasDoctorOrder }))}
+                      className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
+                        formData.hasDoctorOrder === opt.value
+                          ? 'border-primary-600 bg-primary-50 text-primary-900'
+                          : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <div className="font-semibold">{opt.label}</div>
+                    </button>
+                  ))}
                 </div>
-              )}
+                {showDoctorOrderWarning && (
+                  <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                    <strong>Heads up:</strong> most mobile phlebotomists require a physician&apos;s order. You may still submit this request — a provider will follow up and can discuss options with you.
+                  </div>
+                )}
+              </div>
 
-              {/* Step 3 — Organization details (appears for groups or org/business requesters) */}
-              {showOrgFields && (
-                <div className="border-b pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Organization Details</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Organization Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="organizationName"
-                        value={formData.organizationName}
-                        onChange={handleChange}
-                        required={showOrgFields}
-                        placeholder="Acme Clinic, Inc."
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Timeframe / When Needed
-                      </label>
-                      <input
-                        type="text"
-                        name="timeframe"
-                        value={formData.timeframe}
-                        onChange={handleChange}
-                        placeholder="Next week, end of month, ongoing, etc."
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
+              {/* Step 3 — Payment readiness (required, pricing disclosure on "not_sure") */}
+              <div className="border-b pb-6">
+                <label className="block text-lg font-semibold text-gray-900 mb-3">
+                  How will you be paying? <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { value: 'insurance',     label: 'Insurance' },
+                    { value: 'out_of_pocket', label: 'Out of pocket' },
+                    { value: 'not_sure',      label: 'Not sure' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, paymentMethod: opt.value as typeof formData.paymentMethod }))}
+                      className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
+                        formData.paymentMethod === opt.value
+                          ? 'border-primary-600 bg-primary-50 text-primary-900'
+                          : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <div className="font-semibold">{opt.label}</div>
+                    </button>
+                  ))}
                 </div>
-              )}
+                {showPricingNote && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
+                    Rates typically range from <strong>$75–$150 per visit</strong>. The provider will confirm exact pricing when they contact you.
+                  </div>
+                )}
+              </div>
 
               {/* Contact Information */}
               <div className="border-b pb-6">
