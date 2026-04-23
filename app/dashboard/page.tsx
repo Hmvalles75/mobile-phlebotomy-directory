@@ -20,6 +20,31 @@ interface Lead {
   priceCents: number
   notes?: string
   routedAt?: string
+  claimedAt?: string | null
+  outcome?: string | null
+  outcomeNotes?: string | null
+  appointmentDate?: string | null
+  isHighValue?: boolean
+  drawCount?: string | null
+  hasDoctorOrder?: string | null
+  paymentMethod?: string | null
+}
+
+const OUTCOME_LABEL: Record<string, { label: string; color: string }> = {
+  APPOINTMENT_BOOKED:   { label: '✅ Booked',        color: 'bg-green-100 text-green-800 border-green-200' },
+  APPOINTMENT_COMPLETED:{ label: '✅ Completed',     color: 'bg-green-200 text-green-900 border-green-300' },
+  CONTACTED:            { label: '☎️ Contacted',     color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  NO_ANSWER:            { label: '📞 No answer',     color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  VOICEMAIL:            { label: '📧 Voicemail',     color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  SCHEDULED_CALLBACK:   { label: '⏰ Callback',      color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  NO_ORDER:             { label: '📋 No order',      color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  DECLINED:             { label: '💰 Won\'t pay',    color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  WRONG_SERVICE:        { label: '🔀 Wrong service', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  WRONG_NUMBER:         { label: '🔀 Wrong number',  color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  NO_AVAILABILITY:      { label: '📅 Conflict',      color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  OUTSIDE_SERVICE_AREA: { label: '📍 Out of area',   color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  DUPLICATE:            { label: '🔁 Duplicate',     color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  NOT_INTERESTED:       { label: '🚫 Not interested',color: 'bg-gray-100 text-gray-700 border-gray-200' },
 }
 
 interface AvailableLead {
@@ -943,55 +968,80 @@ function DashboardContent() {
               <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No claimed leads yet</h3>
               <p className="text-gray-600">
-                Leads you claim will appear here with full patient contact information.
+                Leads you claim will appear here with full patient contact information, outcome tracking, and a release button.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Patient
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Urgency
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Claimed
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {claimedLeads.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{lead.fullName}</div>
-                        <div className="text-sm text-gray-500">{lead.phone}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{lead.city}, {lead.state}</div>
-                        <div className="text-sm text-gray-500">{lead.zip}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          lead.urgency === 'STAT'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {lead.urgency}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(lead.routedAt || lead.createdAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="divide-y divide-gray-200">
+              {claimedLeads.map((lead) => {
+                const outcomeMeta = lead.outcome ? OUTCOME_LABEL[lead.outcome] : null
+                return (
+                  <div key={lead.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      {/* Patient info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className="text-base font-bold text-gray-900">{lead.fullName}</h3>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                            lead.urgency === 'STAT' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {lead.urgency}
+                          </span>
+                          {lead.isHighValue && (
+                            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-amber-900 border border-amber-600">
+                              ⭐ HIGH VALUE
+                            </span>
+                          )}
+                          {outcomeMeta && (
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${outcomeMeta.color}`}>
+                              {outcomeMeta.label}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 mb-2">
+                          <a href={`tel:${lead.phone}`} className="text-primary-600 hover:text-primary-700 font-medium">
+                            📞 {lead.phone}
+                          </a>
+                          {lead.email && (
+                            <a href={`mailto:${lead.email}`} className="text-primary-600 hover:text-primary-700 truncate max-w-xs">
+                              ✉️ {lead.email}
+                            </a>
+                          )}
+                          <span>📍 {lead.city}, {lead.state} {lead.zip}</span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                          <span>Claimed: {formatDate(lead.claimedAt || lead.routedAt || lead.createdAt)}</span>
+                          {lead.drawCount && <span>· Draws: {lead.drawCount}</span>}
+                          {lead.hasDoctorOrder && (
+                            <span>· Order: {lead.hasDoctorOrder === 'yes' ? 'Yes' : lead.hasDoctorOrder === 'no' ? 'No' : 'Needs help'}</span>
+                          )}
+                          {lead.paymentMethod && (
+                            <span>· Pay: {lead.paymentMethod === 'insurance' ? 'Insurance' : lead.paymentMethod === 'out_of_pocket' ? 'OOP' : 'Not sure'}</span>
+                          )}
+                        </div>
+
+                        {!outcomeMeta && (
+                          <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">
+                            ⏱ No outcome logged yet — open the lead to mark what happened
+                          </div>
+                        )}
+                      </div>
+
+                      {/* CTA */}
+                      <div className="flex-shrink-0 flex md:flex-col gap-2">
+                        <Link
+                          href={`/claim/${lead.id}?provider=${provider.id}`}
+                          className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium whitespace-nowrap"
+                        >
+                          {outcomeMeta ? 'View & update' : 'Log outcome →'}
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

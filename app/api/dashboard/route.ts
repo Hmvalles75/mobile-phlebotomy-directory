@@ -79,7 +79,15 @@ export async function GET(req: NextRequest) {
         status: true,
         priceCents: true,
         notes: true,
-        routedAt: true
+        routedAt: true,
+        claimedAt: true,
+        outcome: true,
+        outcomeNotes: true,
+        appointmentDate: true,
+        isHighValue: true,
+        drawCount: true,
+        hasDoctorOrder: true,
+        paymentMethod: true,
       }
     })
 
