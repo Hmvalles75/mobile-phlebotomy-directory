@@ -33,6 +33,9 @@ export default function ClaimLeadPage() {
   const [releasing, setReleasing] = useState(false)
   const [released, setReleased] = useState(false)
   const [releaseError, setReleaseError] = useState<string | null>(null)
+  const [outcomeSaving, setOutcomeSaving] = useState(false)
+  const [outcomeSaved, setOutcomeSaved] = useState<string | null>(null)  // label of last saved outcome
+  const [outcomeError, setOutcomeError] = useState<string | null>(null)
   const [isTrial, setIsTrial] = useState(false)
   const [providerId, setProviderId] = useState<string>('')
   const [providerName, setProviderName] = useState<string>('')
@@ -62,6 +65,39 @@ export default function ClaimLeadPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId, providerFromUrl])
+
+  // Outcome buttons: one-click capture so we finally have real lead-quality data.
+  // The "complete" action flips status to DELIVERED; everything else is a simple
+  // outcome update (lead stays CLAIMED so the provider can keep working it).
+  async function handleOutcome(outcome: string, label: string, isComplete: boolean) {
+    if (!providerId) {
+      setOutcomeError('Missing provider context — refresh the page and try again.')
+      return
+    }
+    setOutcomeSaving(true)
+    setOutcomeError(null)
+    try {
+      const response = await fetch(`/api/leads/${leadId}/update-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: isComplete ? 'complete' : 'update_outcome',
+          outcome,
+          providerId,
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setOutcomeSaved(label)
+      } else {
+        setOutcomeError(data.error || 'Failed to save outcome')
+      }
+    } catch (err: any) {
+      setOutcomeError(err.message || 'Network error while saving outcome')
+    } finally {
+      setOutcomeSaving(false)
+    }
+  }
 
   async function handleRelease(reason: string) {
     if (!leadData || !providerId) return
@@ -390,6 +426,68 @@ export default function ClaimLeadPage() {
               >
                 View Dashboard
               </a>
+            </div>
+
+            {/* Outcome capture — one-click report so we can measure lead quality */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">How did this lead turn out?</h4>
+              <p className="text-xs text-gray-500 mb-3">
+                One click to tell us what happened. Helps us improve lead quality for you and other providers.
+              </p>
+              {outcomeSaved && (
+                <div className="mb-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded p-2">
+                  ✓ Outcome saved: <strong>{outcomeSaved}</strong>. Thank you!
+                </div>
+              )}
+              {outcomeError && (
+                <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                  {outcomeError}
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleOutcome('APPOINTMENT_BOOKED', 'Booked', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-green-300 text-green-800 bg-green-50 rounded-lg hover:bg-green-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  ✅ Booked
+                </button>
+                <button
+                  onClick={() => handleOutcome('APPOINTMENT_COMPLETED', 'Completed', true)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-green-400 text-green-900 bg-green-100 rounded-lg hover:bg-green-200 transition-colors font-semibold text-sm disabled:opacity-50"
+                >
+                  ✅ Completed
+                </button>
+                <button
+                  onClick={() => handleOutcome('NO_ANSWER', 'No answer', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  📞 No answer
+                </button>
+                <button
+                  onClick={() => handleOutcome('NO_ORDER', 'No doctor\'s order', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  📋 No order
+                </button>
+                <button
+                  onClick={() => handleOutcome('DECLINED', 'Won\'t pay / declined', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  💰 Won&apos;t pay
+                </button>
+                <button
+                  onClick={() => handleOutcome('WRONG_SERVICE', 'Wrong service', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  🔀 Wrong service
+                </button>
+              </div>
             </div>
 
             {/* Release this lead — secondary action */}

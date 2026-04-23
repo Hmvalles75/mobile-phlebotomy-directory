@@ -549,6 +549,7 @@ enum LeadOutcome {
   OUTSIDE_SERVICE_AREA
   NO_AVAILABILITY
   WRONG_SERVICE
+  NO_ORDER
 }
 
 enum Urgency {
