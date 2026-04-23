@@ -8,6 +8,7 @@ import {
   Briefcase, Activity, Stethoscope, FileCheck
 } from 'lucide-react'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
+import { trackPhoneClick } from '@/lib/trackPhoneClick'
 import type { EnrichedProvider } from '@/lib/providers'
 
 interface PremiumProviderPageProps {
@@ -140,6 +141,7 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
               {bookingPhone && (
                 <a
                   href={`tel:${bookingPhone}`}
+                  onClick={() => trackPhoneClick({ providerId: provider.id, source: 'premium_provider_call' })}
                   className="bg-teal-800/60 hover:bg-teal-800/80 backdrop-blur-sm border border-white/30 text-white font-semibold text-lg px-10 py-4 rounded-lg transition-all duration-200 inline-flex items-center gap-2"
                 >
                   <Phone size={20} />

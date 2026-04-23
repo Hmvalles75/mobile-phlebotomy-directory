@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Phone } from 'lucide-react'
 import { MARKET_CONFIG, isMarketLocked } from '@/lib/config/market'
+import { trackPhoneClick } from '@/lib/trackPhoneClick'
 
 interface PhoneRevealProps {
   phone: string
@@ -11,6 +12,7 @@ interface PhoneRevealProps {
   market?: string
   className?: string
   variant?: 'default' | 'compact' | 'featured'
+  source?: string  // passed to phone-click tracking, e.g. 'provider_page_call'
 }
 
 /**
@@ -26,7 +28,8 @@ export function PhoneReveal({
   providerName,
   market,
   className = '',
-  variant = 'default'
+  variant = 'default',
+  source = 'provider_page_call',
 }: PhoneRevealProps) {
   const [revealed, setRevealed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -88,6 +91,7 @@ export function PhoneReveal({
     return (
       <a
         href={`tel:${phone}`}
+        onClick={() => trackPhoneClick({ providerId, source })}
         className={`${linkStyles[variant]} ${className}`}
         aria-label={`Call ${providerName || 'provider'} at ${formatPhone(phone)}`}
       >

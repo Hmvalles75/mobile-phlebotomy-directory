@@ -1,10 +1,16 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { TrackedPhoneLink } from '@/components/TrackedPhoneLink'
+
+// CAREWITHLUVS LLC provider ID for click-to-call attribution
+const CAREWITHLUVS_ID = 'cmkx2iirb0002la04m04jn2z2'
+const CAREWITHLUVS_PHONE = '2405750551'
+const CAREWITHLUVS_PHONE_DISPLAY = '(240) 575-0551'
 
 export const metadata: Metadata = {
-  title: 'CAREWITHLUVS LLC - Mobile Phlebotomy Services in Maryland | (240) 575-0041',
-  description: 'Professional mobile phlebotomy, drug testing, and DNA testing services in Maryland. DOT/NON-DOT specimen collection, immigration DNA testing, and more. Evening and weekend availability. Call (240) 575-0041.',
+  title: 'CAREWITHLUVS LLC - Mobile Phlebotomy Services in Maryland | (240) 575-0551',
+  description: 'Professional mobile phlebotomy, drug testing, and DNA testing services in Maryland. DOT/NON-DOT specimen collection, immigration DNA testing, and more. Evening and weekend availability. Call (240) 575-0551.',
   keywords: 'CAREWITHLUVS, mobile phlebotomy Maryland, blood draw Maryland, DOT drug testing Maryland, DNA testing Maryland, mobile specimen collection, 20785, Capitol Heights',
   openGraph: {
     title: 'CAREWITHLUVS LLC - Mobile Phlebotomy Services in Maryland',
@@ -52,15 +58,17 @@ export default function CareWithLuvsPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 items-start">
-                <a
-                  href="tel:2405750041"
+                <TrackedPhoneLink
+                  phone={CAREWITHLUVS_PHONE}
+                  providerId={CAREWITHLUVS_ID}
+                  source="carewithluvs_hero_call"
                   className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-lg"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  Call (240) 575-0041
-                </a>
+                  Call {CAREWITHLUVS_PHONE_DISPLAY}
+                </TrackedPhoneLink>
                 <a
                   href="mailto:carewithluvshealth@gmail.com"
                   className="inline-flex items-center px-8 py-4 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-900 transition-colors border-2 border-white"
@@ -212,15 +220,17 @@ export default function CareWithLuvsPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="tel:2405750041"
+            <TrackedPhoneLink
+              phone={CAREWITHLUVS_PHONE}
+              providerId={CAREWITHLUVS_ID}
+              source="carewithluvs_footer_call"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-lg"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              Call (240) 575-0041
-            </a>
+              Call {CAREWITHLUVS_PHONE_DISPLAY}
+            </TrackedPhoneLink>
             <a
               href="mailto:carewithluvshealth@gmail.com"
               className="inline-flex items-center justify-center px-8 py-4 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-900 transition-colors border-2 border-white"

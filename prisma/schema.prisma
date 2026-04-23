@@ -154,6 +154,29 @@ model Lead {
   @@map("leads")
 }
 
+/**
+ * PhoneClickEvent — logs every click on a provider's click-to-call link.
+ *
+ * Captures INTENT (patient clicked to call), distinct from CallLog which
+ * captures Twilio-tracked actual call completions. Provider-page views are
+ * tracked in GA4; click events are tracked here so we can join intent with
+ * downstream conversion in SQL rather than relying on external analytics.
+ */
+model PhoneClickEvent {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  providerId String
+  source     String   // e.g. 'provider_page_call' | 'featured_provider_call' | 'city_page_call' | 'state_page_call' | 'search_card_call'
+  pagePath   String?  // window.location.pathname at click time
+  userAgent  String?
+  ipAddress  String?  // for rate-limit / bot filtering
+
+  @@index([providerId])
+  @@index([createdAt])
+  @@index([source])
+  @@map("phone_click_events")
+}
+
 model CallLog {
   id           String    @id @default(cuid())
   createdAt    DateTime  @default(now())
