@@ -97,8 +97,10 @@ export function ProviderCTASection({
         defaultCity={city || ''}
         defaultState={state || ''}
         defaultZip={zip || ''}
-        preferredProviderId={isFeatured ? providerId : undefined}
-        source={isFeatured ? 'featured_provider_cta' : undefined}
+        // Always pass the provider ID so attribution is captured on every provider-page lead,
+        // not just Featured ones. The `source` label distinguishes Featured vs regular for analytics.
+        preferredProviderId={providerId}
+        source={isFeatured ? 'featured_provider_cta' : 'provider_page_cta'}
       />
     </>
   )

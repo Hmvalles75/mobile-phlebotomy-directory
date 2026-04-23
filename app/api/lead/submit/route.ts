@@ -38,6 +38,15 @@ const schema = z.object({
   paymentMethod: z.enum(PAYMENT_METHOD).optional(),
   organizationName: z.string().optional(),
   timeframe: z.string().optional(),
+  // Attribution (2026-04-22) — where the patient came from
+  attribution: z.object({
+    attributionSource: z.string().optional(),
+    utmSource: z.string().nullable().optional(),
+    utmMedium: z.string().nullable().optional(),
+    utmCampaign: z.string().nullable().optional(),
+    referrer: z.string().nullable().optional(),
+    landingPage: z.string().nullable().optional(),
+  }).optional(),
 })
 
 /**
@@ -109,6 +118,13 @@ export async function POST(req: NextRequest) {
         timeframe: payload.timeframe || null,
         hasDoctorOrder: payload.hasDoctorOrder || null,
         paymentMethod: payload.paymentMethod || null,
+        // Attribution — tells us which page this lead originated from
+        attributionSource: payload.attribution?.attributionSource || null,
+        utmSource: payload.attribution?.utmSource || null,
+        utmMedium: payload.attribution?.utmMedium || null,
+        utmCampaign: payload.attribution?.utmCampaign || null,
+        referrer: payload.attribution?.referrer || null,
+        landingPage: payload.attribution?.landingPage || null,
       }
     })
 

@@ -127,6 +127,13 @@ model Lead {
   patientSmsCount   Int                @default(0)
   routedProviderIds    String[]         // Array of providers we attempted to route to
   preferredProviderId  String?          // Provider the patient came from (e.g. clicked from provider page)
+  // Attribution tracking (2026-04-22) — which page did this lead come from?
+  attributionSource    String?          // Normalized: 'facebook' | 'google' | 'direct' | 'organic' | ...
+  utmSource            String?          // Raw utm_source param
+  utmMedium            String?          // Raw utm_medium param
+  utmCampaign          String?          // Raw utm_campaign param
+  referrer             String?          // document.referrer at submission time
+  landingPage          String?          // First page they landed on in the session
   // Lead screening (2026-04-20, refined 2026-04-22) — routes unqualified leads out before they hit providers
   drawCount            String?          // "1-3" | "4-19" | "20+"
   requestType          String?          // "individual" | "organization" | "business" (legacy field, still captured)

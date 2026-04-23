@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
+import { captureAttribution } from '@/lib/attribution'
 
 interface LeadFormModalProps {
   isOpen: boolean
@@ -116,7 +117,8 @@ export function LeadFormModal({
         body: JSON.stringify({
           ...formData,
           ...(preferredProviderId && { preferredProviderId }),
-          ...(source && { source })
+          ...(source && { source }),
+          attribution: captureAttribution(),
         })
       })
 

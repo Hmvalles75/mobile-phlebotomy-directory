@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { captureAttribution } from '@/lib/attribution'
 
 interface InlineLeadFormProps {
   city: string
@@ -54,6 +55,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
           state: submitState,
           labPreference: 'Other/Unsure',
           source: 'inline_city_page',
+          attribution: captureAttribution(),
         })
       })
 

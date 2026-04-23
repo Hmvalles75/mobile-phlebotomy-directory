@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useZipLookup, isValidZip } from '@/hooks/useZipLookup'
 import { ga4, trackEvent } from '@/lib/ga4'
 import { MARKET_CONFIG, getMarketMetroPath, isInLACountyCoverage } from '@/lib/config/market'
+import { captureAttribution } from '@/lib/attribution'
 
 /**
  * Los Angeles Request Page
@@ -156,7 +157,8 @@ function LARequestForm() {
         notes: formData.notes || '',
         // Tracking fields
         source,
-        preferredProviderId: providerId || undefined
+        preferredProviderId: providerId || undefined,
+        attribution: captureAttribution(),
       }
 
       const response = await fetch('/api/lead/submit', {

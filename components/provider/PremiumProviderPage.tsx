@@ -521,13 +521,15 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
         </div>
       </footer>
 
-      {/* Lead form modal */}
+      {/* Lead form modal — always attribute to the provider whose premium page generated the click */}
       <LeadFormModal
         isOpen={leadFormOpen}
         onClose={() => setLeadFormOpen(false)}
         defaultCity={provider.city || ''}
         defaultState={provider.state || ''}
         defaultZip=""
+        preferredProviderId={provider.id}
+        source="premium_provider_page"
       />
     </div>
   )

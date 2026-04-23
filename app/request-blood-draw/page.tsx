@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { captureAttribution } from '@/lib/attribution'
 
 function RequestBloodDrawForm() {
   const router = useRouter()
@@ -98,6 +99,7 @@ function RequestBloodDrawForm() {
           drawCount: formData.drawCount,
           hasDoctorOrder: formData.hasDoctorOrder || undefined,
           paymentMethod: formData.paymentMethod || undefined,
+          attribution: captureAttribution(),
         })
       })
 
