@@ -64,6 +64,10 @@ export interface PendingProvider {
   utmCampaign?: string | null
   referrer?: string | null
   landingPage?: string | null
+
+  // SMS consent (TCPA)
+  smsConsent?: boolean
+  smsConsentAt?: Date | null
 }
 
 const SUBMISSIONS_FILE = path.join(process.cwd(), 'data', 'pending-submissions.json')
@@ -216,6 +220,9 @@ export async function addPendingSubmission(
           utmCampaign: submission.utmCampaign || null,
           referrer: submission.referrer || null,
           landingPage: submission.landingPage || null,
+          // SMS consent (TCPA) — captured at the moment of form submission
+          smsConsent: submission.smsConsent ?? false,
+          smsConsentAt: submission.smsConsentAt || null,
         }
       })
 

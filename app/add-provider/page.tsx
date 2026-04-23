@@ -25,6 +25,7 @@ export default function AddProvider() {
     leadEmail: '',
     leadPhone: '',
     availability: [] as string[],
+    smsConsent: false,  // TCPA consent — unchecked by default, required to submit
   })
 
   const serviceOptions = [
@@ -49,6 +50,14 @@ export default function AddProvider() {
       return
     }
 
+    // Require explicit SMS consent before submission (TCPA compliance).
+    // The checkbox itself also has `required`, but this guards against any
+    // browser that lets the form submit despite it.
+    if (!formData.smsConsent) {
+      alert('Please review and accept the SMS consent notice before submitting.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -61,7 +70,11 @@ export default function AddProvider() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, attribution }),
+        body: JSON.stringify({
+          ...formData,
+          attribution,
+          smsConsentAt: new Date().toISOString(),  // capture exact consent timestamp
+        }),
       })
 
       const data = await response.json()
@@ -92,6 +105,7 @@ export default function AddProvider() {
           leadEmail: '',
           leadPhone: '',
           availability: [],
+          smsConsent: false,
         })
       } else {
         // Show specific error message (including duplicate detection)
@@ -517,9 +531,32 @@ export default function AddProvider() {
                 </ul>
               </div>
 
+              {/* SMS consent — TCPA-compliant express written consent. Unchecked by default, required. */}
+              <div className="border-2 border-primary-200 bg-primary-50 p-4 rounded-lg">
+                <label className="flex items-start cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.smsConsent}
+                    onChange={(e) => setFormData({ ...formData, smsConsent: e.target.checked })}
+                    required
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1 mr-3 flex-shrink-0"
+                  />
+                  <span className="text-sm text-gray-800 leading-relaxed">
+                    <strong>SMS Consent (required):</strong> I agree to receive SMS notifications about new patient leads in my service area from MobilePhlebotomy.org. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe.
+                  </span>
+                </label>
+                <p className="text-xs text-gray-600 mt-2 ml-7">
+                  See our{' '}
+                  <a href="/privacy" target="_blank" className="text-primary-600 hover:underline">Privacy Policy</a>
+                  {' '}and{' '}
+                  <a href="/terms" target="_blank" className="text-primary-600 hover:underline">SMS Terms</a>
+                  {' '}for details.
+                </p>
+              </div>
+
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !formData.smsConsent}
                 className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Processing...' : 'Submit Listing Application'}

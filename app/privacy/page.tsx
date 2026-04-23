@@ -54,6 +54,51 @@ export default function Privacy() {
                 </p>
               </section>
 
+              <section className="bg-primary-50 border-l-4 border-primary-600 p-6 rounded-r-lg">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">SMS / text messaging</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  If you are a provider who has registered on MobilePhlebotomy.org and opted in, or a patient
+                  who has submitted a request and shared a mobile number, we may send you SMS/text messages.
+                </p>
+                <div className="space-y-3 text-gray-700">
+                  <p>
+                    <strong>What we send:</strong> For providers, new patient-lead notifications in your
+                    service area, account and billing alerts, and occasional platform updates. For patients,
+                    appointment-status updates related to the specific request you submitted.
+                  </p>
+                  <p>
+                    <strong>Frequency:</strong> Varies based on lead volume in your area and your account
+                    activity. You may receive multiple messages per week. You will not receive marketing
+                    messages unrelated to the request or account you signed up for.
+                  </p>
+                  <p>
+                    <strong>Carrier fees:</strong> Message and data rates may apply. Check with your mobile
+                    carrier for details about your text messaging plan. MobilePhlebotomy.org does not charge
+                    for SMS itself.
+                  </p>
+                  <p>
+                    <strong>How to opt out:</strong> Reply <strong>STOP</strong> to any SMS message from us
+                    at any time. You will receive a one-time confirmation and no further messages will be
+                    sent. You can also contact{' '}
+                    <a href="mailto:privacy@mobilephlebotomy.org" className="text-primary-600 hover:text-primary-700 font-medium">
+                      privacy@mobilephlebotomy.org
+                    </a>{' '}
+                    to request removal from SMS lists.
+                  </p>
+                  <p>
+                    <strong>Help:</strong> Reply <strong>HELP</strong> to any SMS message or email{' '}
+                    <a href="mailto:support@mobilephlebotomy.org" className="text-primary-600 hover:text-primary-700 font-medium">
+                      support@mobilephlebotomy.org
+                    </a>.
+                  </p>
+                  <p>
+                    <strong>Phone-number privacy:</strong> We do not sell or share your phone number with
+                    third parties for their marketing purposes. Phone numbers are used solely to deliver
+                    the SMS notifications you opted in to receive.
+                  </p>
+                </div>
+              </section>
+
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Sharing</h2>
                 <p className="text-gray-700 leading-relaxed">
