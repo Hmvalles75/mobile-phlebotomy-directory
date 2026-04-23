@@ -30,6 +30,9 @@ export default function ClaimLeadPage() {
   const [claimed, setClaimed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [leadData, setLeadData] = useState<Lead | null>(null)
+  const [releasing, setReleasing] = useState(false)
+  const [released, setReleased] = useState(false)
+  const [releaseError, setReleaseError] = useState<string | null>(null)
   const [isTrial, setIsTrial] = useState(false)
   const [providerId, setProviderId] = useState<string>('')
   const [providerName, setProviderName] = useState<string>('')
@@ -59,6 +62,37 @@ export default function ClaimLeadPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId, providerFromUrl])
+
+  async function handleRelease(reason: string) {
+    if (!leadData || !providerId) return
+    const confirmed = window.confirm(
+      'Release this lead back to the pool?\n\n' +
+      'Other providers in the area will be re-notified and can claim it. ' +
+      'You will no longer have access to this patient\'s contact info.\n\n' +
+      'Only release if you can\'t fulfill this request (no contact, scheduling conflict, wrong service type, etc.).'
+    )
+    if (!confirmed) return
+
+    setReleasing(true)
+    setReleaseError(null)
+    try {
+      const response = await fetch('/api/lead/release', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadId, providerId, reason }),
+      })
+      const data = await response.json()
+      if (data.ok) {
+        setReleased(true)
+      } else {
+        setReleaseError(data.error || 'Failed to release lead')
+      }
+    } catch (err: any) {
+      setReleaseError(err.message || 'Network error while releasing lead')
+    } finally {
+      setReleasing(false)
+    }
+  }
 
   async function autoClaim(pid: string) {
     setClaiming(true)
@@ -224,6 +258,26 @@ export default function ClaimLeadPage() {
   }
 
   // Successfully claimed - show lead details
+  if (released) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <CheckCircle className="mx-auto h-16 w-16 text-blue-500 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Lead Released</h1>
+          <p className="text-gray-600 mb-6">
+            This lead is back in the pool. Other providers in the area have been re-notified and can claim it.
+          </p>
+          <a
+            href="/dashboard"
+            className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+          >
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   if (claimed && leadData) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -336,6 +390,26 @@ export default function ClaimLeadPage() {
               >
                 View Dashboard
               </a>
+            </div>
+
+            {/* Release this lead — secondary action */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Can&apos;t fulfill this lead?</h4>
+              <p className="text-xs text-gray-500 mb-3">
+                If you can&apos;t reach the patient, have a scheduling conflict, or this isn&apos;t the right service type for you, release it back to the pool so another provider in the area can help.
+              </p>
+              {releaseError && (
+                <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                  {releaseError}
+                </div>
+              )}
+              <button
+                onClick={() => handleRelease('OTHER')}
+                disabled={releasing}
+                className="w-full bg-white border-2 border-amber-300 text-amber-800 text-center px-6 py-2.5 rounded-lg hover:bg-amber-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {releasing ? 'Releasing...' : '↩︎ Release this lead back to the pool'}
+              </button>
             </div>
           </div>
         </div>
