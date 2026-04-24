@@ -54,6 +54,16 @@ const nextConfig = {
         destination: '/mobile-phlebotomy-cost',
         permanent: true,
       },
+      // Consolidate the legacy hardcoded CAREWITHLUVS landing page into the
+      // canonical provider detail URL. The premium template on /provider/[slug]
+      // now renders the same rich layout via the premiumPage flag, so the
+      // standalone page is redundant. 301 preserves any accumulated SEO
+      // authority from backlinks pointing at the Maryland URL.
+      {
+        source: '/maryland/carewithluvs-mobile-phlebotomy',
+        destination: '/provider/carewithluvs-llc',
+        permanent: true,
+      },
     ]
   },
 }
