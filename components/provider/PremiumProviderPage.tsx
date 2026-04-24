@@ -170,9 +170,9 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
             <div className="flex justify-center md:justify-start">
               <div className="relative">
                 <div className="w-56 h-56 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center border-8 border-white shadow-2xl overflow-hidden">
-                  {provider.logo ? (
+                  {(provider.logo || provider.profileImage) ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={provider.logo} alt={provider.name} className="w-full h-full object-cover" />
+                    <img src={provider.logo || provider.profileImage || ''} alt={provider.name} className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-24 h-24 text-teal-400" strokeWidth={1.5} />
                   )}
