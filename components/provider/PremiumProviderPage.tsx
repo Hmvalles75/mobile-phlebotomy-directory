@@ -80,9 +80,26 @@ export default function PremiumProviderPage({ provider, mapCoords }: PremiumProv
     { icon: FileCheck, title: 'HIPAA Compliant', description: 'Your medical information is protected under strict HIPAA privacy standards' },
   ]
 
-  // Real testimonials will appear once the provider collects them
-  // (Never ship fabricated reviews — section shows placeholder state until provider supplies real ones)
-  const testimonials: Array<{ quote: string, author: string, location: string, rating: number }> = []
+  // Provider-supplied testimonials are stored as a JSON string in
+  // `provider.testimonials`. Parse once at render time. If parsing fails or
+  // the field is empty, the Patient Reviews section shows the "coming soon"
+  // placeholder instead of fabricated quotes.
+  const testimonials: Array<{ quote: string, author: string, location: string, rating: number }> = (() => {
+    const raw = (provider as any).testimonials
+    if (!raw || typeof raw !== 'string') return []
+    try {
+      const parsed = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return []
+      return parsed.filter(t => t && typeof t.quote === 'string' && typeof t.author === 'string').map(t => ({
+        quote: t.quote,
+        author: t.author,
+        location: t.location || '',
+        rating: typeof t.rating === 'number' ? t.rating : 5,
+      }))
+    } catch {
+      return []
+    }
+  })()
 
   // Parse ZIP codes for coverage display
   const zipList = provider.zipCodes

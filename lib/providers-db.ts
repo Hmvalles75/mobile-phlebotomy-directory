@@ -67,6 +67,8 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     logo: provider.logo,
     profileImage: provider.profileImage,
     heroPoster: provider.heroPoster,
+    // Testimonials (JSON string from DB — template parses)
+    testimonials: provider.testimonials || undefined,
 
     createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()
@@ -95,6 +97,7 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
         logo: true,
         profileImage: true,
         heroPoster: true,
+        testimonials: true,
         createdAt: true,
         updatedAt: true,
         // PRIMARY LOCATION FIELDS (Source of Truth)

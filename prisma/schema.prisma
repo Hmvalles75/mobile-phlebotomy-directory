@@ -48,6 +48,7 @@ model Provider {
   logo                  String?
   profileImage          String?
   heroPoster            String?                // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
+  testimonials          String?                // JSON array of provider-supplied reviews: [{ quote, author, location, rating }]. Rendered in Patient Reviews section when present; section shows "Reviews coming soon" when null/empty.
   notificationEmail     String?
   notifyEnabled         Boolean                @default(true)
   primaryCity           String?
