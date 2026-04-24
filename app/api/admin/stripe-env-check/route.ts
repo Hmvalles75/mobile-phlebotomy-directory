@@ -21,11 +21,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Active public tiers (post-2026-04-24 restructure). STANDARD_PREMIUM is
+  // retired as a sales SKU — its env var is no longer expected to be set.
   const tiers = [
-    { name: 'FOUNDING_PARTNER', envKey: 'STRIPE_PRICE_FOUNDING_PARTNER' },  // new $79 SKU
-    { name: 'STANDARD_PREMIUM', envKey: 'STRIPE_PRICE_STANDARD_PREMIUM' },  // legacy $79 (ProStik, US Mobile Lab)
-    { name: 'HIGH_DENSITY',     envKey: 'STRIPE_PRICE_HIGH_DENSITY' },      // Metro Pro $149
-    { name: 'CHARTER_MEMBER',   envKey: 'STRIPE_PRICE_CHARTER_MEMBER' },    // legacy $49 grandfathered (Steve, future CMB+Ponce)
+    { name: 'FOUNDING_PARTNER', envKey: 'STRIPE_PRICE_FOUNDING_PARTNER' },  // $79 solo / small practice
+    { name: 'HIGH_DENSITY',     envKey: 'STRIPE_PRICE_HIGH_DENSITY' },      // $149 Metro Pro
+    { name: 'CHARTER_MEMBER',   envKey: 'STRIPE_PRICE_CHARTER_MEMBER' },    // $49 grandfathered (Steve, future CMB+Ponce)
   ] as const
 
   const stripe = process.env.STRIPE_SECRET_KEY
