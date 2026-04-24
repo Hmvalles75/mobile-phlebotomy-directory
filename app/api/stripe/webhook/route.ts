@@ -193,10 +193,14 @@ export async function POST(req: NextRequest) {
 
           if (!tier && subscription.items?.data?.[0]?.price?.id) {
             const priceId = subscription.items.data[0].price.id
+            // Order matters: check new canonical SKUs first so they win when
+            // env vars share a price ID (e.g. STRIPE_PRICE_FOUNDING_PARTNER
+            // and STRIPE_PRICE_STANDARD_PREMIUM both pointing at the same
+            // $79 product after the 2026-04-24 Stripe rename).
             if (priceId === process.env.STRIPE_PRICE_HIGH_DENSITY) tier = 'HIGH_DENSITY'
-            else if (priceId === process.env.STRIPE_PRICE_STANDARD_PREMIUM) tier = 'STANDARD_PREMIUM'
             else if (priceId === process.env.STRIPE_PRICE_FOUNDING_PARTNER) tier = 'FOUNDING_PARTNER'
             else if (priceId === process.env.STRIPE_PRICE_CHARTER_MEMBER) tier = 'CHARTER_MEMBER'
+            else if (priceId === process.env.STRIPE_PRICE_STANDARD_PREMIUM) tier = 'STANDARD_PREMIUM'
           }
 
           const effectiveTier = tier || provider.featuredTier
