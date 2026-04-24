@@ -302,13 +302,22 @@ async function findFeaturedProvidersForNotification(
  * @param leadId - The ID of the newly created lead
  * @returns Promise<number> - Number of providers successfully notified
  */
+// Maximum age (in days) at which we'll still send lead notifications.
+// Beyond this, patients have almost certainly been served elsewhere and
+// notifying providers creates noise + false urgency.
+// 4 days gives a weekend-inclusive buffer — a Friday submission is still
+// notifiable through Tuesday — but caps re-routing of genuinely stale leads.
+// Separate from the 14-day auto-expire cron at /api/cron/expire-stale-leads.
+const MAX_NOTIFICATION_AGE_DAYS = 4
+
 export async function notifyFeaturedProvidersForLead(leadId: string): Promise<number> {
   try {
-    // Fetch the lead
+    // Fetch the lead (+ createdAt so we can gate on age)
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
       select: {
         id: true,
+        createdAt: true,
         city: true,
         state: true,
         zip: true,
@@ -323,7 +332,19 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       return 0
     }
 
-    console.log(`[LeadNotifications] Processing lead ${leadId} in ${lead.city}, ${lead.state} ${lead.zip}`)
+    // Age gate — skip notifications for stale leads. Applies to re-routing
+    // paths (release endpoint, catch-missed-notifications cron, etc.) so
+    // 2-month-old leads bouncing back into the pool don't spam providers.
+    const ageDays = (Date.now() - lead.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+    if (ageDays > MAX_NOTIFICATION_AGE_DAYS) {
+      console.log(
+        `[LeadNotifications] SKIP — lead ${leadId} is ${ageDays.toFixed(1)} days old ` +
+        `(> ${MAX_NOTIFICATION_AGE_DAYS}-day cap). No notifications sent.`
+      )
+      return 0
+    }
+
+    console.log(`[LeadNotifications] Processing lead ${leadId} in ${lead.city}, ${lead.state} ${lead.zip} (${ageDays.toFixed(1)}d old)`)
 
     // Find matching featured providers
     const providers = await findFeaturedProvidersForNotification(lead.zip, lead.state)
