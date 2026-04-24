@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Licensed mobile phlebotomists serving Boston, MA and surrounding areas. At-home blood draws — same-day and next-day available.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/boston-ma/in-home-blood-draw',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

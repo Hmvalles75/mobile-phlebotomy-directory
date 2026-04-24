@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Get a blood draw at home in Burbank, CA. Certified mobile phlebotomists serving Burbank and surrounding areas.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/burbank-ca/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

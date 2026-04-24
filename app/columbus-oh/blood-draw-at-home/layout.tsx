@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Licensed mobile phlebotomists serving Columbus, OH and surrounding areas. At-home blood draws — same-day and next-day available.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/columbus-oh/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

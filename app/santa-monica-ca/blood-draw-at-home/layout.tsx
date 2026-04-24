@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Get a blood draw at home in Santa Monica, CA. Certified mobile phlebotomists serving Santa Monica and surrounding areas.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/santa-monica-ca/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

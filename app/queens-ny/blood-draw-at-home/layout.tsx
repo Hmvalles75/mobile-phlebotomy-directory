@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Get a blood draw at home in Queens, NY. Certified mobile phlebotomists serving Queens and surrounding areas.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/queens-ny/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

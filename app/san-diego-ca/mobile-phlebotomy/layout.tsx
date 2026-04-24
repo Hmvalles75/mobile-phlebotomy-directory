@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Licensed mobile phlebotomists serving San Diego, CA and surrounding areas. At-home blood draws — same-day and next-day available.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/san-diego-ca/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

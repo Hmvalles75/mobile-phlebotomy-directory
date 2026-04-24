@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Get a blood draw at home in Newark, NJ. Certified mobile phlebotomists serving Newark and surrounding areas.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/newark-nj/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

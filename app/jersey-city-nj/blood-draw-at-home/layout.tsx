@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Get a blood draw at home in Jersey City, NJ. Certified mobile phlebotomists serving Jersey City and surrounding areas.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/jersey-city-nj/blood-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

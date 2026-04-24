@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'At-home blood draw services in West Hollywood. Same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/west-hollywood-ca/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

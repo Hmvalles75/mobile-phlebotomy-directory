@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Home lab specimen collection in Los Angeles. Professional service with same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/los-angeles-ca/lab-draw-at-home',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

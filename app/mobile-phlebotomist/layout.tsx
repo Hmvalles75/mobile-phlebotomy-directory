@@ -35,7 +35,10 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  }
+  },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/mobile-phlebotomist',
+  },
 }
 
 export default function MobilePhlebotomistLayout({

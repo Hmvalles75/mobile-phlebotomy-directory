@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     description: 'Same-day & next-day mobile blood draw services in Los Angeles. Licensed phlebotomists come to your home, office, or preferred location.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/los-angeles-ca/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

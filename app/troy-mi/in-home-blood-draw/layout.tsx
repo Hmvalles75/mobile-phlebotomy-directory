@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Professional in-home blood draw services in Troy, MI. Licensed mobile phlebotomists come to you — same-day and next-day appointments available.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/troy-mi/in-home-blood-draw',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

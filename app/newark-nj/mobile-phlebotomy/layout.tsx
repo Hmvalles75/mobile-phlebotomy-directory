@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'At-home blood draw services in Newark. Same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/newark-nj/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

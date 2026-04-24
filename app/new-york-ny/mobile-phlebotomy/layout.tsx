@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'At-home blood draw services across NYC and Northern NJ. Same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/new-york-ny/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

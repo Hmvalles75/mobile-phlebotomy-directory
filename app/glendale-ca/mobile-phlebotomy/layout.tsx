@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'At-home blood draw services in Glendale. Same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/glendale-ca/mobile-phlebotomy',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

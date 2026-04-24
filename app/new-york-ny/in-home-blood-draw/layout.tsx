@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'At-home blood draw services in In-Home Blood Draw NYC. Same-day & next-day availability.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/new-york-ny/in-home-blood-draw',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

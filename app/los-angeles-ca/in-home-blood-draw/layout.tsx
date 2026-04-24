@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Professional blood draws in the comfort of your Los Angeles home. Same-day & next-day service available.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://mobilephlebotomy.org/los-angeles-ca/in-home-blood-draw',
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
