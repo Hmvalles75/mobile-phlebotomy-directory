@@ -81,7 +81,20 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
   // Premium provider page template — paid $199 upgrade
   if (provider.premiumPage) {
-    return <PremiumProviderPage provider={provider} />
+    // Resolve lat/lng server-side from the primary ZIP so the embed map can
+    // use reliable coordinates instead of the flaky query-string geocoding.
+    let mapCoords: { lat: number; lng: number } | undefined
+    const primaryZip = provider.zipCodes?.split(',')[0]?.trim()
+    if (primaryZip) {
+      try {
+        const zipcodes = (await import('zipcodes')).default
+        const info = zipcodes.lookup(primaryZip)
+        if (info?.latitude && info?.longitude) {
+          mapCoords = { lat: info.latitude, lng: info.longitude }
+        }
+      } catch { /* fall back to query-based embed */ }
+    }
+    return <PremiumProviderPage provider={provider} mapCoords={mapCoords} />
   }
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''

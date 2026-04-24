@@ -13,6 +13,7 @@ import type { EnrichedProvider } from '@/lib/providers'
 
 interface PremiumProviderPageProps {
   provider: EnrichedProvider
+  mapCoords?: { lat: number; lng: number }
 }
 
 // Map service names to icons and unique descriptions for visual presentation
@@ -60,7 +61,7 @@ function formatPhone(phone: string | undefined | null): string | null {
   return phone // fallback to original if unexpected format
 }
 
-export default function PremiumProviderPage({ provider }: PremiumProviderPageProps) {
+export default function PremiumProviderPage({ provider, mapCoords }: PremiumProviderPageProps) {
   const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
@@ -322,17 +323,23 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
               )}
             </div>
 
-            {/* Google Maps embed — no API key needed for basic query embed.
-                Combines city + state + primary ZIP so Google geocodes
-                reliably to a metro-level view instead of defaulting to the
-                whole-world fallback (which happens when q= is just a bare
-                5-digit ZIP). */}
+            {/* Google Maps embed — prefers lat/lng from server-side ZIP
+                lookup (q=LAT,LNG is the most reliable embed format without
+                an API key). Falls back to text geocoding when coords
+                aren't available. */}
             {(() => {
-              const primaryZip = provider.zipCodes?.split(',')[0]?.trim()
-              const parts = [provider.city, provider.state, primaryZip].filter(Boolean)
-              if (parts.length === 0) return null
-              const locationQuery = parts.join(' ')
-              const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&t=&z=12&ie=UTF8&iwloc=&output=embed`
+              let mapSrc: string | null = null
+              if (mapCoords) {
+                mapSrc = `https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=12&output=embed`
+              } else {
+                const primaryZip = provider.zipCodes?.split(',')[0]?.trim()
+                const parts = [provider.city, provider.state, primaryZip].filter(Boolean)
+                if (parts.length > 0) {
+                  const locationQuery = parts.join(' ')
+                  mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&z=12&output=embed`
+                }
+              }
+              if (!mapSrc) return null
               return (
                 <div className="mt-8 rounded-xl overflow-hidden border border-teal-100 shadow-md bg-white">
                   <iframe
