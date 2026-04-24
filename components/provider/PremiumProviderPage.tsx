@@ -323,14 +323,16 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
             </div>
 
             {/* Google Maps embed — no API key needed for basic query embed.
-                Centered on the provider's primary ZIP or city/state. */}
+                Combines city + state + primary ZIP so Google geocodes
+                reliably to a metro-level view instead of defaulting to the
+                whole-world fallback (which happens when q= is just a bare
+                5-digit ZIP). */}
             {(() => {
               const primaryZip = provider.zipCodes?.split(',')[0]?.trim()
-              const locationQuery = primaryZip
-                || (provider.city && provider.state ? `${provider.city}, ${provider.state}` : null)
-                || provider.state
-              if (!locationQuery) return null
-              const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&t=&z=10&ie=UTF8&iwloc=&output=embed`
+              const parts = [provider.city, provider.state, primaryZip].filter(Boolean)
+              if (parts.length === 0) return null
+              const locationQuery = parts.join(' ')
+              const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&t=&z=12&ie=UTF8&iwloc=&output=embed`
               return (
                 <div className="mt-8 rounded-xl overflow-hidden border border-teal-100 shadow-md bg-white">
                   <iframe
@@ -504,13 +506,16 @@ export default function PremiumProviderPage({ provider }: PremiumProviderPagePro
               </div>
 
               {(provider as any).heroPoster ? (
-                // Provider-supplied promotional poster (overrides the generic Compassionate-care card)
-                <div className="hidden md:block relative bg-gray-100">
+                // Provider-supplied promotional poster (overrides the generic
+                // Compassionate-care card). object-contain + padding so the
+                // full poster is visible without cropping, regardless of
+                // the aspect ratio difference vs the booking card's height.
+                <div className="hidden md:flex relative bg-gradient-to-br from-teal-50 to-cyan-50 items-center justify-center p-6">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={(provider as any).heroPoster}
                     alt={`${provider.name} — mobile phlebotomy`}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-md"
                   />
                 </div>
               ) : (
