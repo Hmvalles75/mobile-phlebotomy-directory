@@ -66,6 +66,7 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     // Images
     logo: provider.logo,
     profileImage: provider.profileImage,
+    heroPoster: provider.heroPoster,
 
     createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()
@@ -93,6 +94,7 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
         isFeaturedCity: true,
         logo: true,
         profileImage: true,
+        heroPoster: true,
         createdAt: true,
         updatedAt: true,
         // PRIMARY LOCATION FIELDS (Source of Truth)

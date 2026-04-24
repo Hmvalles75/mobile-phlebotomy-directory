@@ -21,6 +21,7 @@ export interface EnrichedProvider {
   validation_notes?: string
   logo?: string
   profileImage?: string
+  heroPoster?: string
   businessImages?: string
   bio?: string
   foundedYear?: string

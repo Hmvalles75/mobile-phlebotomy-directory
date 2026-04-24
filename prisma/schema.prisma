@@ -47,6 +47,7 @@ model Provider {
   serviceRadiusMiles    Int?
   logo                  String?
   profileImage          String?
+  heroPoster            String?                // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
   notificationEmail     String?
   notifyEnabled         Boolean                @default(true)
   primaryCity           String?
