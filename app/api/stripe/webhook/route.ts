@@ -10,10 +10,17 @@ const stripe = process.env.STRIPE_SECRET_KEY
 
 const ADMIN_EMAIL = 'hector@mobilephlebotomy.org'
 
+// Tier labels for admin-facing notifications. Updated 2026-04-24 for the
+// two-tier restructure (Founding Partner $79 + Metro Pro $149).
+// - CHARTER_MEMBER is internal-only; grandfathered $49 rate for the 3 pilots
+//   (Steve, CMB, Ponce). Never surfaced in sales copy.
+// - STANDARD_PREMIUM is a legacy tier for ProStik + US Mobile Lab who signed
+//   up at $79 before the rename. Kept so their subs still resolve cleanly.
 const TIER_LABELS: Record<string, string> = {
-  FOUNDING_PARTNER: 'Founding Partner ($49/mo)',
-  STANDARD_PREMIUM: 'Standard Premium ($79/mo)',
-  HIGH_DENSITY: 'High-Density Metro ($149/mo)'
+  CHARTER_MEMBER:   'Charter Member ($49/mo, grandfathered)',
+  FOUNDING_PARTNER: 'Founding Partner ($79/mo)',
+  STANDARD_PREMIUM: 'Standard Premium ($79/mo, legacy)',
+  HIGH_DENSITY:     'Metro Pro ($149/mo)',
 }
 
 async function notifyAdmin(subject: string, body: string) {
@@ -105,7 +112,7 @@ export async function POST(req: NextRequest) {
 
         // Handle subscription (premium tier)
         if (type === 'featured_subscription') {
-          const tier = session.metadata?.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
+          const tier = session.metadata?.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER'
           if (tier) {
             const updated = await prisma.provider.update({
               where: { id: providerId },
@@ -182,13 +189,14 @@ export async function POST(req: NextRequest) {
         if (provider && subscription.status === 'active') {
           // Try to detect tier from subscription price ID if metadata is missing
           const metadata = subscription.metadata || {}
-          let tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | undefined
+          let tier = metadata.tier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER' | undefined
 
           if (!tier && subscription.items?.data?.[0]?.price?.id) {
             const priceId = subscription.items.data[0].price.id
             if (priceId === process.env.STRIPE_PRICE_HIGH_DENSITY) tier = 'HIGH_DENSITY'
             else if (priceId === process.env.STRIPE_PRICE_STANDARD_PREMIUM) tier = 'STANDARD_PREMIUM'
             else if (priceId === process.env.STRIPE_PRICE_FOUNDING_PARTNER) tier = 'FOUNDING_PARTNER'
+            else if (priceId === process.env.STRIPE_PRICE_CHARTER_MEMBER) tier = 'CHARTER_MEMBER'
           }
 
           const effectiveTier = tier || provider.featuredTier
@@ -233,7 +241,7 @@ export async function POST(req: NextRequest) {
                   primaryState: provider.primaryState,
                   primaryStateSlug: provider.primaryStateSlug,
                 },
-                effectiveTier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
+                effectiveTier as 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER'
               )
               if (!welcome.success) {
                 await notifyAdmin(

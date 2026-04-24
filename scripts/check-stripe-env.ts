@@ -5,9 +5,10 @@ import Stripe from 'stripe'
 
 async function main() {
   const tiers = [
-    { name: 'FOUNDING_PARTNER', envKey: 'STRIPE_PRICE_FOUNDING_PARTNER' },
-    { name: 'STANDARD_PREMIUM', envKey: 'STRIPE_PRICE_STANDARD_PREMIUM' },
-    { name: 'HIGH_DENSITY',     envKey: 'STRIPE_PRICE_HIGH_DENSITY' },
+    { name: 'FOUNDING_PARTNER', envKey: 'STRIPE_PRICE_FOUNDING_PARTNER' },  // new $79 SKU
+    { name: 'STANDARD_PREMIUM', envKey: 'STRIPE_PRICE_STANDARD_PREMIUM' },  // legacy $79
+    { name: 'HIGH_DENSITY',     envKey: 'STRIPE_PRICE_HIGH_DENSITY' },      // Metro Pro $149
+    { name: 'CHARTER_MEMBER',   envKey: 'STRIPE_PRICE_CHARTER_MEMBER' },    // legacy $49 grandfathered
   ]
 
   const secret = process.env.STRIPE_SECRET_KEY

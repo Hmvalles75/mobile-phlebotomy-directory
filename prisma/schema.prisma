@@ -546,6 +546,7 @@ enum FeaturedTier {
   FOUNDING_PARTNER
   STANDARD_PREMIUM
   HIGH_DENSITY
+  CHARTER_MEMBER  // Grandfathered $49/mo rate for the original pilots (Steve, CMB, Ponce). Internal-only label — never surfaced in sales copy.
 }
 
 enum LeadStatus {

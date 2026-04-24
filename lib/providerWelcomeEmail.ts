@@ -17,10 +17,14 @@ interface Provider {
   primaryStateSlug: string | null
 }
 
+// Updated 2026-04-24 for the two-tier public structure.
+// Note Charter Member is internal-only but labeled for the rare case this
+// welcome email fires for a grandfathered pilot's conversion.
 const TIER_LABEL: Record<string, string> = {
-  FOUNDING_PARTNER:  'Founding Partner ($49/mo)',
+  CHARTER_MEMBER:    'Charter Member ($49/mo)',
+  FOUNDING_PARTNER:  'Founding Partner ($79/mo)',
   STANDARD_PREMIUM:  'Standard Premium ($79/mo)',
-  HIGH_DENSITY:      'High-Density Metro ($149/mo)',
+  HIGH_DENSITY:      'Metro Pro ($149/mo)',
 }
 
 const FROM_EMAIL = process.env.LEAD_EMAIL_FROM || 'leads@mobilephlebotomy.org'
@@ -38,7 +42,7 @@ const SITE_URL   = 'https://mobilephlebotomy.org'
  */
 export async function sendProviderWelcomeEmail(
   provider: Provider,
-  tier: 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
+  tier: 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER'
 ): Promise<{ success: boolean; error?: string }> {
   const recipient = provider.notificationEmail || provider.claimEmail || provider.email
   if (!recipient) {
