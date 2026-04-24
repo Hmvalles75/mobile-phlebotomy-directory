@@ -59,6 +59,7 @@ export function LeadsPanel() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'new' | 'open' | 'claimed' | 'delivered' | 'unsold'>('all')
+  const [sortBy, setSortBy] = useState<'createdAt' | 'routedAt'>('createdAt')
 
   useEffect(() => {
     loadLeads()
@@ -96,6 +97,17 @@ export function LeadsPanel() {
     if (filter === 'delivered') return lead.status === 'DELIVERED'
     if (filter === 'unsold') return lead.status === 'UNSOLD'
     return true
+  }).slice().sort((a, b) => {
+    // Default: newest submissions first (createdAt desc)
+    // Alternate: most recent re-routing/claim activity first (routedAt desc)
+    // Re-routed old leads surface near top when sorted by routedAt —
+    // useful for catching zombies bouncing around the pool.
+    if (sortBy === 'routedAt') {
+      const aTs = a.routedAt ? new Date(a.routedAt).getTime() : 0
+      const bTs = b.routedAt ? new Date(b.routedAt).getTime() : 0
+      return bTs - aTs
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
   const newLeads = leads.filter(l => l.status === 'NEW')
@@ -196,6 +208,36 @@ export function LeadsPanel() {
         >
           Unsold: {unsoldLeads.length}
         </button>
+      </div>
+
+      {/* Sort toggle — helps surface re-routed older leads near the top */}
+      <div className="mb-4 flex items-center gap-2 text-sm">
+        <span className="text-gray-600">Sort:</span>
+        <button
+          onClick={() => setSortBy('createdAt')}
+          className={`px-3 py-1.5 rounded border text-xs ${
+            sortBy === 'createdAt'
+              ? 'bg-primary-50 border-primary-300 text-primary-800 font-semibold'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Newest submitted
+        </button>
+        <button
+          onClick={() => setSortBy('routedAt')}
+          className={`px-3 py-1.5 rounded border text-xs ${
+            sortBy === 'routedAt'
+              ? 'bg-primary-50 border-primary-300 text-primary-800 font-semibold'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Recent activity
+        </button>
+        {sortBy === 'routedAt' && (
+          <span className="text-xs text-gray-500 ml-2">
+            (re-routed/claimed most recently — surfaces zombie leads)
+          </span>
+        )}
       </div>
 
       <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start">
