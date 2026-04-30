@@ -22,6 +22,7 @@ interface Provider {
   email: string | null
   featuredTier: string | null
   isFeatured: boolean
+  priorityRouting: boolean
 }
 
 /**
@@ -166,8 +167,10 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
     }
 
     // SendGrid's sendAt holds the email on their side and delivers at the specified timestamp.
-    // Used for tier-priority routing: HIGH_DENSITY providers get immediate delivery (delaySeconds=0),
-    // other featured providers get a 60-second delay so HIGH_DENSITY has a head start to claim.
+    // Used for paid-vs-free wave splits: priorityRouting=true (paying customers) get
+    // immediate delivery (delaySeconds=0), everyone else gets a 600-second (10-minute)
+    // delay so paying customers have a real head-start window to claim leads in their
+    // coverage area.
     if (delaySeconds > 0) {
       sendPayload.sendAt = Math.floor(Date.now() / 1000) + delaySeconds
     }
@@ -220,6 +223,7 @@ async function findFeaturedProvidersForNotification(
       email: true,
       featuredTier: true,
       isFeatured: true,
+      priorityRouting: true,
       zipCodes: true,
       serviceRadiusMiles: true,
       primaryState: true,
@@ -293,6 +297,7 @@ async function findFeaturedProvidersForNotification(
     email: p.email,
     featuredTier: p.featuredTier,
     isFeatured: p.isFeatured,
+    priorityRouting: p.priorityRouting,
   }))
 }
 
@@ -356,24 +361,28 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
 
     console.log(`[LeadNotifications] Found ${providers.length} provider(s) to notify`)
 
-    // Split providers into priority waves by tier.
-    //   Wave 1 (immediate):        HIGH_DENSITY — top paid tier, first look
-    //   Wave 2 (+60 seconds):      Other Featured — paid tier, priority access
-    //   Wave 3 (+600 seconds):     Non-Featured opted-in — free tier, 10-minute delay
-    //                              so Featured has a real head-start in competitive ZIPs
-    const priorityProviders = providers.filter(p => p.isFeatured && p.featuredTier === 'HIGH_DENSITY')
-    const standardProviders = providers.filter(p => p.isFeatured && p.featuredTier !== 'HIGH_DENSITY')
-    const freeProviders     = providers.filter(p => !p.isFeatured)
+    // Split providers into 2 waves based on priorityRouting flag.
+    //   Wave 1 (immediate):     priorityRouting=true — actively paying customers, any tier
+    //   Wave 2 (+10 minutes):   everyone else (free + Featured-but-not-paying-currently)
+    //
+    // Rationale: tier-based waves were broken because featuredTier doesn't
+    // reliably indicate paying status (CHARTER_MEMBER includes both Steve who
+    // pays $49 and the free pilots Ponce/CMB; isFeatured has 20+ stale legacy
+    // entries). priorityRouting is a dedicated boolean flagged manually for
+    // active paying customers regardless of tier. That guarantees ALL paying
+    // customers — current and future — get a real head-start window when a
+    // lead lands in their coverage area, in exchange for what they're paying.
+    // Set priorityRouting=true via DB update when a new customer subscribes;
+    // set false when they cancel. (Stripe webhook can write this directly
+    // once the customer-id-writeback bug is fixed — see project memory.)
+    const priorityProviders = providers.filter(p => p.priorityRouting)
+    const otherProviders    = providers.filter(p => !p.priorityRouting)
 
     if (priorityProviders.length > 0) {
-      console.log(`[LeadNotifications] Wave 1 (HIGH_DENSITY): ${priorityProviders.length} provider(s), immediate`)
+      console.log(`[LeadNotifications] Wave 1 (paying): ${priorityProviders.length} provider(s), immediate`)
     }
-    if (standardProviders.length > 0) {
-      console.log(`[LeadNotifications] Wave 2 (Featured): ${standardProviders.length} provider(s), ${priorityProviders.length > 0 ? '60s delay' : 'immediate'}`)
-    }
-    if (freeProviders.length > 0) {
-      const hasPaidWave = priorityProviders.length > 0 || standardProviders.length > 0
-      console.log(`[LeadNotifications] Wave 3 (Free): ${freeProviders.length} provider(s), ${hasPaidWave ? '600s delay' : 'immediate'}`)
+    if (otherProviders.length > 0) {
+      console.log(`[LeadNotifications] Wave 2 (other): ${otherProviders.length} provider(s), ${priorityProviders.length > 0 ? '600s (10-min) delay' : 'immediate'}`)
     }
 
     const sendToProvider = async (provider: Provider, delaySeconds: number) => {
@@ -403,27 +412,21 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       }
     }
 
-    // Delays only apply if there's an earlier wave to give a head start to.
-    const standardDelay = priorityProviders.length > 0 ? 60 : 0
-    const hasPaidWave = priorityProviders.length > 0 || standardProviders.length > 0
-    const freeDelay = hasPaidWave ? 600 : 0
+    // Delay only applies if there's a paying provider to give a head start to.
+    // No paying provider in this lead's coverage = no point holding the lead;
+    // fire to everyone immediately so a free provider can pick it up.
+    const otherDelay = priorityProviders.length > 0 ? 600 : 0
     let successCount = 0
 
-    // Wave 1: HIGH_DENSITY providers — delivered immediately by SendGrid
+    // Wave 1: paying customers — delivered immediately by SendGrid
     for (const provider of priorityProviders) {
       const ok = await sendToProvider(provider, 0)
       if (ok) successCount++
     }
 
-    // Wave 2: Other featured providers — SendGrid holds for 60 seconds, then delivers
-    for (const provider of standardProviders) {
-      const ok = await sendToProvider(provider, standardDelay)
-      if (ok) successCount++
-    }
-
-    // Wave 3: Free opted-in providers — SendGrid holds for 10 minutes, then delivers
-    for (const provider of freeProviders) {
-      const ok = await sendToProvider(provider, freeDelay)
+    // Wave 2: everyone else — held by SendGrid until +600s if any paying provider matched
+    for (const provider of otherProviders) {
+      const ok = await sendToProvider(provider, otherDelay)
       if (ok) successCount++
     }
 

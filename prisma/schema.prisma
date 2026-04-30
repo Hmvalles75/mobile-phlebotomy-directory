@@ -70,6 +70,13 @@ model Provider {
   termsAcceptedAt       DateTime?
   languages             String?                // Comma-separated: "English,Spanish"
   premiumPage           Boolean                @default(false)  // Renders premium $199 template
+  // Lead-routing priority flag — set true ONLY for providers who are actively paying
+  // (any tier). Drives Wave 1 / Wave 2 split in lib/leadNotifications.ts so paying
+  // customers get a real head-start window before free providers see leads in their
+  // coverage area. Independent of featuredTier (which mixes paying + grandfathered)
+  // and isFeatured (which has 20+ stale legacy entries). Set manually until the
+  // Stripe webhook can write back reliably (see project memory: stripeCustomerId bug).
+  priorityRouting       Boolean                @default(false)
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]
