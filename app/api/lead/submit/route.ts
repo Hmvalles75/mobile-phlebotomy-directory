@@ -50,17 +50,67 @@ const schema = z.object({
 })
 
 /**
- * Classifies a lead from the submitted drawCount + requestType. Returns the
- * derived fields to persist on the lead row.
+ * B2B / research-study keyword patterns. When ANY of these match the
+ * notes field, the lead is flagged isHighValue regardless of what the
+ * user selected for drawCount/requestType in the form.
  *
- * - isHighValue: true when drawCount == "20+" OR requestType is organization/business
+ * Why: the form's discrete choices ("individual" + "1-3") miss B2B
+ * patterns where one contact represents an organization with multiple
+ * clients/employees/study participants. Marah Doria from NeuroAge
+ * Therapeutics submitted via the form on 2026-04-30 with notes that
+ * clearly described a multi-state research study, but selected
+ * individual+1-3 — the lead routed to a paramedical exam provider for $0
+ * before anyone realized it was a high-value B2B opportunity. This
+ * classifier closes that gap.
+ *
+ * Patterns are intentionally narrow — single-keyword matches like
+ * "company" or "study" alone would over-trigger on patient requests
+ * (e.g. "my company's insurance" or "the study my doctor ordered").
+ * Each pattern below must read as B2B/research in nearly all contexts.
+ */
+const B2B_NOTE_PATTERNS: ReadonlyArray<RegExp> = [
+  /\bbiotech\b/i,
+  /\bpharmaceutical\b/i,
+  /\bpharma\s+(company|corp|inc|llc)\b/i,
+  /\bresearch\s+study\b/i,
+  /\bresearch\s+studies\b/i,
+  /\bclinical\s+trial/i,
+  /\bclinical\s+research\b/i,
+  /\bdrug\s+discovery\b/i,
+  /\bdrug\s+development\b/i,
+  /\bbiometric\s+screening\b/i,
+  /\bwellness\s+program\b/i,
+  /\bhealth\s+fair\b/i,
+  /\bcorporate\s+event\b/i,
+  /\bon\s+behalf\s+of\b/i,           // strong signal — "I'm reaching out on behalf of X"
+  /\bour\s+(clients|employees|team|staff|patients|participants)\b/i,
+  /\b(employees|participants)\s+(in|across|at)\b/i,
+]
+
+function notesMatchB2B(notes: string | null | undefined): boolean {
+  if (!notes) return false
+  return B2B_NOTE_PATTERNS.some(re => re.test(notes))
+}
+
+/**
+ * Classifies a lead from the submitted drawCount + requestType + notes.
+ * Returns the derived fields to persist on the lead row.
+ *
+ * - isHighValue: true when drawCount == "20+" OR requestType is
+ *   organization/business OR notes contain B2B/research keywords.
  * - estimatedValueCents: draws × $75 using the low/mid of each bucket:
  *     "1-3"   → $0       (standard individual, not a value lead)
  *     "4-19"  → $825     (midpoint 11 × $75)
  *     "20+"   → $1,500   (conservative low 20 × $75)
  *   Legacy buckets ("2-5", "6-20", "1") are mapped to the closest new bucket.
+ *   When the notes-scanner triggers high-value but drawCount=1-3, we use
+ *   $825 as a placeholder so the admin email shows it deserves attention.
  */
-function classifyLead(drawCount: DrawCount | undefined, requestType: RequestType | undefined) {
+function classifyLead(
+  drawCount: DrawCount | undefined,
+  requestType: RequestType | undefined,
+  notes: string | null | undefined
+) {
   const rawDc = drawCount || '1-3'
   // Legacy bucket normalization — map old values to new buckets
   const dc: '1-3' | '4-19' | '20+' =
@@ -73,13 +123,15 @@ function classifyLead(drawCount: DrawCount | undefined, requestType: RequestType
 
   const rt = requestType || 'individual'
   const isOrganization = rt === 'organization' || rt === 'business'
-  const isHighValue = dc === '20+' || isOrganization
+  const notesB2B = notesMatchB2B(notes)
+  const isHighValue = dc === '20+' || isOrganization || notesB2B
   const estimatedValueCents =
     dc === '20+' ? 150000 :                // 20 × $75 = $1,500 conservative low
     dc === '4-19' ? 82500 :                // 11 × $75 = $825 midpoint
+    notesB2B ? 82500 :                     // B2B-flagged via notes — placeholder pending admin review
     0
 
-  return { drawCount: dc, requestType: rt, isHighValue, estimatedValueCents }
+  return { drawCount: dc, requestType: rt, isHighValue, estimatedValueCents, notesB2B }
 }
 
 export async function POST(req: NextRequest) {
@@ -90,8 +142,8 @@ export async function POST(req: NextRequest) {
     const priceCents = priceFor(payload.urgency)
     // Normalize city at write time so analytics + routing see consistent values
     const city = normalizeCity(payload.city)
-    const { drawCount, requestType, isHighValue, estimatedValueCents } =
-      classifyLead(payload.drawCount, payload.requestType)
+    const { drawCount, requestType, isHighValue, estimatedValueCents, notesB2B } =
+      classifyLead(payload.drawCount, payload.requestType, payload.notes)
 
     // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
@@ -128,7 +180,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}${isHighValue ? ' [HIGH VALUE]' : ''}`)
+    console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}${isHighValue ? ' [HIGH VALUE]' : ''}${notesB2B ? ' [B2B-from-notes]' : ''}`)
 
     // High-value leads — immediate admin notification so group/org requests get
     // hands-on follow-up regardless of normal routing outcomes. Fire-and-forget;
