@@ -3,6 +3,9 @@
  * Run with: npx tsx scripts/refresh-login-token.ts <email>
  */
 
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
+
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 
