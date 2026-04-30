@@ -39,6 +39,8 @@ export function Footer() {
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/search" className="text-gray-600 hover:text-primary-600 transition-colors">Find Providers</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/providers" className="text-gray-600 hover:text-primary-600 transition-colors">Provider Directory</Link></li>
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/about" className="text-gray-600 hover:text-primary-600 transition-colors">How It Works</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/contact" className="text-gray-600 hover:text-primary-600 transition-colors">Contact Support</Link></li>

@@ -3,6 +3,7 @@ import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
 import { CITY_MAPPING } from '@/data/cities-full'
 import { prisma } from '@/lib/prisma'
 import { SITE_URL } from '@/lib/seo'
+import { PROVIDERS_PER_PAGE } from '@/lib/seo/providersIndex'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
@@ -14,6 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       updatedAt: true,
     },
   })
+
+  // Count of active providers drives /providers index pagination URLs.
+  const activeProviderCount = await prisma.provider.count({
+    where: { status: 'VERIFIED', eligibleForLeads: true },
+  })
+  const providerIndexPages = Math.max(1, Math.ceil(activeProviderCount / PROVIDERS_PER_PAGE))
 
   const routes: MetadataRoute.Sitemap = [
     {
@@ -106,7 +113,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/providers`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
   ]
+
+  // Paginated provider index pages (page 2..N) — page 1 already added above.
+  for (let i = 2; i <= providerIndexPages; i++) {
+    routes.push({
+      url: `${baseUrl}/providers/page/${i}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    })
+  }
 
   // Add provider pages
   providers.forEach((provider) => {

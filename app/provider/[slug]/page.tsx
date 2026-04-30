@@ -17,6 +17,9 @@ import Link from 'next/link'
 import { ProviderWebsiteLink } from '@/components/ui/ProviderWebsiteLink'
 import { PhoneReveal } from '@/components/PhoneReveal'
 import PremiumProviderPage from '@/components/provider/PremiumProviderPage'
+import { getNearbyProviders, getServiceAreasCovered } from '@/lib/seo/internalLinks'
+import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
+import NearbyProviders from '@/components/seo/NearbyProviders'
 
 interface PageProps {
   params: {
@@ -94,7 +97,21 @@ export default async function ProviderDetailPage({ params }: PageProps) {
         }
       } catch { /* fall back to query-based embed */ }
     }
-    return <PremiumProviderPage provider={provider} mapCoords={mapCoords} />
+    // Service-area links + ZIP coverage block (replaces NearbyProviders on
+    // premium pages — outward links only, no competitor exposure).
+    const serviceAreas = await getServiceAreasCovered(provider.id)
+    const zipCodes = provider.zipCodes
+      ? provider.zipCodes.split(',').map(z => z.trim()).filter(Boolean)
+      : []
+    return (
+      <PremiumProviderPage
+        provider={provider}
+        mapCoords={mapCoords}
+        serviceAreaCities={serviceAreas.cities}
+        serviceAreaZips={zipCodes}
+        serviceAreaStateAbbr={serviceAreas.stateAbbr}
+      />
+    )
   }
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
@@ -161,6 +178,25 @@ export default async function ProviderDetailPage({ params }: PageProps) {
     }
   }
   breadcrumbItems.push({ name: provider.name, url: `/provider/${provider.slug}` })
+
+  // Resolve canonical state abbreviation (provider.state may be either an
+  // abbr like "CA" or a full name like "California") for the SEO link
+  // sections. Falls through to null if we can't resolve, in which case
+  // the link sections render conservatively or skip.
+  const resolvedStateAbbr: string | null = (() => {
+    if (!provider.state) return null
+    const raw = provider.state.trim()
+    const entry = Object.entries(STATE_DATA).find(
+      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
+    )
+    return entry?.[1].abbr || null
+  })()
+  const primaryCitySlug = provider.city
+    ? provider.city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    : null
+  const nearbyProviders = resolvedStateAbbr
+    ? await getNearbyProviders(provider.id, primaryCitySlug, resolvedStateAbbr, 5)
+    : []
 
   return (
     <>
@@ -693,6 +729,19 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Server-rendered SEO link sections (initial-HTML, visible to Googlebot
+              regardless of JS hydration). ServiceAreaLinks goes outward to
+              city/state pages; NearbyProviders distributes link equity to peers. */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ServiceAreaLinks
+              providerSlug={provider.slug}
+              primaryCity={provider.city || null}
+              primaryCitySlug={primaryCitySlug}
+              stateAbbr={resolvedStateAbbr}
+            />
+            <NearbyProviders providers={nearbyProviders} cityName={provider.city || null} />
           </div>
         </div>
       </div>

@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import StatePageClient, { stateData } from './StatePageClient'
+import StatePageClient from './StatePageClient'
 import { SITE_URL } from '@/lib/seo'
+import { STATE_DATA as stateData } from '@/data/states-full'
+import { getCitiesInState } from '@/lib/seo/internalLinks'
+import CitiesInState from '@/components/seo/CitiesInState'
 
 type Props = {
   params: { state: string }
@@ -49,12 +52,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function StatePage({ params }: Props) {
+export default async function StatePage({ params }: Props) {
   const stateSlug = params.state
+  const stateInfo = stateData[stateSlug]
 
-  if (!stateData[stateSlug]) {
+  if (!stateInfo) {
     notFound()
   }
 
-  return <StatePageClient stateSlug={stateSlug} />
+  // Server-rendered city directory — visible in initial HTML to Googlebot
+  // even though StatePageClient hydrates its provider grid client-side.
+  const cities = await getCitiesInState(stateInfo.abbr)
+
+  return (
+    <>
+      <StatePageClient stateSlug={stateSlug} />
+      <div className="bg-gray-50">
+        <div className="container mx-auto px-4 pb-12">
+          <CitiesInState cities={cities} stateSlug={stateSlug} stateName={stateInfo.name} />
+        </div>
+      </div>
+    </>
+  )
 }

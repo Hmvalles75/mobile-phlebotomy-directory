@@ -10,10 +10,19 @@ import {
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { trackPhoneClick } from '@/lib/trackPhoneClick'
 import type { EnrichedProvider } from '@/lib/providers'
+import type { CityLink } from '@/lib/seo/anchorHelpers'
+import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
+import ServiceAreasCovered from '@/components/seo/ServiceAreasCovered'
 
 interface PremiumProviderPageProps {
   provider: EnrichedProvider
   mapCoords?: { lat: number; lng: number }
+  // SEO link sections — server-fetched and passed in by the page route.
+  // NearbyProviders is intentionally omitted on premium pages: paying
+  // providers shouldn't compete with peers on their own profile.
+  serviceAreaCities?: CityLink[]
+  serviceAreaZips?: string[]
+  serviceAreaStateAbbr?: string | null
 }
 
 // Map service names to icons and unique descriptions for visual presentation
@@ -61,7 +70,17 @@ function formatPhone(phone: string | undefined | null): string | null {
   return phone // fallback to original if unexpected format
 }
 
-export default function PremiumProviderPage({ provider, mapCoords }: PremiumProviderPageProps) {
+export default function PremiumProviderPage({
+  provider,
+  mapCoords,
+  serviceAreaCities = [],
+  serviceAreaZips = [],
+  serviceAreaStateAbbr = null,
+}: PremiumProviderPageProps) {
+  // Derive primaryCitySlug for the outward city link
+  const primaryCitySlug = provider.city
+    ? provider.city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    : null
   const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
@@ -563,6 +582,33 @@ export default function PremiumProviderPage({ provider, mapCoords }: PremiumProv
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════
+          7b. SERVICE AREAS COVERED (server-rendered SEO links)
+          Outward links to city + state directory pages. Replaces a
+          competitor-list block that lives on non-premium pages — paying
+          providers don't link to alternatives, but the linking benefit
+          to their geographic context is preserved here.
+          ═══════════════════════════════════════════════════════════ */}
+      <ServiceAreasCovered
+        providerSlug={provider.slug}
+        cities={serviceAreaCities}
+        zipCodes={serviceAreaZips}
+        stateAbbr={serviceAreaStateAbbr}
+      />
+
+      {/* Service area + state link block — gives Google a clear path
+          back into the city/state directory hierarchy. */}
+      <section className="py-12 bg-gray-50 border-t border-gray-100">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <ServiceAreaLinks
+            providerSlug={provider.slug}
+            primaryCity={provider.city || null}
+            primaryCitySlug={primaryCitySlug}
+            stateAbbr={serviceAreaStateAbbr}
+          />
         </div>
       </section>
 
