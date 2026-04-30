@@ -48,7 +48,7 @@ async function sendProviderLeadNotificationEmail(
     return { success: false, error: 'Missing EMAIL_FROM config' }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org').replace(/\/+$/, '')
   const claimUrl = `${siteUrl}/claim/${lead.id}?provider=${provider.id}`
   const leadType = 'Individual'  // Default for Phase 1
   const notesShort = lead.notes ? lead.notes.substring(0, 200) : 'None'

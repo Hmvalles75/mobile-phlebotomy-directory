@@ -35,8 +35,11 @@ export async function sendSMSBlastToEligibleProviders(lead: Lead): Promise<numbe
 
     console.log(`Found ${eligibleProviders.length} eligible providers for SMS blast near ZIP ${lead.zip}`)
 
-    // Construct claim URL (provider-specific for one-click claim)
-    const siteUrl = process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+    // Construct claim URL (provider-specific for one-click claim).
+    // Strip a trailing slash defensively — PUBLIC_SITE_URL is sometimes
+    // set with a trailing "/" which produced "...org//claim/..." URLs
+    // in SMS bodies (carriers + spam filters dislike malformed URLs).
+    const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://mobilephlebotomy.org').replace(/\/+$/, '')
 
     // Send SMS to each provider
     const sendPromises = eligibleProviders.map(async (provider) => {
