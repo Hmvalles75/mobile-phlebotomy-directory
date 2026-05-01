@@ -1,13 +1,17 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 
+// CTR-optimized 2026-04-30 from GSC data. Old title was 78 chars \u2014 heavily
+// truncated by Google. New title at 57 chars leads with the answer (Yes,
+// Medicare 80%) since users search "does insurance cover" looking for a
+// direct yes/no + percentage. Page had 2,600 impressions/90d at 0.69% CTR.
 export const metadata: Metadata = {
-  title: 'Does Insurance Cover Mobile Phlebotomy? Medicare, Medicaid & Private Plans',
-  description: 'Yes \u2014 many insurance plans cover mobile phlebotomy. Medicare pays 80% for homebound patients. See what your plan covers and how to get pre-authorization.',
+  title: 'Mobile Phlebotomy Insurance: Medicare 80%, Medicaid & Private',
+  description: 'Yes \u2014 most insurance covers mobile phlebotomy. Medicare pays 80% for homebound patients. See Medicaid, private plan coverage, and pre-authorization steps for 2026.',
   keywords: 'mobile phlebotomy insurance coverage, does insurance cover mobile phlebotomy, Medicare mobile phlebotomy, at home blood draw insurance, mobile blood draw Medicare, phlebotomy insurance billing',
   openGraph: {
-    title: 'Does Insurance Cover Mobile Phlebotomy? Medicare, Medicaid & Private Plans',
-    description: 'Yes \u2014 many insurance plans cover mobile phlebotomy. Medicare pays 80% for homebound patients. See what your plan covers and how to get pre-authorization.',
+    title: 'Mobile Phlebotomy Insurance: Medicare 80%, Medicaid & Private',
+    description: 'Yes \u2014 most insurance covers mobile phlebotomy. Medicare pays 80% for homebound patients. See Medicaid, private plan coverage, and pre-authorization steps for 2026.',
     type: 'article',
   }
 }

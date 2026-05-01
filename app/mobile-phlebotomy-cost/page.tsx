@@ -2,13 +2,19 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
+// CTR-optimized 2026-04-30 from GSC data. Old title was 64 chars and got
+// truncated by Google ("...(2026)" cut off in SERPs). New title leads with
+// the exact answer users search for ($75\u2013$150) at 56 chars \u2014 within
+// Google's display limit. Description tightens parallel \u2014 leads with the
+// price answer instead of "see prices by state" preamble. Page was getting
+// 7,849 impressions/90d at position 6 with only 0.41% CTR.
 export const metadata: Metadata = {
-  title: 'How Much Does Mobile Phlebotomy Cost? $60\u2013$150 Per Visit (2026)',
-  description: 'Mobile phlebotomy costs $75\u2013$150 per visit. See prices by state, 5 ways to pay less, and get a free quote today. Most Medicare & Medicaid patients pay $0\u2013$25.',
+  title: 'Mobile Phlebotomy Cost: $75\u2013$150 Per Visit (2026 Prices)',
+  description: 'Mobile phlebotomy costs $75\u2013$150 per visit in 2026. Compare prices by state, see what Medicare covers ($0\u2013$25 for most patients), and 5 ways to pay less.',
   keywords: 'mobile phlebotomy cost, at home blood draw cost, mobile blood draw price, home phlebotomy pricing, blood draw at home cost, mobile lab cost, traveling phlebotomist cost, at home blood work price, how much does mobile phlebotomy cost',
   openGraph: {
-    title: 'How Much Does Mobile Phlebotomy Cost? $60\u2013$150 Per Visit (2026)',
-    description: 'Mobile phlebotomy costs $75\u2013$150 per visit. See prices by state, 5 ways to pay less, and get a free quote today. Most Medicare & Medicaid patients pay $0\u2013$25.',
+    title: 'Mobile Phlebotomy Cost: $75\u2013$150 Per Visit (2026 Prices)',
+    description: 'Mobile phlebotomy costs $75\u2013$150 per visit in 2026. Compare prices by state, see what Medicare covers ($0\u2013$25 for most patients), and 5 ways to pay less.',
     type: 'article',
   }
 }

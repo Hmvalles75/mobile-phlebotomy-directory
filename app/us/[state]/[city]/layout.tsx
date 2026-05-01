@@ -30,10 +30,17 @@ function resolveCityState(stateSlug: string, citySlugRaw: string) {
 export async function generateMetadata({ params }: { params: { state: string, city: string } }): Promise<Metadata> {
   const { citySlug, cityName, stateAbbr, cityInfo } = resolveCityState(params.state, params.city)
 
-  // For cities not in mapping, create conversion-optimized SEO
+  // CTR-optimized 2026-04-30. Old title format was generic and was getting
+  // 0.27-0.9% CTR on high-impression city pages (Seattle 4,114 imp at
+  // page-1 position 6.76 with only 0.27% CTR — the strongest signal that
+  // the snippet wasn't compelling). New format leads with city + price
+  // anchor since users searching "mobile phlebotomy [city]" want concrete
+  // info up front. Description tightens parallel.
+
+  // For cities not in mapping, conversion-optimized SEO with same shape
   if (!cityInfo) {
-    const title = `Mobile Phlebotomy ${cityName}, ${stateAbbr} | Find At-Home Blood Draw Services`
-    const description = `Looking for mobile blood draw in ${cityName}? Submit your request and we'll connect you with licensed phlebotomists serving ${stateAbbr}. Free, fast, no obligation.`
+    const title = `Mobile Phlebotomy ${cityName}, ${stateAbbr}: At-Home Blood Draws From $75`
+    const description = `${cityName}, ${stateAbbr} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75. Submit a request — fast, free, no obligation.`
 
     return {
       title,
@@ -44,8 +51,8 @@ export async function generateMetadata({ params }: { params: { state: string, ci
     }
   }
 
-  const title = `Mobile Phlebotomy ${cityInfo.name} | At-Home Blood Draw Near You (2026)`
-  const description = `Licensed mobile phlebotomists serving ${cityInfo.name}, ${cityInfo.state} and surrounding areas. At-home blood draws — same-day and next-day available.`
+  const title = `Mobile Phlebotomy ${cityInfo.name}, ${cityInfo.state}: At-Home Blood Draws From $75`
+  const description = `${cityInfo.name} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75 per visit. Medicare-friendly. Book a draw today.`
 
   return {
     title,

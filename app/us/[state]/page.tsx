@@ -21,9 +21,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const stateName = stateInfo.name
   const url = `${SITE_URL}/us/${stateSlug}`
 
+  // CTR-optimized 2026-04-30. Old title was generic ("Mobile Phlebotomy
+  // in X | At-Home Blood Draw Services (2026)") and page-2 ranked state
+  // pages were getting 0.3-0.9% CTR despite high impressions (TX 5,484,
+  // CA 3,319, FL 2,785). New title leads with a price anchor — concrete
+  // numbers in SERPs lift CTR significantly over generic value props.
+  // Description leads with state name + price/availability instead of
+  // "Find licensed mobile phlebotomists" preamble.
+  const title = `Mobile Phlebotomy in ${stateName}: At-Home Blood Draws From $75 (2026)`
+  const description = `${stateName} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75 per visit. Medicare-friendly. Request a draw today.`
+
   return {
-    title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
-    description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
+    title,
+    description,
     alternates: {
       canonical: url,
     },
@@ -39,15 +49,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
-      description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
+      title,
+      description,
       url,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Mobile Phlebotomy in ${stateName} | At-Home Blood Draw Services (2026)`,
-      description: `Find licensed mobile phlebotomists across ${stateName}. At-home blood draws by certified providers. Request service in your area today.`,
+      title,
+      description,
     },
   }
 }
