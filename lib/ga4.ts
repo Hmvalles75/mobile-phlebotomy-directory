@@ -81,7 +81,70 @@ export const ga4 = {
   },
 
   /**
-   * Step 4: User submits form (before API call)
+   * Step 3a: User completed the drawCount question (1-3 / 4-19 / 20+).
+   * Fires once per session on first interaction with the buttons.
+   * Diagnoses whether the form is even getting visible engagement.
+   */
+  leadFormStepDrawCount: (params?: { value?: string }) => {
+    trackEvent('lead_form_step_drawcount', params)
+  },
+
+  /**
+   * Step 3b: User completed the doctor's order question.
+   * Fires once per session on first selection.
+   * If this is significantly lower than step_drawcount, drawCount → doctor's
+   * order is a drop-off point (maybe people stop when they see the question).
+   */
+  leadFormStepDoctorOrder: (params?: { value?: string }) => {
+    trackEvent('lead_form_step_doctor_order', params)
+  },
+
+  /**
+   * Step 3c: User completed the payment-method question.
+   * Fires once per session on first selection.
+   * If this is significantly lower than step_doctor_order, the payment
+   * question is the drop-off (maybe "Insurance" missing as default scares
+   * people who don't have insurance).
+   */
+  leadFormStepPayment: (params?: { value?: string }) => {
+    trackEvent('lead_form_step_payment', params)
+  },
+
+  /**
+   * Step 3d: User filled all required contact fields (fullName + phone + email).
+   * Fires once per session when all three are non-empty for the first time.
+   * If this is significantly lower than step_payment, the contact-fields
+   * section is the drop-off (maybe email-required is friction, or maybe
+   * they get distracted before finishing).
+   */
+  leadFormStepContactFilled: () => {
+    trackEvent('lead_form_step_contact_filled')
+  },
+
+  /**
+   * Step 3e: User filled all required location fields (zip + city + state).
+   * Fires once per session when all three are non-empty for the first time.
+   * If this is significantly lower than step_contact_filled, location is
+   * the drop-off (maybe ZIP-validation feels too restrictive, or city/state
+   * autofill failed).
+   */
+  leadFormStepLocationFilled: () => {
+    trackEvent('lead_form_step_location_filled')
+  },
+
+  /**
+   * Client-side validation blocked submit. Tells us which required field
+   * was missing when the user clicked Submit. Each field gets its own
+   * named param so we can stack-rank the most common blockers.
+   */
+  leadFormValidationError: (params: { field: string }) => {
+    trackEvent('lead_form_validation_error', params)
+  },
+
+  /**
+   * Step 4: User submits form (before API call).
+   * Distance from step_location_filled tells us whether people make it to
+   * "click submit" or get stuck somewhere else.
    */
   leadSubmitAttempt: (params?: {
     city?: string

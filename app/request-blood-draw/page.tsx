@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { captureAttribution } from '@/lib/attribution'
+import { ga4 } from '@/lib/ga4'
 
 function RequestBloodDrawForm() {
   const router = useRouter()
@@ -40,6 +41,26 @@ function RequestBloodDrawForm() {
     affiliateUrl?: string
   } | null>(null)
 
+  // Step-event dedup. Each step event should fire only once per session,
+  // even if the user re-touches the field. Lets the GA4 funnel show a
+  // clean progression rather than counting re-clicks.
+  const firedSteps = useRef(new Set<string>())
+  const fireOnce = (key: string, fn: () => void) => {
+    if (firedSteps.current.has(key)) return
+    firedSteps.current.add(key)
+    fn()
+  }
+  // Composite step events fire when a GROUP of fields is all non-empty for
+  // the first time. Watching formData; cheaper than per-field listeners.
+  useEffect(() => {
+    if (formData.fullName.trim() && formData.phone.trim() && formData.email.trim()) {
+      fireOnce('contact_filled', () => ga4.leadFormStepContactFilled())
+    }
+    if (formData.zip.trim().length >= 5 && formData.city.trim() && formData.state.trim().length >= 2) {
+      fireOnce('location_filled', () => ga4.leadFormStepLocationFilled())
+    }
+  }, [formData.fullName, formData.phone, formData.email, formData.zip, formData.city, formData.state])
+
   // Check coverage when city and state are available
   useEffect(() => {
     const checkCoverage = async () => {
@@ -74,17 +95,31 @@ function RequestBloodDrawForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Require the two screening questions since they're button inputs (no native "required")
+    // Require the two screening questions since they're button inputs (no native "required").
+    // Fire validation_error events here so we know which field is the most common
+    // submit blocker — click rate on Submit minus successful submits = drop-off
+    // attributable to validation, and we can stack-rank by field.
     if (!formData.hasDoctorOrder) {
+      ga4.leadFormValidationError({ field: 'hasDoctorOrder' })
       setError('Please answer whether you have a doctor\'s order.')
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
     if (!formData.paymentMethod) {
+      ga4.leadFormValidationError({ field: 'paymentMethod' })
       setError('Please select how you\'ll be paying.')
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
+
+    // Past validation — fire submit_attempt before the network call so we
+    // capture intent even if the API errors out.
+    ga4.leadSubmitAttempt({
+      city: formData.city,
+      state: formData.state,
+      zip: formData.zip,
+      urgency: formData.urgency,
+    })
 
     setLoading(true)
     setError('')
@@ -106,16 +141,31 @@ function RequestBloodDrawForm() {
       const data = await response.json()
 
       if (data.ok) {
+        ga4.leadSubmitSuccess({
+          lead_id: data.leadId,
+          city: formData.city,
+          state: formData.state,
+          zip: formData.zip,
+          urgency: formData.urgency,
+        })
         setSubmitted(true)
         // Scroll to success message
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' })
         }, 100)
       } else {
+        ga4.leadSubmitError({
+          error_code: 'api_error',
+          error_message: data.error || 'unknown',
+        })
         setError(data.error || 'Failed to submit request')
       }
     } catch (error) {
       console.error('Lead submission error:', error)
+      ga4.leadSubmitError({
+        error_code: 'network_error',
+        error_message: error instanceof Error ? error.message : 'unknown',
+      })
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -201,7 +251,10 @@ function RequestBloodDrawForm() {
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, drawCount: opt.value as typeof formData.drawCount }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, drawCount: opt.value as typeof formData.drawCount }))
+                        fireOnce('drawcount', () => ga4.leadFormStepDrawCount({ value: opt.value }))
+                      }}
                       className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
                         formData.drawCount === opt.value
                           ? 'border-primary-600 bg-primary-50 text-primary-900'
@@ -229,7 +282,10 @@ function RequestBloodDrawForm() {
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, hasDoctorOrder: opt.value as typeof formData.hasDoctorOrder }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, hasDoctorOrder: opt.value as typeof formData.hasDoctorOrder }))
+                        fireOnce('doctor_order', () => ga4.leadFormStepDoctorOrder({ value: opt.value }))
+                      }}
                       className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
                         formData.hasDoctorOrder === opt.value
                           ? 'border-primary-600 bg-primary-50 text-primary-900'
@@ -261,7 +317,10 @@ function RequestBloodDrawForm() {
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, paymentMethod: opt.value as typeof formData.paymentMethod }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, paymentMethod: opt.value as typeof formData.paymentMethod }))
+                        fireOnce('payment', () => ga4.leadFormStepPayment({ value: opt.value }))
+                      }}
                       className={`text-left px-4 py-3 border-2 rounded-lg transition-all ${
                         formData.paymentMethod === opt.value
                           ? 'border-primary-600 bg-primary-50 text-primary-900'
