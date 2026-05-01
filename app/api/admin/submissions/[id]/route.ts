@@ -184,7 +184,13 @@ async function addProviderToDatabase(submission: any) {
       listingTier: 'BASIC',
       source: 'SELF_SIGNUP',
       eligibleForLeads: wantsLeads,
-      isFeatured: wantsLeads,
+      // Featured is paying-only per policy (project_founding_partner_conversion
+      // memory) — do NOT auto-feature self-signups even when they opt into
+      // leads. Featured placement is reserved for active paying customers
+      // (set priorityRouting=true via DB update when subscription starts).
+      // Older code defaulted this to wantsLeads which created 18+ stale
+      // freeloaders cleaned up 2026-04-30.
+      isFeatured: false,
       notifyEnabled: wantsLeads,
       serviceRadiusMiles: 25,
     }
