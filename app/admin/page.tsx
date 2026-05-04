@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
 import { LeadsPanel } from './LeadsPanel'
 import { ChargeProviderPanel } from './ChargeProviderPanel'
@@ -492,6 +493,16 @@ export default function AdminDashboard() {
             >
               Billing & Charges
             </button>
+            {/* Institutional clients lives at a separate route (/admin/institutional/clients)
+                rather than being part of this tab-state, so it's a Link, not a button.
+                Styled to match the other tab buttons for visual consistency. */}
+            <Link
+              href="/admin/institutional/clients"
+              className="px-4 py-2 font-medium transition-colors whitespace-nowrap text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+            >
+              Institutional Clients
+              <span aria-hidden className="text-xs">↗</span>
+            </Link>
           </div>
 
           {activeTab === 'submissions' && (
