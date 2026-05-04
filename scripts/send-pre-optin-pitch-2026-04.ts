@@ -29,9 +29,11 @@ const TEST = process.argv.includes('--test')
 const TEST_RECIPIENT = 'hector@mobilephlebotomy.org'
 const STAGGER_SECONDS = 90
 
-// Default schedule: Wed 2026-04-29 at 9:00 AM Pacific (16:00 UTC during PDT).
+// Default schedule: Fri 2026-05-01 at 9:00 AM Pacific (16:00 UTC during PDT).
+// Original 2026-04-29 send slipped past while the script was being refined;
+// rescheduled to align with the scraped-claim pitch later same day (2 PM PDT).
 function defaultSendAt(): number {
-  return Math.floor(new Date('2026-04-29T16:00:00Z').getTime() / 1000)
+  return Math.floor(new Date('2026-05-01T16:00:00Z').getTime() / 1000)
 }
 
 function hasValidEmail(e: string | null | undefined): boolean {
