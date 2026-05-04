@@ -60,7 +60,7 @@ function TimestampRow({ label, field, value, orderId }: { label: string; field: 
 
 export default async function OrderDetailPage({ params }: Props) {
   const ok = await verifyAdminSession()
-  if (!ok) redirect(`/admin/login?next=/admin/institutional/orders/${params.orderId}`)
+  if (!ok) redirect('/admin')
 
   const [order, providers] = await Promise.all([
     prisma.institutionalOrder.findUnique({

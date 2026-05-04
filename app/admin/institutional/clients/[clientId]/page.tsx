@@ -17,7 +17,7 @@ function fmtDate(d: Date | null | undefined): string {
 
 export default async function ClientDetailPage({ params }: Props) {
   const ok = await verifyAdminSession()
-  if (!ok) redirect(`/admin/login?next=/admin/institutional/clients/${params.clientId}`)
+  if (!ok) redirect('/admin')
 
   const client = await prisma.institutionalClient.findUnique({
     where: { id: params.clientId },

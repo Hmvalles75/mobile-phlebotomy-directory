@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function InstitutionalClientsPage() {
   const ok = await verifyAdminSession()
-  if (!ok) redirect('/admin/login?next=/admin/institutional/clients')
+  if (!ok) redirect('/admin')
 
   const clients = await prisma.institutionalClient.findMany({
     orderBy: { createdAt: 'desc' },

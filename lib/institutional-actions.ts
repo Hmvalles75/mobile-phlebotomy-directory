@@ -8,7 +8,9 @@ import type { OrderStatus } from '@prisma/client'
 
 async function requireAdmin() {
   const ok = await verifyAdminSession()
-  if (!ok) redirect('/admin/login?next=/admin/institutional/clients')
+  // The admin login page lives at /admin (inline form, not a separate
+  // /admin/login route). Don't change this without also adding the page.
+  if (!ok) redirect('/admin')
 }
 
 // ────────────────────────────────────────────────────────────────────
