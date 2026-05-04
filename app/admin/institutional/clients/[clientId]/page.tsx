@@ -36,7 +36,13 @@ export default async function ClientDetailPage({ params }: Props) {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
         <div>
-          <Link href="/admin/institutional/clients" className="text-sm text-primary-600 hover:underline">← All clients</Link>
+          <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+            <Link href="/admin" className="text-primary-600 hover:underline">Admin home</Link>
+            <span aria-hidden>/</span>
+            <Link href="/admin/institutional/clients" className="text-primary-600 hover:underline">Institutional Clients</Link>
+            <span aria-hidden>/</span>
+            <span className="text-gray-700">{client.name}</span>
+          </nav>
           <div className="mt-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{client.name}</h1>

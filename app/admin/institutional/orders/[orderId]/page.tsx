@@ -87,9 +87,15 @@ export default async function OrderDetailPage({ params }: Props) {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-4 sm:p-8 space-y-6">
         <div>
-          <Link href={`/admin/institutional/clients/${order.clientId}`} className="text-sm text-primary-600 hover:underline">
-            ← {order.client.name}
-          </Link>
+          <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+            <Link href="/admin" className="text-primary-600 hover:underline">Admin home</Link>
+            <span aria-hidden>/</span>
+            <Link href="/admin/institutional/clients" className="text-primary-600 hover:underline">Institutional Clients</Link>
+            <span aria-hidden>/</span>
+            <Link href={`/admin/institutional/clients/${order.clientId}`} className="text-primary-600 hover:underline">{order.client.name}</Link>
+            <span aria-hidden>/</span>
+            <span className="text-gray-700">{order.patientName}</span>
+          </nav>
           <div className="mt-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{order.patientName}</h1>

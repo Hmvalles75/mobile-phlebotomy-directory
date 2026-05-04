@@ -20,7 +20,11 @@ export default async function InstitutionalClientsPage() {
       <div className="max-w-5xl mx-auto p-4 sm:p-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin" className="text-sm text-primary-600 hover:underline">← Admin home</Link>
+            <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+              <Link href="/admin" className="text-primary-600 hover:underline">Admin home</Link>
+              <span aria-hidden>/</span>
+              <span className="text-gray-700">Institutional Clients</span>
+            </nav>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">Institutional Clients</h1>
             <p className="text-sm text-gray-600 mt-1">B2B accounts that send blood draw kits across multiple states.</p>
           </div>
