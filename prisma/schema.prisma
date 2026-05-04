@@ -91,6 +91,7 @@ model Provider {
   coverage              ProviderCoverage[]
   payment               ProviderPayment[]
   services              ProviderService[]
+  institutionalOrders   InstitutionalOrder[]
 
   @@index([primaryState])
   @@index([primaryCity])
@@ -98,6 +99,84 @@ model Provider {
   @@index([onboardingStatus])
   @@index([source])
   @@map("providers")
+}
+
+// ────────────────────────────────────────────────────────────────────
+// B2B / Institutional client tracking. Replaces the spreadsheet workflow
+// for clients like NeuroAge Therapeutics that send blood draw kits to
+// patients across multiple states. Each order has a public share token
+// the client can use (without auth) to see live status. Each client also
+// has a single share token that surfaces all of their orders in one view.
+// Privacy: public views only show patient first name + city/state, never
+// the full address, contact info, pricing, or internal notes.
+// ────────────────────────────────────────────────────────────────────
+model InstitutionalClient {
+  id               String   @id @default(cuid())
+  name             String
+  contactEmail     String
+  ccEmails         String?  // comma-separated additional recipients
+  notes            String?  @db.Text
+  publicShareToken String   @unique @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  orders           InstitutionalOrder[]
+
+  @@map("institutional_clients")
+}
+
+model InstitutionalOrder {
+  id                 String   @id @default(cuid())
+  clientId           String
+  client             InstitutionalClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  patientName        String
+  patientContactName String?  // primary contact if different from patient (e.g. caregiver)
+  patientPhone       String
+  patientEmail       String?
+  patientAddress     String
+  patientCity        String
+  patientState       String
+  patientZip         String
+  patientNotes       String?  @db.Text
+
+  protocolNotes      String?  @db.Text
+  clientRate         Decimal  @db.Decimal(10, 2)
+
+  assignedProviderId String?
+  assignedProvider   Provider? @relation(fields: [assignedProviderId], references: [id])
+  providerRate       Decimal? @db.Decimal(10, 2)
+
+  kitShippedAt       DateTime?
+  kitReceivedAt      DateTime?
+  scheduledAt        DateTime?  // when scheduling was confirmed with patient
+  scheduledFor       DateTime?  // actual appointment date/time
+  drawCompletedAt    DateTime?
+  fedexDroppedAt     DateTime?
+  fedexTrackingNum   String?
+
+  status             OrderStatus @default(PENDING_KIT_RECEIPT)
+  publicShareToken   String   @unique @default(cuid())
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([assignedProviderId])
+  @@index([status])
+  @@map("institutional_orders")
+}
+
+enum OrderStatus {
+  PENDING_KIT_SHIPMENT
+  KIT_SHIPPED
+  PENDING_KIT_RECEIPT
+  KIT_RECEIVED
+  PROVIDER_ASSIGNED
+  SCHEDULED
+  DRAW_COMPLETED
+  FEDEX_DROPPED
+  COMPLETED
+  CANCELLED
 }
 
 model Lead {
