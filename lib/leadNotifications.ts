@@ -34,7 +34,8 @@ interface Provider {
 async function sendProviderLeadNotificationEmail(
   provider: Provider,
   lead: Lead,
-  delaySeconds: number = 0
+  delaySeconds: number = 0,
+  batchId: string | null = null,
 ): Promise<{ success: boolean; error?: string }> {
   // Determine recipient email (priority: notificationEmail > claimEmail > email)
   const recipientEmail = provider.notificationEmail || provider.claimEmail || provider.email
@@ -173,6 +174,11 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
     // coverage area.
     if (delaySeconds > 0) {
       sendPayload.sendAt = Math.floor(Date.now() / 1000) + delaySeconds
+    }
+    // Tag this send with the batch_id so we can cancel any still-scheduled
+    // sends from this batch when the lead gets claimed.
+    if (batchId) {
+      sendPayload.batchId = batchId
     }
 
     await sg.send(sendPayload)
@@ -385,6 +391,35 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       console.log(`[LeadNotifications] Wave 2 (other): ${otherProviders.length} provider(s), ${priorityProviders.length > 0 ? '600s (10-min) delay' : 'immediate'}`)
     }
 
+    // Generate a SendGrid batch_id for this lead's notifications. Lets us
+    // cancel any still-scheduled (Wave 2) emails when the lead gets claimed
+    // before they fire — see lib/cancelLeadNotifications.ts. Stored on the
+    // Lead record so the cancellation handler can look it up later.
+    let batchId: string | null = null
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        const resp = await fetch('https://api.sendgrid.com/v3/mail/batch', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.SENDGRID_API_KEY}` },
+        })
+        if (resp.ok) {
+          const json = await resp.json() as { batch_id?: string }
+          batchId = json.batch_id ?? null
+          if (batchId) {
+            await prisma.lead.update({
+              where: { id: lead.id },
+              data: { notificationBatchId: batchId },
+            })
+            console.log(`[LeadNotifications] SendGrid batch_id: ${batchId}`)
+          }
+        } else {
+          console.warn(`[LeadNotifications] Failed to create SendGrid batch_id (${resp.status}) — sends will proceed without cancellation support`)
+        }
+      } catch (err: any) {
+        console.warn(`[LeadNotifications] SendGrid batch_id create error:`, err.message || err)
+      }
+    }
+
     const sendToProvider = async (provider: Provider, delaySeconds: number) => {
       const notification = await prisma.leadNotification.create({
         data: {
@@ -395,7 +430,7 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
         }
       })
 
-      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds)
+      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds, batchId)
 
       if (result.success) {
         await prisma.leadNotification.update({

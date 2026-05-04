@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
 import {
-  updateOrder, setTimestampNow, clearTimestamp, setScheduledFor, setStatus,
+  updateOrder, setTimestampNow, setTimestampValue, clearTimestamp, setScheduledFor, setStatus,
 } from '@/lib/institutional-actions'
 import { StatusPill } from '@/components/orders/PublicOrderTimeline'
 import CopyLinkButton from '@/components/admin/CopyLinkButton'
@@ -31,29 +31,48 @@ function fmtDateTime(d: Date | null | undefined): string {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Timestamp row — "set to now" / clear / display
+// Timestamp row — datetime-local input (for backdating) + "Set to now"
+// + "Clear" buttons. The datetime input lets admin record historical
+// events (kit shipped on a known past date, scheduled-at confirmed via
+// email last week, etc.) without writing one-off DB scripts.
 // ────────────────────────────────────────────────────────────────────
 function TimestampRow({ label, field, value, orderId }: { label: string; field: string; value: Date | null; orderId: string }) {
   const setNowBound = setTimestampNow.bind(null, orderId)
+  const setValueBound = setTimestampValue.bind(null, orderId)
   const clearBound = clearTimestamp.bind(null, orderId)
   return (
-    <div className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-b-0">
-      <div className="min-w-0">
-        <div className="text-sm font-medium text-gray-900">{label}</div>
-        <div className="text-xs text-gray-500">{fmtDateTime(value)}</div>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <form action={setNowBound}>
-          <input type="hidden" name="field" value={field} />
-          <button type="submit" className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50">Set to now</button>
-        </form>
-        {value && (
-          <form action={clearBound}>
+    <div className="py-3 border-b border-gray-100 last:border-b-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-gray-900">{label}</div>
+          <div className="text-xs text-gray-500">{fmtDateTime(value)}</div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <form action={setNowBound}>
             <input type="hidden" name="field" value={field} />
-            <button type="submit" className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-600">Clear</button>
+            <button type="submit" className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50">Set to now</button>
           </form>
-        )}
+          {value && (
+            <form action={clearBound}>
+              <input type="hidden" name="field" value={field} />
+              <button type="submit" className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-600">Clear</button>
+            </form>
+          )}
+        </div>
       </div>
+      <form action={setValueBound} className="flex items-center gap-2">
+        <input type="hidden" name="field" value={field} />
+        <input
+          name="value"
+          type="datetime-local"
+          defaultValue={fmtDateTimeLocal(value)}
+          className="flex-1 sm:flex-initial sm:w-64 text-xs px-2 py-1 border border-gray-300 rounded-md"
+          aria-label={`Set ${label} to a specific date/time`}
+        />
+        <button type="submit" className="text-xs px-3 py-1 rounded border border-primary-600 bg-primary-50 text-primary-700 hover:bg-primary-100 font-medium">
+          Save date
+        </button>
+      </form>
     </div>
   )
 }

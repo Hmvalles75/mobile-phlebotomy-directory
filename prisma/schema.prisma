@@ -231,6 +231,10 @@ model Lead {
   estimatedValueCents  Int              @default(0)      // draws × $75 (bucket midpoint × 7500)
   organizationName     String?
   timeframe            String?
+  // SendGrid batch ID for the wave of notification emails sent for this lead.
+  // Used to cancel scheduled (delayed) Wave 2/3 sends when the lead gets
+  // claimed before they fire — see lib/cancelLeadNotifications.ts.
+  notificationBatchId  String?
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])

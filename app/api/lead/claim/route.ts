@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { notifyProviderOfLead } from '@/lib/notifyProvider'
+import { cancelLeadNotifications } from '@/lib/cancelLeadNotifications'
 
 export async function POST(req: NextRequest) {
   try {
@@ -84,6 +85,13 @@ export async function POST(req: NextRequest) {
     // Send confirmation notification to provider (async, don't block)
     notifyProviderOfLead(providerId, leadId, 0).catch(err => {
       console.error('Failed to send claim notification:', err)
+    })
+
+    // Cancel queued/scheduled SendGrid sends for this lead and send a
+    // courtesy "claimed" email to providers who already received the
+    // notification — best effort, fire and forget.
+    cancelLeadNotifications(leadId, providerId).catch(err => {
+      console.error('Failed to cancel/notify other providers:', err)
     })
 
     console.log(`✅ Lead ${leadId} claimed by ${provider.name} (${providerId}). Response time: ${responseTimeMinutes !== null ? responseTimeMinutes + ' min' : 'N/A'}`)

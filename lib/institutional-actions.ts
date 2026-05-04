@@ -106,6 +106,25 @@ export async function setTimestampNow(orderId: string, formData: FormData) {
   revalidatePath(`/admin/institutional/orders/${orderId}`)
 }
 
+// Set a timeline timestamp to a specific datetime — used for backdating
+// historical events (e.g. recording the actual ship date a few days
+// after it happened). Form provides `field` + `value` (datetime-local
+// string from <input type="datetime-local">).
+export async function setTimestampValue(orderId: string, formData: FormData) {
+  await requireAdmin()
+  const field = String(formData.get('field') || '')
+  const raw = String(formData.get('value') || '')
+  const allowed = new Set(['kitShippedAt', 'kitReceivedAt', 'scheduledAt', 'drawCompletedAt', 'fedexDroppedAt'])
+  if (!allowed.has(field)) throw new Error(`field "${field}" not allowed`)
+  // Empty string → clear (keep clear-button behavior consistent)
+  const value = raw ? new Date(raw) : null
+  await prisma.institutionalOrder.update({
+    where: { id: orderId },
+    data: { [field]: value },
+  })
+  revalidatePath(`/admin/institutional/orders/${orderId}`)
+}
+
 export async function clearTimestamp(orderId: string, formData: FormData) {
   await requireAdmin()
   const field = String(formData.get('field') || '')
