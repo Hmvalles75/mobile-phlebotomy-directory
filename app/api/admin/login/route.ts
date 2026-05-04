@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminPassword } from '@/lib/admin-auth'
+import { verifyAdminPassword, createAdminSession } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,13 +21,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create session token (don't store password - it's already verified)
-    const sessionToken = Buffer.from(JSON.stringify({
-      authenticated: true,
-      expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-    })).toString('base64')
+    // Set the httpOnly admin_session cookie so server components (e.g.
+    // /admin/institutional/*) can verify auth via verifyAdminSession().
+    // Also returns the token in the response body for the existing
+    // localStorage-based admin pages to keep working unchanged.
+    const sessionToken = await createAdminSession()
 
-    // Return token in response body for client-side storage
     return NextResponse.json({
       success: true,
       message: 'Login successful',
