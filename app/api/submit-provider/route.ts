@@ -91,18 +91,9 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.json()
 
-    // Require explicit SMS consent (TCPA) — same rule the client-side enforces.
-    // Server-side guard catches any submission that bypasses the checkbox.
-    if (!formData.smsConsent) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'sms_consent_required',
-          message: 'SMS consent is required to submit your application. Please review and accept the SMS notice on the form.',
-        },
-        { status: 400 }
-      )
-    }
+    // SMS consent is OPTIONAL — providers can register without opting in to SMS.
+    // Lead notifications default to email; SMS is an additional channel only
+    // when the provider explicitly checks the consent box on /add-provider.
 
     // Check for duplicate provider before accepting submission
     // Now checks both Provider table AND PendingSubmission table
@@ -180,9 +171,12 @@ export async function POST(request: NextRequest) {
       utmCampaign: formData.attribution?.utmCampaign || null,
       referrer: formData.attribution?.referrer || null,
       landingPage: formData.attribution?.landingPage || null,
-      // SMS consent (required, validated above) — record exact consent moment
-      smsConsent: true,
-      smsConsentAt: formData.smsConsentAt ? new Date(formData.smsConsentAt) : new Date(),
+      // SMS consent (optional) — record only if the provider actually checked the box.
+      // Empty/false here means lead notifications go via email only.
+      smsConsent: formData.smsConsent === true,
+      smsConsentAt: formData.smsConsent === true && formData.smsConsentAt
+        ? new Date(formData.smsConsentAt)
+        : null,
     })
 
     console.log('Provider submission saved for review:', submission.id)

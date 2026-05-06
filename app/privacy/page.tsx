@@ -62,6 +62,13 @@ export default function Privacy() {
                 </p>
                 <div className="space-y-3 text-gray-700">
                   <p>
+                    <strong>SMS opt-in is optional.</strong> SMS consent is <em>not required</em> to create
+                    a provider account or use the platform. Providers receive lead notifications via email by
+                    default. During registration, providers may separately check an unchecked-by-default box
+                    to also receive SMS alerts. Providers can opt in or out at any time from their dashboard,
+                    or by replying STOP to any message.
+                  </p>
+                  <p>
                     <strong>What we send:</strong> For providers, new patient-lead notifications in your
                     service area, account and billing alerts, and occasional platform updates. For patients,
                     appointment-status updates related to the specific request you submitted.

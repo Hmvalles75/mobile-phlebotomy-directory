@@ -25,7 +25,7 @@ export default function AddProvider() {
     leadEmail: '',
     leadPhone: '',
     availability: [] as string[],
-    smsConsent: false,  // TCPA consent — unchecked by default, required to submit
+    smsConsent: false,  // TCPA consent — optional, unchecked by default. Account creation does not require SMS opt-in.
   })
 
   const serviceOptions = [
@@ -50,14 +50,6 @@ export default function AddProvider() {
       return
     }
 
-    // Require explicit SMS consent before submission (TCPA compliance).
-    // The checkbox itself also has `required`, but this guards against any
-    // browser that lets the form submit despite it.
-    if (!formData.smsConsent) {
-      alert('Please review and accept the SMS consent notice before submitting.')
-      return
-    }
-
     setIsSubmitting(true)
 
     try {
@@ -73,7 +65,8 @@ export default function AddProvider() {
         body: JSON.stringify({
           ...formData,
           attribution,
-          smsConsentAt: new Date().toISOString(),  // capture exact consent timestamp
+          // Only stamp consent moment when the box was actually checked.
+          smsConsentAt: formData.smsConsent ? new Date().toISOString() : null,
         }),
       })
 
@@ -531,18 +524,17 @@ export default function AddProvider() {
                 </ul>
               </div>
 
-              {/* SMS consent — TCPA-compliant express written consent. Unchecked by default, required. */}
-              <div className="border-2 border-primary-200 bg-primary-50 p-4 rounded-lg">
+              {/* SMS consent — TCPA opt-in. Optional, unchecked by default. Account creation does NOT require it. */}
+              <div className="border border-gray-200 bg-gray-50 p-4 rounded-lg">
                 <label className="flex items-start cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.smsConsent}
                     onChange={(e) => setFormData({ ...formData, smsConsent: e.target.checked })}
-                    required
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1 mr-3 flex-shrink-0"
                   />
                   <span className="text-sm text-gray-800 leading-relaxed">
-                    <strong>SMS Consent (required):</strong> I agree to receive SMS notifications about new patient leads in my service area from MobilePhlebotomy.org. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe.
+                    <strong>(Optional)</strong> I agree to receive SMS notifications about new patient leads in my service area from MobilePhlebotomy.org. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe. You can also receive lead notifications by email — SMS is optional.
                   </span>
                 </label>
                 <p className="text-xs text-gray-600 mt-2 ml-7">
@@ -556,7 +548,7 @@ export default function AddProvider() {
 
               <button
                 type="submit"
-                disabled={isSubmitting || !formData.smsConsent}
+                disabled={isSubmitting}
                 className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Processing...' : 'Submit Listing Application'}
