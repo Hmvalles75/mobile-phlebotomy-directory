@@ -134,10 +134,61 @@ function classifyLead(
   return { drawCount: dc, requestType: rt, isHighValue, estimatedValueCents, notesB2B }
 }
 
+/**
+ * Reject lead submissions where the patient phone matches a known provider's
+ * own phone. Catches both (a) provider self-submitting their own form to "test"
+ * and (b) spam/garbage submissions where the only contact info is scraped from
+ * the displayed provider profile. Without this guard, every other notified
+ * provider in the area calls the bad number and reaches another phlebotomist
+ * (the source provider), which has happened in production — see Khadine lead
+ * cmoujjpd00001l70417slw3jp on 2026-05-06.
+ */
+async function patientPhoneMatchesProvider(rawPhone: string): Promise<{ id: string; name: string } | null> {
+  const digits = rawPhone.replace(/\D/g, '').slice(-10)
+  if (digits.length !== 10) return null
+  // Compare against the last 10 digits of provider phone fields.
+  // Match on raw containment of the digit string OR the formatted variants
+  // we commonly see in the DB.
+  const last10 = digits
+  const formatted = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`
+  const dashed = `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`
+  const match = await prisma.provider.findFirst({
+    where: {
+      OR: [
+        { phone: { contains: last10 } },
+        { phonePublic: { contains: last10 } },
+        { phone: formatted },
+        { phonePublic: formatted },
+        { phone: dashed },
+        { phonePublic: dashed },
+      ],
+    },
+    select: { id: true, name: true },
+  })
+  return match
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const payload = schema.parse(body)
+
+    // Reject self-submissions / scraped-provider-phone spam early.
+    // The form may genuinely fail for the rare patient who happens to share a
+    // number with a provider in our DB — they should email us. The cost of
+    // routing fake leads to the network is much higher.
+    const conflict = await patientPhoneMatchesProvider(payload.phone)
+    if (conflict) {
+      console.warn(`[lead/submit] Rejected — patient phone ${payload.phone} matches provider ${conflict.name} (${conflict.id})`)
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'PHONE_MATCHES_PROVIDER',
+          message: 'The phone number you entered is registered to a service provider on our directory. Please enter the patient\'s own phone number, or email hector@mobilephlebotomy.org if you need help.',
+        },
+        { status: 400 }
+      )
+    }
 
     const priceCents = priceFor(payload.urgency)
     // Normalize city at write time so analytics + routing see consistent values
