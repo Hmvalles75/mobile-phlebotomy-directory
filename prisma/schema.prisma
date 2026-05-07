@@ -578,12 +578,51 @@ model LeadNotification {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   sentAt       DateTime?
+  // SendGrid X-Message-Id from the API response (for correlating with EmailEvents)
+  sgMessageId  String?
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  emailEvents  EmailEvent[]
 
   @@index([leadId])
   @@index([providerId])
+  @@index([sgMessageId])
   @@map("lead_notifications")
+}
+
+// SendGrid Event Webhook payload, stored per individual event.
+// Source: https://docs.sendgrid.com/for-developers/tracking-events/event
+// Linkage to our LeadNotification rows is via customArgs we attach when sending
+// (leadNotificationId, leadId, providerId). Older sends without customArgs can
+// still be matched best-effort via sgMessageId.
+model EmailEvent {
+  id                 String   @id @default(cuid())
+  // sg_event_id is unique per event from SendGrid — used as idempotency key
+  sgEventId          String   @unique
+  // sg_message_id (the SG-internal message ID, not the X-Message-Id header)
+  sgMessageId        String?
+  event              String   // delivered, open, click, bounce, dropped, deferred, spamreport, unsubscribe, processed
+  email              String   // recipient email
+  timestamp          DateTime
+  url                String?  // present on click events
+  reason             String?  // present on bounce/dropped/spamreport
+  ip                 String?
+  userAgent          String?  @db.Text
+  // Linkage via customArgs we attach to outbound sends
+  leadNotificationId String?
+  leadId             String?
+  providerId         String?
+  raw                String?  @db.Text // raw event JSON for debugging / future analysis
+  createdAt          DateTime @default(now())
+  leadNotification   LeadNotification? @relation(fields: [leadNotificationId], references: [id], onDelete: SetNull)
+
+  @@index([leadNotificationId])
+  @@index([leadId])
+  @@index([providerId])
+  @@index([sgMessageId])
+  @@index([event])
+  @@index([timestamp])
+  @@map("email_events")
 }
 
 // Coverage gap task queue for admin follow-up

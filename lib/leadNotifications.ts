@@ -36,7 +36,8 @@ async function sendProviderLeadNotificationEmail(
   lead: Lead,
   delaySeconds: number = 0,
   batchId: string | null = null,
-): Promise<{ success: boolean; error?: string }> {
+  notificationId: string | null = null,
+): Promise<{ success: boolean; error?: string; sgMessageId?: string }> {
   // Determine recipient email (priority: notificationEmail > claimEmail > email)
   const recipientEmail = provider.notificationEmail || provider.claimEmail || provider.email
 
@@ -181,11 +182,23 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
       sendPayload.batchId = batchId
     }
 
-    await sg.send(sendPayload)
+    // customArgs are echoed back by SendGrid in every Event Webhook payload
+    // (delivered/open/click/bounce/etc.) so we can correlate events to the
+    // exact LeadNotification row that produced them. SG limits customArgs to
+    // 10K bytes total so we stick to short stable identifiers.
+    sendPayload.customArgs = {
+      kind: 'lead_notification',
+      leadId: lead.id,
+      providerId: provider.id,
+      ...(notificationId ? { leadNotificationId: notificationId } : {}),
+    }
+
+    const [response] = await sg.send(sendPayload)
+    const sgMessageId = (response?.headers as any)?.['x-message-id'] || null
 
     const delayNote = delaySeconds > 0 ? ` (scheduled +${delaySeconds}s)` : ''
-    console.log(`[LeadNotifications] ✅ Email sent to provider ${provider.id} (${recipientEmail})${delayNote}`)
-    return { success: true }
+    console.log(`[LeadNotifications] ✅ Email sent to provider ${provider.id} (${recipientEmail})${delayNote}${sgMessageId ? ` [msgId=${sgMessageId}]` : ''}`)
+    return { success: true, sgMessageId: sgMessageId || undefined }
   } catch (error: any) {
     console.error(`[LeadNotifications] ❌ Failed to send email to provider ${provider.id}:`, error.response?.body || error.message)
     return { success: false, error: error.message || 'Send failed' }
@@ -430,12 +443,16 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
         }
       })
 
-      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds, batchId)
+      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds, batchId, notification.id)
 
       if (result.success) {
         await prisma.leadNotification.update({
           where: { id: notification.id },
-          data: { status: 'SENT', sentAt: new Date() }
+          data: {
+            status: 'SENT',
+            sentAt: new Date(),
+            sgMessageId: result.sgMessageId || null,
+          }
         })
         return true
       } else {
