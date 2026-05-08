@@ -35,7 +35,7 @@ export async function PATCH(
       )
     }
 
-    const inquiry = await prisma.corporateEventInquiry.update({
+    const inquiry = await prisma.coverageRequest.update({
       where: { id },
       data: { status }
     })
@@ -69,7 +69,7 @@ export async function DELETE(
   try {
     const { id } = params
 
-    await prisma.corporateEventInquiry.delete({
+    await prisma.coverageRequest.delete({
       where: { id }
     })
 

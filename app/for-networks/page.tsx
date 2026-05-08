@@ -76,12 +76,12 @@ export default function ForNetworksPage() {
             Need coverage in specific geographies? We connect you with verified mobile phlebotomists in 40+ states. One partnership, nationwide reach.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:hector@mobilephlebotomy.org?subject=Draw Network Partnership Inquiry"
+            <Link
+              href="/request-coverage"
               className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors"
             >
-              Contact Us to Partner
-            </a>
+              Request Coverage
+            </Link>
             <Link
               href="/resources"
               className="inline-block bg-white/10 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition-colors border border-white/20"
@@ -204,15 +204,15 @@ export default function ForNetworksPage() {
             Tell us where you need mobile phlebotomists and we&apos;ll show you who we have. No commitment, no pressure — just a conversation about coverage.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:hector@mobilephlebotomy.org?subject=Draw Network Partnership Inquiry&body=Hi Hector,%0D%0A%0D%0AI'm interested in discussing mobile phlebotomy coverage for our organization.%0D%0A%0D%0AOrganization:%0D%0AMarkets needed:%0D%0AEstimated volume:%0D%0A%0D%0APlease let me know a good time to connect."
+            <Link
+              href="/request-coverage"
               className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors"
             >
-              Email Us: hector@mobilephlebotomy.org
-            </a>
+              Request Coverage
+            </Link>
           </div>
           <p className="text-gray-500 text-sm mt-6">
-            Or call directly: We typically respond within 24 hours.
+            Prefer email? <a href="mailto:hector@mobilephlebotomy.org" className="text-primary-400 hover:text-primary-300 underline">hector@mobilephlebotomy.org</a> — typically respond within 1-2 business days.
           </p>
         </div>
       </section>

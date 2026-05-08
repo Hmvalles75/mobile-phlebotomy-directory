@@ -478,7 +478,7 @@ export default function AdminDashboard() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Facilities & Group Services
+              Coverage Requests
             </button>
             <button
               onClick={() => {

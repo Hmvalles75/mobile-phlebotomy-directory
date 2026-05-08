@@ -546,26 +546,36 @@ model PendingSubmission {
   @@map("pending_submissions")
 }
 
-model CorporateEventInquiry {
-  id                     String                 @id @default(cuid())
-  createdAt              DateTime               @default(now())
-  companyName            String
-  contactName            String
-  email                  String
-  phone                  String
-  eventLocation          String
-  eventVenue             String?
-  eventDates             String
-  estimatedDraws         String
-  estimatedPhlebotomists String?
-  eventType              String
-  additionalDetails      String?
-  status                 CorporateInquiryStatus @default(NEW)
-  ipAddress              String?
-  userAgent              String?
-  urgency                String?
+// B2B / institutional intake — labs, clinical-study sponsors, draw networks,
+// SNF / healthcare facilities looking for ongoing coverage. Renamed from
+// CorporateEventInquiry on 2026-05-08; existing 6 rows preserved through the
+// migration (Medtronic, Elwyn, Lincoln Care Center, Symphony of Tri Cities,
+// etc.). NOT auto-promoted to InstitutionalClient — admin manually qualifies
+// before promotion to keep the real-client list clean.
+model CoverageRequest {
+  id               String                @id @default(cuid())
+  createdAt        DateTime              @default(now())
+  organizationName String
+  contactName      String
+  email            String
+  phone            String
+  location         String                // free-text "where coverage is needed"
+  statesNeeded     String?               // comma-separated states from the new lean form
+  timeline         String                // when needed: "ongoing", "Q3 2026", "weekly", etc.
+  estimatedVolume  String                // dropdown bucket: "<10/mo", "10-50/mo", "50-200/mo", "200+/mo", "one-time"
+  drawType         String                // "Clinical study/research", "Lab routing", "Healthcare facility", etc.
+  details          String?
+  status           CoverageRequestStatus @default(NEW)
+  ipAddress        String?
+  userAgent        String?
+  // Attribution — where this prospect came from
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  referrer         String?
+  landingPage      String?
 
-  @@map("corporate_event_inquiries")
+  @@map("coverage_requests")
 }
 
 model LeadNotification {
@@ -741,7 +751,7 @@ enum SubmissionStatus {
   REJECTED
 }
 
-enum CorporateInquiryStatus {
+enum CoverageRequestStatus {
   NEW
   CONTACTED
   QUOTED

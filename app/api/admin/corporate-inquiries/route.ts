@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const inquiries = await prisma.corporateEventInquiry.findMany({
+    const inquiries = await prisma.coverageRequest.findMany({
       orderBy: {
         createdAt: 'desc'
       }
