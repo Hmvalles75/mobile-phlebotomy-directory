@@ -63,11 +63,22 @@ interface Provider {
   slug: string
   leadCredit: number
   featuredTier: string | null
+  priorityRouting: boolean
   status: 'UNVERIFIED' | 'PENDING' | 'VERIFIED'
   claimEmail: string | null
   zipCodes: string | null
   stripePaymentMethodId: string | null
   stripeCustomerId: string | null
+}
+
+// Founding Member is the public-facing label for the grandfathered $49
+// Charter Member tier — kept hidden from sales copy, shown to the provider
+// themselves as a status symbol.
+const TIER_PILL: Record<string, { label: string; color: string }> = {
+  HIGH_DENSITY:     { label: 'Metro Pro',         color: 'bg-purple-100 text-purple-800 border-purple-200' },
+  FOUNDING_PARTNER: { label: 'Founding Partner',  color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  STANDARD_PREMIUM: { label: 'Premium',           color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  CHARTER_MEMBER:   { label: 'Founding Member',   color: 'bg-amber-100 text-amber-800 border-amber-200' },
 }
 
 interface DashboardData {
@@ -446,6 +457,14 @@ function DashboardContent() {
               <p className="text-gray-600 mt-1">Provider Dashboard</p>
             </div>
             <div className="flex items-center gap-4">
+              {provider.featuredTier && TIER_PILL[provider.featuredTier] && (
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Plan</p>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${TIER_PILL[provider.featuredTier].color}`}>
+                    ★ {TIER_PILL[provider.featuredTier].label}
+                  </span>
+                </div>
+              )}
               <div className="text-right">
                 <p className="text-sm text-gray-500">Status</p>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
@@ -990,6 +1009,14 @@ function DashboardContent() {
                           {lead.isHighValue && (
                             <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-amber-900 border border-amber-600">
                               ⭐ HIGH VALUE
+                            </span>
+                          )}
+                          {provider.priorityRouting && (
+                            <span
+                              title="You see leads in your service area before non-paying providers"
+                              className="px-2 py-0.5 text-xs font-bold rounded-full bg-purple-100 text-purple-800 border border-purple-300"
+                            >
+                              ⚡ Priority lead
                             </span>
                           )}
                           {outcomeMeta && (

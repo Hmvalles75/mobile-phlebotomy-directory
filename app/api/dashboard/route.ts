@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
         status: true,
         stripePaymentMethodId: true,
         featuredTier: true,
+        priorityRouting: true,
         claimEmail: true,
         email: true,
         phone: true,
