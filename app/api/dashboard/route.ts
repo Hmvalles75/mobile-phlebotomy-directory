@@ -56,11 +56,17 @@ export async function GET(req: NextRequest) {
       return true
     }
 
-    // Fetch leads claimed by this provider (DPPL system)
+    // Fetch leads claimed by this provider (DPPL system).
+    // Includes both currently-CLAIMED leads and DELIVERED leads (outcome already
+    // recorded) from the last 30 days, so completing a lead doesn't make it
+    // disappear from the provider's view. The lead row's outcome badge surfaces
+    // which state each lead is in.
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     const claimedLeads = await prisma.lead.findMany({
       where: {
         routedToId: session.providerId,
-        status: 'CLAIMED'
+        status: { in: ['CLAIMED', 'DELIVERED'] },
+        claimedAt: { gte: thirtyDaysAgo },
       },
       orderBy: {
         routedAt: 'desc'
