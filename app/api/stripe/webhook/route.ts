@@ -120,7 +120,11 @@ export async function POST(req: NextRequest) {
                 listingTier: tier === 'HIGH_DENSITY' ? 'FEATURED' : 'PREMIUM',
                 featuredTier: tier,
                 isFeatured: true,
-                featured: true
+                featured: true,
+                // Wave 1 head-start — only paid subscriptions get this. NOT
+                // set on the $199 one-time website-setup checkout (that flow
+                // doesn't reach this branch — type !== 'featured_subscription').
+                priorityRouting: true,
               }
             })
             console.log(`Activated ${tier} premium tier for provider ${providerId}`)
@@ -211,7 +215,9 @@ export async function POST(req: NextRequest) {
               listingTier: effectiveTier === 'HIGH_DENSITY' ? 'FEATURED' : 'PREMIUM',
               featuredTier: effectiveTier,
               isFeatured: true,
-              featured: true
+              featured: true,
+              // Wave 1 head-start — active sub = paying = priority routing.
+              priorityRouting: true,
             }
           })
           console.log(`Subscription active for provider ${provider.id} at tier ${effectiveTier}`)
@@ -258,6 +264,17 @@ export async function POST(req: NextRequest) {
               }
             }
           }
+        } else if (provider && (subscription.status === 'canceled' || subscription.status === 'unpaid')) {
+          // Grace period exhausted — Stripe gave up on dunning retries (default
+          // ~3 weeks) or the subscription was hard-cancelled. Pull the Wave 1
+          // head-start now even if subscription.deleted hasn't fired yet, so the
+          // provider stops competing with active payers. Tier flags stay until
+          // subscription.deleted explicitly tears them down.
+          await prisma.provider.update({
+            where: { id: provider.id },
+            data: { priorityRouting: false },
+          })
+          console.log(`Subscription ${subscription.status} for provider ${provider.id} — priorityRouting cleared (grace period exhausted)`)
         }
         break
       }
@@ -277,7 +294,8 @@ export async function POST(req: NextRequest) {
               listingTier: 'BASIC',
               featuredTier: null,
               isFeatured: false,
-              featured: false
+              featured: false,
+              priorityRouting: false,
             }
           })
           console.log(`Subscription cancelled for provider ${provider.id}`)
