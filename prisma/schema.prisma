@@ -558,11 +558,11 @@ model CoverageRequest {
   organizationName String
   contactName      String
   email            String
-  phone            String
+  phone            String?               // optional on the new /request-coverage form
   location         String                // free-text "where coverage is needed"
   statesNeeded     String?               // comma-separated states from the new lean form
-  timeline         String                // when needed: "ongoing", "Q3 2026", "weekly", etc.
-  estimatedVolume  String                // dropdown bucket: "<10/mo", "10-50/mo", "50-200/mo", "200+/mo", "one-time"
+  timeline         String?               // optional: when needed; captured in `details` on the lean form
+  estimatedVolume  String                // dropdown bucket: "1–10/mo", "11–50/mo", "51–200/mo", "200+/mo", "Not sure yet"
   drawType         String                // "Clinical study/research", "Lab routing", "Healthcare facility", etc.
   details          String?
   status           CoverageRequestStatus @default(NEW)

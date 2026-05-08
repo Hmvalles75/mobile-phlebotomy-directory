@@ -9,15 +9,23 @@ import { prisma } from '@/lib/prisma'
  *
  * Accepts two payload shapes for backwards compatibility:
  *  1. Legacy `/corporate-phlebotomy` form fields (companyName, eventLocation,
- *     eventDates, estimatedDraws, eventType, additionalDetails) — kept so the
- *     existing form keeps working without coordinated front+back changes.
- *  2. New `/request-coverage` lean fields (organizationName, location,
- *     statesNeeded, timeline, estimatedVolume, drawType, details).
+ *     eventDates, estimatedDraws, eventType, additionalDetails).
+ *  2. New `/request-coverage` lean fields (organizationName, location/
+ *     statesNeeded, estimatedVolume, drawType, details).
  *
  * Both shapes resolve to the same CoverageRequest row. Admin sees a unified
  * queue. Auto-promotion to InstitutionalClient is intentionally NOT done here
  * — admin promotes only after manual qualification (signed terms / first PO).
+ *
+ * Anti-abuse:
+ *  - Honeypot field `website_url` — must be empty. Any non-empty value =>
+ *    silent 200 (don't tip off bots that we caught them).
+ *  - Rate limit: max 5 submissions per IP per hour. Counted live against the
+ *    coverage_requests table — accurate across regions, no infra cost.
  */
+
+const RATE_LIMIT_PER_HOUR = 5
+
 const schema = z.object({
   // Canonical fields
   organizationName: z.string().optional(),
@@ -38,10 +46,12 @@ const schema = z.object({
   estimatedPhlebotomists: z.string().optional(),
   urgency: z.string().optional(),
   eventVenue: z.string().optional(),
+  // Honeypot — bots fill this; humans don't see it
+  website_url: z.string().optional(),
   // Always required
   contactName: z.string().min(2, 'Contact name is required'),
   email: z.string().email('Valid email is required'),
-  phone: z.string().min(7, 'Phone number is required'),
+  phone: z.string().optional().nullable(),
   // Attribution (optional)
   utmSource: z.string().nullable().optional(),
   utmMedium: z.string().nullable().optional(),
@@ -56,39 +66,44 @@ function pickDrawType(payload: z.infer<typeof schema>): string {
   return dt || ''
 }
 
+function firstName(full: string): string {
+  const trimmed = (full || '').trim()
+  if (!trimmed) return 'there'
+  const space = trimmed.indexOf(' ')
+  return space === -1 ? trimmed : trimmed.slice(0, space)
+}
+
 async function sendAdminNotification(req: any) {
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
-    console.warn('⚠️  RESEND_API_KEY not configured - skipping email notification')
+    console.warn('⚠️  RESEND_API_KEY not configured - skipping admin notification')
     return false
   }
   try {
-    const emailBody = `
-New Coverage Request
+    // Subject formatted for at-a-glance triage in the inbox
+    const subject = `[Coverage Request] ${req.organizationName} — ${req.estimatedVolume} — ${req.location}`
+    const body = `New coverage request submitted at ${new Date(req.createdAt).toLocaleString()}
 
 ORGANIZATION
-- Organization: ${req.organizationName}
-- Contact: ${req.contactName}
-- Email: ${req.email}
-- Phone: ${req.phone}
+  ${req.organizationName}
 
-NEED
-- Location:           ${req.location || '(not specified)'}
-- States needed:      ${req.statesNeeded || '(not specified)'}
-- Timeline:           ${req.timeline || '(not specified)'}
-- Estimated volume:   ${req.estimatedVolume || '(not specified)'}
-- Draw type:          ${req.drawType || '(not specified)'}
+CONTACT
+  ${req.contactName}
+  ${req.email}
+  ${req.phone || '—'}
 
-DETAILS
-${req.details || '(none provided)'}
+REQUEST
+  Type:    ${req.drawType}
+  States:  ${req.location}
+  Volume:  ${req.estimatedVolume}
+
+NOTES
+  ${req.details || '(none)'}
 
 ---
-Submitted: ${new Date(req.createdAt).toLocaleString()}
-IP Address: ${req.ipAddress || 'Unknown'}
-Source: ${req.landingPage || '(unknown landing page)'}
-
-View in admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
-`.trim()
+Admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
+Reply directly to: ${req.email}
+`
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -99,8 +114,9 @@ View in admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.o
       body: JSON.stringify({
         from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
         to: ['hector@mobilephlebotomy.org'],
-        subject: `Coverage Request: ${req.organizationName}`,
-        text: emailBody,
+        replyTo: [req.email],  // hit Reply → goes to the prospect
+        subject,
+        text: body,
       }),
     })
     if (!response.ok) {
@@ -108,7 +124,6 @@ View in admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.o
       console.error('Failed to send admin notification:', error)
       return false
     }
-    console.log('✅ Admin notification sent for coverage request')
     return true
   } catch (error) {
     console.error('Error sending admin notification:', error)
@@ -120,29 +135,28 @@ async function sendConfirmationEmail(req: any) {
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) return false
   try {
-    const body = `
-Hi ${req.contactName},
+    const body = `Hi ${firstName(req.contactName)},
 
-Thank you for the coverage request — I've received your details for ${req.organizationName} and will review personally.
+Thanks for reaching out about coverage for ${req.organizationName}.
+This message confirms we received your request — Hector will
+personally review it and respond within one business day with
+available coverage and next steps.
 
-What you submitted:
-- Location: ${req.location || '(not specified)'}
-- Timeline: ${req.timeline || '(not specified)'}
-- Estimated volume: ${req.estimatedVolume || '(not specified)'}
-- Draw type: ${req.drawType || '(not specified)'}
+A quick summary of what you submitted:
 
-Next steps:
-I'll reach out within 1-2 business days with availability and a coordination plan tailored to your need.
+  Coverage type:    ${req.drawType}
+  States / metros:  ${req.location}
+  Estimated volume: ${req.estimatedVolume}
 
-If your request is urgent or you'd like to share additional details, just reply to this email.
+If your timeline is tighter than one business day, just reply
+to this email and flag the urgency.
 
-Best,
+Talk soon,
+
 Hector Valles
-Founder | MobilePhlebotomy.org
+Founder, MobilePhlebotomy.org
 hector@mobilephlebotomy.org
-
-Reference: ${req.id}
-`.trim()
+`
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -151,10 +165,10 @@ Reference: ${req.id}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
+        from: 'Hector Valles <hector@mobilephlebotomy.org>',
         to: [req.email],
         replyTo: ['hector@mobilephlebotomy.org'],
-        subject: `Coverage Request received — ${req.organizationName}`,
+        subject: 'We received your coverage request — MobilePhlebotomy.org',
         text: body,
       }),
     })
@@ -175,25 +189,50 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const payload = schema.parse(body)
 
+    // Honeypot — silently 200 if filled. Don't write to DB, don't notify.
+    if (payload.website_url && payload.website_url.trim().length > 0) {
+      console.log(`[coverage-request] honeypot triggered, silently dropping submission`)
+      return NextResponse.json({ ok: true })
+    }
+
     const ipAddress = req.headers.get('x-forwarded-for') ||
                       req.headers.get('x-real-ip') ||
                       'Unknown'
     const userAgent = req.headers.get('user-agent') || 'Unknown'
 
+    // Rate limit by IP — count submissions in the last hour from the same IP
+    if (ipAddress && ipAddress !== 'Unknown') {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+      const recentFromIp = await prisma.coverageRequest.count({
+        where: { ipAddress, createdAt: { gte: oneHourAgo } },
+      })
+      if (recentFromIp >= RATE_LIMIT_PER_HOUR) {
+        console.warn(`[coverage-request] rate limit hit for IP ${ipAddress}`)
+        return NextResponse.json(
+          {
+            ok: false,
+            error: 'RATE_LIMITED',
+            message: 'Too many requests from this connection. Please email hector@mobilephlebotomy.org directly.',
+          },
+          { status: 429 }
+        )
+      }
+    }
+
     // Resolve canonical fields, falling back to legacy aliases
     const organizationName = payload.organizationName || payload.companyName || ''
-    const location = payload.location || payload.eventLocation || ''
-    const timeline = payload.timeline || payload.eventDates || ''
+    const location = payload.location || payload.eventLocation || payload.statesNeeded || ''
+    const timeline = payload.timeline || payload.eventDates || null
     const estimatedVolume = payload.estimatedVolume || payload.estimatedDraws || ''
     const details = payload.details || payload.additionalDetails || null
     const drawType = pickDrawType(payload)
 
-    if (!organizationName || !location || !timeline || !estimatedVolume || !drawType) {
+    if (!organizationName || !location || !estimatedVolume || !drawType) {
       return NextResponse.json(
         {
           ok: false,
           error: 'Missing required fields',
-          missing: { organizationName, location, timeline, estimatedVolume, drawType },
+          missing: { organizationName, location, estimatedVolume, drawType },
         },
         { status: 400 }
       )
@@ -204,7 +243,7 @@ export async function POST(req: NextRequest) {
         organizationName,
         contactName: payload.contactName,
         email: payload.email,
-        phone: payload.phone,
+        phone: payload.phone || null,
         location,
         statesNeeded: payload.statesNeeded || null,
         timeline,
@@ -229,7 +268,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       inquiryId: created.id,
-      message: 'Thank you — I\'ll review your details and follow up within 1-2 business days.',
     })
   } catch (e: any) {
     console.error('Coverage request submission error:', e)
@@ -240,8 +278,12 @@ export async function POST(req: NextRequest) {
       )
     }
     return NextResponse.json(
-      { ok: false, error: e.message || 'Failed to submit request' },
-      { status: 400 }
+      {
+        ok: false,
+        error: 'SERVER_ERROR',
+        message: 'Something went wrong on our end. Please email hector@mobilephlebotomy.org directly with your request.',
+      },
+      { status: 500 }
     )
   }
 }
