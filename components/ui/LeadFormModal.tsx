@@ -33,6 +33,11 @@ export function LeadFormModal({
     state: defaultState,
     zip: defaultZip,
     labPreference: '',
+    // Intent gates — both required to filter low-intent submissions
+    // (price-shoppers, no doctor's order, can't pay). Maps to existing
+    // schema enums on Lead.hasDoctorOrder / Lead.paymentMethod.
+    hasDoctorOrder: '' as '' | 'yes' | 'no' | 'need_help',
+    paymentMethod: '' as '' | 'insurance' | 'out_of_pocket' | 'not_sure',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
     notes: ''
   })
@@ -86,6 +91,14 @@ export function LeadFormModal({
 
     if (!formData.labPreference) {
       newErrors.labPreference = 'Please select your preferred lab drop-off'
+    }
+
+    if (!formData.hasDoctorOrder) {
+      newErrors.hasDoctorOrder = 'Please answer — required to match you with a provider'
+    }
+
+    if (!formData.paymentMethod) {
+      newErrors.paymentMethod = 'Please answer — required to match you with a provider'
     }
 
     setErrors(newErrors)
@@ -164,6 +177,8 @@ export function LeadFormModal({
             state: defaultState,
             zip: defaultZip,
             labPreference: '',
+            hasDoctorOrder: '',
+            paymentMethod: '',
             urgency: 'STANDARD',
             notes: ''
           })
@@ -391,6 +406,85 @@ export function LeadFormModal({
                   {errors.labPreference && (
                     <p className="text-red-500 text-sm mt-1">{errors.labPreference}</p>
                   )}
+                </div>
+
+                {/* Doctor's order — intent gate */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Do you have a doctor's order for this draw? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { value: 'yes', label: 'Yes, I have one' },
+                      { value: 'no', label: 'No, I don\'t' },
+                      { value: 'need_help', label: 'I need help with that' },
+                    ].map(opt => (
+                      <label
+                        key={opt.value}
+                        className={`flex items-center justify-center px-3 py-2 border rounded-md cursor-pointer text-sm transition-colors ${
+                          formData.hasDoctorOrder === opt.value
+                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium'
+                            : errors.hasDoctorOrder
+                              ? 'border-red-500 hover:bg-gray-50'
+                              : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="hasDoctorOrder"
+                          value={opt.value}
+                          checked={formData.hasDoctorOrder === opt.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.hasDoctorOrder && (
+                    <p className="text-red-500 text-sm mt-1">{errors.hasDoctorOrder}</p>
+                  )}
+                </div>
+
+                {/* Payment method — intent gate */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Are you OK paying out-of-pocket if insurance doesn't cover? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { value: 'out_of_pocket', label: 'Yes, I\'m OK with that' },
+                      { value: 'insurance',     label: 'Only if insurance covers' },
+                      { value: 'not_sure',      label: 'I\'m not sure yet' },
+                    ].map(opt => (
+                      <label
+                        key={opt.value}
+                        className={`flex items-center justify-center px-3 py-2 border rounded-md cursor-pointer text-sm transition-colors ${
+                          formData.paymentMethod === opt.value
+                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium'
+                            : errors.paymentMethod
+                              ? 'border-red-500 hover:bg-gray-50'
+                              : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value={opt.value}
+                          checked={formData.paymentMethod === opt.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.paymentMethod && (
+                    <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Most insurance does NOT cover mobile phlebotomy. Out-of-pocket draws typically run $50–$100 depending on location.
+                  </p>
                 </div>
 
                 {/* Urgency */}

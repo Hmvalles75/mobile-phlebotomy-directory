@@ -18,6 +18,9 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
     cityInput: '',
     urgency: 'STANDARD' as 'STANDARD' | 'STAT',
     notes: '',
+    // Intent gates — both required to filter low-intent submissions
+    hasDoctorOrder: '' as '' | 'yes' | 'no' | 'need_help',
+    paymentMethod: '' as '' | 'insurance' | 'out_of_pocket' | 'not_sure',
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -25,6 +28,17 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Intent gates — required to filter low-intent submissions
+    if (!formData.hasDoctorOrder) {
+      setError('Please answer the doctor\'s order question — required to match you with a provider.')
+      return
+    }
+    if (!formData.paymentMethod) {
+      setError('Please answer the payment question — required to match you with a provider.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -169,6 +183,75 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
           </div>
         </div>
 
+        {/* Doctor's order — intent gate */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Do you have a doctor's order for this draw? <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {[
+              { value: 'yes', label: 'Yes, I have one' },
+              { value: 'no', label: "No, I don't" },
+              { value: 'need_help', label: 'I need help with that' },
+            ].map(opt => (
+              <label
+                key={opt.value}
+                className={`flex items-center justify-center px-3 py-2 border rounded-lg cursor-pointer text-sm transition-colors ${
+                  formData.hasDoctorOrder === opt.value
+                    ? 'bg-primary-50 border-primary-500 text-primary-700 font-medium'
+                    : 'border-gray-300 hover:bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="hasDoctorOrder"
+                  value={opt.value}
+                  checked={formData.hasDoctorOrder === opt.value}
+                  onChange={(e) => setFormData({ ...formData, hasDoctorOrder: e.target.value as any })}
+                  className="sr-only"
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Payment — intent gate */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Are you OK paying out-of-pocket if insurance doesn't cover? <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {[
+              { value: 'out_of_pocket', label: "Yes, I'm OK with that" },
+              { value: 'insurance',     label: 'Only if insurance covers' },
+              { value: 'not_sure',      label: "I'm not sure yet" },
+            ].map(opt => (
+              <label
+                key={opt.value}
+                className={`flex items-center justify-center px-3 py-2 border rounded-lg cursor-pointer text-sm transition-colors ${
+                  formData.paymentMethod === opt.value
+                    ? 'bg-primary-50 border-primary-500 text-primary-700 font-medium'
+                    : 'border-gray-300 hover:bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={opt.value}
+                  checked={formData.paymentMethod === opt.value}
+                  onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as any })}
+                  className="sr-only"
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Most insurance does NOT cover mobile phlebotomy. Out-of-pocket draws typically run $50–$100.
+          </p>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
           <textarea
@@ -176,7 +259,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            placeholder="Any details — lab order, preferred time, special needs..."
+            placeholder="Any details — preferred time, special needs..."
           />
         </div>
 
