@@ -1,49 +1,34 @@
 'use client'
 
-import { Check, Star, TrendingUp, Award, Globe, Palette } from 'lucide-react'
+import { Check, TrendingUp, Award, Globe, Palette } from 'lucide-react'
 import Link from 'next/link'
 
+// Public-facing tiers. The grandfathered $49 Charter Member tier is internal-only
+// (3 pilots locked in pre-launch) and is NOT shown here.
 const tiers = [
   {
     id: 'FOUNDING_PARTNER',
-    name: 'Founding Partner Premium',
-    price: 49,
-    roi: 'Just 2 leads pays for itself',
-    description: 'Launch offer for providers in new, unserved markets',
-    badge: 'Limited Time',
+    name: 'Founding Partner',
+    price: 79,
+    roi: '~3 leads pays for itself',
+    description: 'For providers in growing markets — premium placement and priority lead routing.',
     popular: true,
     icon: Award,
     features: [
       'Premium placement in search results',
       'Featured badge on your listing',
       'Priority lead routing in your area',
-      'Exclusive market coverage opportunity',
-      'Founding Partner designation',
-      'Lock in this rate permanently'
-    ]
-  },
-  {
-    id: 'STANDARD_PREMIUM',
-    name: 'Standard Premium',
-    price: 79,
-    roi: '~3 leads pays for itself',
-    description: 'Standard premium listing for established markets',
-    icon: Star,
-    features: [
-      'Premium placement in search results',
-      'Featured badge on your listing',
-      'Priority lead routing',
       'Enhanced profile visibility',
       'Analytics dashboard',
-      'Monthly performance reports'
-    ]
+      'Cancel anytime — no long-term contract',
+    ],
   },
   {
     id: 'HIGH_DENSITY',
-    name: 'High-Density Metro',
+    name: 'Metro Pro',
     price: 149,
     roi: '6 leads pays for itself',
-    description: 'Maximum visibility in major metro markets',
+    description: 'Maximum visibility in major metro markets with city-exclusive options.',
     icon: TrendingUp,
     features: [
       'Top placement in major metros',
@@ -52,9 +37,8 @@ const tiers = [
       'City-exclusive featured sponsor option',
       'Advanced analytics & insights',
       'Dedicated account support',
-      'Premium lead quality guarantee'
-    ]
-  }
+    ],
+  },
 ]
 
 export default function PricingPage() {
@@ -71,7 +55,7 @@ export default function PricingPage() {
               Get more leads with premium placement at the top of search results
             </p>
             <div className="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-semibold">
-              Now Available - Starting at $49/month
+              Starting at $79/month
             </div>
           </div>
         </div>
@@ -79,7 +63,7 @@ export default function PricingPage() {
 
       {/* Pricing Cards */}
       <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {tiers.map((tier) => {
             const Icon = tier.icon
             return (
@@ -91,14 +75,6 @@ export default function PricingPage() {
                     : 'border-gray-200 shadow-lg'
                 } bg-white`}
               >
-                {tier.badge && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      {tier.badge}
-                    </span>
-                  </div>
-                )}
-
                 <div className="text-center mb-8">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
                     <Icon className="text-primary-600" size={32} />

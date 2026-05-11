@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Check, Star, TrendingUp, Award } from 'lucide-react'
+import { X, Check, TrendingUp, Award } from 'lucide-react'
 
 interface PricingTier {
-  id: 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY'
+  id: 'FOUNDING_PARTNER' | 'HIGH_DENSITY'
   name: string
   price: number
   description: string
@@ -14,49 +14,39 @@ interface PricingTier {
   icon: React.ElementType
 }
 
+// Public-facing tiers shown in the upgrade modal. The $49 grandfathered
+// Charter Member rate is internal-only (3 pilots) and is NOT offered here.
 const tiers: PricingTier[] = [
   {
     id: 'FOUNDING_PARTNER',
     name: 'Founding Partner',
-    price: 49,
-    description: 'Early-bird rate — locked in forever at this price',
+    price: 79,
+    description: 'For providers in growing markets',
     badge: 'Best Value',
     popular: true,
     icon: Award,
     features: [
       'Everything listed above',
       '"Founding Partner" label on your profile',
-      'Be the first premium provider in your market',
-      'This $49/mo rate never increases, even when prices go up'
-    ]
-  },
-  {
-    id: 'STANDARD_PREMIUM',
-    name: 'Premium',
-    price: 79,
-    description: 'The standard plan for most providers',
-    icon: Star,
-    features: [
-      'Everything listed above',
       'Larger, more visible profile card highlighting your services',
       'Monthly listing views and click stats',
-      'Monthly performance report emailed to you'
-    ]
+      'Cancel anytime — no long-term contract',
+    ],
   },
   {
     id: 'HIGH_DENSITY',
-    name: 'Metro Premium',
+    name: 'Metro Pro',
     price: 149,
     description: 'For providers in competitive major metros',
     icon: TrendingUp,
     features: [
-      'Everything in Premium, plus:',
+      'Everything in Founding Partner, plus:',
       'Top spot on your city page — the #1 listing patients see',
       'Option to be the exclusive featured sponsor for your city',
       'Detailed analytics: views, clicks, and conversion rates',
-      'Direct support line for account questions'
-    ]
-  }
+      'Direct support line for account questions',
+    ],
+  },
 ]
 
 interface PremiumPricingModalProps {
@@ -150,7 +140,7 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               {tiers.map((tier) => {
                 const Icon = tier.icon
                 return (
