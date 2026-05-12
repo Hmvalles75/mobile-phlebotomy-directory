@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { captureAttribution } from '@/lib/attribution'
 
 interface InlineLeadFormProps {
@@ -120,6 +121,14 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
+        {/* B2B funnel diversion */}
+        <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm">
+          <span className="text-gray-600">Need 5+ draws or running a clinical study?</span>{' '}
+          <Link href="/request-coverage" className="text-primary-600 hover:underline font-medium">
+            Request coverage →
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>

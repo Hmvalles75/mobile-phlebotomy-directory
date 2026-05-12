@@ -237,6 +237,15 @@ function RequestBloodDrawForm() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* B2B funnel diversion — for orgs and clinical studies that
+                  land here. Sits above all form fields, single line, muted. */}
+              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm">
+                <span className="text-gray-600">Need 5+ draws or running a clinical study?</span>{' '}
+                <Link href="/request-coverage" className="text-blue-600 hover:underline font-medium">
+                  Request coverage →
+                </Link>
+              </div>
+
               {/* Step 1 — Draw count (first screening question) */}
               <div className="border-b pb-6">
                 <label className="block text-lg font-semibold text-gray-900 mb-3">

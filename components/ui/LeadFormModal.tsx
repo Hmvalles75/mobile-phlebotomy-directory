@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
 import { captureAttribution } from '@/lib/attribution'
@@ -235,6 +236,15 @@ export function LeadFormModal({
               <p className="text-gray-600 mb-4">
                 Fill out the form below and a licensed phlebotomist will contact you to schedule your appointment.
               </p>
+
+              {/* B2B funnel diversion — surfaces /request-coverage so orgs
+                  with multi-draw needs don't submit through the patient form. */}
+              <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm">
+                <span className="text-gray-600">Need 5+ draws or running a clinical study?</span>{' '}
+                <Link href="/request-coverage" className="text-blue-600 hover:underline font-medium">
+                  Request coverage →
+                </Link>
+              </div>
 
               {/* Service Scope Clarification */}
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">

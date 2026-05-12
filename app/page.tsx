@@ -335,6 +335,28 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* B2B funnel band — surfaces /request-coverage for labs / clinical
+          studies / orgs that land on the patient homepage by mistake. One row,
+          neutral styling so it doesn't fight with the hero or social-trust band. */}
+      <section className="py-6 bg-gray-50 border-b border-gray-100">
+        <div className="container">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 max-w-5xl mx-auto">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">For labs, clinical studies, and organizations.</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Coordinate multi-draw projects or recurring blood collection across multiple cities.
+              </p>
+            </div>
+            <Link
+              href="/request-coverage"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm whitespace-nowrap"
+            >
+              Request coverage →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Social Trust Section - Simplified for LA */}
       {isMarketLocked() ? (
         <section className="py-6 bg-white border-b border-gray-100">
