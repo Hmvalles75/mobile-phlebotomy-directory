@@ -235,6 +235,11 @@ model Lead {
   // Used to cancel scheduled (delayed) Wave 2/3 sends when the lead gets
   // claimed before they fire — see lib/cancelLeadNotifications.ts.
   notificationBatchId  String?
+  // Set by the STAT-escalation cron the first time it alerts the admin
+  // about a STAT lead sitting unclaimed past the threshold. Prevents
+  // re-alerting on the same lead on every subsequent cron tick. Null on
+  // STANDARD leads and on STAT leads that get claimed in time.
+  statEscalatedAt      DateTime?
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])
