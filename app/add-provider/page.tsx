@@ -209,10 +209,16 @@ export default function AddProvider() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Website (optional)
                 </label>
+                {/* type="text" instead of "url" — browser-level url validation
+                    silently blocks submission when the user omits the protocol
+                    (most users type "mysite.com" not "https://mysite.com"),
+                    losing real signups. Lost Comfort Mobile Labs to this on
+                    2026-05-11 before they emailed in to flag it. */}
                 <input
-                  type="url"
+                  type="text"
                   value={formData.website}
                   onChange={(e) => setFormData(prev => ({...prev, website: e.target.value}))}
+                  placeholder="e.g. yourbusiness.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>

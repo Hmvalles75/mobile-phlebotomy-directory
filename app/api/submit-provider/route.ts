@@ -87,9 +87,24 @@ Review at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}
   }
 }
 
+/**
+ * Normalize a website URL submitted via the form. Users typically type
+ * "mysite.com" without a protocol; without normalization the value gets
+ * rendered as a relative link on the provider's profile page. Prepend
+ * https:// when no protocol is present. Empty / null → null.
+ */
+function normalizeWebsite(input: string | null | undefined): string | null {
+  if (!input) return null
+  const trimmed = input.trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.json()
+    formData.website = normalizeWebsite(formData.website)
 
     // SMS consent is OPTIONAL — providers can register without opting in to SMS.
     // Lead notifications default to email; SMS is an additional channel only
