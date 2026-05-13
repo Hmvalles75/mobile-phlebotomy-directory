@@ -911,6 +911,9 @@ export default function CityPage({ params }: PageProps) {
 
                 <div className="text-sm text-gray-600 mb-4">
                   <span className="font-medium">Coverage:</span> {getProviderCoverageDisplay(provider, cityName)}
+                  {(provider as any).serviceRadiusMiles && (
+                    <span> — within {(provider as any).serviceRadiusMiles} mile radius</span>
+                  )}
                 </div>
 
                 <div className="flex justify-between items-center">

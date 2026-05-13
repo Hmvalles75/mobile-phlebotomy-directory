@@ -678,34 +678,51 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                       {/* Left Column - Contact & Coverage */}
                       <div className="space-y-4">
-                        {/* Contact Information */}
-                        <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
-                          <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
-                          <div className="space-y-2 text-sm">
-                            {provider.phone && !provider.isFeatured && (
-                              <div className="flex items-center gap-2">
-                                <PhoneReveal
-                                  phone={provider.phone}
-                                  providerId={provider.id}
-                                  providerName={provider.name}
-                                  variant="compact"
-                                />
+                        {/* Contact Information — only render when there's
+                            actually content to show. Featured providers hide
+                            the phone (PhoneReveal pattern only fires on free
+                            cards), so this box was rendering empty for them.
+                            Falls back to primaryCity when the address relation
+                            isn't loaded into the public schema. */}
+                        {(() => {
+                          const showPhone = provider.phone && !provider.isFeatured
+                          const cityLabel = provider.address?.city || (provider as any).primaryCity
+                          const stateLabel = provider.address?.state || (provider as any).primaryState
+                          if (!showPhone && !cityLabel) return null
+                          return (
+                            <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
+                              <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Contact Information</h4>
+                              <div className="space-y-2 text-sm">
+                                {showPhone && (
+                                  <div className="flex items-center gap-2">
+                                    <PhoneReveal
+                                      phone={provider.phone!}
+                                      providerId={provider.id}
+                                      providerName={provider.name}
+                                      variant="compact"
+                                    />
+                                  </div>
+                                )}
+                                {cityLabel && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-primary-600">📍</span>
+                                    <span className="text-gray-700">Based in {cityLabel}{stateLabel ? `, ${stateLabel}` : ''}</span>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                            {provider.address?.city && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-primary-600">📍</span>
-                                <span className="text-gray-700">Based in {provider.address.city}, {provider.address.state}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                            </div>
+                          )
+                        })()}
 
-                        {/* Coverage Area */}
+                        {/* Coverage Area — append service-radius miles when set
+                            so coverage doesn't read as a single city. */}
                         <div className="bg-white/60 p-4 rounded-lg border border-gray-200">
                           <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Service Coverage</h4>
                           <p className="text-gray-700 text-sm">
                             {formatCoverageDisplay(provider.coverage)}
+                            {(provider as any).serviceRadiusMiles && (
+                              <span className="text-gray-600"> — within {(provider as any).serviceRadiusMiles} mile radius</span>
+                            )}
                           </p>
                         </div>
 
@@ -930,11 +947,14 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                             </div>
                           )}
 
-                          {/* Coverage Area */}
+                          {/* Coverage Area — radius appended when set */}
                           <div className="mb-3">
                             <span className="text-sm font-medium text-gray-700">Coverage: </span>
                             <span className="text-sm text-gray-600">
                               {formatCoverageDisplay(provider.coverage)}
+                              {(provider as any).serviceRadiusMiles && (
+                                <> — within {(provider as any).serviceRadiusMiles} mile radius</>
+                              )}
                             </span>
                           </div>
 

@@ -142,6 +142,9 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
 
       <div className="text-sm text-gray-600 mb-4">
         <span className="font-medium">Coverage:</span> {coverageDisplay}
+        {(provider as any).serviceRadiusMiles && (
+          <span> — within {(provider as any).serviceRadiusMiles} mile radius</span>
+        )}
       </div>
 
       {/* CTAs — Featured gets Request Appointment as primary, free gets View Details only */}
