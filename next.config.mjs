@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Next/image refuses SVG by default for security (SVG can contain
+    // embedded JS). Provider logos uploaded by us into /public/images
+    // are trusted; enable rendering with strict CSP + attachment headers
+    // so any future externally-sourced SVG still can't execute scripts.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
