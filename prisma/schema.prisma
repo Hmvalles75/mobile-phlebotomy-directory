@@ -70,6 +70,13 @@ model Provider {
   termsAcceptedAt       DateTime?
   languages             String?                // Comma-separated: "English,Spanish"
   premiumPage           Boolean                @default(false)  // Renders premium $199 template
+  // Set true by the junk-detection pass when the description looks like
+  // scraped nav-menu junk (e.g. "HOME HOME CONTACT US BOOK ONLINE..."),
+  // heavy ALL-CAPS, or repeated phrase patterns. Flagged providers render
+  // "Contact for details." instead of the description on directory pages.
+  // Surfaced in /admin/flagged-descriptions for cleanup. Reset to false
+  // after the description is manually rewritten.
+  descriptionFlagged    Boolean                @default(false)
   // Lead-routing priority flag — set true ONLY for providers who are actively paying
   // (any tier). Drives Wave 1 / Wave 2 split in lib/leadNotifications.ts so paying
   // customers get a real head-start window before free providers see leads in their

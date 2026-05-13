@@ -90,14 +90,35 @@ Review at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}
 /**
  * Normalize a website URL submitted via the form. Users typically type
  * "mysite.com" without a protocol; without normalization the value gets
- * rendered as a relative link on the provider's profile page. Prepend
- * https:// when no protocol is present. Empty / null → null.
+ * rendered as a relative link on the provider's profile page.
+ *
+ * BUT — accept-only-domain-shaped strings. EMT Lab Pro's owner typed
+ * "6635 Chantalle Drive" (a street address) into the website field. The
+ * first version of this function blindly prepended https:// and produced
+ * "https://6635 Chantalle Drive" — garbage that broke the admin display.
+ *
+ * Rules:
+ *   - Already a URL with http(s):// → keep as-is
+ *   - Hostname-shaped (contains a dot, no spaces, valid hostname chars)
+ *     → prepend https://
+ *   - Anything else (addresses, free text, gibberish) → null
  */
+const HOSTNAME_RE = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/[^\s]*)?$/i
+
 function normalizeWebsite(input: string | null | undefined): string | null {
   if (!input) return null
   const trimmed = input.trim()
   if (!trimmed) return null
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (/^https?:\/\//i.test(trimmed)) {
+    // Already protocoled — light sanity check that the part after :// is
+    // hostname-shaped too. If it contains spaces it's definitely wrong.
+    const afterScheme = trimmed.replace(/^https?:\/\//i, '')
+    if (/\s/.test(afterScheme)) return null
+    return trimmed
+  }
+  // Bare value — strip any leading "www." and validate
+  const candidate = trimmed.replace(/^www\./i, '')
+  if (!HOSTNAME_RE.test(candidate)) return null
   return `https://${trimmed}`
 }
 

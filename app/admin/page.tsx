@@ -517,6 +517,13 @@ export default function AdminDashboard() {
               Lead Quality
               <span aria-hidden className="text-xs">↗</span>
             </Link>
+            <Link
+              href="/admin/flagged-descriptions"
+              className="px-4 py-2 font-medium transition-colors whitespace-nowrap text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+            >
+              Flagged Descriptions
+              <span aria-hidden className="text-xs">↗</span>
+            </Link>
           </div>
 
           {activeTab === 'submissions' && (
