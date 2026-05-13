@@ -13,6 +13,7 @@ import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadc
 import { getProviderBadge } from '@/lib/provider-tiers'
 import { ga4 } from '@/lib/ga4'
 import { PhoneReveal } from '@/components/PhoneReveal'
+import { ProviderDescription } from '@/components/ui/ProviderDescription'
 
 // Use the standardized coverage display function
 function getProviderCoverageDisplay(provider: Provider, currentCity?: string): string {
@@ -873,20 +874,38 @@ export default function CityPage({ params }: PageProps) {
                 </div>
 
                 {provider.description && (
-                  <p className="text-gray-600 mb-4">{provider.description}</p>
+                  <div className="mb-4">
+                    <ProviderDescription
+                      description={provider.description}
+                      flagged={!!(provider as any).descriptionFlagged}
+                    />
+                  </div>
                 )}
 
                 <div className="mb-4">
                   <h4 className="font-medium text-gray-900 mb-2">Services Offered:</h4>
                   <div className="flex flex-wrap gap-2">
-                    {provider.services.map((service) => (
-                      <span
-                        key={service}
-                        className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded"
-                      >
-                        {service}
-                      </span>
-                    ))}
+                    {(() => {
+                      const services = provider.services || []
+                      const isFeatured = !!provider.isFeatured
+                      const visible = isFeatured ? services : services.slice(0, 3)
+                      const hidden = isFeatured ? 0 : Math.max(0, services.length - 3)
+                      return (
+                        <>
+                          {visible.map((service) => (
+                            <span
+                              key={service}
+                              className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded"
+                            >
+                              {service}
+                            </span>
+                          ))}
+                          {hidden > 0 && (
+                            <span className="text-xs text-gray-500 self-center">+{hidden} more</span>
+                          )}
+                        </>
+                      )
+                    })()}
                   </div>
                 </div>
 

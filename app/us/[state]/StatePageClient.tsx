@@ -17,6 +17,7 @@ import { SITE_URL } from '@/lib/seo'
 import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
 import { PhoneReveal } from '@/components/PhoneReveal'
 import StateSEOContent from '@/components/seo/StateSEOContent'
+import { ProviderDescription } from '@/components/ui/ProviderDescription'
 
 // State data imported from shared source of truth — see data/states-full.ts
 import { STATE_DATA as stateData } from '@/data/states-full'
@@ -204,12 +205,20 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
         {/* SEO Content - Summary + Accordion */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 leading-relaxed">
               Mobile phlebotomists come directly to your home, office, or care facility in {stateName} to collect lab samples. Instead of driving to a draw site and waiting in line, a licensed phlebotomist meets you where you are and delivers your samples to the lab.
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy providers. Some providers on this page are verified, others are not. Always confirm details directly with the provider before scheduling a visit.
-            </p>
+            {/* Verification disclaimer — collapsed to a small disclosure
+                rather than a prominent block. Same content, less visual weight. */}
+            <details className="mt-4 text-xs text-gray-500">
+              <summary className="cursor-pointer hover:text-gray-700 inline-flex items-center gap-1">
+                <span aria-hidden>ⓘ</span>
+                About verification on this directory
+              </summary>
+              <p className="mt-2 leading-relaxed">
+                MobilePhlebotomy.org lists publicly available mobile phlebotomy providers. Some are verified; others are not. Always confirm details directly with the provider before scheduling a visit.
+              </p>
+            </details>
           </div>
 
           <SimpleAccordion
@@ -655,12 +664,14 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                       </div>
                     </div>
 
-                    {/* Description */}
+                    {/* Description — truncated + Read more, junk-flagged shows "Contact for details." */}
                     {provider.description && (
                       <div className="mb-4 p-3 bg-white/60 rounded-lg border border-gray-200">
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                          {provider.description}
-                        </p>
+                        <ProviderDescription
+                          description={provider.description}
+                          flagged={!!(provider as any).descriptionFlagged}
+                          className="leading-relaxed"
+                        />
                       </div>
                     )}
 
@@ -890,7 +901,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                           const isVerified = isProviderRegistered(provider.id)
 
                           return (
-                          <div key={provider.id} className={`p-6 ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                          <div key={provider.id} className="p-6">
                             <div className="flex justify-between items-start mb-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -911,9 +922,12 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                                   />
                                 </div>
                           {provider.description && (
-                            <p className="text-gray-600 mb-3">
-                              {provider.description}
-                            </p>
+                            <div className="mb-3">
+                              <ProviderDescription
+                                description={provider.description}
+                                flagged={!!(provider as any).descriptionFlagged}
+                              />
+                            </div>
                           )}
 
                           {/* Coverage Area */}
@@ -1001,10 +1015,11 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                 </div>
                 <div className="divide-y divide-gray-200">
                   {categorizedProviders.basic.map((provider) => {
-                    const isVerified = isProviderRegistered(provider.id)
-
+                    // Per card-redesign spec 2026-05-12: free/basic cards
+                    // show NO verified indicator. isVerified is intentionally
+                    // unused here. Premium + featured cards still surface it.
                     return (
-                    <div key={provider.id} className={`p-6 ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
+                    <div key={provider.id} className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -1026,9 +1041,13 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                           </div>
 
                           {provider.description && (
-                            <p className="text-gray-600 mb-3 text-sm">
-                              {provider.description}
-                            </p>
+                            <div className="mb-3 text-sm">
+                              <ProviderDescription
+                                description={provider.description}
+                                flagged={!!(provider as any).descriptionFlagged}
+                                truncateAt={140}
+                              />
+                            </div>
                           )}
 
                           {/* Services - Compact */}

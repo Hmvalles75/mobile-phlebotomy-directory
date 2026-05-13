@@ -1,21 +1,31 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { Provider } from '@/lib/schemas'
 import { getProviderCoverageDisplay, getProviderCoverageType } from '@/lib/enhanced-city-search'
-import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { PhoneReveal } from '@/components/PhoneReveal'
 import { FeaturedProviderCTA } from '@/components/FeaturedProviderCTA'
+import { ProviderDescription } from '@/components/ui/ProviderDescription'
 
 interface ProviderCardProps {
   provider: Provider
   showCoverageType?: boolean
 }
 
+const FREE_TAG_LIMIT = 3
+
 export function ProviderCard({ provider, showCoverageType = false }: ProviderCardProps) {
   const coverageType = getProviderCoverageType(provider)
   const coverageDisplay = getProviderCoverageDisplay(provider)
-  const registeredBadge = getProviderBadge(provider.id)
-  const isVerified = isProviderRegistered(provider.id)
+  const isFeatured = !!provider.isFeatured
+  // Verified ✓ indicator only shown on Featured cards — free cards stay clean.
+  // Schema-side, "Verified" maps to status === 'VERIFIED' on the underlying
+  // Provider row. The Provider type here is the public schema, which mirrors
+  // it as `verified: true` where applicable.
+  const isVerified = !!(provider as any).verified || (provider as any).status === 'VERIFIED'
+  const descriptionFlagged = !!(provider as any).descriptionFlagged
+
+  const services = provider.services || []
+  const visibleServices = isFeatured ? services : services.slice(0, FREE_TAG_LIMIT)
+  const hiddenServiceCount = isFeatured ? 0 : Math.max(0, services.length - FREE_TAG_LIMIT)
 
   const getCoverageIcon = (type: string) => {
     switch (type) {
@@ -35,71 +45,42 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
     }
   }
 
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{provider.name}</h3>
+  // Featured-specific styling — subtle amber border + faint warm tint + lifted shadow.
+  // Free cards stay plain white with a minimal shadow so the visual hierarchy is clear.
+  const cardClasses = isFeatured
+    ? 'relative bg-amber-50/40 rounded-lg shadow-lg hover:shadow-xl transition-shadow p-6 border-2 border-amber-300/70'
+    : 'relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200'
 
-          {/* Founding Partner Badge */}
-          {provider.featuredTier === 'FOUNDING_PARTNER' && (
+  return (
+    <div className={cardClasses}>
+      {/* Featured Partner badge — top-right, larger on featured */}
+      {isFeatured && (
+        <div className="absolute top-0 right-0 bg-gradient-to-br from-amber-400 to-amber-500 text-white px-4 py-1.5 rounded-bl-lg rounded-tr-lg font-semibold text-sm shadow flex items-center gap-1">
+          <span aria-hidden>⭐</span>
+          <span>Featured Partner</span>
+        </div>
+      )}
+
+      <div className="flex justify-between items-start mb-3 gap-3">
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-bold text-gray-900 mb-2 ${isFeatured ? 'text-xl' : 'text-lg'}`}>{provider.name}</h3>
+
+          {/* Verified indicator — Featured only */}
+          {isFeatured && isVerified && (
             <div className="mb-2">
-              <span
-                className="inline-flex items-center gap-1 rounded-full border border-amber-400 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
-                title="Founding Partners are early premium providers with prioritized visibility and direct lead access."
-                aria-label="Founding Partner Premium Provider"
-              >
-                <svg className="h-3.5 w-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                FOUNDING PARTNER
+                Verified
               </span>
             </div>
           )}
 
-          {/* Verification Status Badge */}
-          <div className="mb-2">
-            {isVerified ? (
-              <Image src="/images/PV_Badge.png" alt="Platform Verified" width={140} height={28} className="h-7 w-auto" />
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500 bg-opacity-10 text-yellow-800 border border-yellow-600">
-                ⚠️ Unverified — Details may vary
-              </span>
-            )}
-          </div>
-
-          {/* Additional Badges */}
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {/* Featured Provider Badge (Pilot - Visibility Only) */}
-            {provider.isFeatured && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-300">
-                ⭐ Featured Provider
-              </span>
-            )}
-            {/* Nationwide/Multi-State Badge */}
-            {(provider as any).is_nationwide === 'Yes' && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                🌎 Nationwide Service
-              </span>
-            )}
-            {/* Registered/Featured Badge */}
-            {registeredBadge && (
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                {registeredBadge.icon} {registeredBadge.text}
-              </span>
-            )}
-            {showCoverageType && (
-              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                {getCoverageIcon(coverageType)}
-                {getCoverageLabel(coverageType)}
-              </span>
-            )}
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
-            <span>📍 {provider.address?.city ? `${provider.address.city}, ${provider.address.state} ${provider.address.zip}` : coverageDisplay}</span>
-            {/* Phone: hidden for featured, click-to-reveal for others */}
-            {provider.phone && !provider.isFeatured && (
+          {/* Location + phone + rating row */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 mb-2">
+            <span>📍 {provider.address?.city ? `${provider.address.city}, ${provider.address.state} ${provider.address.zip || ''}`.trim() : coverageDisplay}</span>
+            {provider.phone && !isFeatured && (
               <PhoneReveal
                 phone={provider.phone}
                 providerId={provider.id}
@@ -110,9 +91,14 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
             {provider.rating && provider.reviewsCount && (
               <span>⭐ {provider.rating} ({provider.reviewsCount} reviews)</span>
             )}
+            {showCoverageType && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                {getCoverageIcon(coverageType)} {getCoverageLabel(coverageType)}
+              </span>
+            )}
           </div>
-          
-          <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-600">
             {provider.availability && (
               <span>📅 {provider.availability.join(', ')}</span>
             )}
@@ -121,66 +107,66 @@ export function ProviderCard({ provider, showCoverageType = false }: ProviderCar
             )}
           </div>
         </div>
-        
-        <div className="flex flex-wrap gap-1">
-          {provider.badges?.map((badge) => (
-            <span
-              key={badge}
-              className={`text-xs px-2 py-1 rounded-full text-center ${
-                badge === 'Certified' ? 'bg-green-100 text-green-800' :
-                badge === 'Insured' ? 'bg-blue-100 text-blue-800' :
-                badge === 'Background-Checked' ? 'bg-purple-100 text-purple-800' :
-                'bg-gray-100 text-gray-800'
-              }`}
-            >
-              {badge}
-            </span>
-          ))}
-        </div>
       </div>
 
-      {provider.description && (
-        <p className="text-gray-600 mb-4">{provider.description}</p>
-      )}
-
+      {/* Description — truncate with Read more, hide if flagged as junk */}
       <div className="mb-4">
-        <h4 className="font-medium text-gray-900 mb-2">Services Offered:</h4>
-        <div className="flex flex-wrap gap-2">
-          {provider.services.map((service) => (
-            <span
-              key={service}
-              className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded"
-            >
-              {service}
-            </span>
-          ))}
-        </div>
+        <ProviderDescription description={provider.description ?? null} flagged={descriptionFlagged} />
       </div>
+
+      {/* Services — all visible on Featured, +N more on Free */}
+      {services.length > 0 && (
+        <div className="mb-4">
+          <h4 className="font-medium text-gray-900 mb-2 text-sm">Services Offered:</h4>
+          <div className="flex flex-wrap gap-2">
+            {visibleServices.map((service) => (
+              <span
+                key={service}
+                className={`text-xs px-2.5 py-1 rounded-full ${
+                  isFeatured
+                    ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                    : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {service}
+              </span>
+            ))}
+            {hiddenServiceCount > 0 && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-200">
+                +{hiddenServiceCount} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="text-sm text-gray-600 mb-4">
         <span className="font-medium">Coverage:</span> {coverageDisplay}
       </div>
 
+      {/* CTAs — Featured gets Request Appointment as primary, free gets View Details only */}
       <div className="flex flex-wrap gap-3">
-        {provider.isFeatured ? (
-          <FeaturedProviderCTA
-            providerId={provider.id}
-            providerName={provider.name}
-          />
+        {isFeatured ? (
+          <>
+            <FeaturedProviderCTA
+              providerId={provider.id}
+              providerName={provider.name}
+            />
+            <Link
+              href={`/provider/${provider.slug}`}
+              className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            >
+              View Details
+            </Link>
+          </>
         ) : (
           <Link
             href={`/provider/${provider.slug}`}
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
           >
-            View Provider Details
+            View Details
           </Link>
         )}
-        <Link
-          href={`/provider/${provider.slug}`}
-          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          View Details
-        </Link>
       </div>
     </div>
   )
