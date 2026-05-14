@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 interface Provider {
   id: string
@@ -176,17 +177,28 @@ export function ProvidersManagementPanel() {
                   )}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => toggleEligibility(provider.id, provider.eligibleForLeads)}
-                    disabled={updating === provider.id}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                      provider.eligibleForLeads
-                        ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                        : 'bg-green-50 text-green-600 hover:bg-green-100'
-                    } disabled:opacity-50`}
-                  >
-                    {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
-                  </button>
+                  <div className="flex flex-col gap-1.5 items-center">
+                    <button
+                      onClick={() => toggleEligibility(provider.id, provider.eligibleForLeads)}
+                      disabled={updating === provider.id}
+                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        provider.eligibleForLeads
+                          ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                          : 'bg-green-50 text-green-600 hover:bg-green-100'
+                      } disabled:opacity-50`}
+                    >
+                      {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
+                    </button>
+                    {provider.eligibleForLeads && (
+                      <Link
+                        href={`/admin/providers/${provider.id}/rematch`}
+                        className="text-xs text-blue-600 hover:underline whitespace-nowrap"
+                        title="Re-route recent OPEN leads in this provider's radius. Use after activating a new provider."
+                      >
+                        Rematch open leads →
+                      </Link>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
