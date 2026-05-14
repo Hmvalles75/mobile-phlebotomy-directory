@@ -76,6 +76,19 @@ const B2B_NOTE_PATTERNS: ReadonlyArray<RegExp> = [
   /\bresearch\s+studies\b/i,
   /\bclinical\s+trial/i,
   /\bclinical\s+research\b/i,
+  // "clinical study" / "clinical studies" — added 2026-05-14 after Michael
+  // McKee's U-Mich research-coordinator lead leaked through to free providers
+  // and sat unclaimed for 24 days. The old patterns only matched "research
+  // study" (not "clinical study") and "clinical trial" (not "clinical study").
+  /\bclinical\s+stud(y|ies)\b/i,
+  // Research-vocabulary tells — IRB and study coordinator are research-only
+  // language, never used by individual patients. Pattern "study participants"
+  // and "research participants" catch B2B phrasing that doesn't include a
+  // top-level signal word like "clinical" or "research study".
+  /\bstudy\s+participants\b/i,
+  /\bresearch\s+participants\b/i,
+  /\bstudy\s+coordinator\b/i,
+  /\b(IRB|institutional\s+review\s+board)\b/i,
   /\bdrug\s+discovery\b/i,
   /\bdrug\s+development\b/i,
   /\bbiometric\s+screening\b/i,
