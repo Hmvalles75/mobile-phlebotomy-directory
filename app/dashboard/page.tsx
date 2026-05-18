@@ -22,7 +22,7 @@ interface Lead {
   routedAt?: string
   claimedAt?: string | null
   outcome?: string | null
-  outcomeNotes?: string | null
+  outcomeNotes?: string | null  // shown inline on the dashboard row, line-clamped to 2 lines
   appointmentDate?: string | null
   isHighValue?: boolean
   drawCount?: string | null
@@ -36,6 +36,9 @@ const OUTCOME_LABEL: Record<string, { label: string; color: string }> = {
   CONTACTED:            { label: '☎️ Contacted',     color: 'bg-blue-100 text-blue-800 border-blue-200' },
   NO_ANSWER:            { label: '📞 No answer',     color: 'bg-amber-100 text-amber-800 border-amber-200' },
   VOICEMAIL:            { label: '📧 Voicemail',     color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  TEXT_SENT:            { label: '💬 Text sent',     color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  EMAIL_SENT:           { label: '✉️ Email sent',    color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  UNABLE_TO_REACH:      { label: '🚫 Can\'t reach',  color: 'bg-amber-100 text-amber-800 border-amber-200' },
   SCHEDULED_CALLBACK:   { label: '⏰ Callback',      color: 'bg-amber-100 text-amber-800 border-amber-200' },
   NO_ORDER:             { label: '📋 No order',      color: 'bg-gray-100 text-gray-700 border-gray-200' },
   DECLINED:             { label: '💰 Won\'t pay',    color: 'bg-gray-100 text-gray-700 border-gray-200' },
@@ -1048,6 +1051,19 @@ function DashboardContent() {
                             <span>· Pay: {lead.paymentMethod === 'insurance' ? 'Insurance' : lead.paymentMethod === 'out_of_pocket' ? 'OOP' : 'Not sure'}</span>
                           )}
                         </div>
+
+                        {/* Provider notes (outcomeNotes) — shown inline by default,
+                            line-clamped to 2 lines. Full text on hover via title attr.
+                            The whole point of Janelle's ask is at-a-glance tracking. */}
+                        {lead.outcomeNotes && (
+                          <div
+                            className="mt-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded px-2 py-1.5"
+                            title={lead.outcomeNotes}
+                          >
+                            <span className="font-medium text-gray-500">📝 </span>
+                            <span className="line-clamp-2">{lead.outcomeNotes}</span>
+                          </div>
+                        )}
 
                         {!outcomeMeta && (
                           <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">

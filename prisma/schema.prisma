@@ -728,6 +728,12 @@ enum LeadOutcome {
   APPOINTMENT_COMPLETED
   NO_ANSWER
   VOICEMAIL
+  // Added 2026-05-18 per Janelle Lashley feedback — mid-funnel outreach
+  // signals so providers can document attempts without flipping to a
+  // terminal state. Lead remains CLAIMED after these are set.
+  TEXT_SENT
+  EMAIL_SENT
+  UNABLE_TO_REACH
   DECLINED
   WRONG_NUMBER
   DUPLICATE

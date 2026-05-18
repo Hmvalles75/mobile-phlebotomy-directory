@@ -16,6 +16,11 @@ interface Lead {
   urgency: 'STANDARD' | 'STAT'
   notes?: string
   priceCents: number
+  // Existing outcome + notes when this lead is already claimed by the viewer.
+  // Pre-populates the notes textarea so they can edit existing notes rather
+  // than typing over a blank field every time they revisit the page.
+  outcome?: string | null
+  outcomeNotes?: string | null
 }
 
 export default function ClaimLeadPage() {
@@ -36,6 +41,7 @@ export default function ClaimLeadPage() {
   const [outcomeSaving, setOutcomeSaving] = useState(false)
   const [outcomeSaved, setOutcomeSaved] = useState<string | null>(null)  // label of last saved outcome
   const [outcomeError, setOutcomeError] = useState<string | null>(null)
+  const [outcomeNotes, setOutcomeNotes] = useState<string>('')
   const [isTrial, setIsTrial] = useState(false)
   const [providerId, setProviderId] = useState<string>('')
   const [providerName, setProviderName] = useState<string>('')
@@ -69,6 +75,11 @@ export default function ClaimLeadPage() {
   // Outcome buttons: one-click capture so we finally have real lead-quality data.
   // The "complete" action flips status to DELIVERED; everything else is a simple
   // outcome update (lead stays CLAIMED so the provider can keep working it).
+  //
+  // Notes textarea (outcomeNotes) ALWAYS saves alongside the chosen outcome —
+  // last-write-wins on the outcomeNotes column. Provider can append/edit on
+  // subsequent saves. No "save notes only" path: every save sets an outcome,
+  // so the lead is never stuck in a "claimed but no status, has notes" state.
   async function handleOutcome(outcome: string, label: string, isComplete: boolean) {
     if (!providerId) {
       setOutcomeError('Missing provider context — refresh the page and try again.')
@@ -83,6 +94,7 @@ export default function ClaimLeadPage() {
         body: JSON.stringify({
           action: isComplete ? 'complete' : 'update_outcome',
           outcome,
+          outcomeNotes: outcomeNotes.trim() || null,
           providerId,
         }),
       })
@@ -198,6 +210,9 @@ export default function ClaimLeadPage() {
       // the URL and previously got an "already claimed by someone else" page.
       if (data.isClaimedByYou && data.lead) {
         setLeadData(data.lead)
+        // Pre-populate the notes textarea with any existing notes so the
+        // provider edits rather than re-typing.
+        if (data.lead.outcomeNotes) setOutcomeNotes(data.lead.outcomeNotes)
         setClaimed(true)
         return true
       }
@@ -432,11 +447,28 @@ export default function ClaimLeadPage() {
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">How did this lead turn out?</h4>
               <p className="text-xs text-gray-500 mb-3">
-                One click to tell us what happened. Helps us improve lead quality for you and other providers.
+                Click the outcome that best matches what happened. Notes are optional but helpful — they save with whichever outcome you click.
               </p>
+
+              {/* Free-text notes — optional, saves with whatever outcome button is clicked.
+                  Always editable, last-write-wins on the outcomeNotes column. */}
+              <div className="mb-3">
+                <label htmlFor="outcomeNotes" className="block text-xs font-medium text-gray-600 mb-1">
+                  Notes (optional) <span className="text-gray-400">— {outcomeNotes.length}/1000</span>
+                </label>
+                <textarea
+                  id="outcomeNotes"
+                  value={outcomeNotes}
+                  onChange={(e) => setOutcomeNotes(e.target.value.slice(0, 1000))}
+                  rows={3}
+                  placeholder="e.g. Called 3x, left voicemail — will try Thursday. Or: scheduled for 5/22 9am."
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+
               {outcomeSaved && (
                 <div className="mb-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded p-2">
-                  ✓ Outcome saved: <strong>{outcomeSaved}</strong>. Thank you!
+                  ✓ Saved: <strong>{outcomeSaved}</strong>{outcomeNotes.trim() ? ' (with notes)' : ''}. Thank you!
                 </div>
               )}
               {outcomeError && (
@@ -465,6 +497,34 @@ export default function ClaimLeadPage() {
                   className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
                 >
                   📞 No answer
+                </button>
+                <button
+                  onClick={() => handleOutcome('VOICEMAIL', 'Voicemail left', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  📧 Voicemail
+                </button>
+                <button
+                  onClick={() => handleOutcome('TEXT_SENT', 'Text sent', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-blue-300 text-blue-800 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  💬 Text sent
+                </button>
+                <button
+                  onClick={() => handleOutcome('EMAIL_SENT', 'Email sent', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-blue-300 text-blue-800 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  ✉️ Email sent
+                </button>
+                <button
+                  onClick={() => handleOutcome('UNABLE_TO_REACH', 'Unable to reach', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  🚫 Can&apos;t reach
                 </button>
                 <button
                   onClick={() => handleOutcome('NO_ORDER', 'No doctor\'s order', false)}

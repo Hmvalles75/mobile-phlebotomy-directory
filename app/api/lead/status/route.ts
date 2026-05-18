@@ -72,6 +72,8 @@ export async function GET(req: NextRequest) {
           urgency: true,
           notes: true,
           labPreference: true,
+          outcome: true,
+          outcomeNotes: true,
         }
       })
       return NextResponse.json({
