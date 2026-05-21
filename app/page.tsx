@@ -732,7 +732,7 @@ export default function HomePage() {
 
             {/* Launch Offer Badge */}
             <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
-              Now Available - Starting at $49/month
+              Now Available - Starting at $79/month
             </div>
 
             {/* Description */}

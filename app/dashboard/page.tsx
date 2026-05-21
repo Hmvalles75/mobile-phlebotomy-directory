@@ -1112,7 +1112,7 @@ function DashboardContent() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Premium</h3>
             <p className="text-gray-600 mb-4">
-              Get premium placement, a featured badge, and priority lead routing starting at $49/month.
+              Get premium placement, a featured badge, and priority lead routing starting at $79/month.
             </p>
             <button
               onClick={() => setShowPricingModal(true)}
