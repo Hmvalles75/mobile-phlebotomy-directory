@@ -600,41 +600,60 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 isFeatured={isFeatured}
               />
 
-              {/* Contact Card */}
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
+              {/* Direct-contact card — clearly labeled as the OTHER path
+                  (distinct from the routed-request CTA above). Patients calling
+                  this number reach {providerName} directly. Featured providers
+                  hide their phone and rely on the request flow only; for those,
+                  this card collapses into a small "contact via request form"
+                  hint to avoid showing an empty header. */}
+              {(provider.phone && !isFeatured) || provider.contactPerson ? (
+                <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Contact {provider.name} directly
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 mb-4">
+                    This contact info reaches {provider.name} only. To reach our broader network of providers covering your area, use the request form above.
+                  </p>
 
-                <div className="space-y-4 mb-6">
-                  {/* Phone: hidden for featured, click-to-reveal for others */}
-                  {provider.phone && !isFeatured && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2">📞</span>
-                      <div>
-                        <PhoneReveal
-                          phone={provider.phone}
-                          providerId={provider.id}
-                          providerName={provider.name}
-                          variant="compact"
-                        />
-                        <p className="text-sm text-gray-500">Primary Phone</p>
-                        {!isVerified && (
-                          <p className="text-xs text-amber-600 mt-1">⚠️ Unverified - confirm details</p>
-                        )}
+                  <div className="space-y-4 mb-6">
+                    {provider.phone && !isFeatured && (
+                      <div className="flex items-start">
+                        <span className="text-gray-500 mr-2">📞</span>
+                        <div>
+                          <PhoneReveal
+                            phone={provider.phone}
+                            providerId={provider.id}
+                            providerName={provider.name}
+                            variant="compact"
+                          />
+                          <p className="text-sm text-gray-500">Primary Phone</p>
+                          {!isVerified && (
+                            <p className="text-xs text-amber-600 mt-1">⚠️ Unverified - confirm details</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {provider.contactPerson && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2">👤</span>
-                      <div>
-                        <p className="font-semibold text-gray-900">{provider.contactPerson}</p>
-                        <p className="text-sm text-gray-500">Contact Person</p>
+                    {provider.contactPerson && (
+                      <div className="flex items-start">
+                        <span className="text-gray-500 mr-2">👤</span>
+                        <div>
+                          <p className="font-semibold text-gray-900">{provider.contactPerson}</p>
+                          <p className="text-sm text-gray-500">Contact Person</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  <ProviderActions
+                    provider={providerForSchema as any}
+                    currentLocation={`provider-detail-${params.slug}`}
+                    variant="detailed"
+                    showStructuredData={false}
+                    hideViewDetails={true}
+                  />
                 </div>
-
+              ) : (
                 <ProviderActions
                   provider={providerForSchema as any}
                   currentLocation={`provider-detail-${params.slug}`}
@@ -642,7 +661,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   showStructuredData={false}
                   hideViewDetails={true}
                 />
-              </div>
+              )}
 
               {/* Additional Details Card */}
               <div className="bg-white rounded-lg shadow-md p-6">

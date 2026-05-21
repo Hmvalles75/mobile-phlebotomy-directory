@@ -67,12 +67,20 @@ export function ProviderCTASection({
 
   return (
     <>
+      {/* Coordinated copy update 2026-05-21 — header, body, CTA, and disclosure
+          all reframed to make the routing mechanism transparent. Previously
+          all three implied direct booking with the named provider ("Request
+          Service from X" / "Book a licensed mobile phlebotomist" / "Request
+          a Mobile Blood Draw"), which created a BBB-style complaint risk
+          because submissions actually route through the central system to
+          providers covering the area, not just this specific listing. */}
       <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">
-          Request Service from {providerName}
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
+          Request a Mobile Phlebotomist for Your Area
         </h3>
         <p className="text-gray-700 mb-4 text-sm">
-          Book a licensed mobile phlebotomist to come to you. Same-day and next-day slots available.
+          Submit your request and we'll connect you with a vetted provider covering your area.
+          Same-day and next-day slots commonly available.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -80,13 +88,17 @@ export function ProviderCTASection({
             onClick={handleRequestClick}
             className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition text-center"
           >
-            Request a Mobile Blood Draw
+            Request a Draw in This Area
           </button>
         </div>
 
+        <p className="text-xs text-gray-600 mt-3">
+          Requests are routed to vetted providers covering your area.
+        </p>
+
         {!isVerified && (
-          <p className="text-xs text-gray-600 mt-3">
-            ⚠️ This is an unverified listing. Please confirm details with the provider.
+          <p className="text-xs text-amber-700 mt-2">
+            ⚠️ This is an unverified listing. Please confirm details with the provider before scheduling.
           </p>
         )}
       </div>
