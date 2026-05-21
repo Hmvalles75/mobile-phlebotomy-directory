@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { captureAttribution } from '@/lib/attribution'
+import { ga4 } from '@/lib/ga4'
 
 interface InlineLeadFormProps {
   city: string
@@ -77,6 +78,22 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
       const data = await response.json()
 
       if (data.ok) {
+        // Fire GA4 conversion event AFTER server confirms ok=true.
+        // Previously missing — submissions from this inline city-page form
+        // weren't appearing in the GA4 funnel, which made the platform
+        // conversion rate look artificially low.
+        if (typeof window !== 'undefined') {
+          ga4.leadFormSubmitSuccess({
+            lead_id: data.leadId || data.id,
+            source_page: window.location.href,
+            provider_slug: null,  // inline city form never sits on a provider page
+            placement: 'inline',
+            city: submitCity,
+            state: submitState,
+            zip: formData.zip,
+            urgency: formData.urgency,
+          })
+        }
         setSubmitted(true)
       } else {
         setError(data.error || 'Failed to submit. Please try again.')

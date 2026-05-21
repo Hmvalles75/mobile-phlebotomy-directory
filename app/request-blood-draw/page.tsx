@@ -141,8 +141,11 @@ function RequestBloodDrawForm() {
       const data = await response.json()
 
       if (data.ok) {
-        ga4.leadSubmitSuccess({
+        ga4.leadFormSubmitSuccess({
           lead_id: data.leadId,
+          source_page: typeof window !== 'undefined' ? window.location.href : undefined,
+          provider_slug: null,  // dedicated /request-blood-draw page never sits on a provider listing
+          placement: 'dedicated_request_page',
           city: formData.city,
           state: formData.state,
           zip: formData.zip,

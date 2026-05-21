@@ -49,6 +49,14 @@ export function trackEvent(eventName: string, params?: any) {
   (window as any).gtag('event', eventName, enrichedParams)
 }
 
+// Placement carry-through: the originating CTA placement (e.g. 'provider_card',
+// 'hero', 'sticky') sits at the top of the funnel. We capture it here when
+// lead_cta_click fires, then auto-merge it into downstream events (form_open,
+// submit_success) so GA4 funnel reports can attribute conversions back to the
+// CTA surface without every caller having to thread the value through props.
+// Sequential by definition in a user flow; safe for client-side React.
+let _lastPlacement: string | null = null
+
 // Specific event trackers
 export const ga4 = {
   // ========================================
@@ -58,18 +66,27 @@ export const ga4 = {
   /**
    * Step 1: User clicks CTA button (before modal opens)
    * Use this BEFORE opening the lead form modal
+   *
+   * Side-effect: captures `placement` into the module-level _lastPlacement
+   * so downstream funnel events (lead_form_open, lead_form_submit_success)
+   * can echo it without every caller having to thread the value through
+   * props. Single-user-flow safe: clicks are sequential by definition.
    */
   leadCtaClick: (params?: {
     placement?: 'hero' | 'sticky' | 'inline' | 'provider_card' | 'not_found' | 'metro_links' | 'bottom'
   }) => {
+    if (params?.placement) _lastPlacement = params.placement
     trackEvent('lead_cta_click', params)
   },
 
   /**
-   * Step 2: Lead form modal opens
+   * Step 2: Lead form modal opens.
+   * Auto-merges _lastPlacement (set by the preceding leadCtaClick) so the
+   * funnel keeps placement attribution across stages.
    */
-  leadFormOpen: (params?: { city?: string; state?: string; zip?: string }) => {
-    trackEvent('lead_form_open', params)
+  leadFormOpen: (params?: { city?: string; state?: string; zip?: string; placement?: string }) => {
+    const placement = params?.placement || _lastPlacement || undefined
+    trackEvent('lead_form_open', { ...params, ...(placement && { placement }) })
   },
 
   /**
@@ -157,10 +174,27 @@ export const ga4 = {
 
   /**
    * Step 5a: Form submitted successfully (PRIMARY CONVERSION)
-   * Mark as "Key Event" in GA4 UI
+   * Mark as "Key Event" in GA4 UI.
+   *
+   * Renamed 2026-05-22 from leadSubmitSuccess → leadFormSubmitSuccess and
+   * event from `lead_submit_success` → `lead_form_submit_success` to match
+   * the lead_form_* family (lead_form_open, lead_form_validation_error,
+   * etc.) and to make this the canonical conversion event. Spec'd by Hector:
+   *
+   *   - placement: carries through from lead_cta_click via _lastPlacement
+   *   - lead_id: DB ID of the created lead
+   *   - source_page: full URL the submission originated from
+   *   - provider_slug: if submitted from a /provider/[slug] page, else null
+   *
+   * Fire AFTER the API returns ok=true. Don't count failed submissions.
    */
-  leadSubmitSuccess: (params?: {
+  leadFormSubmitSuccess: (params: {
     lead_id?: string
+    source_page?: string
+    provider_slug?: string | null
+    placement?: string
+    // Legacy params kept so existing analytics queries still work during
+    // the cutover window — drop after 30d of clean data on the new event.
     location_type?: 'city' | 'metro' | 'state' | 'not_found'
     city?: string
     state?: string
@@ -168,7 +202,20 @@ export const ga4 = {
     urgency?: string
     provider_status?: string
   }) => {
-    trackEvent('lead_submit_success', params)
+    const placement = params.placement || _lastPlacement || undefined
+    trackEvent('lead_form_submit_success', {
+      ...params,
+      ...(placement && { placement }),
+    })
+  },
+
+  /**
+   * @deprecated Use leadFormSubmitSuccess. This alias keeps any external
+   * callers (or stale code) working during the rename cutover; it forwards
+   * to the new helper so the new event name fires. Will be removed.
+   */
+  leadSubmitSuccess: function(params?: any) {
+    this.leadFormSubmitSuccess(params || {})
   },
 
   /**

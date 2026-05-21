@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { useZipLookup, isValidZip } from '@/hooks/useZipLookup'
-import { ga4, trackEvent } from '@/lib/ga4'
+import { ga4 } from '@/lib/ga4'
 import { MARKET_CONFIG, getMarketMetroPath, isInLACountyCoverage } from '@/lib/config/market'
 import { captureAttribution } from '@/lib/attribution'
 
@@ -173,19 +173,16 @@ function LARequestForm() {
         throw new Error(data.error || 'Failed to submit request')
       }
 
-      // Track success
-      ga4.leadSubmitSuccess({
+      // Track success — canonical conversion event
+      ga4.leadFormSubmitSuccess({
         lead_id: data.leadId,
+        source_page: typeof window !== 'undefined' ? window.location.href : undefined,
+        provider_slug: null,  // LA market-locked request page, no specific provider
+        placement: 'la_market_request',
         city,
         state,
-        zip: formData.zip
-      })
-
-      trackEvent('lead_submit_success', {
-        source,
         zip: formData.zip,
-        city,
-        urgency: formData.urgency
+        urgency: formData.urgency,
       })
 
       setSubmitted(true)

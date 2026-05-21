@@ -144,22 +144,33 @@ export function LeadFormModal({
 
       // Determine location_type from URL
       let locationType: 'city' | 'metro' | 'state' | 'not_found' = 'city'
+      let sourcePage: string | undefined
+      let providerSlug: string | null = null
       if (typeof window !== 'undefined') {
         const path = window.location.pathname
         if (path.includes('/metro/')) locationType = 'metro'
         else if (path.match(/\/us\/[a-z]{2}$/)) locationType = 'state'
         else if (!path.includes('/us/')) locationType = 'not_found'
+
+        sourcePage = window.location.href
+        // Extract slug from /provider/[slug] paths only — null elsewhere
+        const slugMatch = path.match(/^\/provider\/([^/]+)/)
+        providerSlug = slugMatch ? slugMatch[1] : null
       }
 
-      // Track success with lead_id and location_type
-      ga4.leadSubmitSuccess({
+      // Track success — canonical conversion event. placement is carried
+      // through automatically by the helper from the preceding lead_cta_click.
+      ga4.leadFormSubmitSuccess({
         lead_id: data.leadId || data.id,
+        source_page: sourcePage,
+        provider_slug: providerSlug,
+        // Legacy params kept for analytics continuity during the 30d cutover
         location_type: locationType,
         city: formData.city,
         state: formData.state,
         zip: formData.zip,
         urgency: formData.urgency,
-        provider_status: data.status
+        provider_status: data.status,
       })
 
       setSubmitted(true)
