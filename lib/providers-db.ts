@@ -78,6 +78,7 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
 export async function getAllProviders(): Promise<EnrichedProvider[]> {
   try {
     const providers = await prisma.provider.findMany({
+      where: { removedAt: null },
       select: {
         id: true,
         name: true,
@@ -135,8 +136,11 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
 
 export async function getProviderBySlug(slug: string): Promise<EnrichedProvider | null> {
   try {
-    const provider = await prisma.provider.findUnique({
-      where: { slug },
+    // findFirst (not findUnique) so we can combine the unique slug with the
+    // removedAt:null filter. Removed providers return null here so the page
+    // route's notFound() fires; next.config.mjs has a 301 for canonical slugs.
+    const provider = await prisma.provider.findFirst({
+      where: { slug, removedAt: null },
       include: {
         coverage: {
           include: {
@@ -192,6 +196,7 @@ export async function getProvidersByCity(cityName: string, stateAbbr?: string): 
   try {
     const providers = await prisma.provider.findMany({
       where: {
+        removedAt: null,
         coverage: {
           some: {
             city: {
@@ -234,6 +239,7 @@ export async function getProvidersByState(stateAbbr: string): Promise<EnrichedPr
   try {
     const providers = await prisma.provider.findMany({
       where: {
+        removedAt: null,
         coverage: {
           some: {
             state: {
@@ -268,6 +274,7 @@ export async function searchProviders(query: string): Promise<EnrichedProvider[]
   try {
     const providers = await prisma.provider.findMany({
       where: {
+        removedAt: null,
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
           { description: { contains: query, mode: 'insensitive' } },
@@ -300,6 +307,7 @@ export async function getFeaturedProviders(): Promise<EnrichedProvider[]> {
   try {
     const providers = await prisma.provider.findMany({
       where: {
+        removedAt: null,
         listingTier: 'FEATURED'
       },
       include: {
@@ -329,6 +337,7 @@ export async function getTopRatedProviders(): Promise<EnrichedProvider[]> {
   try {
     const providers = await prisma.provider.findMany({
       where: {
+        removedAt: null,
         rating: {
           gte: 4.0
         }

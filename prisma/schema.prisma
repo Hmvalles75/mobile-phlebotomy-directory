@@ -84,6 +84,19 @@ model Provider {
   // and isFeatured (which has 20+ stale legacy entries). Set manually until the
   // Stripe webhook can write back reliably (see project memory: stripeCustomerId bug).
   priorityRouting       Boolean                @default(false)
+  // ── Soft-removal at provider request ───────────────────────────────────────
+  // removedAt: null = listing is live; timestamp = listing has been removed.
+  // Listing queries in lib/providers-db.ts filter by removedAt:null so removed
+  // rows disappear from city/state pages, search, and the provider detail page
+  // (which then 404s, with optional 301 in next.config.mjs for canonical slugs).
+  // We keep the row so Lead.routedToId history stays valid and the unique slug
+  // blocks future scrapers from re-inserting under the same name.
+  removedAt             DateTime?
+  removedReason         String?                // free-text: "provider request", future "for cause", etc.
+  // doNotRelist: hard-stop for future seeders/scrapers. Any script that creates
+  // providers should refuse to insert when a matching (name + phone) row exists
+  // with doNotRelist=true.
+  doNotRelist           Boolean                @default(false)
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]

@@ -71,6 +71,16 @@ const nextConfig = {
         destination: '/provider/carewithluvs-llc',
         permanent: true,
       },
+      // Removed-at-provider-request 301s. Listing rows still exist in the DB
+      // with removedAt set (preserving Lead.routedToId history and blocking
+      // the unique slug), but the public page now redirects to the closest
+      // canonical location page. Add an entry here for each removed provider
+      // until volume justifies a DB-driven middleware redirect.
+      {
+        source: '/provider/just-a-pinch-mobile-phlebotomy',
+        destination: '/us/ny/saint-albans',
+        permanent: true,
+      },
     ]
   },
 }
