@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/stat-escalation",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/stale-claim-release",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

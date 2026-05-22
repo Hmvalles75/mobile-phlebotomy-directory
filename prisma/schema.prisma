@@ -97,6 +97,13 @@ model Provider {
   // providers should refuse to insert when a matching (name + phone) row exists
   // with doNotRelist=true.
   doNotRelist           Boolean                @default(false)
+  // Stale-claim tracking. Incremented when the stale-claim-release cron
+  // yanks a CLAIMED lead from this provider for failing to log an outcome
+  // within SLA. Surfaces in admin to spot patterns; high counts can feed
+  // into auto-pause logic in future iterations of the pause-non-converter
+  // workflow. lastStaleReleaseAt enables cooldown / "third strike" timing.
+  staleReleaseCount     Int                    @default(0)
+  lastStaleReleaseAt    DateTime?
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]
@@ -260,6 +267,15 @@ model Lead {
   // re-alerting on the same lead on every subsequent cron tick. Null on
   // STANDARD leads and on STAT leads that get claimed in time.
   statEscalatedAt      DateTime?
+  // Stale-claim auto-release audit trail. Set when the cron auto-releases
+  // a CLAIMED lead because the provider didn't log an outcome within the
+  // SLA (STAT 2h, STANDARD 6h). Lead flips status back to OPEN and these
+  // fields preserve who held it and why, so we can audit patterns and
+  // exclude the original claimer from re-notification. See
+  // lib/staleClaimRelease.ts and app/api/cron/stale-claim-release/route.ts.
+  releasedFromProviderId String?
+  releasedAt             DateTime?
+  releaseReason          String?    // currently only "stale_claim"; future: "manual_admin", etc.
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])
