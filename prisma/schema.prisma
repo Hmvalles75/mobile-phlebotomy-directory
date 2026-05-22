@@ -756,6 +756,20 @@ enum LeadOutcome {
   NO_AVAILABILITY
   WRONG_SERVICE
   NO_ORDER
+  // Added 2026-05-22 — completing the failed-contact sub-status set per
+  // Janelle Lashley follow-up feedback. The full failed-contact cluster is
+  // NO_ANSWER, VOICEMAIL, BUSY_OR_DISCONNECTED, WRONG_NUMBER,
+  // INVALID_CONTACT_INFO, UNABLE_TO_REACH. lib/leadOutcomes.ts exports
+  // FAILED_CONTACT_OUTCOMES so reporting can aggregate the whole cluster.
+  //
+  // Semantic distinction between the three "info problem" values:
+  //   - UNABLE_TO_REACH      = tried; info was valid; no connect after
+  //                            multiple attempts, no voicemail option.
+  //   - BUSY_OR_DISCONNECTED = phone rang busy or line was out-of-service.
+  //   - INVALID_CONTACT_INFO = contact data itself is broken (wrong format,
+  //                            fake number, mismatched name/email).
+  BUSY_OR_DISCONNECTED
+  INVALID_CONTACT_INFO
 }
 
 enum Urgency {

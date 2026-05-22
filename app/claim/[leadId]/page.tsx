@@ -503,7 +503,28 @@ export default function ClaimLeadPage() {
                   disabled={outcomeSaving}
                   className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
                 >
-                  📧 Voicemail
+                  📧 Voicemail left
+                </button>
+                <button
+                  onClick={() => handleOutcome('BUSY_OR_DISCONNECTED', 'Busy / disconnected', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  📵 Busy / disconnected
+                </button>
+                <button
+                  onClick={() => handleOutcome('WRONG_NUMBER', 'Wrong number', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  ❌ Wrong number
+                </button>
+                <button
+                  onClick={() => handleOutcome('INVALID_CONTACT_INFO', 'Bad contact info', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  ⚠️ Bad contact info
                 </button>
                 <button
                   onClick={() => handleOutcome('TEXT_SENT', 'Text sent', false)}

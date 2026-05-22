@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { FAILED_CONTACT_OUTCOMES } from '@/lib/leadOutcomes'
 
 interface LeadNotification {
   id: string
@@ -31,7 +32,7 @@ interface Lead {
   claimedAt: string | null
   firstContactAt: string | null
   callAttempts: number
-  outcome: 'CONTACTED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'NO_ANSWER' | 'VOICEMAIL' | 'DECLINED' | 'WRONG_NUMBER' | 'DUPLICATE' | 'NOT_INTERESTED' | 'SCHEDULED_CALLBACK' | null
+  outcome: 'CONTACTED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'NO_ANSWER' | 'VOICEMAIL' | 'BUSY_OR_DISCONNECTED' | 'WRONG_NUMBER' | 'INVALID_CONTACT_INFO' | 'DECLINED' | 'DUPLICATE' | 'NOT_INTERESTED' | 'SCHEDULED_CALLBACK' | null
   outcomeNotes: string | null
   appointmentDate: string | null
   completedAt: string | null
@@ -603,7 +604,7 @@ export function LeadsPanel() {
                             selectedLead.outcome === 'APPOINTMENT_COMPLETED' ? 'text-green-700' :
                             selectedLead.outcome === 'APPOINTMENT_BOOKED' ? 'text-blue-700' :
                             selectedLead.outcome === 'CONTACTED' ? 'text-purple-700' :
-                            selectedLead.outcome === 'NO_ANSWER' || selectedLead.outcome === 'VOICEMAIL' ? 'text-yellow-700' :
+                            (FAILED_CONTACT_OUTCOMES as readonly string[]).includes(selectedLead.outcome) ? 'text-yellow-700' :
                             'text-red-700'
                           }`}>
                             {selectedLead.outcome.replace(/_/g, ' ')}

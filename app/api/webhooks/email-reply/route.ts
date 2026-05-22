@@ -15,6 +15,8 @@ import { LeadOutcome } from '@prisma/client'
  * - "DECLINED" → sets outcome to DECLINED
  * - "NOT INTERESTED" → sets outcome to NOT_INTERESTED
  * - "WRONG NUMBER" → sets outcome to WRONG_NUMBER
+ * - "BUSY" / "DISCONNECTED" / "OUT OF SERVICE" → sets outcome to BUSY_OR_DISCONNECTED
+ * - "BAD NUMBER" / "FAKE NUMBER" / "INVALID NUMBER" / "BAD CONTACT" → sets outcome to INVALID_CONTACT_INFO
  * - "DUPLICATE" → sets outcome to DUPLICATE
  *
  * Setup in SendGrid:
@@ -127,6 +129,12 @@ export async function POST(request: NextRequest) {
     } else if (normalizedText.includes('WRONG NUMBER')) {
       action = 'update_outcome'
       outcome = LeadOutcome.WRONG_NUMBER
+    } else if (normalizedText.includes('BUSY') || normalizedText.includes('DISCONNECTED') || normalizedText.includes('OUT OF SERVICE')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.BUSY_OR_DISCONNECTED
+    } else if (normalizedText.includes('BAD NUMBER') || normalizedText.includes('FAKE NUMBER') || normalizedText.includes('INVALID NUMBER') || normalizedText.includes('BAD CONTACT')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.INVALID_CONTACT_INFO
     } else if (normalizedText.includes('DUPLICATE')) {
       action = 'update_outcome'
       outcome = LeadOutcome.DUPLICATE

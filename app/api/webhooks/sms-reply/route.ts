@@ -16,6 +16,8 @@ import twilio from 'twilio'
  * - "DECLINED" → sets outcome to DECLINED
  * - "NOT INTERESTED" → sets outcome to NOT_INTERESTED
  * - "WRONG NUMBER" → sets outcome to WRONG_NUMBER
+ * - "BUSY" / "DISCONNECTED" / "OUT OF SERVICE" → sets outcome to BUSY_OR_DISCONNECTED
+ * - "BAD NUMBER" / "FAKE NUMBER" / "INVALID NUMBER" / "BAD CONTACT" → sets outcome to INVALID_CONTACT_INFO
  * - "DUPLICATE" → sets outcome to DUPLICATE
  *
  * Example: Provider receives "New Lead: John Doe, ZIP 48126..."
@@ -138,6 +140,12 @@ export async function POST(request: NextRequest) {
     } else if (normalizedMessage.includes('WRONG NUMBER')) {
       action = 'update_outcome'
       outcome = LeadOutcome.WRONG_NUMBER
+    } else if (normalizedMessage.includes('BUSY') || normalizedMessage.includes('DISCONNECTED') || normalizedMessage.includes('OUT OF SERVICE')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.BUSY_OR_DISCONNECTED
+    } else if (normalizedMessage.includes('BAD NUMBER') || normalizedMessage.includes('FAKE NUMBER') || normalizedMessage.includes('INVALID NUMBER') || normalizedMessage.includes('BAD CONTACT')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.INVALID_CONTACT_INFO
     } else if (normalizedMessage.includes('DUPLICATE')) {
       action = 'update_outcome'
       outcome = LeadOutcome.DUPLICATE
@@ -157,7 +165,7 @@ export async function POST(request: NextRequest) {
 
     if (!action) {
       return new NextResponse(
-        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>Keywords: CLAIMED, CALLED, BOOKED, COMPLETED, NO ANSWER, VOICEMAIL, DECLINED, NOT INTERESTED, WRONG NUMBER, DUPLICATE, TOO FAR, UNAVAILABLE, WRONG SERVICE, CALLBACK</Message></Response>`,
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>Keywords: CLAIMED, CALLED, BOOKED, COMPLETED, NO ANSWER, VOICEMAIL, DECLINED, NOT INTERESTED, WRONG NUMBER, BUSY, DISCONNECTED, BAD NUMBER, DUPLICATE, TOO FAR, UNAVAILABLE, WRONG SERVICE, CALLBACK</Message></Response>`,
         { headers: { 'Content-Type': 'text/xml' } }
       )
     }
