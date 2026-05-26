@@ -749,6 +749,8 @@ enum LeadStatus {
   NEEDS_COVERAGE        // No opted-in providers available
   CLOSED_UNCONFIRMED    // Patient didn't confirm (timed out)
   CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
+  CLOSED_DUPLICATE      // Older submission from a patient who re-submitted; canonical row is the most recent submission
+  EXPIRED_NO_RESPONSE   // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
 }
 
 enum LeadOutcome {

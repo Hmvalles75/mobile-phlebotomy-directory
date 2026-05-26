@@ -104,6 +104,7 @@ async function releaseStaleLead(leadId: string, providerId: string): Promise<voi
       data: {
         status: 'OPEN',
         routedToId: null,
+        claimedAt: null,           // Null on release. The previous claim is undone; audit lives in releasedFromProviderId + releasedAt. Without this, leads come back to OPEN with stale claimedAt and downstream queries that filter `claimedAt: null` miss them (e.g. recover-unclaimed-leads.ts before the 2026-05-26 fix).
         releasedFromProviderId: providerId,
         releasedAt: now,
         releaseReason: 'stale_claim',
