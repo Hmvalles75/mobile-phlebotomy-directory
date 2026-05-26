@@ -788,6 +788,14 @@ enum LeadOutcome {
   //                            fake number, mismatched name/email).
   BUSY_OR_DISCONNECTED
   INVALID_CONTACT_INFO
+  // Added 2026-05-26 after Aliya Simpson (AccuGen Diagnostics) reached out
+  // saying the patient told her "I already found someone." Existing terminal
+  // outcomes (DECLINED, NOT_INTERESTED) don't match — the patient didn't
+  // decline service, they shopped multiple providers and picked another.
+  // Distinct because (a) contact succeeded, so it's not failed-contact;
+  // (b) patient still wanted the service, so it's not NOT_INTERESTED;
+  // (c) it's a signal about competitive routing, not provider behavior.
+  PATIENT_FOUND_OTHER
 }
 
 enum Urgency {

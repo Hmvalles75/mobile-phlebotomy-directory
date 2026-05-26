@@ -45,6 +45,7 @@ const OUTCOME_LABEL: Record<string, { label: string; color: string }> = {
   SCHEDULED_CALLBACK:   { label: '⏰ Callback',          color: 'bg-amber-100 text-amber-800 border-amber-200' },
   NO_ORDER:             { label: '📋 No order',          color: 'bg-gray-100 text-gray-700 border-gray-200' },
   DECLINED:             { label: '💰 Won\'t pay',        color: 'bg-gray-100 text-gray-700 border-gray-200' },
+  PATIENT_FOUND_OTHER:  { label: '🔍 Found other',       color: 'bg-gray-100 text-gray-700 border-gray-200' },
   WRONG_SERVICE:        { label: '🔀 Wrong service',     color: 'bg-gray-100 text-gray-700 border-gray-200' },
   NO_AVAILABILITY:      { label: '📅 Conflict',      color: 'bg-gray-100 text-gray-700 border-gray-200' },
   OUTSIDE_SERVICE_AREA: { label: '📍 Out of area',   color: 'bg-gray-100 text-gray-700 border-gray-200' },

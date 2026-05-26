@@ -18,6 +18,7 @@ import twilio from 'twilio'
  * - "WRONG NUMBER" → sets outcome to WRONG_NUMBER
  * - "BUSY" / "DISCONNECTED" / "OUT OF SERVICE" → sets outcome to BUSY_OR_DISCONNECTED
  * - "BAD NUMBER" / "FAKE NUMBER" / "INVALID NUMBER" / "BAD CONTACT" → sets outcome to INVALID_CONTACT_INFO
+ * - "FOUND OTHER" / "FOUND ANOTHER" / "FOUND SOMEONE" / "ALREADY HAS PROVIDER" → sets outcome to PATIENT_FOUND_OTHER
  * - "DUPLICATE" → sets outcome to DUPLICATE
  *
  * Example: Provider receives "New Lead: John Doe, ZIP 48126..."
@@ -134,6 +135,9 @@ export async function POST(request: NextRequest) {
     } else if (normalizedMessage.includes('DECLINED')) {
       action = 'update_outcome'
       outcome = LeadOutcome.DECLINED
+    } else if (normalizedMessage.includes('FOUND OTHER') || normalizedMessage.includes('FOUND ANOTHER') || normalizedMessage.includes('FOUND SOMEONE') || normalizedMessage.includes('ALREADY HAS PROVIDER')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.PATIENT_FOUND_OTHER
     } else if (normalizedMessage.includes('NOT INTERESTED')) {
       action = 'update_outcome'
       outcome = LeadOutcome.NOT_INTERESTED
@@ -165,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     if (!action) {
       return new NextResponse(
-        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>Keywords: CLAIMED, CALLED, BOOKED, COMPLETED, NO ANSWER, VOICEMAIL, DECLINED, NOT INTERESTED, WRONG NUMBER, BUSY, DISCONNECTED, BAD NUMBER, DUPLICATE, TOO FAR, UNAVAILABLE, WRONG SERVICE, CALLBACK</Message></Response>`,
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>Keywords: CLAIMED, CALLED, BOOKED, COMPLETED, NO ANSWER, VOICEMAIL, DECLINED, NOT INTERESTED, WRONG NUMBER, BUSY, DISCONNECTED, BAD NUMBER, FOUND OTHER, DUPLICATE, TOO FAR, UNAVAILABLE, WRONG SERVICE, CALLBACK</Message></Response>`,
         { headers: { 'Content-Type': 'text/xml' } }
       )
     }

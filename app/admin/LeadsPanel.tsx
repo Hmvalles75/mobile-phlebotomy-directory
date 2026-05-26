@@ -32,7 +32,7 @@ interface Lead {
   claimedAt: string | null
   firstContactAt: string | null
   callAttempts: number
-  outcome: 'CONTACTED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'NO_ANSWER' | 'VOICEMAIL' | 'BUSY_OR_DISCONNECTED' | 'WRONG_NUMBER' | 'INVALID_CONTACT_INFO' | 'DECLINED' | 'DUPLICATE' | 'NOT_INTERESTED' | 'SCHEDULED_CALLBACK' | null
+  outcome: 'CONTACTED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'NO_ANSWER' | 'VOICEMAIL' | 'BUSY_OR_DISCONNECTED' | 'WRONG_NUMBER' | 'INVALID_CONTACT_INFO' | 'DECLINED' | 'DUPLICATE' | 'NOT_INTERESTED' | 'SCHEDULED_CALLBACK' | 'PATIENT_FOUND_OTHER' | null
   outcomeNotes: string | null
   appointmentDate: string | null
   completedAt: string | null

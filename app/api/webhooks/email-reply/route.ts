@@ -17,6 +17,7 @@ import { LeadOutcome } from '@prisma/client'
  * - "WRONG NUMBER" → sets outcome to WRONG_NUMBER
  * - "BUSY" / "DISCONNECTED" / "OUT OF SERVICE" → sets outcome to BUSY_OR_DISCONNECTED
  * - "BAD NUMBER" / "FAKE NUMBER" / "INVALID NUMBER" / "BAD CONTACT" → sets outcome to INVALID_CONTACT_INFO
+ * - "FOUND OTHER" / "FOUND ANOTHER" / "FOUND SOMEONE" / "ALREADY HAS PROVIDER" → sets outcome to PATIENT_FOUND_OTHER
  * - "DUPLICATE" → sets outcome to DUPLICATE
  *
  * Setup in SendGrid:
@@ -123,6 +124,9 @@ export async function POST(request: NextRequest) {
     } else if (normalizedText.includes('DECLINED')) {
       action = 'update_outcome'
       outcome = LeadOutcome.DECLINED
+    } else if (normalizedText.includes('FOUND OTHER') || normalizedText.includes('FOUND ANOTHER') || normalizedText.includes('FOUND SOMEONE') || normalizedText.includes('ALREADY HAS PROVIDER')) {
+      action = 'update_outcome'
+      outcome = LeadOutcome.PATIENT_FOUND_OTHER
     } else if (normalizedText.includes('NOT INTERESTED')) {
       action = 'update_outcome'
       outcome = LeadOutcome.NOT_INTERESTED

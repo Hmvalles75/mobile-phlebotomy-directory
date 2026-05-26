@@ -562,6 +562,20 @@ export default function ClaimLeadPage() {
                   💰 Won&apos;t pay
                 </button>
                 <button
+                  onClick={() => handleOutcome('PATIENT_FOUND_OTHER', 'Patient found other provider', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  🔍 Found other
+                </button>
+                <button
+                  onClick={() => handleOutcome('NOT_INTERESTED', 'Not interested', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  🚫 Not interested
+                </button>
+                <button
                   onClick={() => handleOutcome('WRONG_SERVICE', 'Wrong service', false)}
                   disabled={outcomeSaving}
                   className="px-3 py-2 border-2 border-gray-300 text-gray-800 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
