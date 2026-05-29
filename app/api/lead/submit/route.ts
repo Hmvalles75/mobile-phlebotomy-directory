@@ -7,6 +7,7 @@ import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
+import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
 
 // Updated draw-count buckets (2026-04-22): 1-3 standard, 4-19 medium, 20+ high.
 // Also keep backward-compat for the older bucket values submitted by the LeadFormModal /
@@ -18,9 +19,21 @@ const PAYMENT_METHOD = ['insurance', 'out_of_pocket', 'not_sure'] as const
 type DrawCount = typeof DRAW_COUNTS[number]
 type RequestType = typeof REQUEST_TYPES[number]
 
+// US phone validation + normalization. The old `min(7)` rule let malformed
+// numbers through — e.g. Jenn Gallo's 8-digit "63147634" (2026-05) created a
+// lead a provider could never actually call. We now require a real 10-digit
+// US number (optionally with a leading 1), strip formatting, and store a
+// consistent (XXX) XXX-XXXX shape. Bad numbers are rejected at the boundary
+// instead of becoming a dead claimed lead + a WRONG_NUMBER/INVALID_CONTACT_INFO
+// outcome downstream.
+const phoneSchema = z.string()
+  .min(1, 'Phone number is required')
+  .refine(isValidUSPhone, PHONE_VALIDATION_MESSAGE)
+  .transform(normalizeUSPhone)
+
 const schema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().min(7, 'Phone number is required'),
+  phone: phoneSchema,
   email: z.string().email().optional().or(z.literal('')),
   address1: z.string().optional(),
   city: z.string().min(1, 'City is required'),
@@ -326,8 +339,12 @@ export async function POST(req: NextRequest) {
     console.error('Lead submission error:', e)
 
     if (e instanceof z.ZodError) {
+      // Surface the first field-level message as `error` so client forms that
+      // display data.error show something actionable ("Enter a valid 10-digit
+      // US phone number") instead of a generic "Validation error".
+      const firstMessage = e.errors[0]?.message || 'Validation error'
       return NextResponse.json(
-        { ok: false, error: 'Validation error', details: e.errors },
+        { ok: false, error: firstMessage, details: e.errors },
         { status: 400 }
       )
     }

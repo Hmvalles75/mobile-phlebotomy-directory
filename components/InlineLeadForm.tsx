@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { captureAttribution } from '@/lib/attribution'
 import { ga4 } from '@/lib/ga4'
+import { isValidUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
 
 interface InlineLeadFormProps {
   city: string
@@ -38,6 +39,10 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
     }
     if (!formData.paymentMethod) {
       setError('Please answer the payment question — required to match you with a provider.')
+      return
+    }
+    if (!isValidUSPhone(formData.phone)) {
+      setError(PHONE_VALIDATION_MESSAGE)
       return
     }
 

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { X } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
 import { captureAttribution } from '@/lib/attribution'
+import { isValidUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
 
 interface LeadFormModalProps {
   isOpen: boolean
@@ -74,8 +75,10 @@ export function LeadFormModal({
       newErrors.fullName = 'Full name is required (at least 2 characters)'
     }
 
-    if (!formData.phone.trim() || formData.phone.trim().length < 7) {
-      newErrors.phone = 'Valid phone number is required'
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!isValidUSPhone(formData.phone)) {
+      newErrors.phone = PHONE_VALIDATION_MESSAGE
     }
 
     if (!formData.city.trim()) {
