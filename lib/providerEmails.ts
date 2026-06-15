@@ -228,6 +228,11 @@ You'll receive the patient's:
 📱 HOW TO RESPOND:
 Simply contact the patient directly to schedule their appointment. The faster you respond, the better your chances of booking the visit.
 
+⏱️ AFTER YOU CALL THE PATIENT:
+Tap an outcome button on the claim page after each call attempt (No answer, Booked, Voicemail left, Found other, Not interested, etc.). Our system uses outcome logging as a "proof of life" signal — leads with no logged outcome within 6 hours auto-release back to the pool so they don't sit frozen.
+
+Takes 2 seconds, but missing it can release a lead you actually worked. The button is the only way the system knows you've engaged.
+
 💰 PRICING:
 During our beta phase, all leads are FREE. We're working with a small group of providers to refine the system before introducing pricing.
 
