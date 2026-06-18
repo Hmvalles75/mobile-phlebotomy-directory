@@ -25,7 +25,7 @@ export default function MobilePhlebotomyCostPage() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'How Much Does Mobile Phlebotomy Cost? $60-150 (2026 Prices)',
+    headline: 'How Much Does Mobile Phlebotomy Cost? $75-$150 (2026 Prices)',
     description: 'Complete guide to mobile phlebotomy costs including provider price comparisons, insurance coverage, state-by-state pricing, and ways to save.',
     author: {
       '@type': 'Organization',
@@ -38,7 +38,7 @@ export default function MobilePhlebotomyCostPage() {
       url: 'https://mobilephlebotomy.org'
     },
     datePublished: '2024-01-01',
-    dateModified: '2026-03-12'
+    dateModified: '2026-06-18'
   }
 
   const pricingSchema = {
@@ -135,6 +135,22 @@ export default function MobilePhlebotomyCostPage() {
           '@type': 'Answer',
           text: 'Without insurance, a home blood draw costs $60 to $150 for the phlebotomist\'s service fee. Lab processing fees are additional and vary from $25 to $200+ depending on the tests ordered. To reduce costs without insurance, use an independent phlebotomist ($60-$100) rather than a national service, schedule during business hours, bundle multiple tests in one visit, and ask about self-pay discounts. Some providers also accept HSA and FSA payments.'
         }
+      },
+      {
+        '@type': 'Question',
+        name: 'Why is mobile phlebotomy more expensive than getting blood drawn at a lab?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'A walk-in lab draw is often $20–$50 (or free with insurance) because the patient covers all travel, parking, and wait time. Mobile phlebotomy is $75–$150 because the price includes a certified phlebotomist coming to your home, supplies, scheduling, and specimen drop-off at the lab. For homebound patients, immunocompromised individuals, families coordinating multiple draws at once, or anyone without transportation, the convenience premium is often worth it — and Medicare typically covers the cost for qualifying patients who are homebound or have documented mobility limitations.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Are there extra fees for travel or multiple patients?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Most mobile phlebotomists include travel within a 10–25 mile radius at no extra cost. Beyond that radius, expect a travel surcharge of $15–$50 depending on distance and rural vs urban location. For multiple patients at the same address (a couple, family, or group home), most providers offer a discount on additional patients — typically $40–$75 per extra patient rather than the full per-visit fee. Bundling multiple people into a single visit can cut your effective per-patient cost by 40–50%, making it significantly cheaper than booking separate appointments.'
+        }
       }
     ]
   }
@@ -200,7 +216,7 @@ export default function MobilePhlebotomyCostPage() {
                 Find a Provider in Your Area
               </Link>
             </div>
-            <p className="text-sm text-gray-500 mt-4">Last updated: March 2026</p>
+            <p className="text-sm text-gray-500 mt-4">Last updated: June 2026</p>
           </div>
         </div>
       </div>
@@ -253,6 +269,76 @@ export default function MobilePhlebotomyCostPage() {
             </div>
             <p className="text-sm text-gray-500 mt-3">
               Prices are approximate and may vary by location. Lab processing fees are separate from the service fee shown above.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Service Type Pricing — answers "what does each kind of draw cost?"
+          with a clean semantic table targeting "mobile phlebotomy cost per
+          visit" and related long-tail queries. Complementary to the
+          provider-comparison table above (who's cheapest) — this one is
+          service-type vs price-range vs cost drivers. */}
+      <div className="bg-white py-12 border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Mobile Phlebotomy Cost by Service Type</h2>
+            <p className="text-gray-600 mb-6">
+              Pricing varies based on what kind of draw you need. Below are typical service-fee ranges for the most common mobile phlebotomy services, plus what drives the difference between them.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+                <thead>
+                  <tr className="bg-gray-800 text-white">
+                    <th className="px-6 py-4 text-left">Service Type</th>
+                    <th className="px-6 py-4 text-left">Typical Price Range</th>
+                    <th className="px-6 py-4 text-left">What Affects Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-6 py-4 font-semibold text-gray-900">Single-vial blood draw</td>
+                    <td className="px-6 py-4 text-gray-900">$60–$100</td>
+                    <td className="px-6 py-4 text-gray-600">Standard fee for one routine collection — most common request</td>
+                  </tr>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <td className="px-6 py-4 font-semibold text-gray-900">Multi-vial / panel (4+ tubes)</td>
+                    <td className="px-6 py-4 text-gray-900">$80–$130</td>
+                    <td className="px-6 py-4 text-gray-600">More tubes and handling time; same travel and visit base</td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-6 py-4 font-semibold text-gray-900">Specialty kit (functional med, hormone, genetic)</td>
+                    <td className="px-6 py-4 text-gray-900">$90–$175</td>
+                    <td className="px-6 py-4 text-gray-600">Special tubes, cold-chain or kit prep, lab-specific packaging</td>
+                  </tr>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <td className="px-6 py-4 font-semibold text-gray-900">STAT / urgent same-day</td>
+                    <td className="px-6 py-4 text-gray-900">$125–$250</td>
+                    <td className="px-6 py-4 text-gray-600">After-hours, weekend, or same-day premium (typically +25–50%)</td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="px-6 py-4 font-semibold text-gray-900">Pediatric draw</td>
+                    <td className="px-6 py-4 text-gray-900">$100–$175</td>
+                    <td className="px-6 py-4 text-gray-600">Specialized technique, longer appointment, smaller-gauge supplies</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 font-semibold text-gray-900">Additional patient at same address</td>
+                    <td className="px-6 py-4 text-gray-900">+$40–$75 per patient</td>
+                    <td className="px-6 py-4 text-gray-600">Bundling discount vs separate visits — ideal for households and group homes</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-sm text-gray-500 mt-3">
+              Lab processing fees are separate from the service fee shown.{' '}
+              <Link href="/mobile-phlebotomy-insurance-coverage" className="text-green-600 hover:text-green-700 underline">
+                See what insurance covers
+              </Link>
+              {' '}or{' '}
+              <Link href="/search" className="text-green-600 hover:text-green-700 underline">
+                compare providers in your area
+              </Link>
+              .
             </p>
           </div>
         </div>
