@@ -77,13 +77,16 @@ const nextConfig = {
       // canonical location page. Add an entry here for each removed provider
       // until volume justifies a DB-driven middleware redirect.
       {
+        // Site canonicalizes /us/<full-state-slug>/<city>; 2-letter abbreviation
+        // URLs (/us/ny/...) 301-redirect to the slug form. Pointing removal
+        // redirects directly at the slug avoids a 2-hop chain.
         source: '/provider/just-a-pinch-mobile-phlebotomy',
-        destination: '/us/ny/saint-albans',
+        destination: '/us/new-york/saint-albans',
         permanent: true,
       },
       {
         source: '/provider/comfortcare-mobile-labs',
-        destination: '/us/ca/sacramento',
+        destination: '/us/california/sacramento',
         permanent: true,
       },
     ]
