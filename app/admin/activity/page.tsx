@@ -68,6 +68,68 @@ export default function AdminActivityPage() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ActivityData | null>(null)
   const [activeTab, setActiveTab] = useState<'onboarded' | 'featured' | 'recent' | 'all' | 'claims'>('featured')
+  const [coverageAttention, setCoverageAttention] = useState<{
+    count: number
+    newCount: number
+    staleNewCount: number
+    staleContactedCount: number
+    oldestNewAgeDays: number | null
+  } | null>(null)
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [leadAttention, setLeadAttention] = useState<{
+    count: number
+    highValueCount: number
+    unroutedCount: number
+    oldestHvAgeHours: number | null
+    oldestUnroutedAgeHours: number | null
+  } | null>(null)
+  const [leadBannerDismissed, setLeadBannerDismissed] = useState(false)
+
+  async function loadLeadAttention() {
+    try {
+      const token = localStorage.getItem('admin_token')
+      if (!token) return
+      const res = await fetch('/api/admin/leads/attention', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const result = await res.json()
+      if (result.success) {
+        setLeadAttention({
+          count: result.count,
+          highValueCount: result.highValueCount,
+          unroutedCount: result.unroutedCount,
+          oldestHvAgeHours: result.oldestHvAgeHours,
+          oldestUnroutedAgeHours: result.oldestUnroutedAgeHours,
+        })
+      }
+    } catch (err) {
+      console.error('Failed to load lead attention:', err)
+    }
+  }
+
+  async function loadCoverageAttention() {
+    try {
+      const token = localStorage.getItem('admin_token')
+      if (!token) return
+      const res = await fetch('/api/admin/corporate-inquiries/attention', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const result = await res.json()
+      if (result.success) {
+        setCoverageAttention({
+          count: result.count,
+          newCount: result.newCount,
+          staleNewCount: result.staleNewCount,
+          staleContactedCount: result.staleContactedCount,
+          oldestNewAgeDays: result.oldestNewAgeDays,
+        })
+      }
+    } catch (err) {
+      console.error('Failed to load coverage attention:', err)
+    }
+  }
 
   // Check for existing admin token on page load
   useEffect(() => {
@@ -85,6 +147,8 @@ export default function AdminActivityPage() {
           if (result.ok) {
             setIsAuthenticated(true)
             setData(result)
+            loadCoverageAttention()
+            loadLeadAttention()
           }
         })
         .catch(err => {
@@ -112,6 +176,8 @@ export default function AdminActivityPage() {
         setData(result)
         // Store token for future use
         localStorage.setItem('admin_token', password)
+        loadCoverageAttention()
+        loadLeadAttention()
       } else {
         setError('Invalid password')
       }
@@ -148,7 +214,11 @@ export default function AdminActivityPage() {
   useEffect(() => {
     if (isAuthenticated) {
       // Auto-refresh every 30 seconds
-      const interval = setInterval(refreshData, 30000)
+      const interval = setInterval(() => {
+        refreshData()
+        loadCoverageAttention()
+        loadLeadAttention()
+      }, 30000)
       return () => clearInterval(interval)
     }
   }, [isAuthenticated])
@@ -227,6 +297,104 @@ export default function AdminActivityPage() {
             {loading ? 'Refreshing...' : 'Refresh Data'}
           </button>
         </div>
+
+        {/* High-value / unrouted lead attention banner */}
+        {leadAttention && leadAttention.count > 0 && !leadBannerDismissed && (
+          <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg shadow-sm p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 flex-1">
+                <AlertCircle className="text-amber-600 flex-shrink-0 mt-0.5" size={24} />
+                <div>
+                  <h3 className="font-bold text-amber-900">
+                    {leadAttention.count} {leadAttention.count === 1 ? 'lead needs' : 'leads need'} your personal attention
+                  </h3>
+                  <p className="text-sm text-amber-800 mt-1">
+                    {leadAttention.highValueCount > 0 && (
+                      <>
+                        <span className="font-semibold">{leadAttention.highValueCount} high-value</span>
+                        {leadAttention.oldestHvAgeHours !== null && leadAttention.oldestHvAgeHours > 0 && (
+                          <span className="text-amber-700"> (oldest: {leadAttention.oldestHvAgeHours}h)</span>
+                        )}
+                      </>
+                    )}
+                    {leadAttention.highValueCount > 0 && leadAttention.unroutedCount > 0 && ' · '}
+                    {leadAttention.unroutedCount > 0 && (
+                      <>
+                        <span className="font-semibold">{leadAttention.unroutedCount} unrouted</span>
+                        <span className="text-amber-700"> (no provider coverage)</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <a
+                  href="/admin#leads"
+                  className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded hover:bg-amber-700 transition-colors"
+                >
+                  Open →
+                </a>
+                <button
+                  onClick={() => setLeadBannerDismissed(true)}
+                  className="px-2 py-1.5 text-amber-700 hover:text-amber-900 text-sm"
+                  aria-label="Dismiss for this session"
+                  title="Dismiss for this session"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* B2B coverage attention banner */}
+        {coverageAttention && coverageAttention.count > 0 && !bannerDismissed && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 flex-1">
+                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={24} />
+                <div>
+                  <h3 className="font-bold text-red-900">
+                    {coverageAttention.count} B2B coverage {coverageAttention.count === 1 ? 'inquiry needs' : 'inquiries need'} attention
+                  </h3>
+                  <p className="text-sm text-red-800 mt-1">
+                    {coverageAttention.newCount > 0 && (
+                      <>
+                        <span className="font-semibold">{coverageAttention.newCount} new</span>
+                        {coverageAttention.oldestNewAgeDays !== null && coverageAttention.oldestNewAgeDays > 0 && (
+                          <span className="text-red-700"> (oldest: {coverageAttention.oldestNewAgeDays}d)</span>
+                        )}
+                      </>
+                    )}
+                    {coverageAttention.newCount > 0 && coverageAttention.staleContactedCount > 0 && ' · '}
+                    {coverageAttention.staleContactedCount > 0 && (
+                      <>
+                        <span className="font-semibold">{coverageAttention.staleContactedCount} stale</span>
+                        <span className="text-red-700"> (contacted &gt;7d ago, no progress)</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <a
+                  href="/admin#corporate"
+                  className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
+                >
+                  Open →
+                </a>
+                <button
+                  onClick={() => setBannerDismissed(true)}
+                  className="px-2 py-1.5 text-red-700 hover:text-red-900 text-sm"
+                  aria-label="Dismiss for this session"
+                  title="Dismiss for this session"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">

@@ -32,6 +32,24 @@ const STATUS_OPTIONS = [
   { value: 'DECLINED',  label: 'Declined',  color: 'bg-red-100 text-red-800' },
 ]
 
+const NEW_STALE_DAYS = 2
+const CONTACTED_STALE_DAYS = 7
+
+/**
+ * Returns the staleness flag for a request based on age and status.
+ * NEW > 2d: not yet contacted, getting cold
+ * CONTACTED > 7d: conversation went cold, no progress
+ * Anything past 30d in NEW/CONTACTED: critical
+ */
+function getStaleness(createdAt: string, status: string): { kind: 'critical' | 'stale' | 'fresh'; ageDays: number } {
+  const ageDays = Math.floor((Date.now() - new Date(createdAt).getTime()) / (24 * 60 * 60 * 1000))
+  if (status !== 'NEW' && status !== 'CONTACTED') return { kind: 'fresh', ageDays }
+  if (ageDays > 30) return { kind: 'critical', ageDays }
+  if (status === 'NEW' && ageDays >= NEW_STALE_DAYS) return { kind: 'stale', ageDays }
+  if (status === 'CONTACTED' && ageDays >= CONTACTED_STALE_DAYS) return { kind: 'stale', ageDays }
+  return { kind: 'fresh', ageDays }
+}
+
 export function CorporateInquiriesPanel() {
   const [requests, setRequests] = useState<CoverageRequest[]>([])
   const [selected, setSelected] = useState<CoverageRequest | null>(null)
@@ -121,6 +139,21 @@ export function CorporateInquiriesPanel() {
     declined: requests.filter(r => r.status === 'DECLINED'),
   }
 
+  // Surface stale/critical requests to the top. Within each band, preserve recency order.
+  const sortedRequests = [...requests].sort((a, b) => {
+    const sa = getStaleness(a.createdAt, a.status)
+    const sb = getStaleness(b.createdAt, b.status)
+    const rank = (kind: string) => (kind === 'critical' ? 0 : kind === 'stale' ? 1 : 2)
+    const diff = rank(sa.kind) - rank(sb.kind)
+    if (diff !== 0) return diff
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+
+  const attentionCount = requests.filter(r => {
+    const s = getStaleness(r.createdAt, r.status)
+    return s.kind === 'critical' || s.kind === 'stale' || r.status === 'NEW'
+  }).length
+
   if (loading && requests.length === 0) {
     return (
       <div className="text-center py-12">
@@ -162,34 +195,66 @@ export function CorporateInquiriesPanel() {
       <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start">
         {/* List */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Coverage Requests</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Coverage Requests</h2>
+            {attentionCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-bold rounded-full bg-red-600 text-white">
+                {attentionCount} need attention
+              </span>
+            )}
+          </div>
           <div className="space-y-3">
             {requests.length === 0 && (
               <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
                 No coverage requests yet.
               </div>
             )}
-            {requests.map(r => (
-              <div
-                key={r.id}
-                onClick={() => setSelected(r)}
-                className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md ${
-                  selected?.id === r.id ? 'ring-2 ring-primary-500' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 truncate">{r.organizationName}</h3>
-                    <p className="text-sm text-gray-600 truncate">{r.location}</p>
-                    <p className="text-sm text-gray-600">Timeline: {r.timeline}</p>
-                    <p className="text-xs text-gray-500 mt-1">{new Date(r.createdAt).toLocaleString()}</p>
+            {sortedRequests.map(r => {
+              const staleness = getStaleness(r.createdAt, r.status)
+              const isStale = staleness.kind === 'stale'
+              const isCritical = staleness.kind === 'critical'
+              const ringClass = selected?.id === r.id
+                ? 'ring-2 ring-primary-500'
+                : isCritical
+                  ? 'ring-2 ring-red-400'
+                  : isStale
+                    ? 'ring-1 ring-amber-300'
+                    : ''
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => setSelected(r)}
+                  className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md ${ringClass}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 truncate">{r.organizationName}</h3>
+                      <p className="text-sm text-gray-600 truncate">{r.location}</p>
+                      <p className="text-sm text-gray-600">Timeline: {r.timeline}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(r.createdAt).toLocaleString()}
+                        <span className="ml-2 text-gray-400">· {staleness.ageDays}d ago</span>
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getStatusColor(r.status)}`}>
+                        {r.status}
+                      </span>
+                      {isCritical && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap">
+                          🔥 CRITICAL
+                        </span>
+                      )}
+                      {isStale && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 whitespace-nowrap">
+                          ⚠ STALE
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getStatusColor(r.status)}`}>
-                    {r.status}
-                  </span>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

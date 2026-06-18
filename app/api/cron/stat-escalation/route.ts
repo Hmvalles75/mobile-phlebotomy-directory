@@ -31,7 +31,9 @@ const ESCALATION_THRESHOLD_MINUTES = 30  // alert if STAT lead has been routed b
 const ESCALATION_MAX_AGE_MINUTES = 180   // don't alert on leads older than 3hr — they're already dead, no point waking Hector
 
 const ADMIN_EMAIL = 'hector@mobilephlebotomy.org'
-const FROM_EMAIL = process.env.LEAD_EMAIL_FROM || 'leads@mobilephlebotomy.org'
+// Admin-bound escalation — only `hector@` is verified, so unverified fallbacks
+// were silently failing in SendGrid.
+const FROM_EMAIL = 'hector@mobilephlebotomy.org'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
 
 function fmtMinAgo(d: Date | null): string {

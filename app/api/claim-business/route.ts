@@ -51,7 +51,8 @@ Review claim at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
+        // Verified Resend sender only — `noreply@` is not verified.
+        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
         to: ['hector@mobilephlebotomy.org'],
         subject: `Business Claim: ${claim.providerName}`,
         text: emailBody,

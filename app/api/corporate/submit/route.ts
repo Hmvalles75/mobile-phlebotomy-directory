@@ -112,9 +112,14 @@ Reply directly to: ${req.email}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
+        // `from` must be a Resend-verified address. `noreply@mobilephlebotomy.org`
+        // is NOT verified — that's why every admin notification silently failed
+        // for months and Hector never saw any of the 10 backlogged inquiries.
+        // Send from the verified hector@ address; replyTo still points at the
+        // prospect so Reply goes to them, not to himself.
+        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
         to: ['hector@mobilephlebotomy.org'],
-        replyTo: [req.email],  // hit Reply → goes to the prospect
+        replyTo: [req.email],
         subject,
         text: body,
       }),

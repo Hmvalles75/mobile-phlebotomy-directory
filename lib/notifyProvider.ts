@@ -113,7 +113,10 @@ export async function notifyAdminUnservedLead(lead: any) {
   try {
     await sg.send({
       to: process.env.ADMIN_EMAIL,
-      from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
+      // Admin-facing notification — hard-code the verified Hector sender so
+      // SendGrid doesn't reject it. Falling back to `noreply@` (unverified) is
+      // what made every unserved-lead alert silently fail historically.
+      from: 'hector@mobilephlebotomy.org',
       subject: `Unserved lead — recruit provider in ${lead.zip}`,
       text: `A lead could not be routed to any provider.\n\nLead ID: ${lead.id}\nZIP: ${lead.zip}\nCity: ${lead.city}, ${lead.state}\nUrgency: ${lead.urgency}\n\nConsider recruiting providers in this area.`
     })

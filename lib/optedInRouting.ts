@@ -206,7 +206,8 @@ async function createCoverageGapTask(
     try {
       await sg.send({
         to: process.env.ADMIN_EMAIL,
-        from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
+        // Verified sender only — `noreply@` fallback silently failed every alert.
+        from: 'hector@mobilephlebotomy.org',
         subject: `Coverage Gap - No opted-in providers in ${lead?.zip}`,
         text: `A qualified lead needs coverage but no opted-in providers are available.\n\nLead ID: ${leadId}\nZIP: ${lead?.zip}\nCity: ${lead?.city}, ${lead?.state}\n\nAction needed: Recruit providers in this area or manually fulfill.`
       })

@@ -66,7 +66,8 @@ Review at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
+        // Verified Resend sender only — `noreply@` is not verified.
+        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
         to: ['hector@mobilephlebotomy.org'],
         subject: `New Provider Application: ${submission.businessName}`,
         text: emailBody,

@@ -139,7 +139,8 @@ This is your weekly confirmation that the audit cron is running and all provider
     // Send email
     await sg.send({
       to: 'hector@mobilephlebotomy.org',
-      from: process.env.LEAD_EMAIL_FROM || 'leads@mobilephlebotomy.org',
+      // Verified sender only — `leads@` fallback was unverified.
+      from: 'hector@mobilephlebotomy.org',
       subject,
       text: body,
     })

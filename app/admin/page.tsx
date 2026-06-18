@@ -73,6 +73,22 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'submissions' | 'provider-mgmt' | 'corporate' | 'leads' | 'billing'>('submissions')
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
+  const [coverageAttention, setCoverageAttention] = useState<{
+    count: number
+    newCount: number
+    staleNewCount: number
+    staleContactedCount: number
+    oldestNewAgeDays: number | null
+  } | null>(null)
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [leadAttention, setLeadAttention] = useState<{
+    count: number
+    highValueCount: number
+    unroutedCount: number
+    oldestHvAgeHours: number | null
+    oldestUnroutedAgeHours: number | null
+  } | null>(null)
+  const [leadBannerDismissed, setLeadBannerDismissed] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState<PendingProvider | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deployLoading, setDeployLoading] = useState(false)
@@ -114,6 +130,8 @@ export default function AdminDashboard() {
       if (res.ok) {
         setIsAuthenticated(true)
         loadSubmissions()
+        loadCoverageAttention()
+        loadLeadAttention()
       } else {
         // Token invalid, clear it
         localStorage.removeItem('admin_token')
@@ -149,6 +167,8 @@ export default function AdminDashboard() {
         setPassword('')
         setIsAuthenticated(true)
         loadSubmissions()
+        loadCoverageAttention()
+        loadLeadAttention()
       } else {
         setLoginError(data.error || 'Login failed')
       }
@@ -168,6 +188,50 @@ export default function AdminDashboard() {
       setSelectedSubmission(null)
     } catch (error) {
       console.error('Logout failed:', error)
+    }
+  }
+
+  const loadLeadAttention = async () => {
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch('/api/admin/leads/attention', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.success) {
+        setLeadAttention({
+          count: data.count,
+          highValueCount: data.highValueCount,
+          unroutedCount: data.unroutedCount,
+          oldestHvAgeHours: data.oldestHvAgeHours,
+          oldestUnroutedAgeHours: data.oldestUnroutedAgeHours,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load lead attention:', error)
+    }
+  }
+
+  const loadCoverageAttention = async () => {
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch('/api/admin/corporate-inquiries/attention', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.success) {
+        setCoverageAttention({
+          count: data.count,
+          newCount: data.newCount,
+          staleNewCount: data.staleNewCount,
+          staleContactedCount: data.staleContactedCount,
+          oldestNewAgeDays: data.oldestNewAgeDays,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load coverage attention:', error)
     }
   }
 
@@ -458,27 +522,45 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('leads')
                 setShowAddForm(false)
+                loadLeadAttention()
               }}
-              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap inline-flex items-center gap-2 ${
                 activeTab === 'leads'
                   ? 'text-primary-600 border-b-2 border-primary-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Leads
+              {leadAttention && leadAttention.count > 0 && (
+                <span
+                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full bg-red-600 text-white"
+                  title={`${leadAttention.highValueCount} high-value · ${leadAttention.unroutedCount} unrouted`}
+                >
+                  {leadAttention.count}
+                </span>
+              )}
             </button>
             <button
               onClick={() => {
                 setActiveTab('corporate')
                 setShowAddForm(false)
+                loadCoverageAttention()
               }}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-4 py-2 font-medium transition-colors inline-flex items-center gap-2 ${
                 activeTab === 'corporate'
                   ? 'text-primary-600 border-b-2 border-primary-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Coverage Requests
+              {coverageAttention && coverageAttention.count > 0 && (
+                <span
+                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full bg-red-600 text-white"
+                  title={`${coverageAttention.newCount} new · ${coverageAttention.staleContactedCount} stale contacted`}
+                >
+                  {coverageAttention.count}
+                </span>
+              )}
             </button>
             <button
               onClick={() => {
@@ -546,6 +628,115 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* High-value / unrouted lead attention banner — same pattern as coverage banner.
+            Surfaces leads that need Hector's personal attention (high-value sitting unclaimed,
+            or unrouted because there's no provider coverage in the area). Hidden when the
+            Leads tab is already active — the badge on the tab handles that case. */}
+        {leadAttention && leadAttention.count > 0 && !leadBannerDismissed && activeTab !== 'leads' && (
+          <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg shadow-sm p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 flex-1">
+                <div className="text-2xl leading-none mt-0.5" aria-hidden>🚨</div>
+                <div>
+                  <h3 className="font-bold text-amber-900">
+                    {leadAttention.count} {leadAttention.count === 1 ? 'lead needs' : 'leads need'} your personal attention
+                  </h3>
+                  <p className="text-sm text-amber-800 mt-1">
+                    {leadAttention.highValueCount > 0 && (
+                      <>
+                        <span className="font-semibold">{leadAttention.highValueCount} high-value</span>
+                        {leadAttention.oldestHvAgeHours !== null && leadAttention.oldestHvAgeHours > 0 && (
+                          <span className="text-amber-700"> (oldest: {leadAttention.oldestHvAgeHours}h)</span>
+                        )}
+                      </>
+                    )}
+                    {leadAttention.highValueCount > 0 && leadAttention.unroutedCount > 0 && ' · '}
+                    {leadAttention.unroutedCount > 0 && (
+                      <>
+                        <span className="font-semibold">{leadAttention.unroutedCount} unrouted</span>
+                        <span className="text-amber-700"> (no provider coverage in their area)</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    setActiveTab('leads')
+                    setShowAddForm(false)
+                    loadLeadAttention()
+                  }}
+                  className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded hover:bg-amber-700 transition-colors"
+                >
+                  Open →
+                </button>
+                <button
+                  onClick={() => setLeadBannerDismissed(true)}
+                  className="px-2 py-1.5 text-amber-700 hover:text-amber-900 text-sm"
+                  aria-label="Dismiss for this session"
+                  title="Dismiss for this session"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* B2B inquiry attention banner — surfaces unworked coverage requests across all tabs */}
+        {coverageAttention && coverageAttention.count > 0 && !bannerDismissed && activeTab !== 'corporate' && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 flex-1">
+                <div className="text-2xl leading-none mt-0.5" aria-hidden>⚠️</div>
+                <div>
+                  <h3 className="font-bold text-red-900">
+                    {coverageAttention.count} B2B coverage {coverageAttention.count === 1 ? 'inquiry needs' : 'inquiries need'} attention
+                  </h3>
+                  <p className="text-sm text-red-800 mt-1">
+                    {coverageAttention.newCount > 0 && (
+                      <>
+                        <span className="font-semibold">{coverageAttention.newCount} new</span>
+                        {coverageAttention.oldestNewAgeDays !== null && coverageAttention.oldestNewAgeDays > 0 && (
+                          <span className="text-red-700"> (oldest: {coverageAttention.oldestNewAgeDays}d)</span>
+                        )}
+                      </>
+                    )}
+                    {coverageAttention.newCount > 0 && coverageAttention.staleContactedCount > 0 && ' · '}
+                    {coverageAttention.staleContactedCount > 0 && (
+                      <>
+                        <span className="font-semibold">{coverageAttention.staleContactedCount} stale</span>
+                        <span className="text-red-700"> (contacted &gt;7d ago, no progress)</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    setActiveTab('corporate')
+                    setShowAddForm(false)
+                    loadCoverageAttention()
+                  }}
+                  className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
+                >
+                  Open →
+                </button>
+                <button
+                  onClick={() => setBannerDismissed(true)}
+                  className="px-2 py-1.5 text-red-700 hover:text-red-900 text-sm"
+                  aria-label="Dismiss for this session"
+                  title="Dismiss for this session"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Add Provider Form */}
         {showAddForm && (
           <div className="mb-8 bg-white rounded-lg shadow-md p-6">

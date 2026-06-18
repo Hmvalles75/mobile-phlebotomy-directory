@@ -5,7 +5,11 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 const ADMIN_EMAIL = 'hector@mobilephlebotomy.org'
-const FROM_EMAIL = process.env.LEAD_EMAIL_FROM || 'leads@mobilephlebotomy.org'
+// Admin-facing notification — must send from a SendGrid-verified address or
+// every high-value alert silently fails. `hector@mobilephlebotomy.org` is the
+// only sender Hector has confirmed is verified across the stack, so we hard-code
+// it here. (Provider-facing email paths still use `LEAD_EMAIL_FROM` separately.)
+const FROM_EMAIL = 'hector@mobilephlebotomy.org'
 
 interface HighValueLeadPayload {
   id: string

@@ -81,6 +81,11 @@ const nextConfig = {
         destination: '/us/ny/saint-albans',
         permanent: true,
       },
+      {
+        source: '/provider/comfortcare-mobile-labs',
+        destination: '/us/ca/sacramento',
+        permanent: true,
+      },
     ]
   },
 }

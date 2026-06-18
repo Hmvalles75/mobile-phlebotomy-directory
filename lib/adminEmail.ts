@@ -8,15 +8,13 @@ export async function emailAdmin(subject: string, text: string) {
     return
   }
 
-  if (!process.env.LEAD_EMAIL_FROM) {
-    console.error('[adminEmail] LEAD_EMAIL_FROM env var not set')
-    return
-  }
-
   try {
     await sg.send({
       to: process.env.ADMIN_EMAIL,
-      from: process.env.LEAD_EMAIL_FROM,
+      // Hard-coded verified sender — `LEAD_EMAIL_FROM` previously pointed at
+      // unverified addresses (noreply@, leads@) and SendGrid silently rejected
+      // every admin notification. `hector@` is the only confirmed-verified sender.
+      from: 'hector@mobilephlebotomy.org',
       subject: `[Admin] ${subject}`,
       text
     })

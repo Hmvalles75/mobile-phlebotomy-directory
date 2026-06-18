@@ -335,24 +335,36 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* B2B funnel band — surfaces /request-coverage for labs / clinical
-          studies / orgs that land on the patient homepage by mistake. One row,
-          neutral styling so it doesn't fight with the hero or social-trust band. */}
+      {/* B2B funnel band — surfaces /request-coverage for facilities, research orgs,
+          corporate wellness, and multi-site labs that land on the patient homepage by
+          mistake. Headline + CTA on top row, named use-case chips below so buyers
+          self-identify quickly. Neutral styling so it doesn't fight with the hero. */}
       <section className="py-6 bg-gray-50 border-b border-gray-100">
         <div className="container">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 max-w-5xl mx-auto">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">For labs, clinical studies, and organizations.</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Coordinate multi-draw projects or recurring blood collection across multiple cities.
-              </p>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Need recurring or multi-site coverage?</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Mobile blood collection coordinated across the U.S. for facilities, research, and organizations.
+                </p>
+              </div>
+              <Link
+                href="/request-coverage"
+                className="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm whitespace-nowrap"
+              >
+                Request coverage →
+              </Link>
             </div>
-            <Link
-              href="/request-coverage"
-              className="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm whitespace-nowrap"
-            >
-              Request coverage →
-            </Link>
+            <div className="mt-4 pt-3 border-t border-gray-200 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-700">
+              <span className="font-medium">Senior living &amp; care facilities</span>
+              <span className="text-gray-300" aria-hidden>·</span>
+              <span className="font-medium">Clinical research &amp; trials</span>
+              <span className="text-gray-300" aria-hidden>·</span>
+              <span className="font-medium">Corporate wellness programs</span>
+              <span className="text-gray-300" aria-hidden>·</span>
+              <span className="font-medium">Multi-site lab routing</span>
+            </div>
           </div>
         </div>
       </section>
