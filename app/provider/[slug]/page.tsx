@@ -623,6 +623,25 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                 <ClaimBusinessButton providerId={provider.id} providerName={provider.name} />
               )}
 
+              {/* Provider self-management — verified providers can sign in to
+                  edit their own listing. Without this, existing providers had no
+                  visible path to their dashboard, which drove the recurring
+                  "how do I log in / update my listing" support emails. */}
+              {isVerified && (
+                <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-6 border border-primary-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Is this your business?</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Sign in to manage your listing — update your service area, contact info, hours, and more.
+                  </p>
+                  <Link
+                    href="/dashboard/login"
+                    className="block w-full text-center bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                  >
+                    Manage This Listing
+                  </Link>
+                </div>
+              )}
+
               {/* CTA Section - Lead Gen */}
               <ProviderCTASection
                 providerId={provider.id}
