@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import sg from '@sendgrid/mail'
 import { isLeadInServiceRadius } from './zip-geocode'
+import { isSendGridHealthy } from './sendgridHealth'
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -558,4 +559,110 @@ export async function notifyFeaturedProvidersForLeadDryRun(leadId: string): Prom
   } catch (error) {
     console.error('[DryRun] Error:', error)
   }
+}
+
+// Retry tuning. A FAILED notification is re-attempted at most this many times,
+// and only within the window below — old failures are for leads that have long
+// since routed elsewhere or expired.
+const MAX_NOTIFICATION_RETRIES = 3
+const RETRY_WINDOW_HOURS = 24
+
+export interface RetryResult {
+  attempted: number
+  succeeded: number
+  stillFailed: number
+  skipped: number
+  skippedUnhealthy: boolean
+}
+
+/**
+ * Re-send LeadNotification rows that failed (e.g. during the 2026-06 SendGrid
+ * outage). Targets the specific FAILED rows — it does NOT re-blast the whole
+ * matching pool, so providers who already received the lead aren't re-notified.
+ *
+ * Guards:
+ *  - Skips the whole run if SendGrid is currently unhealthy, so a multi-day
+ *    outage doesn't silently exhaust every row's retry budget before recovery.
+ *  - Only retries email-channel failures from the last RETRY_WINDOW_HOURS whose
+ *    lead is STILL OPEN (no point notifying about a claimed/expired lead).
+ *  - Skips (and retires) any row where the same provider already has a SENT
+ *    notification for that lead — avoids double-sending after a manual re-fire.
+ *  - Caps attempts at MAX_NOTIFICATION_RETRIES per row.
+ */
+export async function retryFailedNotifications(): Promise<RetryResult> {
+  const result: RetryResult = { attempted: 0, succeeded: 0, stillFailed: 0, skipped: 0, skippedUnhealthy: false }
+
+  if (!(await isSendGridHealthy())) {
+    console.warn('[retryFailedNotifications] SendGrid not healthy — skipping run to preserve retry budget')
+    result.skippedUnhealthy = true
+    return result
+  }
+
+  const windowStart = new Date(Date.now() - RETRY_WINDOW_HOURS * 60 * 60 * 1000)
+
+  const failed = await prisma.leadNotification.findMany({
+    where: {
+      status: 'FAILED',
+      channel: 'email',
+      createdAt: { gte: windowStart },
+      retryCount: { lt: MAX_NOTIFICATION_RETRIES },
+      lead: { status: 'OPEN' },
+    },
+    select: {
+      id: true,
+      leadId: true,
+      providerId: true,
+      lead: {
+        select: { id: true, city: true, state: true, zip: true, labPreference: true, urgency: true, notes: true },
+      },
+      provider: {
+        select: {
+          id: true, name: true, notificationEmail: true, claimEmail: true, email: true,
+          featuredTier: true, isFeatured: true, priorityRouting: true,
+        },
+      },
+    },
+    take: 100,
+  })
+
+  for (const n of failed) {
+    // Don't double-notify a provider who already got a successful send for this
+    // lead (e.g. via a later wave or a manual re-fire). Retire the stale row.
+    const alreadySent = await prisma.leadNotification.findFirst({
+      where: { leadId: n.leadId, providerId: n.providerId, status: 'SENT' },
+      select: { id: true },
+    })
+    if (alreadySent) {
+      await prisma.leadNotification.update({
+        where: { id: n.id },
+        data: { retryCount: MAX_NOTIFICATION_RETRIES },
+      })
+      result.skipped++
+      continue
+    }
+
+    result.attempted++
+    const sendResult = await sendProviderLeadNotificationEmail(n.provider, n.lead as any, 0, null, n.id)
+    if (sendResult.success) {
+      await prisma.leadNotification.update({
+        where: { id: n.id },
+        data: {
+          status: 'SENT',
+          sentAt: new Date(),
+          sgMessageId: sendResult.sgMessageId || null,
+          retryCount: { increment: 1 },
+        },
+      })
+      result.succeeded++
+    } else {
+      await prisma.leadNotification.update({
+        where: { id: n.id },
+        data: { retryCount: { increment: 1 }, errorMessage: sendResult.error || 'Unknown error' },
+      })
+      result.stillFailed++
+    }
+  }
+
+  console.log(`[retryFailedNotifications] attempted=${result.attempted} succeeded=${result.succeeded} stillFailed=${result.stillFailed} skipped=${result.skipped}`)
+  return result
 }

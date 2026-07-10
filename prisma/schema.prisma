@@ -637,6 +637,10 @@ model LeadNotification {
   sentAt       DateTime?
   // SendGrid X-Message-Id from the API response (for correlating with EmailEvents)
   sgMessageId  String?
+  // Times the retry-failed-notifications cron has re-attempted a FAILED send.
+  // Capped at MAX_NOTIFICATION_RETRIES so a permanently-bad address doesn't
+  // retry forever. See retryFailedNotifications() in lib/leadNotifications.ts.
+  retryCount   Int                @default(0)
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailEvents  EmailEvent[]
