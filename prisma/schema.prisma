@@ -249,6 +249,7 @@ model Lead {
   utmCampaign          String?          // Raw utm_campaign param
   referrer             String?          // document.referrer at submission time
   landingPage          String?          // First page they landed on in the session
+  ipAddress            String?          // submitter IP (x-forwarded-for) — used for intake rate-limiting; mirrors CoverageRequest
   // Lead screening (2026-04-20, refined 2026-04-22) — routes unqualified leads out before they hit providers
   drawCount            String?          // "1-3" | "4-19" | "20+"
   requestType          String?          // "individual" | "organization" | "business" (legacy field, still captured)

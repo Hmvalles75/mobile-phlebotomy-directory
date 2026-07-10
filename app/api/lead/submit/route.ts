@@ -13,6 +13,11 @@ import { getZipInfo } from '@/lib/zip-geocode'
 // Updated draw-count buckets (2026-04-22): 1-3 standard, 4-19 medium, 20+ high.
 // Also keep backward-compat for the older bucket values submitted by the LeadFormModal /
 // ZipCodeLeadForm / InlineLeadForm paths until those are updated.
+// Intake abuse guards (P0 #4). Rate limit mirrors the corporate route.
+const LEAD_RATE_LIMIT_PER_HOUR = 5
+// Same phone + name within this window is treated as a duplicate re-submission.
+const DUPLICATE_WINDOW_HOURS = 6
+
 const DRAW_COUNTS = ['1-3', '4-19', '20+', '1', '2-5', '6-20'] as const
 const REQUEST_TYPES = ['individual', 'organization', 'business'] as const
 const DOCTOR_ORDER = ['yes', 'no', 'need_help'] as const
@@ -238,6 +243,51 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Rate-limit by IP — mirrors the corporate-request route. Sheds bots /
+    // form-hammering before we do any DB writes or provider blasts.
+    const ipAddress =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      null
+    if (ipAddress) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+      const recentFromIp = await prisma.lead.count({
+        where: { ipAddress, createdAt: { gte: oneHourAgo } },
+      })
+      if (recentFromIp >= LEAD_RATE_LIMIT_PER_HOUR) {
+        console.warn(`[lead/submit] Rate limit hit for IP ${ipAddress} (${recentFromIp} in last hour)`)
+        return NextResponse.json(
+          {
+            ok: false,
+            error: 'RATE_LIMITED',
+            message: 'We\'ve received several requests from your connection recently. If you still need help, please email hector@mobilephlebotomy.org directly.',
+          },
+          { status: 429 }
+        )
+      }
+    }
+
+    // Duplicate suppression — the same patient (phone + name) re-submitting
+    // within the window created up to 12 duplicate leads AND 12 provider blasts
+    // in production (Geraldine Wong 2026-06-09/10). Matching phone AND name
+    // (not phone alone) still lets a caregiver submit for different people from
+    // one phone. On a duplicate we return success (their request IS on file)
+    // without creating another lead or re-notifying providers.
+    const dupWindow = new Date(Date.now() - DUPLICATE_WINDOW_HOURS * 60 * 60 * 1000)
+    const existingDup = await prisma.lead.findFirst({
+      where: {
+        phone: payload.phone,   // already normalized by phoneSchema
+        fullName: { equals: payload.fullName, mode: 'insensitive' },
+        createdAt: { gte: dupWindow },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, createdAt: true },
+    })
+    if (existingDup) {
+      console.warn(`[lead/submit] Duplicate suppressed — ${payload.phone} / "${payload.fullName}" already submitted ${existingDup.id} within ${DUPLICATE_WINDOW_HOURS}h`)
+      return NextResponse.json({ ok: true, duplicate: true, leadId: existingDup.id })
+    }
+
     const priceCents = priceFor(payload.urgency)
     // Normalize city at write time so analytics + routing see consistent values
     const city = normalizeCity(payload.city)
@@ -276,6 +326,7 @@ export async function POST(req: NextRequest) {
         utmCampaign: payload.attribution?.utmCampaign || null,
         referrer: payload.attribution?.referrer || null,
         landingPage: payload.attribution?.landingPage || null,
+        ipAddress,
       }
     })
 
