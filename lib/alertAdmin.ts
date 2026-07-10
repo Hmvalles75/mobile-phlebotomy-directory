@@ -52,3 +52,57 @@ export async function alertAdminSMS(message: string): Promise<boolean> {
     return false
   }
 }
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+/**
+ * Place an automated voice CALL to the admin that speaks `message` (twice).
+ *
+ * This is the primary out-of-band alert channel. Unlike SMS, voice is NOT
+ * subject to A2P 10DLC registration, so it delivers even while the Twilio
+ * number's messaging is carrier-blocked (error 30034) — which is exactly the
+ * state SMS is in right now. Depends on neither SendGrid nor A2P SMS.
+ *
+ * Fire-and-forget: never throws. Returns true only if a call was placed.
+ *
+ * Requires:
+ *   - ADMIN_ALERT_PHONE   — admin's mobile, E.164 (e.g. +13105551234)
+ *   - TWILIO_PHONE_NUMBER — a voice-capable Twilio number to call FROM
+ */
+export async function alertAdminCall(message: string): Promise<boolean> {
+  const to = process.env.ADMIN_ALERT_PHONE
+  const from = process.env.TWILIO_PHONE_NUMBER
+
+  if (!twilioClient) {
+    console.error('[alertAdmin] Twilio not configured — cannot place out-of-band alert call:', message)
+    return false
+  }
+  if (!to) {
+    console.error('[alertAdmin] ADMIN_ALERT_PHONE not set — cannot place alert call:', message)
+    return false
+  }
+  if (!from) {
+    console.error('[alertAdmin] TWILIO_PHONE_NUMBER not set — cannot place alert call:', message)
+    return false
+  }
+
+  try {
+    const spoken = escapeXml(message)
+    const twiml =
+      `<Response><Say voice="alice">${spoken}</Say>` +
+      `<Pause length="1"/><Say voice="alice">Repeating. ${spoken}</Say></Response>`
+    const call = await twilioClient.calls.create({ to, from, twiml })
+    console.log(`[alertAdmin] Alert CALL placed to admin [sid=${call.sid}]: ${message.slice(0, 80)}`)
+    return true
+  } catch (err: any) {
+    console.error('[alertAdmin] Failed to place alert call:', err?.message || err)
+    return false
+  }
+}

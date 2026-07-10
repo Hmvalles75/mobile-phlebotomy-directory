@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { alertAdminSMS } from '@/lib/alertAdmin'
+import { alertAdminCall } from '@/lib/alertAdmin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -43,17 +43,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Manual test: fire a single out-of-band SMS to prove the alert channel
+    // Manual test: place a single out-of-band call to prove the alert channel
     // actually reaches the admin's phone, without waiting for a real outage.
     if (isTest) {
-      const alerted = await alertAdminSMS('✅ MobilePhlebotomy test alert — out-of-band SMS alerting is working. No action needed.')
+      const alerted = await alertAdminCall('Mobile Phlebotomy test alert. Out of band voice alerting is working. No action needed.')
       return NextResponse.json({
         ok: true,
         test: true,
         alerted,
         note: alerted
-          ? 'Test SMS dispatched to ADMIN_ALERT_PHONE.'
-          : 'Not sent — check ADMIN_ALERT_PHONE and Twilio env vars (see server logs).',
+          ? 'Test call placed to ADMIN_ALERT_PHONE.'
+          : 'Not placed — check ADMIN_ALERT_PHONE and TWILIO_PHONE_NUMBER (see server logs).',
       })
     }
 
@@ -89,11 +89,11 @@ export async function GET(req: NextRequest) {
       alerts.push(`${recentFailed} lead notifications FAILED in the last hour — providers are not being reached.`)
     }
 
-    // --- Alert out-of-band (SMS) if anything is wrong ---
+    // --- Alert out-of-band (voice call) if anything is wrong ---
     let alerted = false
     if (alerts.length > 0) {
-      const body = `⚠️ MobilePhlebotomy alert:\n${alerts.join('\n')}`
-      alerted = await alertAdminSMS(body)
+      const spoken = `Mobile Phlebotomy alert. ${alerts.join('. ')}`
+      alerted = await alertAdminCall(spoken)
       console.error(`[sendgrid-health] UNHEALTHY: ${alerts.join(' | ')} (alerted=${alerted})`)
     }
 
