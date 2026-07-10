@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { normalizeCityName, citySlug } from '@/lib/city-normalize'
 
 // GET - Fetch provider profile for editing
 export async function GET(req: NextRequest) {
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
         zipCodes: true,
         serviceZipCodes: true,
         languages: true,
+        primaryCity: true,
         services: {
           select: {
             service: {
@@ -59,6 +61,7 @@ export async function GET(req: NextRequest) {
         description: provider.description || '',
         zipCodes: provider.zipCodes || provider.serviceZipCodes || '',
         languages: provider.languages || '',
+        primaryCity: provider.primaryCity || '',
       },
       services: provider.services.map(s => s.service),
       allServices
@@ -86,7 +89,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages } = body
+    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages, primaryCity } = body
 
     // Validate required fields
     if (!businessName || businessName.trim().length === 0) {
@@ -119,18 +122,41 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (primaryCity && typeof primaryCity === 'string' && primaryCity.trim().length > 100) {
+      return NextResponse.json(
+        { ok: false, error: 'City name is too long' },
+        { status: 400 }
+      )
+    }
+
     // Update provider profile
+    const updateData: {
+      name: string; phone: string | null; notificationEmail: string | null;
+      website: string | null; description: string | null; zipCodes: string | null;
+      languages: string | null; primaryCity?: string | null; primaryCitySlug?: string | null;
+    } = {
+      name: businessName.trim(),
+      phone: phone?.trim() || null,
+      notificationEmail: notificationEmail?.trim() || null,
+      website: website?.trim() || null,
+      description: description?.trim() || null,
+      zipCodes: zipCodes?.trim() || null,
+      languages: languages?.trim() || null,
+    }
+
+    // Primary city drives the public page header and the provider's city-page
+    // association. Keep primaryCitySlug in sync with it (mirrors the admin
+    // approval flow). Only touch it when a value is provided, so an empty submit
+    // never wipes an existing city.
+    if (typeof primaryCity === 'string' && primaryCity.trim()) {
+      const normalizedCity = normalizeCityName(primaryCity.trim())
+      updateData.primaryCity = normalizedCity
+      updateData.primaryCitySlug = citySlug(normalizedCity)
+    }
+
     await prisma.provider.update({
       where: { id: session.providerId },
-      data: {
-        name: businessName.trim(),
-        phone: phone?.trim() || null,
-        notificationEmail: notificationEmail?.trim() || null,
-        website: website?.trim() || null,
-        description: description?.trim() || null,
-        zipCodes: zipCodes?.trim() || null,
-        languages: languages?.trim() || null,
-      }
+      data: updateData,
     })
 
     // Update services if provided

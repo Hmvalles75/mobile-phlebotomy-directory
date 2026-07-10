@@ -138,6 +138,7 @@ function DashboardContent() {
     description: '',
     zipCodes: '',
     languages: '',
+    primaryCity: '',
   })
   const [allServices, setAllServices] = useState<{id: string, name: string}[]>([])
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
@@ -205,6 +206,7 @@ function DashboardContent() {
             description: result.profile.description || '',
             zipCodes: result.profile.zipCodes || '',
             languages: result.profile.languages || '',
+            primaryCity: result.profile.primaryCity || '',
           })
           setAllServices(result.allServices || [])
           setSelectedServiceIds(result.services?.map((s: any) => s.id) || [])
@@ -756,6 +758,19 @@ function DashboardContent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">{profileData.description.length}/2000 characters</p>
+              </div>
+
+              {/* Primary City */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Primary City</label>
+                <input
+                  type="text"
+                  value={profileData.primaryCity}
+                  onChange={(e) => setProfileData({ ...profileData, primaryCity: e.target.value })}
+                  placeholder="e.g. Valencia"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">The main city shown at the top of your public listing</p>
               </div>
 
               {/* Service ZIP Codes */}
