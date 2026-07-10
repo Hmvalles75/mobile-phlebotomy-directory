@@ -161,7 +161,7 @@ function RequestBloodDrawForm() {
           error_code: 'api_error',
           error_message: data.error || 'unknown',
         })
-        setError(data.error || 'Failed to submit request')
+        setError(data.message || data.error || 'Failed to submit request')
       }
     } catch (error) {
       console.error('Lead submission error:', error)

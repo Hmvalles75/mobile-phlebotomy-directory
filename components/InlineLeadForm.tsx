@@ -101,7 +101,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
         }
         setSubmitted(true)
       } else {
-        setError(data.error || 'Failed to submit. Please try again.')
+        setError(data.message || data.error || 'Failed to submit. Please try again.')
       }
     } catch {
       setError('Network error. Please try again.')

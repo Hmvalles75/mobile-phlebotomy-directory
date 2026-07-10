@@ -142,7 +142,7 @@ export function LeadFormModal({
       const data = await response.json()
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error || 'Failed to submit request')
+        throw new Error(data.message || data.error || 'Failed to submit request')
       }
 
       // Determine location_type from URL

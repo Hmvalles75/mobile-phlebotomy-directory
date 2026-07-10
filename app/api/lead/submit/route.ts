@@ -8,6 +8,7 @@ import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
+import { getZipInfo } from '@/lib/zip-geocode'
 
 // Updated draw-count buckets (2026-04-22): 1-3 standard, 4-19 medium, 20+ high.
 // Also keep backward-compat for the older bucket values submitted by the LeadFormModal /
@@ -211,6 +212,27 @@ export async function POST(req: NextRequest) {
           ok: false,
           error: 'PHONE_MATCHES_PROVIDER',
           message: 'The phone number you entered is registered to a service provider on our directory. Please enter the patient\'s own phone number, or email hector@mobilephlebotomy.org if you need help.',
+        },
+        { status: 400 }
+      )
+    }
+
+    // ZIP <-> state consistency check. Provider routing keys on the ZIP's
+    // physical location, so a ZIP that doesn't match the submitted state
+    // silently mis-routes the lead — e.g. a Honolulu patient who typed NJ ZIP
+    // 08550 got routed to New Jersey providers; "Groton, NE" carried the CT ZIP
+    // 06340. We reject clear mismatches so the patient corrects it at the source
+    // instead of wasting provider time on an unreachable lead. Unresolvable ZIPs
+    // are allowed through: they simply match no providers and land in
+    // NEEDS_COVERAGE, which is a non-harmful outcome (no mis-route).
+    const zipInfo = getZipInfo(payload.zip)
+    if (zipInfo?.state && zipInfo.state.toUpperCase() !== payload.state.toUpperCase()) {
+      console.warn(`[lead/submit] Rejected ZIP_STATE_MISMATCH — ZIP ${payload.zip} is in ${zipInfo.state} but state=${payload.state} submitted (city="${payload.city}", name="${payload.fullName}")`)
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'ZIP_STATE_MISMATCH',
+          message: `The ZIP code ${payload.zip} is in ${zipInfo.state}${zipInfo.city ? ` (${zipInfo.city})` : ''}, but you selected ${payload.state.toUpperCase()}. Please double-check your ZIP code and state so we can match you with a nearby phlebotomist.`,
         },
         { status: 400 }
       )
