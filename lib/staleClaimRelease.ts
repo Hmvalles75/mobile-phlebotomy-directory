@@ -22,6 +22,14 @@ export const SLA_MINUTES_STANDARD = 360 // 6h
 // against weird historical state.
 const MAX_CLAIM_AGE_DAYS = 30
 
+// Loop cap: after this many auto-releases, a lead is almost certainly an
+// unreachable patient bouncing between providers. Re-notifying the whole
+// pool yet again just spams providers indefinitely (Pasadena/Ken Yapkowitz
+// 2026-07-09 hit 8 cycles before a provider complained). At the cap we
+// expire the lead terminally (EXPIRED_NO_RESPONSE) and stop notifying.
+// Tunable — 3 allows a few genuine hand-offs before giving up.
+export const MAX_STALE_RELEASE_CYCLES = 3
+
 export interface StaleCandidate {
   id: string
   fullName: string
@@ -35,11 +43,13 @@ export interface StaleCandidate {
   routedToId: string
   providerName: string
   providerEmail: string | null
+  staleReleaseCount: number
 }
 
 export interface SweepResult {
   scanned: number
   released: number
+  expired: number   // hit the loop cap → terminated instead of re-notified
   notificationFailures: number
   errors: Array<{ leadId: string; error: string }>
 }
@@ -86,6 +96,7 @@ export async function findStaleClaimCandidates(now: Date = new Date()): Promise<
     routedToId: l.routedToId!,
     providerName: l.provider?.name?.trim() || 'unknown',
     providerEmail: l.provider?.notificationEmail || l.provider?.claimEmail || l.provider?.email || null,
+    staleReleaseCount: l.staleReleaseCount,
   }))
 }
 
@@ -108,6 +119,38 @@ async function releaseStaleLead(leadId: string, providerId: string): Promise<voi
         releasedFromProviderId: providerId,
         releasedAt: now,
         releaseReason: 'stale_claim',
+        staleReleaseCount: { increment: 1 },  // per-lead loop counter (see MAX_STALE_RELEASE_CYCLES)
+      },
+    }),
+    prisma.provider.update({
+      where: { id: providerId },
+      data: {
+        staleReleaseCount: { increment: 1 },
+        lastStaleReleaseAt: now,
+      },
+    }),
+  ])
+}
+
+/**
+ * Terminal counterpart to releaseStaleLead for a lead that has hit the loop
+ * cap. Instead of returning it to OPEN and re-notifying, we expire it
+ * (EXPIRED_NO_RESPONSE — providers WERE notified, none reached the patient)
+ * and clear the claim so it stops cycling. No re-notification fires.
+ */
+async function expireLoopingLead(leadId: string, providerId: string): Promise<void> {
+  const now = new Date()
+  await prisma.$transaction([
+    prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        status: 'EXPIRED_NO_RESPONSE',
+        routedToId: null,
+        claimedAt: null,
+        releasedFromProviderId: providerId,
+        releasedAt: now,
+        releaseReason: 'stale_claim_cycle_cap',
+        staleReleaseCount: { increment: 1 },
       },
     }),
     prisma.provider.update({
@@ -144,6 +187,7 @@ export async function runStaleClaimReleaseSweep(opts: { dryRun?: boolean } = {})
   const result: SweepResult = {
     scanned: candidates.length,
     released: 0,
+    expired: 0,
     notificationFailures: 0,
     errors: [],
   }
@@ -154,6 +198,30 @@ export async function runStaleClaimReleaseSweep(opts: { dryRun?: boolean } = {})
 
   for (const c of candidates) {
     try {
+      // Loop cap: a lead that has already been released this many times is an
+      // unreachable patient bouncing around the pool. Expire it terminally
+      // and DO NOT re-notify — that's what was spamming providers every cycle.
+      if (c.staleReleaseCount >= MAX_STALE_RELEASE_CYCLES) {
+        await expireLoopingLead(c.id, c.routedToId)
+        result.expired++
+        console.log(`[stale-claim-release] Lead ${c.id} hit loop cap (${c.staleReleaseCount} releases) — expired, not re-notified`)
+        // Tell the current claimer their claim was released (final). No fan-out.
+        sendClaimReleasedEmail({
+          toEmail: c.providerEmail,
+          providerName: c.providerName,
+          leadFullName: c.fullName,
+          leadCity: c.city,
+          leadState: c.state,
+          leadZip: c.zip,
+          claimedMinutesAgo: c.claimedMinutesAgo,
+          slaMinutes: c.urgency === 'STAT' ? SLA_MINUTES_STAT : SLA_MINUTES_STANDARD,
+        }).catch((err: any) => {
+          result.notificationFailures++
+          console.error(`[stale-claim-release] Claimer email failed for expired lead ${c.id}:`, err.message || err)
+        })
+        continue
+      }
+
       await releaseStaleLead(c.id, c.routedToId)
       result.released++
 

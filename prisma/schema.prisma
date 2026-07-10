@@ -276,6 +276,12 @@ model Lead {
   releasedFromProviderId String?
   releasedAt             DateTime?
   releaseReason          String?    // currently only "stale_claim"; future: "manual_admin", etc.
+  // Number of times this lead has been auto-released by the stale-claim cron.
+  // Guards the infinite claim->release->re-notify loop an unreachable patient
+  // otherwise causes (Pasadena/Ken Yapkowitz 2026-07-09, 8 cycles of provider
+  // spam). Once it reaches MAX_STALE_RELEASE_CYCLES the sweep expires the lead
+  // terminally instead of re-notifying. See lib/staleClaimRelease.ts.
+  staleReleaseCount      Int        @default(0)
   // Relations
   leadNotifications LeadNotification[]
   provider          Provider?          @relation(fields: [routedToId], references: [id])

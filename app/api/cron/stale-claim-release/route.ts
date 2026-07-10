@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     const result = await runStaleClaimReleaseSweep()
 
-    console.log(`[stale-claim-release] scanned=${result.scanned} released=${result.released} notifyFails=${result.notificationFailures} errors=${result.errors.length}`)
+    console.log(`[stale-claim-release] scanned=${result.scanned} released=${result.released} expired=${result.expired} notifyFails=${result.notificationFailures} errors=${result.errors.length}`)
 
     return NextResponse.json({
       ok: true,

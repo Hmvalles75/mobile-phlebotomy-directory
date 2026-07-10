@@ -60,8 +60,11 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Send magic link email
-    const magicLink = `${process.env.PUBLIC_SITE_URL || 'http://localhost:3002'}/api/auth/verify?token=${provider.claimToken}`
+    // Send magic link email. Strip any trailing slash(es) from PUBLIC_SITE_URL
+    // so we don't produce a broken "origin//api/auth/verify" double-slash path
+    // (prod env var has a trailing slash; Next.js won't route the double slash).
+    const base = (process.env.PUBLIC_SITE_URL || 'http://localhost:3002').replace(/\/+$/, '')
+    const magicLink = `${base}/api/auth/verify?token=${provider.claimToken}`
 
     if (process.env.SENDGRID_API_KEY) {
       // Set API key at send time for compatibility with scripts
