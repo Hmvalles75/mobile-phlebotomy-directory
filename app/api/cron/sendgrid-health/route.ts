@@ -26,10 +26,35 @@ const FAILED_ALERT_THRESHOLD = 3
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url)
+    const isTest = searchParams.get('test') === '1'
+
+    // Auth: Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`. For the
+    // manual ?test=1 trigger from a browser (which can't set that header), we
+    // also accept ?secret=<CRON_SECRET> in the query string.
     const authHeader = req.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    const querySecret = searchParams.get('secret')
+    const authorized =
+      !cronSecret ||                                   // fail-open only if unset (existing convention)
+      authHeader === `Bearer ${cronSecret}` ||
+      querySecret === cronSecret
+    if (!authorized) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Manual test: fire a single out-of-band SMS to prove the alert channel
+    // actually reaches the admin's phone, without waiting for a real outage.
+    if (isTest) {
+      const alerted = await alertAdminSMS('✅ MobilePhlebotomy test alert — out-of-band SMS alerting is working. No action needed.')
+      return NextResponse.json({
+        ok: true,
+        test: true,
+        alerted,
+        note: alerted
+          ? 'Test SMS dispatched to ADMIN_ALERT_PHONE.'
+          : 'Not sent — check ADMIN_ALERT_PHONE and Twilio env vars (see server logs).',
+      })
     }
 
     const alerts: string[] = []
