@@ -20,11 +20,41 @@ import PremiumProviderPage from '@/components/provider/PremiumProviderPage'
 import { getNearbyProviders, getServiceAreasCovered } from '@/lib/seo/internalLinks'
 import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
 import NearbyProviders from '@/components/seo/NearbyProviders'
+import { getZipInfo } from '@/lib/zip-geocode'
 
 interface PageProps {
   params: {
     slug: string
   }
+}
+
+/**
+ * Derive a patient-friendly coverage summary from a provider's raw zipCodes
+ * string by resolving each ZIP to its city. This is what makes a provider's
+ * dashboard-edited service ZIPs actually show on their public listing — before
+ * this, the non-premium Service Area block ignored zipCodes entirely and only
+ * showed the primary city (the "shows only Valencia" complaint). Returns null
+ * when nothing usable (no 5-digit ZIPs, or none resolve) so callers fall
+ * through to the relational coverage. Server-only (imports the zipcodes DB).
+ */
+function deriveZipCoverage(zipCodes: string | null | undefined): string | null {
+  if (!zipCodes) return null
+  const zips = zipCodes.match(/\b\d{5}\b/g)
+  if (!zips || zips.length === 0) return null
+  const cities: string[] = []
+  const seen = new Set<string>()
+  for (const z of zips) {
+    const city = getZipInfo(z)?.city
+    if (city && !seen.has(city.toLowerCase())) {
+      seen.add(city.toLowerCase())
+      cities.push(city)
+    }
+  }
+  if (cities.length === 0) return null
+  const MAX = 8
+  if (cities.length <= MAX) return cities.join(', ')
+  const extra = cities.length - MAX
+  return `${cities.slice(0, MAX).join(', ')}, and ${extra} more ${extra === 1 ? 'area' : 'areas'}`
 }
 
 // Enable ISR (Incremental Static Regeneration) - revalidate every 60 seconds
@@ -554,10 +584,15 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                         )
                       }
                     }
-                    // Fallback to existing fields
+                    // Fallback chain: explicit curated fields → cities derived
+                    // from the provider's service ZIPs (reflects dashboard edits)
+                    // → relational coverage. The zip-derived source is what fixes
+                    // the "shows only my primary city" complaint for providers
+                    // who curate a wide ZIP list but have no coverage rows.
+                    const zipCoverage = deriveZipCoverage(provider.zipCodes)
                     return (
                       <p className="text-gray-600">
-                        <strong>Coverage:</strong> {provider['regions serviced'] || provider.verified_service_areas || formatCoverageDisplay(provider.coverage)}
+                        <strong>Coverage:</strong> {provider['regions serviced'] || provider.verified_service_areas || zipCoverage || formatCoverageDisplay(provider.coverage)}
                       </p>
                     )
                   })()}
