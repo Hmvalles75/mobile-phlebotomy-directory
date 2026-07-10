@@ -142,6 +142,13 @@ function DashboardContent() {
   const [allServices, setAllServices] = useState<{id: string, name: string}[]>([])
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
 
+  // Login email (change requires re-typing to confirm)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [showEmailChange, setShowEmailChange] = useState(false)
+  const [emailForm, setEmailForm] = useState({ newEmail: '', confirmEmail: '' })
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailMsg, setEmailMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
   useEffect(() => {
     fetchDashboardData()
     fetchSettings()
@@ -201,6 +208,7 @@ function DashboardContent() {
           })
           setAllServices(result.allServices || [])
           setSelectedServiceIds(result.services?.map((s: any) => s.id) || [])
+          setLoginEmail(result.profile.email || '')
         }
       }
     } catch (error) {
@@ -235,6 +243,42 @@ function DashboardContent() {
       alert('An error occurred while saving your profile')
     } finally {
       setProfileLoading(false)
+    }
+  }
+
+  const saveLoginEmail = async () => {
+    setEmailMsg(null)
+    const newEmail = emailForm.newEmail.trim()
+    const confirmEmail = emailForm.confirmEmail.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      setEmailMsg({ type: 'err', text: 'Please enter a valid email address.' })
+      return
+    }
+    if (newEmail.toLowerCase() !== confirmEmail.toLowerCase()) {
+      setEmailMsg({ type: 'err', text: 'The two emails don\'t match.' })
+      return
+    }
+    setEmailSaving(true)
+    try {
+      const response = await fetch('/api/provider/change-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ newEmail }),
+      })
+      const result = await response.json()
+      if (result.ok) {
+        setLoginEmail(result.email)
+        setEmailForm({ newEmail: '', confirmEmail: '' })
+        setShowEmailChange(false)
+        setEmailMsg({ type: 'ok', text: result.message || 'Login email updated.' })
+      } else {
+        setEmailMsg({ type: 'err', text: result.error || 'Failed to update login email.' })
+      }
+    } catch {
+      setEmailMsg({ type: 'err', text: 'An error occurred. Please try again.' })
+    } finally {
+      setEmailSaving(false)
     }
   }
 
@@ -556,6 +600,74 @@ function DashboardContent() {
               All time
             </p>
           </div>
+        </div>
+
+        {/* Login & Security */}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl" aria-hidden>🔒</span>
+                <h2 className="text-xl font-bold text-gray-900">Login &amp; Security</h2>
+              </div>
+              <button
+                onClick={() => { setShowEmailChange(!showEmailChange); setEmailMsg(null) }}
+                className="text-green-600 hover:text-green-700 font-medium text-sm"
+              >
+                {showEmailChange ? 'Cancel' : 'Change'}
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              Login email: <span className="font-medium text-gray-900">{loginEmail || 'Loading...'}</span>
+            </p>
+          </div>
+
+          {emailMsg && !showEmailChange && (
+            <div className={`px-6 py-3 text-sm ${emailMsg.type === 'ok' ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'}`}>
+              {emailMsg.text}
+            </div>
+          )}
+
+          {showEmailChange && (
+            <div className="px-6 py-6">
+              <p className="text-gray-600 mb-4 text-sm">
+                This is the email you use to sign in and receive your magic login link. Update it here if your email has changed so you don&apos;t lose access to your account.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">New login email</label>
+                  <input
+                    type="email"
+                    value={emailForm.newEmail}
+                    onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm new email</label>
+                  <input
+                    type="email"
+                    value={emailForm.confirmEmail}
+                    onChange={(e) => setEmailForm({ ...emailForm, confirmEmail: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="you@example.com"
+                  />
+                </div>
+              </div>
+              {emailMsg && (
+                <p className={`text-sm mb-3 ${emailMsg.type === 'ok' ? 'text-green-700' : 'text-red-600'}`}>{emailMsg.text}</p>
+              )}
+              <button
+                onClick={saveLoginEmail}
+                disabled={emailSaving}
+                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-medium px-4 py-2 rounded-lg"
+              >
+                <Save size={16} />
+                {emailSaving ? 'Updating...' : 'Update login email'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Business Profile */}
