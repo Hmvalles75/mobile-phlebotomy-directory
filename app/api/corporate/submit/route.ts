@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import sg from '@sendgrid/mail'
+
+if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
 
 /**
  * Coverage-request submit endpoint. Backed by the renamed CoverageRequest model
@@ -74,11 +77,15 @@ function firstName(full: string): string {
 }
 
 async function sendAdminNotification(req: any) {
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (!resendApiKey) {
-    console.warn('⚠️  RESEND_API_KEY not configured - skipping admin notification')
+  // Sent via SendGrid — the working channel. This previously used Resend, but
+  // RESEND_API_KEY was never configured, so every institutional-lead alert
+  // silently failed for months (all 15 inquiries arrived with no notification).
+  // SendGrid + the verified hector@ sender is what the rest of the app uses.
+  if (!process.env.SENDGRID_API_KEY) {
+    console.warn('⚠️  SENDGRID_API_KEY not configured - skipping admin notification')
     return false
   }
+  const adminTo = process.env.ADMIN_EMAIL || 'hector@mobilephlebotomy.org'
   try {
     // Subject formatted for at-a-glance triage in the inbox
     const subject = `[Coverage Request] ${req.organizationName} — ${req.estimatedVolume} — ${req.location}`
@@ -105,33 +112,18 @@ Admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/adm
 Reply directly to: ${req.email}
 `
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        // `from` must be a Resend-verified address. `noreply@mobilephlebotomy.org`
-        // is NOT verified — that's why every admin notification silently failed
-        // for months and Hector never saw any of the 10 backlogged inquiries.
-        // Send from the verified hector@ address; replyTo still points at the
-        // prospect so Reply goes to them, not to himself.
-        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
-        to: ['hector@mobilephlebotomy.org'],
-        replyTo: [req.email],
-        subject,
-        text: body,
-      }),
+    await sg.send({
+      to: adminTo,
+      // Hard-coded verified sender — the only confirmed-verified SendGrid sender.
+      from: 'hector@mobilephlebotomy.org',
+      // Reply goes to the prospect, not to Hector himself.
+      replyTo: req.email,
+      subject,
+      text: body,
     })
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Failed to send admin notification:', error)
-      return false
-    }
     return true
-  } catch (error) {
-    console.error('Error sending admin notification:', error)
+  } catch (error: any) {
+    console.error('Error sending admin notification:', error?.response?.body || error?.message || error)
     return false
   }
 }
