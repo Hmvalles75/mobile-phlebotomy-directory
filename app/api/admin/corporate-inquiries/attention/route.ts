@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 
+// Admin auth via the shared cookie-session (same as /api/admin/leads). The
+// previous ADMIN_TOKEN bearer check was broken and 401'd every request, so the
+// B2B attention banner silently showed nothing.
 function validateAdminToken(req: NextRequest): boolean {
   const authHeader = req.headers.get('authorization')
-  const token = authHeader?.replace('Bearer ', '')
-  const validToken = process.env.ADMIN_TOKEN || 'default-admin-token'
-  return token === validToken
+  const cookieHeader = req.headers.get('cookie')
+  return verifyAdminSessionFromCookies(authHeader || cookieHeader)
 }
 
 const NEW_STALE_DAYS = 2

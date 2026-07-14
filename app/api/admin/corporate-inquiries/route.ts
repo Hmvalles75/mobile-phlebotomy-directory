@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 
-// Simple token validation (matches your existing admin auth)
+// Admin auth via the shared cookie-session (same as /api/admin/leads). The
+// previous ADMIN_TOKEN bearer check was broken: ADMIN_TOKEN was never set, so
+// it expected the literal 'default-admin-token' while the panel sends the
+// session token — 401ing every request and showing an empty Coverage Requests
+// panel despite rows existing.
 function validateAdminToken(req: NextRequest): boolean {
   const authHeader = req.headers.get('authorization')
-  const token = authHeader?.replace('Bearer ', '')
-  const validToken = process.env.ADMIN_TOKEN || 'default-admin-token'
-  return token === validToken
+  const cookieHeader = req.headers.get('cookie')
+  return verifyAdminSessionFromCookies(authHeader || cookieHeader)
 }
 
 export async function GET(req: NextRequest) {
