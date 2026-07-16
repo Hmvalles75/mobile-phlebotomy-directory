@@ -31,6 +31,7 @@ interface Lead {
 }
 
 const OUTCOME_LABEL: Record<string, { label: string; color: string }> = {
+  WORKING_IT:           { label: '🔧 Working it',      color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
   APPOINTMENT_BOOKED:   { label: '✅ Booked',        color: 'bg-green-100 text-green-800 border-green-200' },
   APPOINTMENT_COMPLETED:{ label: '✅ Completed',     color: 'bg-green-200 text-green-900 border-green-300' },
   CONTACTED:            { label: '☎️ Contacted',     color: 'bg-blue-100 text-blue-800 border-blue-200' },
@@ -149,6 +150,34 @@ function DashboardContent() {
   const [emailForm, setEmailForm] = useState({ newEmail: '', confirmEmail: '' })
   const [emailSaving, setEmailSaving] = useState(false)
   const [emailMsg, setEmailMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const [workingLeadId, setWorkingLeadId] = useState<string | null>(null)
+
+  // One-tap "I'm working it" — locks a claimed lead against stale-claim
+  // auto-release without forcing the provider to pick a specific outcome.
+  const markWorkingIt = async (leadId: string) => {
+    setWorkingLeadId(leadId)
+    try {
+      const res = await fetch('/api/provider/lead-working', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ leadId }),
+      })
+      const result = await res.json()
+      if (result.ok) {
+        setData(prev => prev ? {
+          ...prev,
+          claimedLeads: prev.claimedLeads.map(l => l.id === leadId ? { ...l, outcome: result.outcome } : l),
+        } : prev)
+      } else {
+        alert(result.error || 'Could not update. Please try again.')
+      }
+    } catch {
+      alert('Network error. Please try again.')
+    } finally {
+      setWorkingLeadId(null)
+    }
+  }
 
   useEffect(() => {
     fetchDashboardData()
@@ -1196,8 +1225,18 @@ function DashboardContent() {
                         )}
 
                         {!outcomeMeta && (
-                          <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">
-                            ⏱ No outcome logged yet — open the lead to mark what happened
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">
+                              ⏱ No outcome logged yet
+                            </div>
+                            <button
+                              onClick={() => markWorkingIt(lead.id)}
+                              disabled={workingLeadId === lead.id}
+                              className="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1 hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                              title="Locks this lead to you so it won't be auto-released while you work it. Log the actual outcome when you're done."
+                            >
+                              {workingLeadId === lead.id ? 'Saving…' : '🔧 I\'m working it'}
+                            </button>
                           </div>
                         )}
                       </div>

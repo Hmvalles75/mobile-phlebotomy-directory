@@ -766,6 +766,13 @@ enum LeadStatus {
 
 enum LeadOutcome {
   CONTACTED
+  // One-tap "I'm working it" engagement signal (2026-07-16). Set from the
+  // dashboard so a provider working a lead offline can lock their claim without
+  // logging a specific outcome yet — the stale-claim cron treats any non-null
+  // outcome as engaged and skips it, so this stops the auto-release that was
+  // confusing providers (Sherin/All Veins, Ponce). See project memory:
+  // stale-claim offline-work friction. Overwritten when a real outcome is logged.
+  WORKING_IT
   APPOINTMENT_BOOKED
   APPOINTMENT_COMPLETED
   NO_ANSWER
