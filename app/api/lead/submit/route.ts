@@ -243,6 +243,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Reject obvious fake / placeholder phone numbers. The 555 exchange
+    // (e.g. 555-1212 directory assistance, the 555-01xx fictional range) passes
+    // format validation but is never a real patient line — one slipped through
+    // as a junk lead 2026-07-15. Extend this list as other fake patterns appear.
+    const phoneDigits = payload.phone.replace(/\D/g, '').slice(-10)
+    if (phoneDigits.length === 10 && phoneDigits.slice(3, 6) === '555') {
+      console.warn(`[lead/submit] Rejected fake phone ${payload.phone} (555 exchange)`)
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'INVALID_PHONE',
+          message: 'Please enter a phone number where we can reach you — the number provided doesn\'t appear to be a working line.',
+        },
+        { status: 400 }
+      )
+    }
+
     // Rate-limit by IP — mirrors the corporate-request route. Sheds bots /
     // form-hammering before we do any DB writes or provider blasts.
     const ipAddress =
@@ -274,11 +291,19 @@ export async function POST(req: NextRequest) {
     // one phone. On a duplicate we return success (their request IS on file)
     // without creating another lead or re-notifying providers.
     const dupWindow = new Date(Date.now() - DUPLICATE_WINDOW_HOURS * 60 * 60 * 1000)
+    // Match on phone OR email (each paired with name) so a patient who corrects
+    // their phone and re-submits is still caught — Stefan A Smith 2026-07-15
+    // submitted a junk 555 number then his real number 2 min later (same name +
+    // email). Phone-only dedup missed it; email+name catches it.
+    const identityMatch: Array<Record<string, unknown>> = [{ phone: payload.phone }]
+    if (payload.email) {
+      identityMatch.push({ email: { equals: payload.email, mode: 'insensitive' } })
+    }
     const existingDup = await prisma.lead.findFirst({
       where: {
-        phone: payload.phone,   // already normalized by phoneSchema
         fullName: { equals: payload.fullName, mode: 'insensitive' },
         createdAt: { gte: dupWindow },
+        OR: identityMatch,
       },
       orderBy: { createdAt: 'desc' },
       select: { id: true, createdAt: true },
