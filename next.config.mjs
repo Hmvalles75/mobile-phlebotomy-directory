@@ -89,6 +89,19 @@ const nextConfig = {
         destination: '/us/california/sacramento',
         permanent: true,
       },
+      {
+        // Stub record cleanup 2026-06-18 — generic "Mobile Phlebotomist"
+        // placeholder in Brooklyn Park, MN with no real contact info.
+        source: '/provider/mobile-phlebotomist',
+        destination: '/us/minnesota/minneapolis',
+        permanent: true,
+      },
+      {
+        // Removed at provider request 2026-07-16 (Tiffani Fouse, opted out).
+        source: '/provider/veni-vidi-vici-private-labsllc',
+        destination: '/us/california/los-angeles',
+        permanent: true,
+      },
     ]
   },
 }
