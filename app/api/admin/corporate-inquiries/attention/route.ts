@@ -27,7 +27,17 @@ export async function GET(req: NextRequest) {
     const [newCount, staleNew, staleContacted, oldestNew] = await Promise.all([
       prisma.coverageRequest.count({ where: { status: 'NEW' } }),
       prisma.coverageRequest.count({ where: { status: 'NEW', createdAt: { lt: newStaleCutoff } } }),
-      prisma.coverageRequest.count({ where: { status: 'CONTACTED', createdAt: { lt: contactedStaleCutoff } } }),
+      // CONTACTED staleness keys off lastContactedAt (real activity), not
+      // createdAt. Legacy rows with no lastContactedAt fall back to createdAt.
+      prisma.coverageRequest.count({
+        where: {
+          status: 'CONTACTED',
+          OR: [
+            { lastContactedAt: { lt: contactedStaleCutoff } },
+            { lastContactedAt: null, createdAt: { lt: contactedStaleCutoff } },
+          ],
+        },
+      }),
       prisma.coverageRequest.findFirst({
         where: { status: 'NEW' },
         orderBy: { createdAt: 'asc' },

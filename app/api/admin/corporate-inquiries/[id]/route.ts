@@ -27,8 +27,9 @@ export async function PATCH(
     const body = await req.json()
     const { status } = body
 
-    // Validate status
-    const validStatuses = ['NEW', 'CONTACTED', 'QUOTED', 'BOOKED', 'COMPLETED', 'DECLINED']
+    // Validate status. Legacy values (QUOTED/BOOKED/COMPLETED/DECLINED) still
+    // accepted so old rows can be edited; new pipeline stages added 2026-07-17.
+    const validStatuses = ['NEW', 'CONTACTED', 'QUOTED', 'BOOKED', 'COMPLETED', 'DECLINED', 'IN_DISCUSSION', 'WON', 'LOST', 'DEAD']
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { success: false, error: 'Invalid status' },
@@ -36,9 +37,22 @@ export async function PATCH(
       )
     }
 
+    // Moving a lead out of NEW implies first contact has happened. If nothing
+    // has been logged yet, stamp lastContactedAt now so staleness keys off
+    // activity rather than createdAt (this also makes the status editor a valid
+    // backfill path for leads already emailed from Gmail).
+    const existing = await prisma.coverageRequest.findUnique({
+      where: { id },
+      select: { lastContactedAt: true },
+    })
+    const data: { status: string; lastContactedAt?: Date } = { status }
+    if (status !== 'NEW' && existing && !existing.lastContactedAt) {
+      data.lastContactedAt = new Date()
+    }
+
     const inquiry = await prisma.coverageRequest.update({
       where: { id },
-      data: { status }
+      data: data as any,
     })
 
     return NextResponse.json({

@@ -26,7 +26,10 @@ export async function GET(req: NextRequest) {
     const inquiries = await prisma.coverageRequest.findMany({
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      include: {
+        contactAttempts: { orderBy: { occurredAt: 'desc' } },
+      },
     })
 
     return NextResponse.json({

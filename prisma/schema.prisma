@@ -623,7 +623,43 @@ model CoverageRequest {
   referrer         String?
   landingPage      String?
 
+  // Contact tracking (2026-07-17). Institutional outreach happens from Gmail,
+  // outside the app, so status/staleness must key off logged activity rather
+  // than createdAt. lastContactedAt is set whenever a ContactAttempt is logged,
+  // an email is sent from admin, or the status is moved out of NEW.
+  lastContactedAt  DateTime?
+  contactAttempts  ContactAttempt[]
+
   @@map("coverage_requests")
+}
+
+enum ContactChannel {
+  EMAIL
+  PHONE
+  OTHER
+}
+
+enum ContactDirection {
+  OUTBOUND
+  INBOUND
+}
+
+// Logged outreach against a CoverageRequest (institutional lead). One row per
+// touch. `note` holds the email body when created by the admin "Email this
+// lead" action, giving an audit trail. See app/api/admin/corporate-inquiries.
+model ContactAttempt {
+  id         String           @id @default(cuid())
+  leadId     String
+  lead       CoverageRequest  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  channel    ContactChannel   @default(EMAIL)
+  direction  ContactDirection @default(OUTBOUND)
+  subject    String?
+  note       String?          @db.Text
+  occurredAt DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+
+  @@index([leadId])
+  @@map("contact_attempts")
 }
 
 model LeadNotification {
@@ -843,10 +879,17 @@ enum SubmissionStatus {
 enum CoverageRequestStatus {
   NEW
   CONTACTED
+  // Legacy values — kept so existing rows stay valid, hidden from the new admin
+  // UI. DECLINED is remapped to LOST during backfill (2026-07-17).
   QUOTED
   BOOKED
   COMPLETED
   DECLINED
+  // Active pipeline stages (2026-07-17)
+  IN_DISCUSSION
+  WON
+  LOST
+  DEAD
 }
 
 enum ListingTier {
