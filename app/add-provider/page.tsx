@@ -21,11 +21,14 @@ export default function AddProvider() {
     licensed: false,
     yearsExperience: '',
     leadOptIn: 'yes' as 'yes' | 'no',
-    leadContactMethod: [] as string[],
+    // Email is the only delivery channel — SMS lead-distribution is not
+    // permitted under A2P 10DLC carrier policy (rejected 2026-07-17 as
+    // third-party lead-gen), so notifications go by email.
+    leadContactMethod: ['email'] as string[],
     leadEmail: '',
     leadPhone: '',
     availability: [] as string[],
-    smsConsent: false,  // TCPA consent — optional, unchecked by default. Account creation does not require SMS opt-in.
+    smsConsent: false,  // deprecated — SMS not offered; retained to avoid breaking the submit payload.
   })
 
   const serviceOptions = [
@@ -118,15 +121,6 @@ export default function AddProvider() {
       services: prev.services.includes(service)
         ? prev.services.filter(s => s !== service)
         : [...prev.services, service]
-    }))
-  }
-
-  const handleContactMethodToggle = (method: string) => {
-    setFormData(prev => ({
-      ...prev,
-      leadContactMethod: prev.leadContactMethod.includes(method)
-        ? prev.leadContactMethod.filter(m => m !== method)
-        : [...prev.leadContactMethod, method]
     }))
   }
 
@@ -447,56 +441,25 @@ export default function AddProvider() {
               {formData.leadOptIn === 'yes' && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-3">
-                      How should we send you patient requests? *
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      How we send you patient requests
                     </label>
-                    <div className="space-y-2">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.leadContactMethod.includes('email')}
-                          onChange={() => handleContactMethodToggle('email')}
-                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
-                        />
-                        <span className="text-sm text-gray-700">Email</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.leadContactMethod.includes('sms')}
-                          onChange={() => handleContactMethodToggle('sms')}
-                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
-                        />
-                        <span className="text-sm text-gray-700">Text message</span>
-                      </label>
-                    </div>
+                    <p className="text-sm text-gray-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                      📧 Patient requests are delivered to your <strong>email</strong> the moment they come in — so make sure your notification email below is one you check.
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Lead notification email (optional)
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.leadEmail}
-                        onChange={(e) => setFormData(prev => ({...prev, leadEmail: e.target.value}))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="If different from above"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Lead notification phone (optional)
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.leadPhone}
-                        onChange={(e) => setFormData(prev => ({...prev, leadPhone: e.target.value}))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="If different from above"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Lead notification email (optional)
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.leadEmail}
+                      onChange={(e) => setFormData(prev => ({...prev, leadEmail: e.target.value}))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="If different from your account email above"
+                    />
                   </div>
 
                   <div>
@@ -525,31 +488,9 @@ export default function AddProvider() {
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• We review and approve your listing (usually within 24–48 hours)</li>
                   <li>• Your business becomes discoverable by patients in your service area</li>
-                  <li>• If you opted in, you can start receiving patient requests by email/text</li>
+                  <li>• If you opted in, you start receiving patient requests by email</li>
                   <li>• No obligation — you control which requests you accept</li>
                 </ul>
-              </div>
-
-              {/* SMS consent — TCPA opt-in. Optional, unchecked by default. Account creation does NOT require it. */}
-              <div className="border border-gray-200 bg-gray-50 p-4 rounded-lg">
-                <label className="flex items-start cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.smsConsent}
-                    onChange={(e) => setFormData({ ...formData, smsConsent: e.target.checked })}
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1 mr-3 flex-shrink-0"
-                  />
-                  <span className="text-sm text-gray-800 leading-relaxed">
-                    <strong>(Optional)</strong> I agree to receive SMS notifications about new patient leads in my service area from MobilePhlebotomy.org. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe. You can also receive lead notifications by email — SMS is optional.
-                  </span>
-                </label>
-                <p className="text-xs text-gray-600 mt-2 ml-7">
-                  See our{' '}
-                  <a href="/privacy" target="_blank" className="text-primary-600 hover:underline">Privacy Policy</a>
-                  {' '}and{' '}
-                  <a href="/terms" target="_blank" className="text-primary-600 hover:underline">SMS Terms</a>
-                  {' '}for details.
-                </p>
               </div>
 
               <button
