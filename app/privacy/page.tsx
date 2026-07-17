@@ -84,6 +84,12 @@ export default function Privacy() {
                     for SMS itself.
                   </p>
                   <p>
+                    <strong>No sharing of mobile data:</strong> We do not share or sell your mobile
+                    opt-in information, phone number, or SMS consent with third parties or affiliates
+                    for their own marketing purposes. Mobile information is used solely to deliver the
+                    SMS notifications you opted into.
+                  </p>
+                  <p>
                     <strong>How to opt out:</strong> Reply <strong>STOP</strong> to any SMS message from us
                     at any time. You will receive a one-time confirmation and no further messages will be
                     sent. You can also contact{' '}
