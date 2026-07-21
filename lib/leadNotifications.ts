@@ -398,11 +398,27 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     const priorityProviders = providers.filter(p => p.priorityRouting)
     const otherProviders    = providers.filter(p => !p.priorityRouting)
 
+    // Priority head-start window (the paid tier's real value). Paying providers
+    // (Wave 1) get the lead immediately; free listings (Wave 2) are held this
+    // long — but ONLY when a paying provider actually covers the area (otherwise
+    // fire to everyone at once so the patient isn't delayed for nothing).
+    // STAT/urgent requests keep NO free delay — an urgent patient must never
+    // wait on a monetization window. Free providers still receive EVERY lead,
+    // just after the window, so overall coverage/claim reach is unchanged; only
+    // the head start is sold. (Widened from 10m→30m on 2026-07-21 to give the
+    // $79 tier genuine value for the top-converter upsell.)
+    const FREE_TIER_DELAY_STANDARD = 30 * 60  // 30-minute priority head start
+    const FREE_TIER_DELAY_STAT = 0            // urgent: everyone immediately
+    const otherDelay =
+      priorityProviders.length === 0 ? 0
+        : lead.urgency === 'STAT' ? FREE_TIER_DELAY_STAT
+          : FREE_TIER_DELAY_STANDARD
+
     if (priorityProviders.length > 0) {
       console.log(`[LeadNotifications] Wave 1 (paying): ${priorityProviders.length} provider(s), immediate`)
     }
     if (otherProviders.length > 0) {
-      console.log(`[LeadNotifications] Wave 2 (other): ${otherProviders.length} provider(s), ${priorityProviders.length > 0 ? '600s (10-min) delay' : 'immediate'}`)
+      console.log(`[LeadNotifications] Wave 2 (other): ${otherProviders.length} provider(s), ${otherDelay > 0 ? `${otherDelay}s delay` : 'immediate'}`)
     }
 
     // Generate a SendGrid batch_id for this lead's notifications. Lets us
@@ -465,10 +481,6 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
       }
     }
 
-    // Delay only applies if there's a paying provider to give a head start to.
-    // No paying provider in this lead's coverage = no point holding the lead;
-    // fire to everyone immediately so a free provider can pick it up.
-    const otherDelay = priorityProviders.length > 0 ? 600 : 0
     let successCount = 0
 
     // Wave 1: paying customers — delivered immediately by SendGrid
