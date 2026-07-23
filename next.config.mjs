@@ -71,6 +71,14 @@ const nextConfig = {
         destination: '/provider/carewithluvs-llc',
         permanent: true,
       },
+      // $199 premium-page vanity URL for Gentle Trace Mobile (Columbus OH, paid
+      // 2026-07). Clean address she can put on cards/flyers; redirects to her
+      // premium provider page. Same pattern as CAREWITHLUVS above.
+      {
+        source: '/ohio/gentle-trace-mobile-phlebotomy',
+        destination: '/provider/gentle-trace-mobile',
+        permanent: true,
+      },
       // Removed-at-provider-request 301s. Listing rows still exist in the DB
       // with removedAt set (preserving Lead.routedToId history and blocking
       // the unique slug), but the public page now redirects to the closest
