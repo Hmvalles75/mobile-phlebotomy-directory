@@ -12,9 +12,29 @@ export const metadata = {
 }
 
 export default async function PublicOrderPage({ params }: Props) {
+  // Select ONLY the client-visible fields. Never fetch clientRate, providerRate,
+  // assignedProviderId, or patient contact/address/notes here — this object is
+  // handed to the public timeline, and selecting only safe fields keeps the
+  // sensitive data out of the render layer entirely (defense-in-depth; the
+  // omission of provider/pricing from client views is a deliberate protection).
   const order = await prisma.institutionalOrder.findUnique({
     where: { publicShareToken: params.publicShareToken },
-    include: { client: { select: { name: true } } },
+    select: {
+      id: true,
+      patientName: true,
+      patientCity: true,
+      patientState: true,
+      status: true,
+      kitShippedAt: true,
+      kitReceivedAt: true,
+      scheduledAt: true,
+      scheduledFor: true,
+      drawCompletedAt: true,
+      fedexDroppedAt: true,
+      fedexTrackingNum: true,
+      createdAt: true,
+      client: { select: { name: true } },
+    },
   })
   if (!order) notFound()
 

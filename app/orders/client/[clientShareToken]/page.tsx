@@ -18,11 +18,26 @@ function fmtDate(d: Date | null | undefined): string {
 }
 
 export default async function ClientPublicAllOrdersPage({ params }: Props) {
+  // Select ONLY client-visible fields. Deliberately excludes the client's own
+  // contactEmail/ccEmails/notes and every order's clientRate/providerRate/
+  // assignedProviderId/patient contact/address/notes — those must never leave
+  // the DB layer for a token-authed public view (defense-in-depth).
   const client = await prisma.institutionalClient.findUnique({
     where: { publicShareToken: params.clientShareToken },
-    include: {
+    select: {
+      name: true,
       orders: {
         orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          patientName: true,
+          patientCity: true,
+          patientState: true,
+          status: true,
+          scheduledFor: true,
+          createdAt: true,
+          publicShareToken: true,
+        },
       },
     },
   })
