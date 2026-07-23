@@ -146,6 +146,20 @@ export default function PremiumProviderPage({
 
         <div className="relative container mx-auto px-4 py-20 md:py-32">
           <div className="max-w-4xl mx-auto text-center">
+            {/* Business logo — shown on the teal hero background (works well for
+                light/white logos). Conditional so providers without a logo are
+                unaffected. */}
+            {provider.logo && (
+              <div className="flex justify-center mb-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={provider.logo}
+                  alt={`${provider.name} logo`}
+                  className="h-24 md:h-28 w-auto object-contain drop-shadow-lg"
+                />
+              </div>
+            )}
+
             {/* Verified badge */}
             {isVerified && (
               <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-4 py-1.5 mb-6 text-white text-sm font-medium">
@@ -207,9 +221,9 @@ export default function PremiumProviderPage({
             <div className="flex justify-center md:justify-start">
               <div className="relative">
                 <div className="w-56 h-56 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center border-8 border-white shadow-2xl overflow-hidden">
-                  {(provider.logo || provider.profileImage) ? (
+                  {(provider.profileImage || provider.logo) ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={provider.logo || provider.profileImage || ''} alt={provider.name} className="w-full h-full object-cover" />
+                    <img src={provider.profileImage || provider.logo || ''} alt={provider.name} className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-24 h-24 text-teal-400" strokeWidth={1.5} />
                   )}
