@@ -37,8 +37,17 @@ export interface ClientSession {
 // Audit — append-only. Never throws into the caller (audit failure must
 // not block or leak into the auth flow), but always logged.
 // ────────────────────────────────────────────────────────────────────
+export type ClientAuthEventType =
+  | 'link_requested'
+  | 'link_verified'
+  | 'link_failed'
+  | 'order_submitted'
+  | 'user_created'
+  | 'user_disabled'
+  | 'user_enabled'
+
 export async function logClientAuthEvent(
-  event: 'link_requested' | 'link_verified' | 'link_failed' | 'order_submitted',
+  event: ClientAuthEventType,
   opts: { clientUserId?: string | null; email?: string | null; ip?: string | null; userAgent?: string | null } = {},
 ): Promise<void> {
   try {

@@ -2,8 +2,10 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
+import { logClientAuthEvent } from '@/lib/client-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import type { OrderStatus } from '@prisma/client'
 
 async function requireAdmin() {
@@ -11,6 +13,15 @@ async function requireAdmin() {
   // The admin login page lives at /admin (inline form, not a separate
   // /admin/login route). Don't change this without also adding the page.
   if (!ok) redirect('/admin')
+}
+
+// IP + user-agent of the admin performing an action, for the audit trail.
+// Admin auth is a single shared credential (no per-admin identity), so the
+// actor is always "admin" — IP/UA is the most attribution we can record.
+async function adminReqCtx(): Promise<{ ip: string | null; userAgent: string | null }> {
+  const h = await headers()
+  const ip = (h.get('x-forwarded-for')?.split(',')[0].trim()) || h.get('x-real-ip') || null
+  return { ip, userAgent: h.get('user-agent') }
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -176,7 +187,10 @@ export async function createClientUser(formData: FormData) {
   const existing = await prisma.clientUser.findUnique({ where: { email } })
   if (existing) throw new Error('A portal user with that email already exists')
 
-  await prisma.clientUser.create({ data: { clientId, email, name } })
+  const created = await prisma.clientUser.create({ data: { clientId, email, name } })
+  // Granting portal access is audit-relevant under a BAA.
+  const ctx = await adminReqCtx()
+  await logClientAuthEvent('user_created', { clientUserId: created.id, email: created.email, ...ctx })
   revalidatePath(`/admin/institutional/clients/${clientId}`)
 }
 
@@ -190,9 +204,14 @@ export async function setClientUserDisabled(formData: FormData) {
   // Disabling also revokes any in-flight magic link (clear the pending token),
   // so a link already emailed can't still be used. We never hard-delete users —
   // disabling preserves the submittedByClientUser audit link on their orders.
-  await prisma.clientUser.update({
+  const updated = await prisma.clientUser.update({
     where: { id },
     data: { disabled, ...(disabled ? { magicToken: null, magicTokenExpiresAt: null } : {}) },
+  })
+  // Revoking/restoring portal access is audit-relevant under a BAA.
+  const ctx = await adminReqCtx()
+  await logClientAuthEvent(disabled ? 'user_disabled' : 'user_enabled', {
+    clientUserId: updated.id, email: updated.email, ...ctx,
   })
   revalidatePath(`/admin/institutional/clients/${clientId}`)
 }
