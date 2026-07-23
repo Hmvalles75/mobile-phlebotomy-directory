@@ -147,6 +147,7 @@ model InstitutionalClient {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   orders           InstitutionalOrder[]
+  users            ClientUser[]
 
   @@map("institutional_clients")
 }
@@ -184,16 +185,29 @@ model InstitutionalOrder {
   status             OrderStatus @default(PENDING_KIT_RECEIPT)
   publicShareToken   String   @unique @default(cuid())
 
+  // Client-portal submission tracking (2026-07). submittedByClientUserId null =
+  // admin-created; set = submitted by a client via the magic-link portal (WHO).
+  // requestedWindow is the client's requested date/time window. submittedFromIp
+  // is for audit (WHEN = createdAt). Client submissions land in PENDING_REVIEW.
+  requestedWindow         String?
+  submittedByClientUserId String?
+  submittedByClientUser   ClientUser? @relation(fields: [submittedByClientUserId], references: [id], onDelete: SetNull)
+  submittedFromIp         String?
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@index([clientId])
   @@index([assignedProviderId])
   @@index([status])
+  @@index([submittedByClientUserId])
   @@map("institutional_orders")
 }
 
 enum OrderStatus {
+  // Client-submitted via the portal; awaiting admin review + rate. Deliberately
+  // NOT part of the kit workflow until reviewed (2026-07).
+  PENDING_REVIEW
   PENDING_KIT_SHIPMENT
   KIT_SHIPPED
   PENDING_KIT_RECEIPT
@@ -204,6 +218,42 @@ enum OrderStatus {
   FEDEX_DROPPED
   COMPLETED
   CANCELLED
+}
+
+// Client-portal user — per-person identity for magic-link auth. Admin-created
+// only (you authorize who can log in). Disable (never hard-delete) to revoke,
+// which preserves the submittedByClientUser audit link on their orders.
+model ClientUser {
+  id                String              @id @default(cuid())
+  clientId          String
+  client            InstitutionalClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  email             String              @unique
+  name              String?
+  disabled          Boolean             @default(false)
+  magicToken          String?           @unique
+  magicTokenExpiresAt DateTime?
+  lastLoginAt         DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  submittedOrders   InstitutionalOrder[]
+
+  @@index([clientId])
+  @@map("client_users")
+}
+
+// Append-only auth/submission audit trail (who / when / IP) for the client
+// portal — supports BAA/HIPAA audit expectations.
+model ClientAuthEvent {
+  id           String   @id @default(cuid())
+  clientUserId String?
+  email        String?
+  event        String   // link_requested | link_verified | link_failed | order_submitted
+  ip           String?
+  userAgent    String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  @@index([clientUserId])
+  @@map("client_auth_events")
 }
 
 model Lead {
