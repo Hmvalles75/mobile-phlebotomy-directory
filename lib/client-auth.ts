@@ -26,6 +26,13 @@ export const CLIENT_SESSION_COOKIE = 'client_session'
 const TOKEN_TTL_MIN = 15
 const SESSION_TTL_DAYS = 30
 
+// Magic-link request throttles (per rolling hour). Prevents mail-bombing a
+// known portal user's inbox and unbounded token churn. Counted against the
+// append-only audit log so no extra table is needed. A throttled request still
+// returns { ok: true } — the caller never learns it was throttled.
+const MAX_LINK_REQUESTS_PER_EMAIL_PER_HOUR = 5
+const MAX_LINK_REQUESTS_PER_IP_PER_HOUR = 20
+
 export interface ClientSession {
   clientUserId: string
   clientId: string
@@ -79,6 +86,25 @@ export async function createClientMagicLink(
 ): Promise<{ ok: true }> {
   const normalized = email.toLowerCase().trim()
   await logClientAuthEvent('link_requested', { email: normalized, ip: ctx.ip, userAgent: ctx.userAgent })
+
+  // Throttle before doing any work. The just-logged request is included in the
+  // counts, so the caps are inclusive of the current attempt. Return generic ok
+  // on throttle — never reveal that the request was dropped.
+  const windowStart = new Date(Date.now() - 60 * 60 * 1000)
+  const [emailCount, ipCount] = await Promise.all([
+    prisma.clientAuthEvent.count({
+      where: { email: normalized, event: 'link_requested', createdAt: { gte: windowStart } },
+    }),
+    ctx.ip
+      ? prisma.clientAuthEvent.count({
+          where: { ip: ctx.ip, event: 'link_requested', createdAt: { gte: windowStart } },
+        })
+      : Promise.resolve(0),
+  ])
+  if (emailCount > MAX_LINK_REQUESTS_PER_EMAIL_PER_HOUR || ipCount > MAX_LINK_REQUESTS_PER_IP_PER_HOUR) {
+    console.warn(`[client-auth] magic-link request throttled (email hits=${emailCount}, ip hits=${ipCount})`)
+    return { ok: true }
+  }
 
   const user = await prisma.clientUser.findFirst({
     where: { email: { equals: normalized, mode: 'insensitive' }, disabled: false },
