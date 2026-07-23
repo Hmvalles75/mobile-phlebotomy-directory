@@ -33,6 +33,16 @@ export default async function ClientDetailPage({ params }: Props) {
 
   const shareUrl = `/orders/client/${client.publicShareToken}`
 
+  // Bubble client-submitted orders awaiting review to the top of the table so
+  // they don't get lost among admin-created orders; keep createdAt-desc within.
+  const sortedOrders = [...client.orders].sort((a, b) => {
+    const ap = a.status === 'PENDING_REVIEW' ? 0 : 1
+    const bp = b.status === 'PENDING_REVIEW' ? 0 : 1
+    if (ap !== bp) return ap - bp
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+  const needsReviewCount = client.orders.filter(o => o.status === 'PENDING_REVIEW').length
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
@@ -170,8 +180,13 @@ export default async function ClientDetailPage({ params }: Props) {
 
         {/* Orders table */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-5 sm:px-6 py-4 border-b border-gray-200">
+          <div className="px-5 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-gray-900">Orders ({client.orders.length})</h2>
+            {needsReviewCount > 0 && (
+              <span className="text-xs font-semibold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full">
+                {needsReviewCount} need{needsReviewCount === 1 ? 's' : ''} review
+              </span>
+            )}
           </div>
           {client.orders.length === 0 ? (
             <div className="p-8 text-center text-sm text-gray-500">No orders yet.</div>
@@ -189,12 +204,17 @@ export default async function ClientDetailPage({ params }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {client.orders.map((o) => (
-                    <tr key={o.id} className="hover:bg-gray-50">
+                  {sortedOrders.map((o) => (
+                    <tr key={o.id} className={`hover:bg-gray-50 ${o.status === 'PENDING_REVIEW' ? 'bg-amber-50/40' : ''}`}>
                       <td className="px-4 py-3">
                         <Link href={`/admin/institutional/orders/${o.id}`} className="font-medium text-primary-700 hover:underline">
                           {o.patientName}
                         </Link>
+                        {o.submittedByClientUserId && (
+                          <span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">
+                            client-submitted
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-gray-700">{o.patientCity}, {o.patientState}</td>
                       <td className="px-4 py-3"><StatusPill status={o.status} /></td>

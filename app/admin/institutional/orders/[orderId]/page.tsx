@@ -87,6 +87,7 @@ export default async function OrderDetailPage({ params }: Props) {
       include: {
         client: true,
         assignedProvider: { select: { id: true, name: true, primaryCity: true, primaryState: true } },
+        submittedByClientUser: { select: { email: true, name: true } },
       },
     }),
     prisma.provider.findMany({
@@ -101,6 +102,14 @@ export default async function OrderDetailPage({ params }: Props) {
   const scheduledForBound = setScheduledFor.bind(null, order.id)
   const setStatusBound = setStatus.bind(null, order.id)
   const shareUrl = `/orders/${order.publicShareToken}`
+
+  // PENDING_REVIEW is an intake-only status (client submissions). It's not in
+  // the normal admin dropdown, so surface it as an option only while the order
+  // is actually in that state — otherwise its <select> value wouldn't render.
+  const statusOptions = order.status === 'PENDING_REVIEW'
+    ? (['PENDING_REVIEW', ...ALL_STATUSES] as const)
+    : ALL_STATUSES
+  const isClientSubmitted = !!order.submittedByClientUserId
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -127,6 +136,28 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
 
+        {/* Client-submitted review banner — distinguishes portal submissions
+            from admin-created orders and reminds admin to set the rate first. */}
+        {isClientSubmitted && (
+          <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+            <span className="inline-block text-xs font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full mb-2">
+              Client-submitted — needs review
+            </span>
+            <p className="text-sm text-amber-900">
+              Submitted by {order.submittedByClientUser?.name || order.submittedByClientUser?.email || 'a portal user'}
+              {order.submittedByClientUser?.name && order.submittedByClientUser?.email ? ` (${order.submittedByClientUser.email})` : ''}
+              {' '}on {fmtDateTime(order.createdAt)}
+              {order.submittedFromIp ? ` · IP ${order.submittedFromIp}` : ''}.
+            </p>
+            {order.requestedWindow && (
+              <p className="text-sm text-amber-900 mt-1"><strong>Requested window:</strong> {order.requestedWindow}</p>
+            )}
+            <p className="text-xs text-amber-700 mt-2">
+              The client set no pricing. Set the client rate, assign a provider, then move it out of “pending review” to start the workflow.
+            </p>
+          </div>
+        )}
+
         {/* Status + scheduling section */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
           <h2 className="text-lg font-semibold text-gray-900">Status & Schedule</h2>
@@ -135,7 +166,7 @@ export default async function OrderDetailPage({ params }: Props) {
               <label className="block">
                 <span className="block text-sm font-medium text-gray-700 mb-1">Status</span>
                 <select name="status" defaultValue={order.status} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                  {ALL_STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+                  {statusOptions.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
                 </select>
               </label>
               <button type="submit" className="mt-2 text-sm bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md font-medium">Update status</button>

@@ -10,10 +10,19 @@ export default async function InstitutionalClientsPage() {
   const ok = await verifyAdminSession()
   if (!ok) redirect('/admin')
 
-  const clients = await prisma.institutionalClient.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { orders: true } } },
-  })
+  const [clients, pendingByClient] = await Promise.all([
+    prisma.institutionalClient.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { _count: { select: { orders: true } } },
+    }),
+    prisma.institutionalOrder.groupBy({
+      by: ['clientId'],
+      where: { status: 'PENDING_REVIEW' },
+      _count: { _all: true },
+    }),
+  ])
+  // clientId -> count of client-submitted orders awaiting review.
+  const pendingMap = new Map(pendingByClient.map(g => [g.clientId, g._count._all]))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,7 +83,14 @@ export default async function InstitutionalClientsPage() {
                     className="flex items-center justify-between px-5 sm:px-6 py-4 hover:bg-gray-50 transition-colors"
                   >
                     <div className="min-w-0">
-                      <div className="font-semibold text-gray-900">{c.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900">{c.name}</span>
+                        {(pendingMap.get(c.id) ?? 0) > 0 && (
+                          <span className="text-xs font-semibold text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">
+                            {pendingMap.get(c.id)} need{pendingMap.get(c.id) === 1 ? 's' : ''} review
+                          </span>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-500 truncate">{c.contactEmail}</div>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-500 ml-4 shrink-0">
