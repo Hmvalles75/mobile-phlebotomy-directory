@@ -158,3 +158,41 @@ export async function setStatus(orderId: string, formData: FormData) {
   })
   revalidatePath(`/admin/institutional/orders/${orderId}`)
 }
+
+// ────────────────────────────────────────────────────────────────────
+// Client portal users (magic-link identities). Admin-authorized only — you
+// decide who at a client can log in and submit orders.
+// ────────────────────────────────────────────────────────────────────
+export async function createClientUser(formData: FormData) {
+  await requireAdmin()
+  const clientId = String(formData.get('clientId') || '')
+  const email = String(formData.get('email') || '').trim().toLowerCase()
+  const name = String(formData.get('name') || '').trim() || null
+  if (!clientId) throw new Error('clientId required')
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('a valid email is required')
+
+  // email is @unique across all clients — give a friendly error rather than a
+  // Prisma constraint crash, and never let a user be created under two clients.
+  const existing = await prisma.clientUser.findUnique({ where: { email } })
+  if (existing) throw new Error('A portal user with that email already exists')
+
+  await prisma.clientUser.create({ data: { clientId, email, name } })
+  revalidatePath(`/admin/institutional/clients/${clientId}`)
+}
+
+export async function setClientUserDisabled(formData: FormData) {
+  await requireAdmin()
+  const id = String(formData.get('id') || '')
+  const clientId = String(formData.get('clientId') || '')
+  const disabled = String(formData.get('disabled') || '') === 'true'
+  if (!id) throw new Error('id required')
+
+  // Disabling also revokes any in-flight magic link (clear the pending token),
+  // so a link already emailed can't still be used. We never hard-delete users —
+  // disabling preserves the submittedByClientUser audit link on their orders.
+  await prisma.clientUser.update({
+    where: { id },
+    data: { disabled, ...(disabled ? { magicToken: null, magicTokenExpiresAt: null } : {}) },
+  })
+  revalidatePath(`/admin/institutional/clients/${clientId}`)
+}

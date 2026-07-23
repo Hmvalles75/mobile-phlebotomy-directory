@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
-import { createOrder } from '@/lib/institutional-actions'
+import { createOrder, createClientUser, setClientUserDisabled } from '@/lib/institutional-actions'
 import { StatusPill } from '@/components/orders/PublicOrderTimeline'
 import CopyLinkButton from '@/components/admin/CopyLinkButton'
 
@@ -26,6 +26,7 @@ export default async function ClientDetailPage({ params }: Props) {
         orderBy: { createdAt: 'desc' },
         include: { assignedProvider: { select: { name: true } } },
       },
+      users: { orderBy: { createdAt: 'asc' } },
     },
   })
   if (!client) notFound()
@@ -56,6 +57,57 @@ export default async function ClientDetailPage({ params }: Props) {
             <p className="text-sm text-gray-700 mt-3 whitespace-pre-line bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{client.notes}</p>
           )}
         </div>
+
+        {/* Portal Users — magic-link logins for client-side order submission */}
+        <section className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-5 sm:px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Portal Users ({client.users.length})</h2>
+            <p className="text-xs text-gray-500 mt-1">People authorized to log in (via emailed magic link) and submit orders for this client. Disable to revoke access immediately.</p>
+          </div>
+          <div className="px-5 sm:px-6 py-4 space-y-4">
+            {client.users.length === 0 ? (
+              <p className="text-sm text-gray-500">No portal users yet. Add one to let this client submit orders directly.</p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {client.users.map((u) => (
+                  <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-gray-900">{u.name || u.email}</div>
+                      <div className="text-xs text-gray-500">{u.email}{u.lastLoginAt ? ` · last login ${fmtDate(u.lastLoginAt)}` : ' · never logged in'}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${u.disabled ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                        {u.disabled ? 'Disabled' : 'Active'}
+                      </span>
+                      <form action={setClientUserDisabled}>
+                        <input type="hidden" name="id" value={u.id} />
+                        <input type="hidden" name="clientId" value={client.id} />
+                        <input type="hidden" name="disabled" value={u.disabled ? 'false' : 'true'} />
+                        <button type="submit" className="text-xs text-gray-600 hover:text-gray-900 underline">
+                          {u.disabled ? 'Enable' : 'Disable'}
+                        </button>
+                      </form>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <form action={createClientUser} className="flex flex-wrap items-end gap-3 pt-2 border-t border-gray-100">
+              <input type="hidden" name="clientId" value={client.id} />
+              <label className="block">
+                <span className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></span>
+                <input name="email" type="email" required placeholder="person@client.org" className="px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </label>
+              <label className="block">
+                <span className="block text-xs font-medium text-gray-700 mb-1">Name</span>
+                <input name="name" className="px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </label>
+              <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                Add portal user
+              </button>
+            </form>
+          </div>
+        </section>
 
         {/* Add Order form */}
         <details className="bg-white rounded-lg shadow-sm border border-gray-200">

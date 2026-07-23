@@ -13,6 +13,7 @@ interface Props {
 
 // Status → display label + color. Public-friendly wording (no internal jargon).
 const STATUS_LABEL: Record<OrderStatus, { label: string; tone: 'gray' | 'blue' | 'amber' | 'green' | 'red' }> = {
+  PENDING_REVIEW: { label: 'Received — pending review', tone: 'amber' },
   PENDING_KIT_SHIPMENT: { label: 'Awaiting kit shipment', tone: 'gray' },
   KIT_SHIPPED: { label: 'Kit shipped', tone: 'blue' },
   PENDING_KIT_RECEIPT: { label: 'Awaiting kit at patient', tone: 'amber' },
