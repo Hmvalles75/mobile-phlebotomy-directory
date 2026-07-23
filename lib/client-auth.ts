@@ -230,3 +230,13 @@ export function getClientSession(req: Request): ClientSession | null {
   const m = cookie.match(new RegExp(`(?:^|;\\s*)${CLIENT_SESSION_COOKIE}=([^;]+)`))
   return m ? verifyClientSessionToken(decodeURIComponent(m[1])) : null
 }
+
+/**
+ * Read + verify the client session from the Next cookie store — for use in
+ * server components and server actions (where there's no Request object).
+ */
+export async function getClientSessionFromCookieStore(): Promise<ClientSession | null> {
+  const { cookies } = await import('next/headers')
+  const jar = await cookies()
+  return verifyClientSessionToken(jar.get(CLIENT_SESSION_COOKIE)?.value)
+}
