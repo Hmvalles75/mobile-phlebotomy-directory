@@ -17,10 +17,10 @@ function defaultNeighbors(stateAbbr: string, excludeCitySlug: string | null, lim
   const stateSlug = ABBR_TO_SLUG[stateAbbr]
   if (!stateSlug) return []
   const out: CityLink[] = []
-  for (const [slug, info] of Object.entries(CITY_MAPPING)) {
+  for (const info of Object.values(CITY_MAPPING)) {
     if (info.state !== stateAbbr) continue
-    if (slug === excludeCitySlug) continue
-    out.push({ slug, name: info.name, stateAbbr: info.state, stateSlug })
+    if (info.citySlug === excludeCitySlug) continue
+    out.push({ slug: info.citySlug, name: info.name, stateAbbr: info.state, stateSlug })
     if (out.length >= limit) break
   }
   return out

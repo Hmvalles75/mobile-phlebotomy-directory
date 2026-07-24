@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
+import { STATE_DATA } from '@/data/states-full'
 import { CITY_MAPPING } from '@/data/cities-full'
 import { prisma } from '@/lib/prisma'
 import { SITE_URL } from '@/lib/seo'
@@ -151,17 +151,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  // Add all ~260 city pages from the full city mapping
-  for (const [citySlug, cityInfo] of Object.entries(CITY_MAPPING)) {
-    const stateSlug = ABBR_TO_SLUG[cityInfo.state]
-    if (stateSlug) {
-      routes.push({
-        url: `${baseUrl}/us/${stateSlug}/${citySlug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      })
-    }
+  // Add city pages from the unified compound-keyed city mapping.
+  // Skip cities flagged noProviders (zero matching providers in the coverage
+  // DB) so we don't advertise thin pages in the sitemap.
+  for (const cityInfo of Object.values(CITY_MAPPING)) {
+    if (cityInfo.noProviders) continue
+    routes.push({
+      url: `${baseUrl}/us/${cityInfo.stateSlug}/${cityInfo.citySlug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    })
   }
 
   // Add custom metro area pages (Detroit, NYC, LA)

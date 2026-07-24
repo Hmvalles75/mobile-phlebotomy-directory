@@ -1,7 +1,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { CITY_MAPPING } from '@/data/cities-full'
+import { CITY_MAPPING, cityByStateCity } from '@/data/cities-full'
 import { ABBR_TO_SLUG } from '@/data/states-full'
 
 // Re-export pure helpers + types from the client-safe module so existing
@@ -56,7 +56,7 @@ function deterministicShuffle<T>(arr: T[], seed: string): T[] {
 // ────────────────────────────────────────────────────────────────────
 export const getProvidersForCity = unstable_cache(
   async (citySlug: string, stateAbbr: string): Promise<ProviderLink[]> => {
-    const cityInfo = CITY_MAPPING[citySlug]
+    const cityInfo = cityByStateCity(stateAbbr, citySlug)
     const cityName = cityInfo?.name
 
     const providers = await prisma.provider.findMany({
@@ -106,10 +106,10 @@ export const getNearbyCities = unstable_cache(
     if (!stateSlug) return []
 
     const sameState: CityLink[] = []
-    for (const [slug, info] of Object.entries(CITY_MAPPING)) {
+    for (const info of Object.values(CITY_MAPPING)) {
       if (info.state !== stateAbbr) continue
-      if (slug === citySlug) continue
-      sameState.push({ slug, name: info.name, stateAbbr: info.state, stateSlug })
+      if (info.citySlug === citySlug) continue
+      sameState.push({ slug: info.citySlug, name: info.name, stateAbbr: info.state, stateSlug })
     }
 
     // Deterministic ordering by source slug so the rotation is stable per
@@ -153,7 +153,7 @@ export const getCitiesInState = unstable_cache(
 
     const tryAdd = (slug: string | null | undefined) => {
       if (!slug || seen.has(slug)) return
-      const info = CITY_MAPPING[slug]
+      const info = cityByStateCity(stateAbbr, slug)
       if (!info || info.state !== stateAbbr) return
       seen.add(slug)
       out.push({ slug, name: info.name, stateAbbr, stateSlug })
@@ -256,7 +256,7 @@ export const getServiceAreasCovered = unstable_cache(
       if (!slug || !name || !abbr) return
       const stateSlug = ABBR_TO_SLUG[abbr]
       if (!stateSlug) return
-      const info = CITY_MAPPING[slug]
+      const info = cityByStateCity(abbr, slug)
       // Only link to slugs that have a dedicated page in CITY_MAPPING.
       if (!info || info.state !== abbr) return
       if (cityMap.has(slug)) return

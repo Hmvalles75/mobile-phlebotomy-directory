@@ -30,7 +30,8 @@ export function cityAnchorVariants(cityName: string, stateAbbr: string): string[
   ]
 }
 
-const CITY_SLUG_SET = new Set(Object.keys(CITY_MAPPING))
+// Compound-keyed map → build the bare-slug membership set from citySlug values.
+const CITY_SLUG_SET = new Set(Object.values(CITY_MAPPING).map(i => i.citySlug))
 
 export function cityLinkExists(citySlug: string): boolean {
   return CITY_SLUG_SET.has(citySlug)

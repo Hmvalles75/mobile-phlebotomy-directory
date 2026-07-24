@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { CITY_MAPPING } from '@/data/cities-full'
+import { cityByStateCity } from '@/data/cities-full'
 import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
@@ -16,7 +16,7 @@ interface CityLayoutProps {
 // Resolve the city + state info shared between metadata and layout body.
 function resolveCityState(stateSlug: string, citySlugRaw: string) {
   const citySlug = citySlugRaw.toLowerCase()
-  const cityInfo = CITY_MAPPING[citySlug]
+  const cityInfo = cityByStateCity(stateSlug, citySlug)
   const fallbackName = citySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   const cityName = cityInfo?.name || fallbackName
   const stateAbbr = (cityInfo?.state || stateSlug.toUpperCase()).toUpperCase()

@@ -1,0 +1,23 @@
+{
+  "_comment": "Byproduct of the 2026-07-24 city-data unification. Cities with a dedicated /us/[state]/[city] page but ZERO matching providers in the coverage DB (no city-specific, statewide, or primaryState coverage). Flagged noProviders:true in data/cities-full.ts and excluded from the sitemap. These are demand-side coverage holes = provider-recruitment targets. Cross-reference against institutional inquiries and directory search logs to prioritize. Regenerate: npx tsx scripts/unify-cities-full.ts --dry-run",
+  "generatedOn": "2026-07-24",
+  "eligibleProvidersAtGeneration": 277,
+  "totalExcluded": 40,
+  "note": "All 14 states below have NO provider coverage at all — recruiting one statewide/nationwide provider per state lights up every city in it.",
+  "byState": {
+    "AK": ["anchorage", "fairbanks", "tok", "wasilla"],
+    "HI": ["honolulu"],
+    "ID": ["boise", "emmett", "meridian", "post-falls"],
+    "IA": ["cedar-rapids", "des-moines"],
+    "MS": ["diberville", "forest", "gulfport", "jackson", "pascagoula", "ridgeland"],
+    "MT": ["billings", "bozeman"],
+    "NE": ["lincoln", "omaha"],
+    "NH": ["exeter", "manchester"],
+    "ND": ["fargo"],
+    "OR": ["beaverton", "clackamas", "eugene", "gresham", "portland", "redmond", "salem", "springfield", "tualatin"],
+    "RI": ["pawtucket", "providence", "woonsocket"],
+    "SD": ["sioux-falls"],
+    "DC": ["washington"],
+    "WV": ["charleston", "parkersburg"]
+  }
+}
