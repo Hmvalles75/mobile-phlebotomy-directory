@@ -1104,7 +1104,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/san-diego-ca/mobile-phlebotomy" className="text-primary-600 hover:text-primary-700">
+                  <Link href="/us/california/san-diego" className="text-primary-600 hover:text-primary-700">
                     San Diego Mobile Lab Services
                   </Link>
                 </li>

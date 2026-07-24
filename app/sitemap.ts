@@ -231,7 +231,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'chicago-il/blood-draw-at-home', priority: 0.7 },
 
     // SAN DIEGO METRO
-    { slug: 'san-diego-ca/mobile-phlebotomy', priority: 0.85 },
+    // (san-diego-ca/mobile-phlebotomy removed 2026-07-24 — 301'd to the
+    // canonical /us/california/san-diego during the URL consolidation pilot.)
     { slug: 'san-diego-ca/in-home-blood-draw', priority: 0.7 },
     { slug: 'san-diego-ca/blood-draw-at-home', priority: 0.7 },
 

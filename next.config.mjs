@@ -110,6 +110,19 @@ const nextConfig = {
         destination: '/us/california/los-angeles',
         permanent: true,
       },
+      // ── URL consolidation pilot (2026-07) ──────────────────────────────
+      // Phoenix, San Diego, and San Antonio each had a canonical
+      // /us/{state}/{city} page plus a P2 /us/metro/{city} duplicate (and,
+      // for San Diego, a P3 /{city}-{st}/mobile-phlebotomy duplicate) — all
+      // self-canonicalizing and competing in search. Collapse the duplicates
+      // into the /us/ page. 301 preserves accrued authority; the /us/ pages
+      // now carry the ported long-form copy. Intent-variant P3 pages
+      // (/san-diego-ca/in-home-blood-draw etc.) are a different keyword and
+      // are intentionally left in place.
+      { source: '/us/metro/phoenix', destination: '/us/arizona/phoenix', permanent: true },
+      { source: '/us/metro/san-antonio', destination: '/us/texas/san-antonio', permanent: true },
+      { source: '/us/metro/san-diego', destination: '/us/california/san-diego', permanent: true },
+      { source: '/san-diego-ca/mobile-phlebotomy', destination: '/us/california/san-diego', permanent: true },
     ]
   },
 }
