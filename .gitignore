@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# Data pulls for newsletter/analysis — may contain aggregates not meant for the repo
+/reports/
