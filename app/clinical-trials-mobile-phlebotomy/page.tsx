@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { SITE_URL } from '@/lib/seo'
+import { ClinicalTrialIntakeForm } from './ClinicalTrialIntakeForm'
 
 export const metadata: Metadata = {
   title: 'Clinical Trial Mobile Phlebotomy Services | MobilePhlebotomy.org',
@@ -267,22 +268,21 @@ export default function ClinicalTrialsPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section — the intake form is inline rather than a link out to the
+          generic /corporate-phlebotomy form, which asked none of the questions
+          that actually decide research feasibility and lost the buyer signal. */}
       <section className="py-16 bg-gradient-to-br from-blue-900 to-slate-900 text-white" id="request-form">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h2 className="text-3xl font-bold mb-6">
-            Request a Clinical Phlebotomy Coordination Review
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Tell us about your study requirements and locations.<br />
-            We'll review availability and follow up with next steps.
-          </p>
-          <Link
-            href="/corporate-phlebotomy#quote-form"
-            className="inline-block bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg text-lg"
-          >
-            Request Coordination Review
-          </Link>
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">
+              Request a Clinical Phlebotomy Coordination Review
+            </h2>
+            <p className="text-xl text-blue-100">
+              Tell us about your study requirements and locations.<br />
+              We&apos;ll review availability and follow up with next steps.
+            </p>
+          </div>
+          <ClinicalTrialIntakeForm />
         </div>
       </section>
 
