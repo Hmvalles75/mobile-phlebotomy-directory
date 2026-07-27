@@ -5,6 +5,7 @@ import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
+import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
@@ -406,6 +407,24 @@ export async function POST(req: NextRequest) {
       console.log(`[Lead ${lead.id}] ✅ SMS blast: ${smsCount} sent`)
     } catch (err: any) {
       console.error(`[Lead ${lead.id}] ❌ SMS blast FAILED:`, err.message || err)
+    }
+
+    // Patient confirmation — only when at least one provider was actually
+    // notified. Its job is to make the patient expect a call from an unknown
+    // number, which is where a quarter of claimed leads currently die
+    // (NO_ANSWER / VOICEMAIL). Fire-and-forget: a failed confirmation must
+    // never fail the submission or delay the provider race.
+    if (emailCount > 0 || smsCount > 0) {
+      sendLeadConfirmationToPatient({
+        id: lead.id,
+        fullName: lead.fullName,
+        email: lead.email,
+        city: lead.city,
+        state: lead.state,
+        urgency: lead.urgency,
+      }).catch(err =>
+        console.error(`[Lead ${lead.id}] ❌ Patient confirmation FAILED:`, err?.message || err)
+      )
     }
 
     // If NO providers were notified at all, this is an uncovered area
