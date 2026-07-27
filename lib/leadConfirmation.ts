@@ -1,6 +1,12 @@
 import sg from '@sendgrid/mail'
 
-if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
+// Set the key at send time, not module load. Elsewhere in the codebase this is
+// a top-level side effect, which is fine under Next.js (process.env is
+// populated before user modules evaluate) but silently breaks in tsx scripts:
+// ES imports are hoisted above dotenv.config(), so the key reads as undefined,
+// setApiKey never fires, and SendGrid rejects the empty auth header with
+// "Permission denied, wrong credentials" — which looks exactly like a revoked
+// key. Resolving it per-call keeps local verification honest.
 
 /**
  * Patient-facing confirmation email, sent immediately after a lead is routed to
@@ -117,10 +123,12 @@ export async function sendLeadConfirmationToPatient(
     console.log(`[Lead ${lead.id}] No email on file — cannot send patient confirmation`)
     return false
   }
-  if (!process.env.SENDGRID_API_KEY) {
+  const apiKey = process.env.SENDGRID_API_KEY
+  if (!apiKey) {
     console.error('[Lead confirmation] SendGrid not configured')
     return false
   }
+  sg.setApiKey(apiKey)
 
   const { subject, text, html } = buildLeadConfirmation(lead)
 
