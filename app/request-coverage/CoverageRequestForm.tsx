@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { captureFirstTouchAttribution } from '@/lib/attribution'
 
 const COVERAGE_TYPES = [
   'Clinical trial / research study draws',
@@ -66,12 +67,9 @@ export function CoverageRequestForm() {
     setLoading(true)
     setSubmitError('')
     try {
-      const referrer = typeof document !== 'undefined' ? document.referrer || null : null
-      const landingPage = typeof window !== 'undefined' ? window.location.pathname : null
-      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-      const utmSource = params?.get('utm_source') || null
-      const utmMedium = params?.get('utm_medium') || null
-      const utmCampaign = params?.get('utm_campaign') || null
+      // First-touch, not current-URL: landingPage must be the page they entered
+      // the site on, and B2B buyers often return days later before submitting.
+      const attribution = captureFirstTouchAttribution()
 
       const res = await fetch('/api/corporate/submit', {
         method: 'POST',
@@ -86,12 +84,9 @@ export function CoverageRequestForm() {
           statesNeeded: data.statesNeeded,
           estimatedVolume: data.estimatedVolume,
           details: data.details,
+          intakeForm: 'coverage',
           website_url: data.website_url,       // honeypot — server silently 200s if filled
-          referrer,
-          landingPage,
-          utmSource,
-          utmMedium,
-          utmCampaign,
+          ...attribution,
         }),
       })
       const json = await res.json()

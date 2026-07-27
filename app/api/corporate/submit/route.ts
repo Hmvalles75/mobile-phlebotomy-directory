@@ -49,6 +49,8 @@ const schema = z.object({
   estimatedPhlebotomists: z.string().optional(),
   urgency: z.string().optional(),
   eventVenue: z.string().optional(),
+  // Which form produced this lead — see CoverageRequest.intakeForm
+  intakeForm: z.string().nullable().optional(),
   // Honeypot — bots fill this; humans don't see it
   website_url: z.string().optional(),
   // Always required
@@ -56,6 +58,7 @@ const schema = z.object({
   email: z.string().email('Valid email is required'),
   phone: z.string().optional().nullable(),
   // Attribution (optional)
+  attributionSource: z.string().nullable().optional(),
   utmSource: z.string().nullable().optional(),
   utmMedium: z.string().nullable().optional(),
   utmCampaign: z.string().nullable().optional(),
@@ -88,7 +91,10 @@ async function sendAdminNotification(req: any) {
   const adminTo = process.env.ADMIN_EMAIL || 'hector@mobilephlebotomy.org'
   try {
     // Subject formatted for at-a-glance triage in the inbox
-    const subject = `[Coverage Request] ${req.organizationName} — ${req.estimatedVolume} — ${req.location}`
+    // Research leads are the high-value lane — flag them in the subject so they
+    // are distinguishable at a glance in the inbox.
+    const tag = req.intakeForm === 'clinical-research' ? '[RESEARCH]' : '[Coverage Request]'
+    const subject = `${tag} ${req.organizationName} — ${req.estimatedVolume} — ${req.location}`
     const body = `New coverage request submitted at ${new Date(req.createdAt).toLocaleString()}
 
 ORGANIZATION
@@ -106,6 +112,13 @@ REQUEST
 
 NOTES
   ${req.details || '(none)'}
+
+SOURCE
+  Form:     ${req.intakeForm || 'unknown'}
+  Channel:  ${req.attributionSource || 'unknown'}
+  Entered:  ${req.landingPage || '(unknown page)'}
+  Referrer: ${req.referrer || '(none)'}
+  Campaign: ${[req.utmSource, req.utmMedium, req.utmCampaign].filter(Boolean).join(' / ') || '(none)'}
 
 ---
 Admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
@@ -249,6 +262,10 @@ export async function POST(req: NextRequest) {
         details,
         ipAddress,
         userAgent,
+        // Legacy payloads (the /corporate-phlebotomy shape) predate this field;
+        // infer rather than storing null so the buyer split stays complete.
+        intakeForm: payload.intakeForm || (payload.companyName ? 'corporate' : 'coverage'),
+        attributionSource: payload.attributionSource || null,
         utmSource: payload.utmSource || null,
         utmMedium: payload.utmMedium || null,
         utmCampaign: payload.utmCampaign || null,

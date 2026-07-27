@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { captureFirstTouchAttribution } from '@/lib/attribution'
 
 const EVENT_TYPES = [
   'Clinical trial / research study',
@@ -111,7 +112,9 @@ export function CorporateQuoteForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          eventType: formData.eventType.join(', ')
+          eventType: formData.eventType.join(', '),
+          intakeForm: 'corporate',
+          ...captureFirstTouchAttribution()
         })
       })
 

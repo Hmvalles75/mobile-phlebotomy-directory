@@ -30,6 +30,8 @@ interface CoverageRequest {
   contactAttempts?: ContactAttempt[]
   ipAddress?: string | null
   userAgent?: string | null
+  attributionSource?: string | null
+  intakeForm?: string | null
   utmSource?: string | null
   referrer?: string | null
   landingPage?: string | null
@@ -52,6 +54,14 @@ const STATUS_DISPLAY: Record<string, { label: string; color: string }> = {
   BOOKED:    { label: 'Booked (legacy)',    color: 'bg-green-100 text-green-800' },
   COMPLETED: { label: 'Completed (legacy)', color: 'bg-gray-100 text-gray-800' },
   DECLINED:  { label: 'Declined (legacy)',  color: 'bg-red-100 text-red-800' },
+}
+
+const FORM_LABELS: Record<string, string> = {
+  'clinical-research': 'Research',
+  'coverage': 'General coverage',
+  'corporate': 'Corporate (legacy)',
+  'admin-manual': 'Logged by hand',
+  'unknown': 'Unknown',
 }
 
 const NEW_STALE_DAYS = 2
@@ -84,6 +94,15 @@ export function CorporateInquiriesPanel() {
   const [emailForm, setEmailForm] = useState({ subject: '', body: '' })
   const [emailSending, setEmailSending] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
+  // Manual entry for leads that arrived off-site (cold email, phone, intro)
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualForm, setManualForm] = useState({
+    organizationName: '', contactName: '', email: '', phone: '',
+    location: '', estimatedVolume: '', drawType: '', details: '',
+    attributionSource: 'email',
+  })
+  const [manualSubmitting, setManualSubmitting] = useState(false)
+  const [manualError, setManualError] = useState<string | null>(null)
 
   const authHeaders = (): Record<string, string> => {
     const token = localStorage.getItem('admin_token')
@@ -252,6 +271,55 @@ export function CorporateInquiriesPanel() {
     return s.kind === 'critical' || s.kind === 'stale' || r.status === 'NEW'
   }).length
 
+  // Channel mix. 'unknown' is kept as its own bucket rather than folded into
+  // 'direct' — pre-2026-07-25 rows and the legacy form recorded nothing, and
+  // counting those as direct would overstate direct traffic.
+  const channelMix = Object.entries(
+    requests.reduce<Record<string, number>>((acc, r) => {
+      const key = r.attributionSource || 'unknown'
+      acc[key] = (acc[key] || 0) + 1
+      return acc
+    }, {})
+  ).sort((a, b) => b[1] - a[1])
+
+  // Which funnel each lead self-selected into — the buyer split.
+  const formMix = Object.entries(
+    requests.reduce<Record<string, number>>((acc, r) => {
+      const key = r.intakeForm || 'unknown'
+      acc[key] = (acc[key] || 0) + 1
+      return acc
+    }, {})
+  ).sort((a, b) => b[1] - a[1])
+
+  const submitManualLead = async (ev: React.FormEvent) => {
+    ev.preventDefault()
+    setManualSubmitting(true)
+    setManualError(null)
+    try {
+      const res = await fetch('/api/admin/corporate-inquiries', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(manualForm),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setManualError(data.error || 'Failed to log lead')
+        return
+      }
+      setManualOpen(false)
+      setManualForm({
+        organizationName: '', contactName: '', email: '', phone: '',
+        location: '', estimatedVolume: '', drawType: '', details: '',
+        attributionSource: 'email',
+      })
+      await loadRequests()
+    } catch {
+      setManualError('Network error — lead not saved')
+    } finally {
+      setManualSubmitting(false)
+    }
+  }
+
   if (loading && requests.length === 0) {
     return (
       <div className="text-center py-12">
@@ -290,6 +358,47 @@ export function CorporateInquiriesPanel() {
         </div>
       </div>
 
+      {/* Channel mix — where institutional leads actually come from */}
+      <div className="mb-6 bg-white border border-gray-200 rounded-lg px-4 py-3">
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-2">
+          <span className="text-sm font-semibold text-gray-700">Channel mix:</span>
+          {channelMix.length === 0 && <span className="text-sm text-gray-400">no leads yet</span>}
+          {channelMix.map(([source, count]) => (
+            <span
+              key={source}
+              className={`text-sm px-2 py-0.5 rounded ${
+                source === 'unknown' ? 'bg-gray-100 text-gray-500' : 'bg-primary-50 text-primary-800'
+              }`}
+            >
+              {source}: <span className="font-bold">{count}</span>
+            </span>
+          ))}
+        </div>
+        {channelMix.some(([s]) => s === 'unknown') && (
+          <p className="text-xs text-gray-500 mt-2">
+            &ldquo;unknown&rdquo; = submitted before attribution tracking, or arrived off-site. Log
+            off-site leads below so the mix reflects reality.
+          </p>
+        )}
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-100">
+          <span className="text-sm font-semibold text-gray-700">Intake form:</span>
+          {formMix.map(([form, count]) => (
+            <span
+              key={form}
+              className={`text-sm px-2 py-0.5 rounded ${
+                form === 'clinical-research'
+                  ? 'bg-blue-100 text-blue-800'
+                  : form === 'unknown'
+                    ? 'bg-gray-100 text-gray-500'
+                    : 'bg-gray-100 text-gray-700'
+              }`}
+            >
+              {FORM_LABELS[form] || form}: <span className="font-bold">{count}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-8 items-start">
         {/* List */}
         <div>
@@ -300,6 +409,12 @@ export function CorporateInquiriesPanel() {
                 {attentionCount} need attention
               </span>
             )}
+            <button
+              onClick={() => { setManualOpen(true); setManualError(null) }}
+              className="ml-auto text-sm font-medium text-primary-700 hover:text-primary-900 border border-primary-300 rounded px-3 py-1"
+            >
+              + Log off-site lead
+            </button>
           </div>
           <div className="space-y-3">
             {requests.length === 0 && (
@@ -326,7 +441,14 @@ export function CorporateInquiriesPanel() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 truncate">{r.organizationName}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900 truncate">{r.organizationName}</h3>
+                        {r.intakeForm === 'clinical-research' && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 shrink-0">
+                            RESEARCH
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 truncate">{r.location}</p>
                       <p className="text-sm text-gray-600">Timeline: {r.timeline}</p>
                       <p className="text-xs text-gray-500 mt-1">
@@ -517,8 +639,10 @@ export function CorporateInquiriesPanel() {
 
                 <div className="border-t pt-4 mt-4 text-xs text-gray-500 space-y-1">
                   <p>Submitted: {new Date(selected.createdAt).toLocaleString()}</p>
-                  {selected.landingPage && <p>Landing page: {selected.landingPage}</p>}
-                  {selected.utmSource && <p>Source: {selected.utmSource}</p>}
+                  <p>Intake form: {FORM_LABELS[selected.intakeForm || 'unknown'] || selected.intakeForm}</p>
+                  <p>Channel: {selected.attributionSource || 'unknown'}</p>
+                  {selected.landingPage && <p>Entered on: {selected.landingPage}</p>}
+                  {selected.utmSource && <p>utm_source: {selected.utmSource}</p>}
                   {selected.referrer && <p>Referrer: {selected.referrer}</p>}
                   {selected.ipAddress && <p>IP: {selected.ipAddress}</p>}
                 </div>
@@ -561,6 +685,54 @@ export function CorporateInquiriesPanel() {
           )}
         </div>
       </div>
+
+      {/* Log a lead that came in off-site. Kept outside the detail pane so it
+          works whether or not a request is selected. */}
+      {manualOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={() => !manualSubmitting && setManualOpen(false)}>
+          <form
+            onSubmit={submitManualLead}
+            className="bg-white rounded-lg shadow-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Log off-site lead</h3>
+            <p className="text-xs text-gray-500 mb-3">
+              For inquiries that arrived by email, phone, or intro — so the channel mix counts them.
+              Saved as <strong>Contacted</strong>.
+            </p>
+            {manualError && (
+              <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">{manualError}</div>
+            )}
+            <div className="space-y-2">
+              <input required value={manualForm.organizationName} onChange={e => setManualForm(f => ({ ...f, organizationName: e.target.value }))} placeholder="Organization *" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <input required value={manualForm.contactName} onChange={e => setManualForm(f => ({ ...f, contactName: e.target.value }))} placeholder="Contact name *" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <input required type="email" value={manualForm.email} onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))} placeholder="Email *" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <input value={manualForm.phone} onChange={e => setManualForm(f => ({ ...f, phone: e.target.value }))} placeholder="Phone" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <label className="block text-xs font-medium text-gray-600 pt-1">How did this lead reach us? *</label>
+              <select value={manualForm.attributionSource} onChange={e => setManualForm(f => ({ ...f, attributionSource: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option value="email">Inbound email</option>
+                <option value="phone">Inbound phone call</option>
+                <option value="referral">Referral / warm intro</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="newsletter">The Draw Report</option>
+                <option value="conference">Conference / event</option>
+                <option value="outbound">Our outbound outreach</option>
+                <option value="other">Other</option>
+              </select>
+              <input value={manualForm.location} onChange={e => setManualForm(f => ({ ...f, location: e.target.value }))} placeholder="Where coverage is needed" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <input value={manualForm.drawType} onChange={e => setManualForm(f => ({ ...f, drawType: e.target.value }))} placeholder="Draw type (e.g. Clinical trial / research)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <input value={manualForm.estimatedVolume} onChange={e => setManualForm(f => ({ ...f, estimatedVolume: e.target.value }))} placeholder="Estimated volume (e.g. 51–200 draws/month)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              <textarea value={manualForm.details} onChange={e => setManualForm(f => ({ ...f, details: e.target.value }))} placeholder="Notes" rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button type="button" onClick={() => setManualOpen(false)} disabled={manualSubmitting} className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 disabled:opacity-50">Cancel</button>
+              <button type="submit" disabled={manualSubmitting} className="px-4 py-2 text-sm rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50">
+                {manualSubmitting ? 'Saving…' : 'Log lead'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

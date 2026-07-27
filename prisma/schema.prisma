@@ -666,7 +666,17 @@ model CoverageRequest {
   status           CoverageRequestStatus @default(NEW)
   ipAddress        String?
   userAgent        String?
-  // Attribution — where this prospect came from
+  // Which intake produced this lead: 'clinical-research' | 'coverage' |
+  // 'corporate' | 'admin-manual'. Distinct from attributionSource (which
+  // channel brought them) — this is which funnel they self-selected into, and
+  // it's the reliable buyer signal because drawType is free-text on the legacy
+  // form. Null on rows predating 2026-07-25.
+  intakeForm       String?
+  // Attribution — where this prospect came from. Captured first-touch (see
+  // lib/attribution.ts): landingPage is the page they ENTERED the site on, not
+  // the form's own path, and the source survives across sessions for 90 days
+  // because institutional buyers research for weeks before submitting.
+  attributionSource String?              // Normalized: 'google' | 'bing' | 'newsletter' | 'direct' | ...
   utmSource        String?
   utmMedium        String?
   utmCampaign      String?
