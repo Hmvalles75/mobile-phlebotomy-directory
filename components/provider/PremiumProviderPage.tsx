@@ -5,7 +5,8 @@ import Link from 'next/link'
 import {
   MapPin, Phone, Mail, Clock, Shield, CheckCircle, Award, Globe,
   Calendar, Heart, Star, ChevronRight, User, Droplet, Home,
-  Briefcase, Activity, Stethoscope, FileCheck
+  Briefcase, Activity, Stethoscope, FileCheck,
+  Instagram, Facebook, Youtube, Linkedin
 } from 'lucide-react'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { trackPhoneClick } from '@/lib/trackPhoneClick'
@@ -23,6 +24,27 @@ interface PremiumProviderPageProps {
   serviceAreaCities?: CityLink[]
   serviceAreaZips?: string[]
   serviceAreaStateAbbr?: string | null
+}
+
+// Social profiles supported on premium pages. Order here is the render order.
+// TikTok has no lucide icon, so it uses the inline glyph below.
+const SOCIAL_ORDER = ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin'] as const
+type SocialKey = typeof SOCIAL_ORDER[number]
+
+function TikTokIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 1 1 .77-5.06V9.7a5.67 5.67 0 0 0-.77-.05A5.67 5.67 0 1 0 15.54 15.4V9.01a7.35 7.35 0 0 0 4.29 1.37V7.3a4.29 4.29 0 0 1-3.23-1.48z" />
+    </svg>
+  )
+}
+
+const SOCIAL_META: Record<SocialKey, { label: string, icon: (props: { size?: number }) => JSX.Element }> = {
+  instagram: { label: 'Instagram', icon: ({ size = 20 }) => <Instagram size={size} /> },
+  facebook: { label: 'Facebook', icon: ({ size = 20 }) => <Facebook size={size} /> },
+  tiktok: { label: 'TikTok', icon: ({ size = 20 }) => <TikTokIcon size={size} /> },
+  youtube: { label: 'YouTube', icon: ({ size = 20 }) => <Youtube size={size} /> },
+  linkedin: { label: 'LinkedIn', icon: ({ size = 20 }) => <Linkedin size={size} /> },
 }
 
 // Map service names to icons and unique descriptions for visual presentation
@@ -115,6 +137,24 @@ export default function PremiumProviderPage({
         location: t.location || '',
         rating: typeof t.rating === 'number' ? t.rating : 5,
       }))
+    } catch {
+      return []
+    }
+  })()
+
+  // Provider-supplied social profiles, stored as a JSON object string in
+  // `provider.socialLinks` ({ instagram, facebook, tiktok, youtube, linkedin }).
+  // Only https URLs are rendered — anything else is dropped so a bad value
+  // can't produce a javascript: link. Empty result hides the row entirely.
+  const socials: Array<{ key: SocialKey, url: string }> = (() => {
+    const raw = (provider as any).socialLinks
+    if (!raw || typeof raw !== 'string') return []
+    try {
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed !== 'object') return []
+      return SOCIAL_ORDER
+        .filter(key => typeof parsed[key] === 'string' && parsed[key].startsWith('https://'))
+        .map(key => ({ key, url: parsed[key] as string }))
     } catch {
       return []
     }
@@ -552,6 +592,30 @@ export default function PremiumProviderPage({
                     </div>
                   </div>
                 </div>
+
+                {socials.length > 0 && (
+                  <div className="mb-8">
+                    <div className="text-sm text-gray-500 mb-3">Follow us</div>
+                    <div className="flex flex-wrap gap-3">
+                      {socials.map(({ key, url }) => {
+                        const { label, icon: Icon } = SOCIAL_META[key]
+                        return (
+                          <a
+                            key={key}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            aria-label={`${provider.name} on ${label}`}
+                            title={label}
+                            className="w-12 h-12 rounded-full bg-gray-100 hover:bg-teal-600 text-gray-600 hover:text-white flex items-center justify-center transition-colors"
+                          >
+                            <Icon size={22} />
+                          </a>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={() => setLeadFormOpen(true)}

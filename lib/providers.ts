@@ -32,6 +32,7 @@ export interface EnrichedProvider {
   travelFee?: string
   googlePlaceId?: string
   testimonials?: string
+  socialLinks?: string
   certifications?: string
   licenseNumber?: string
   insuranceAmount?: string
