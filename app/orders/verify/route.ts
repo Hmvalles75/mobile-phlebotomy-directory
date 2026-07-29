@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   verifyClientMagicLink,
   signClientSession,
+  clientSessionSecretConfigured,
   CLIENT_SESSION_COOKIE,
 } from '@/lib/client-auth'
 import { LOGIN_NEXT_COOKIE, DEFAULT_POST_LOGIN, safeNext } from '@/lib/client-portal'
@@ -13,6 +14,14 @@ export async function GET(req: NextRequest) {
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || null
   const userAgent = req.headers.get('user-agent')
+
+  // Bail BEFORE verifying — verification consumes the token, so a config
+  // failure discovered after it would destroy a link the user could otherwise
+  // still click once the deploy is fixed.
+  if (!clientSessionSecretConfigured()) {
+    console.error('[client-auth] CLIENT_SESSION_SECRET is not set — refusing to consume magic token')
+    return NextResponse.redirect(`${SITE}/orders/login?error=config`)
+  }
 
   const result = token ? await verifyClientMagicLink(token, { ip, userAgent }) : { ok: false as const }
 

@@ -48,6 +48,13 @@ export default function OrderPortalLoginPage({ searchParams }: Props) {
                   That login link is invalid or has expired. Enter your email to get a new one.
                 </div>
               )}
+              {error === 'config' && (
+                <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-900">
+                  We couldn&rsquo;t sign you in just now — that&rsquo;s a problem on our end, not with your link.
+                  Your link is still good: try it again in a few minutes, or email{' '}
+                  <a href="mailto:hector@mobilephlebotomy.org" className="underline">hector@mobilephlebotomy.org</a>.
+                </div>
+              )}
               <label className="block">
                 <span className="block text-sm font-medium text-gray-700 mb-1">Work email</span>
                 <input

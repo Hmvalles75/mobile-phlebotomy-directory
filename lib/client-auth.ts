@@ -221,6 +221,18 @@ function sessionSecret(): string {
   return s
 }
 
+/**
+ * Whether sessions can be signed at all. Check this BEFORE consuming a magic
+ * token: verifyClientMagicLink() clears the token as its first act, so if
+ * signing then throws for missing config, the user's link is already burned and
+ * their retry reports "invalid or expired" — a misleading error for what is
+ * really a deployment problem. Shipped without the secret set in Vercel on
+ * 2026-07-29 and this is exactly how it presented.
+ */
+export function clientSessionSecretConfigured(): boolean {
+  return Boolean(process.env.CLIENT_SESSION_SECRET)
+}
+
 export function signClientSession(session: ClientSession): string {
   const payload = Buffer.from(JSON.stringify(session)).toString('base64url')
   const sig = crypto.createHmac('sha256', sessionSecret()).update(payload).digest('base64url')

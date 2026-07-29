@@ -48,7 +48,9 @@ export default function OrderSubmitForm() {
         </label>
         <label className="block">
           <span className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-red-500">*</span></span>
-          <input name="patientPhone" type="tel" required maxLength={40} placeholder="(555) 123-4567" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+          {/* Not a 555 number — the submit action rejects that exchange as a
+              placeholder, so the example must be one the form would accept. */}
+          <input name="patientPhone" type="tel" required maxLength={40} placeholder="(312) 730-4188" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
         </label>
         <label className="block sm:col-span-2">
           <span className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(optional)</span></span>

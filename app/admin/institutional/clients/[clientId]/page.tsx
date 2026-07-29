@@ -66,6 +66,15 @@ export default async function ClientDetailPage({ params }: Props) {
           {client.notes && (
             <p className="text-sm text-gray-700 mt-3 whitespace-pre-line bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{client.notes}</p>
           )}
+          {/* Without a portal user, /orders/login silently no-ops for this
+              client's staff (by design — it never discloses who has an account).
+              That silence is correct for them and useless for us, so say it here. */}
+          {client.users.length === 0 && (
+            <p className="text-sm mt-3 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-amber-900">
+              <strong>No portal users yet.</strong> Nobody at {client.name} can sign in — the login page
+              accepts their email and sends nothing. Add a portal user below before sharing the portal link.
+            </p>
+          )}
         </div>
 
         {/* Portal Users — magic-link logins for client-side order submission */}
