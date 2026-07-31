@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminSession } from '@/lib/admin-auth'
 import { getClaimById, updateClaimStatus, deleteClaim } from '@/lib/business-claims'
-import { markProviderAsRegistered } from '@/lib/provider-tiers'
 
 /**
  * Update claim status (verify or reject)
@@ -47,13 +46,16 @@ export async function POST(
         )
       }
 
-      // Mark provider as registered (Tier 2)
-      markProviderAsRegistered(claim.providerId)
-      console.log(`✅ Provider ${claim.providerId} marked as registered`)
+      // The claim record itself is the source of truth for registration —
+      // updateClaimStatus() above has already persisted it. This used to also
+      // write a JSON tier file, which no longer exists: it was unreadable from
+      // client components and its writes did not survive a serverless cold
+      // start, so nothing ever read what it wrote.
+      console.log(`✅ Claim verified for provider ${claim.providerId}`)
 
       return NextResponse.json({
         success: true,
-        message: `Claim verified for ${claim.providerName}. Provider is now marked as "Registered" (Tier 2).`,
+        message: `Claim verified for ${claim.providerName}.`,
         provider: claim.providerName
       })
 

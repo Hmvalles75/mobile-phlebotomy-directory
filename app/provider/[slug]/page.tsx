@@ -9,7 +9,6 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 import { STATE_DATA } from '@/data/states-full'
 import { ProviderImage } from '@/components/ui/ProviderImage'
-import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
 import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
 import { ReportIssueButton } from '@/components/ui/ReportIssueButton'
@@ -183,9 +182,6 @@ export default async function ProviderDetailPage({ params }: PageProps) {
     updatedAt: provider.updatedAt
   }
 
-  // Get provider tier badge
-  const registeredBadge = getProviderBadge(provider.id)
-
   // Check if provider is verified (based on database status)
   const isVerified = provider.status === 'VERIFIED'
   const isFeatured = provider.isFeatured === true
@@ -328,12 +324,6 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   {(provider as any).is_nationwide === 'Yes' && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                       🌎 Nationwide Service
-                    </span>
-                  )}
-                  {/* Registered/Featured Badge */}
-                  {registeredBadge && (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                      {registeredBadge.icon} {registeredBadge.text}
                     </span>
                   )}
                   {/* Language Badges */}

@@ -12,7 +12,6 @@ import { ProviderListSchema, ProviderSchema } from '@/components/seo/ProviderSch
 import { generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
 import { SimpleAccordion } from '@/components/ui/Accordion'
 import { ProviderActions } from '@/components/ui/ProviderActions'
-import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
 import { ga4 } from '@/lib/ga4'
 import { PhoneReveal } from '@/components/PhoneReveal'
@@ -405,7 +404,9 @@ export default function MetroPage({ params }: MetroPageProps) {
               </div>
               <div className="divide-y divide-gray-200">
                 {categorizedProviders.featured.map((provider) => {
-                  const isVerified = isProviderRegistered(provider.id)
+                  // Platform-verified in the DB — the same signal the provider
+                  // detail page uses for its Verified badge.
+                  const isVerified = (provider as any).status === 'VERIFIED'
                   const tierBadge = getTierBadge(provider.featuredTier as any)
                   const isHighDensity = provider.featuredTier === 'HIGH_DENSITY'
 

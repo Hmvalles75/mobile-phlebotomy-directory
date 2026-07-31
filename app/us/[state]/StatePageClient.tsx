@@ -9,7 +9,6 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import InlineLeadForm from '@/components/InlineLeadForm'
-import { getProviderBadge, isProviderRegistered } from '@/lib/provider-tiers'
 import { getMetrosByState } from '@/data/top-metros'
 import { SimpleAccordion } from '@/components/ui/Accordion'
 import { LeadFormModal } from '@/components/ui/LeadFormModal'
@@ -619,7 +618,9 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
               </div>
               <div className="divide-y divide-gray-200">
                 {categorizedProviders.featured.map((provider) => {
-                  const isVerified = isProviderRegistered(provider.id)
+                  // Platform-verified in the DB — the same signal the provider
+                  // detail page uses for its Verified badge.
+                  const isVerified = (provider as any).status === 'VERIFIED'
 
                   return (
                   <div key={provider.id} className={`p-5 bg-gradient-to-r from-amber-50/40 to-transparent hover:from-amber-50/60 transition-all ${isVerified ? 'border-l-4 border-l-green-500' : ''}`}>
@@ -915,7 +916,9 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                       </div>
                       <div className="divide-y divide-gray-200">
                         {categorizedProviders.premium.map((provider) => {
-                          const isVerified = isProviderRegistered(provider.id)
+                          // Platform-verified in the DB — the same signal the
+                          // provider detail page uses for its Verified badge.
+                          const isVerified = (provider as any).status === 'VERIFIED'
 
                           return (
                           <div key={provider.id} className="p-6">

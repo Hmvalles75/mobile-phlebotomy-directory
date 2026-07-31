@@ -447,10 +447,9 @@ export default function CityPage({ params }: PageProps) {
                         </span>
                       )}
                       {/* Monetization Tier Badge — reads the live DB flags, same
-                          component the state page uses. Previously came from
-                          lib/provider-tiers.ts, which reads a JSON file that is
-                          empty on the client and stale on the server, so no
-                          provider ever got a badge here. */}
+                          component the state page uses. Replaced a JSON-file
+                          tier lookup that returned nothing in a client
+                          component, so no provider ever got a badge here. */}
                       <ListingTierBadge
                         tier={(provider as any).listingTier || 'BASIC'}
                         isFeaturedCity={(provider as any).isFeaturedCity || false}
