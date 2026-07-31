@@ -10,7 +10,7 @@ import { type Provider } from '@/lib/schemas'
 import { formatCoverageDisplay } from '@/lib/coverage-utils'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { generateLocalBusinessSchema, generateProviderListSchema, generateBreadcrumbSchema } from '@/lib/schema-generators'
-import { getProviderBadge } from '@/lib/provider-tiers'
+import { ListingTierBadge } from '@/components/ui/ListingTierBadge'
 import { ga4 } from '@/lib/ga4'
 import { PhoneReveal } from '@/components/PhoneReveal'
 import { ProviderDescription } from '@/components/ui/ProviderDescription'
@@ -123,6 +123,20 @@ export default function CityPage({ params }: PageProps) {
 
     return matchesSearch && matchesServices
   })
+
+  // Paid tiers first, matching the state page. The API returns providers in
+  // relevance order (city-specific → regional → statewide), which left paying
+  // Featured providers ranked below free BASIC listings on their own city page
+  // — the opposite of the placement a subscription buys. Sort is stable, so
+  // relevance order still decides ties within a tier.
+  const tierWeight = (p: Provider) => {
+    const tier = (p as any).listingTier
+    if (tier === 'FEATURED' || (p as any).isFeaturedCity) return 3
+    if ((p as any).isFeatured) return 2
+    if (tier === 'PREMIUM') return 1
+    return 0
+  }
+  const rankedProviders = [...filteredProviders].sort((a, b) => tierWeight(b) - tierWeight(a))
 
   const handleServiceToggle = (service: string) => {
     setSelectedServices(prev =>
@@ -400,7 +414,7 @@ export default function CityPage({ params }: PageProps) {
           ) : filteredProviders.length === 0 ? (
             <InlineLeadForm city={cityName} state={state} variant="no-results" />
           ) : (
-            filteredProviders.map((provider) => {
+            rankedProviders.map((provider) => {
               // Determine provider type for visual indicator
               let providerType = 'statewide';
               if (groupedResults?.citySpecific.some(p => p.id === provider.id)) {
@@ -408,8 +422,6 @@ export default function CityPage({ params }: PageProps) {
               } else if (groupedResults?.regional.some(p => p.id === provider.id)) {
                 providerType = 'regional';
               }
-
-              const registeredBadge = getProviderBadge(provider.id)
 
               return (
               <div key={provider.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
@@ -434,12 +446,16 @@ export default function CityPage({ params }: PageProps) {
                           🌎 Nationwide Service
                         </span>
                       )}
-                      {/* Registered/Featured Badge */}
-                      {registeredBadge && (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${registeredBadge.color}`}>
-                          {registeredBadge.icon} {registeredBadge.text}
-                        </span>
-                      )}
+                      {/* Monetization Tier Badge — reads the live DB flags, same
+                          component the state page uses. Previously came from
+                          lib/provider-tiers.ts, which reads a JSON file that is
+                          empty on the client and stale on the server, so no
+                          provider ever got a badge here. */}
+                      <ListingTierBadge
+                        tier={(provider as any).listingTier || 'BASIC'}
+                        isFeaturedCity={(provider as any).isFeaturedCity || false}
+                        isFeatured={(provider as any).isFeatured || false}
+                      />
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                       {provider.address?.city && provider.address.city.trim() ? (
