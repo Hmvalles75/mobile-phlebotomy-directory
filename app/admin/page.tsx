@@ -600,6 +600,20 @@ export default function AdminDashboard() {
               <span aria-hidden className="text-xs">↗</span>
             </Link>
             <Link
+              href="/admin/coverage"
+              className="px-4 py-2 font-medium transition-colors whitespace-nowrap text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+            >
+              Coverage Map
+              <span aria-hidden className="text-xs">↗</span>
+            </Link>
+            <Link
+              href="/admin/coverage/providers"
+              className="px-4 py-2 font-medium transition-colors whitespace-nowrap text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+            >
+              Provider Roster
+              <span aria-hidden className="text-xs">↗</span>
+            </Link>
+            <Link
               href="/admin/flagged-descriptions"
               className="px-4 py-2 font-medium transition-colors whitespace-nowrap text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
             >
