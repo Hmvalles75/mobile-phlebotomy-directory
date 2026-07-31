@@ -1,8 +1,11 @@
 import sg from '@sendgrid/mail'
 
-if (process.env.SENDGRID_API_KEY) {
-  sg.setApiKey(process.env.SENDGRID_API_KEY)
-}
+// Set the key at send time, not module load — same reasoning as
+// lib/leadConfirmation.ts. Top-level setApiKey works under Next.js but breaks
+// in tsx scripts, where ES imports are hoisted above dotenv.config(): the key
+// reads undefined, setApiKey never fires, and SendGrid rejects the empty auth
+// header with "Permission denied, wrong credentials" — indistinguishable from
+// a revoked key.
 
 interface Provider {
   id: string
@@ -39,18 +42,25 @@ const SITE_URL   = 'https://mobilephlebotomy.org'
  * Describes what's live now (Featured placement + priority lead routing)
  * and includes deep links to the provider's own listing on the state page,
  * city page, and detail page so they can verify the upgrade themselves.
+ *
+ * `overrideTo` replaces the usual notificationEmail-first resolution. Use it
+ * when the person who actually paid isn't the address leads route to — the
+ * billing contact should hear about their own upgrade.
  */
 export async function sendProviderWelcomeEmail(
   provider: Provider,
-  tier: 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER'
+  tier: 'FOUNDING_PARTNER' | 'STANDARD_PREMIUM' | 'HIGH_DENSITY' | 'CHARTER_MEMBER',
+  overrideTo?: string | string[]
 ): Promise<{ success: boolean; error?: string }> {
-  const recipient = provider.notificationEmail || provider.claimEmail || provider.email
-  if (!recipient) {
+  const recipient = overrideTo || provider.notificationEmail || provider.claimEmail || provider.email
+  if (!recipient || (Array.isArray(recipient) && recipient.length === 0)) {
     return { success: false, error: 'No recipient email on provider record' }
   }
-  if (!process.env.SENDGRID_API_KEY) {
+  const apiKey = process.env.SENDGRID_API_KEY
+  if (!apiKey) {
     return { success: false, error: 'SENDGRID_API_KEY not configured' }
   }
+  sg.setApiKey(apiKey)
 
   const tierLabel = TIER_LABEL[tier] || tier
   const statePath = provider.primaryStateSlug ? `/us/${provider.primaryStateSlug}` : null
@@ -173,7 +183,8 @@ MobilePhlebotomy.org`
       text,
       html,
     })
-    console.log(`[ProviderWelcome] Sent welcome email to ${provider.name} <${recipient}> for tier ${tier}`)
+    const shown = Array.isArray(recipient) ? recipient.join(', ') : recipient
+    console.log(`[ProviderWelcome] Sent welcome email to ${provider.name} <${shown}> for tier ${tier}`)
     return { success: true }
   } catch (err: any) {
     const msg = err.response?.body?.errors?.[0]?.message || err.message || 'Unknown error'
