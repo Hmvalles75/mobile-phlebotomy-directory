@@ -110,6 +110,13 @@ const nextConfig = {
         destination: '/us/california/los-angeles',
         permanent: true,
       },
+      {
+        // Removed at provider request 2026-08-02 (Everlene McAllister,
+        // Diamond Wellness Solutions, Las Vegas — withdrew authorization).
+        source: '/provider/diamond-wellness-solutions',
+        destination: '/us/nevada/las-vegas',
+        permanent: true,
+      },
       // ── URL consolidation pilot (2026-07) ──────────────────────────────
       // Phoenix, San Diego, and San Antonio each had a canonical
       // /us/{state}/{city} page plus a P2 /us/metro/{city} duplicate (and,
