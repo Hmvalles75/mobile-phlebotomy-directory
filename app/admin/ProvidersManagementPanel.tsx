@@ -13,14 +13,30 @@ interface Provider {
   state: string
   eligibleForLeads: boolean
   createdAt: string
+  removedAt: string | null
+  removedReason: string | null
+  doNotRelist: boolean
+}
+
+interface RemovalFollowUp {
+  message: string
+  source?: string
+  destination?: string
 }
 
 export function ProvidersManagementPanel() {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'eligible' | 'not-eligible'>('all')
+  const [filter, setFilter] = useState<'all' | 'eligible' | 'not-eligible' | 'removed'>('all')
   const [search, setSearch] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  // Removal is a separate, deliberate action from the Activate/Deactivate
+  // pause — it delists the provider from the public site and blocks re-import.
+  const [removeTarget, setRemoveTarget] = useState<Provider | null>(null)
+  const [removeReason, setRemoveReason] = useState('')
+  const [removeError, setRemoveError] = useState<string | null>(null)
+  const [needsForce, setNeedsForce] = useState(false)
+  const [followUp, setFollowUp] = useState<RemovalFollowUp | null>(null)
 
   useEffect(() => {
     fetchProviders()
@@ -72,8 +88,72 @@ export function ProvidersManagementPanel() {
     }
   }
 
+  const removeProvider = async (force = false) => {
+    if (!removeTarget) return
+    setUpdating(removeTarget.id)
+    setRemoveError(null)
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/providers/${removeTarget.id}/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ reason: removeReason, force }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        setRemoveError(data.error || 'Failed to remove provider')
+        setNeedsForce(data.requiresForce === true)
+        return
+      }
+      setNeedsForce(false)
+      setProviders(prev =>
+        prev.map(p =>
+          p.id === removeTarget.id
+            ? { ...p, removedAt: data.provider.removedAt, removedReason: data.provider.removedReason, doNotRelist: true, eligibleForLeads: false }
+            : p
+        )
+      )
+      setFollowUp(data.followUp || null)
+      setRemoveTarget(null)
+      setRemoveReason('')
+    } catch {
+      setRemoveError('Network error — provider was not removed')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const restoreProvider = async (provider: Provider) => {
+    if (!confirm(`Restore ${provider.businessName}'s listing? They will be visible on the site again but will NOT receive leads until you Activate them.`)) return
+    setUpdating(provider.id)
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/providers/${provider.id}/remove`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (res.ok && data.ok) {
+        setProviders(prev =>
+          prev.map(p =>
+            p.id === provider.id ? { ...p, removedAt: null, removedReason: null, doNotRelist: false } : p
+          )
+        )
+        setFollowUp(data.followUp || null)
+      }
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const removedCount = providers.filter(p => p.removedAt).length
+
   const filteredProviders = providers
     .filter(p => {
+      if (filter === 'removed') return !!p.removedAt
+      // Removed providers are hidden from the working views — they are not
+      // candidates for activation and would only add noise.
+      if (p.removedAt) return false
       if (filter === 'eligible') return p.eligibleForLeads
       if (filter === 'not-eligible') return !p.eligibleForLeads
       return true
@@ -136,8 +216,76 @@ export function ProvidersManagementPanel() {
           <option value="all">All Providers</option>
           <option value="eligible">Receiving Leads ({eligibleCount})</option>
           <option value="not-eligible">Not Activated ({notEligibleCount})</option>
+          <option value="removed">Removed ({removedCount})</option>
         </select>
       </div>
+
+      {followUp && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="text-sm text-amber-900">
+              <strong>{followUp.message}</strong>
+              {followUp.source && followUp.destination && (
+                <pre className="mt-2 overflow-x-auto rounded bg-amber-100 p-3 text-xs">{`{
+  source: '${followUp.source}',
+  destination: '${followUp.destination}',
+  permanent: true,
+},`}</pre>
+              )}
+            </div>
+            <button onClick={() => setFollowUp(null)} className="text-amber-700 hover:text-amber-900 text-sm">
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {removeTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Remove {removeTarget.businessName}?
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              This delists them from the public site, stops all lead routing and email,
+              and flags the record so a future import cannot re-add them. It is not the
+              same as Deactivate, which is a reversible pause.
+            </p>
+            <label className="mt-4 block text-sm font-medium text-gray-700">
+              Reason (recorded on the provider record)
+            </label>
+            <textarea
+              value={removeReason}
+              onChange={e => setRemoveReason(e.target.value)}
+              rows={3}
+              placeholder="e.g. Provider request 2026-08-04 — emailed asking to be removed."
+              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            />
+            {removeError && (
+              <p className="mt-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{removeError}</p>
+            )}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => { setRemoveTarget(null); setRemoveReason(''); setRemoveError(null); setNeedsForce(false) }}
+                className="rounded border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => removeProvider(needsForce)}
+                disabled={removeReason.trim().length < 5 || updating === removeTarget.id}
+                className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
+              >
+                {updating === removeTarget.id
+                  ? 'Removing…'
+                  : needsForce
+                    ? 'Remove anyway'
+                    : 'Remove listing'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Provider List */}
       <div className="bg-white rounded-lg border overflow-x-auto">
@@ -166,7 +314,14 @@ export function ProvidersManagementPanel() {
                   {provider.phone && <div className="text-sm text-gray-400">{provider.phone}</div>}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {provider.eligibleForLeads ? (
+                  {provider.removedAt ? (
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                      title={provider.removedReason || undefined}
+                    >
+                      Removed {provider.removedAt.slice(0, 10)}
+                    </span>
+                  ) : provider.eligibleForLeads ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       ✅ Active
                     </span>
@@ -178,25 +333,45 @@ export function ProvidersManagementPanel() {
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="flex flex-col gap-1.5 items-center">
-                    <button
-                      onClick={() => toggleEligibility(provider.id, provider.eligibleForLeads)}
-                      disabled={updating === provider.id}
-                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                        provider.eligibleForLeads
-                          ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                          : 'bg-green-50 text-green-600 hover:bg-green-100'
-                      } disabled:opacity-50`}
-                    >
-                      {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
-                    </button>
-                    {provider.eligibleForLeads && (
-                      <Link
-                        href={`/admin/providers/${provider.id}/rematch`}
-                        className="text-xs text-blue-600 hover:underline whitespace-nowrap"
-                        title="Re-route recent OPEN leads in this provider's radius. Use after activating a new provider."
+                    {provider.removedAt ? (
+                      <button
+                        onClick={() => restoreProvider(provider)}
+                        disabled={updating === provider.id}
+                        className="px-3 py-1 rounded text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
                       >
-                        Rematch open leads →
-                      </Link>
+                        {updating === provider.id ? '...' : 'Restore listing'}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => toggleEligibility(provider.id, provider.eligibleForLeads)}
+                          disabled={updating === provider.id}
+                          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                            provider.eligibleForLeads
+                              ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                          } disabled:opacity-50`}
+                        >
+                          {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
+                        </button>
+                        {provider.eligibleForLeads && (
+                          <Link
+                            href={`/admin/providers/${provider.id}/rematch`}
+                            className="text-xs text-blue-600 hover:underline whitespace-nowrap"
+                            title="Re-route recent OPEN leads in this provider's radius. Use after activating a new provider."
+                          >
+                            Rematch open leads →
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => { setRemoveTarget(provider); setRemoveReason(''); setRemoveError(null); setNeedsForce(false) }}
+                          disabled={updating === provider.id}
+                          className="text-xs text-red-700 hover:underline disabled:opacity-50"
+                          title="Permanently delist from the public site. Not the same as Deactivate."
+                        >
+                          Remove listing
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>

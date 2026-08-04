@@ -30,6 +30,11 @@ export async function GET(req: NextRequest) {
         stripePaymentMethodId: true,
         trialStatus: true,
         createdAt: true,
+        // Removal state — the panel needs these to distinguish a paused
+        // provider from a removed one and to disable actions on removed rows.
+        removedAt: true,
+        removedReason: true,
+        doNotRelist: true,
         address: {
           select: {
             city: true,
