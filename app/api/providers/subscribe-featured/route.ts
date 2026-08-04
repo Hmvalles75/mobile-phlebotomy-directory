@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { providerId, tier } = body
+    const { providerId, tier, attribution } = body
 
     if (!providerId || !['FOUNDING_PARTNER', 'HIGH_DENSITY'].includes(tier)) {
       return NextResponse.json(
@@ -73,7 +73,15 @@ export async function POST(req: NextRequest) {
       metadata: {
         providerId,
         tier,
-        type: 'featured_subscription'
+        type: 'featured_subscription',
+        // Stripe metadata values are strings capped at 500 chars, and the whole
+        // object is capped at 50 keys — truncate rather than risk a rejected
+        // session over an over-long referrer.
+        ...(attribution?.utmSource   ? { utmSource:   String(attribution.utmSource).slice(0, 200) }   : {}),
+        ...(attribution?.utmMedium   ? { utmMedium:   String(attribution.utmMedium).slice(0, 200) }   : {}),
+        ...(attribution?.utmCampaign ? { utmCampaign: String(attribution.utmCampaign).slice(0, 200) } : {}),
+        ...(attribution?.referrer    ? { referrer:    String(attribution.referrer).slice(0, 400) }    : {}),
+        ...(attribution?.landingPage ? { landingPage: String(attribution.landingPage).slice(0, 400) } : {}),
       }
     })
 

@@ -74,7 +74,19 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           providerId,
-          tier: tierId
+          tier: tierId,
+          // Attribution. Nothing recorded what brought a provider to this
+          // modal, so the only way to tell a newsletter conversion from an
+          // organic one was to compare Stripe timestamps against lead
+          // notification logs by hand. Captured at click time because the
+          // Stripe redirect discards the referrer.
+          attribution: {
+            utmSource: new URLSearchParams(window.location.search).get('utm_source') || undefined,
+            utmMedium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
+            utmCampaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
+            referrer: document.referrer || undefined,
+            landingPage: window.location.pathname + window.location.search,
+          },
         })
       })
 

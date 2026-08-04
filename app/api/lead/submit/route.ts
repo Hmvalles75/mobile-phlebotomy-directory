@@ -10,6 +10,15 @@ import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
 import { getZipInfo } from '@/lib/zip-geocode'
+import { US_STATES } from '@/lib/states'
+
+// US_STATES drives site navigation and covers the 50 states only. Intake must
+// also accept DC and the territories — a real Washington DC lead was delivered
+// on 2026-06-24 and a 50-state check would have rejected it.
+const VALID_STATE_ABBRS = new Set([
+  ...US_STATES.map(s => s.abbr),
+  'DC', 'PR', 'VI', 'GU', 'AS', 'MP',
+])
 
 // Updated draw-count buckets (2026-04-22): 1-3 standard, 4-19 medium, 20+ high.
 // Also keep backward-compat for the older bucket values submitted by the LeadFormModal /
@@ -44,7 +53,13 @@ const schema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   address1: z.string().optional(),
   city: z.string().min(1, 'City is required'),
-  state: z.string().length(2, 'State must be 2 characters'),
+  // Normalise before validating: routing compares lead.state to provider
+  // state abbreviations with an exact string match, so "Pa", "md" or " CA "
+  // stored raw silently match nothing. 13 leads carried non-canonical values
+  // before this. Also rejects 2-letter strings that are not real states.
+  state: z.string()
+    .transform(s => s.trim().toUpperCase())
+    .refine(s => VALID_STATE_ABBRS.has(s), 'Not a valid US state abbreviation'),
   zip: z.string().min(5, 'ZIP code must be at least 5 characters'),
   labPreference: z.string().min(1, 'Lab preference is required'),
   urgency: z.enum(['STANDARD', 'STAT']),
@@ -228,10 +243,24 @@ export async function POST(req: NextRequest) {
     // silently mis-routes the lead — e.g. a Honolulu patient who typed NJ ZIP
     // 08550 got routed to New Jersey providers; "Groton, NE" carried the CT ZIP
     // 06340. We reject clear mismatches so the patient corrects it at the source
-    // instead of wasting provider time on an unreachable lead. Unresolvable ZIPs
-    // are allowed through: they simply match no providers and land in
-    // NEEDS_COVERAGE, which is a non-harmful outcome (no mis-route).
+    // instead of wasting provider time on an unreachable lead.
     const zipInfo = getZipInfo(payload.zip)
+
+    // An unresolvable ZIP is NOT rejected, and deliberately so. Backtesting a
+    // rejection rule over 679 leads showed it would have blocked real patients:
+    // 75072 (McKinney TX), 72713 (Bentonville AR), 18366 (Tannersville PA) and
+    // 26526 (Granville WV) are all valid ZIPs simply absent from
+    // lib/zip-geocode's table. The gap is in our data, not the patient's typing,
+    // so the lead is accepted and flagged instead. Without coordinates it will
+    // match no providers and land in NEEDS_COVERAGE — the warning is what makes
+    // that visible so the table can be filled.
+    if (!zipInfo) {
+      console.warn(
+        `[lead/submit] ZIP_NOT_IN_GEOCODE_TABLE — ${payload.zip} (${payload.city}, ${payload.state}). ` +
+        `Lead accepted but cannot be distance-matched. Verify the ZIP and backfill lib/zip-geocode if valid.`
+      )
+    }
+
     if (zipInfo?.state && zipInfo.state.toUpperCase() !== payload.state.toUpperCase()) {
       console.warn(`[lead/submit] Rejected ZIP_STATE_MISMATCH — ZIP ${payload.zip} is in ${zipInfo.state} but state=${payload.state} submitted (city="${payload.city}", name="${payload.fullName}")`)
       return NextResponse.json(
