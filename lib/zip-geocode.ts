@@ -3,6 +3,7 @@
  * Covers all US ZIP codes (~40,000 entries)
  */
 import zipcodes from 'zipcodes'
+import { getZipOverride } from './zip-overrides'
 
 interface Coordinates {
   lat: number
@@ -27,6 +28,11 @@ export function getZipCoordinates(zip: string): Coordinates | null {
     }
   }
 
+  // Fall back to the hand-verified override table for ZIPs created after the
+  // package's data was cut. Checked second so the package always wins.
+  const override = getZipOverride(normalizedZip)
+  if (override) return { lat: override.lat, lng: override.lng }
+
   return null
 }
 
@@ -35,7 +41,18 @@ export function getZipCoordinates(zip: string): Coordinates | null {
  */
 export function getZipInfo(zip: string) {
   const normalizedZip = zip.replace(/[\s-]/g, '').slice(0, 5)
-  return zipcodes.lookup(normalizedZip)
+  const found = zipcodes.lookup(normalizedZip)
+  if (found) return found
+  const override = getZipOverride(normalizedZip)
+  if (!override) return undefined
+  return {
+    zip: normalizedZip,
+    latitude: override.lat,
+    longitude: override.lng,
+    city: override.city,
+    state: override.state,
+    country: 'US',
+  }
 }
 
 /**
