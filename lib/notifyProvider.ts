@@ -3,6 +3,7 @@ import twilio from 'twilio'
 import sg from '@sendgrid/mail'
 import { formatPrice } from './leadPricing'
 import { getDistanceBetweenZips, getZipInfo } from './zip-geocode'
+import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 
 // Initialize SendGrid if API key is available
 if (process.env.SENDGRID_API_KEY) {
@@ -136,9 +137,15 @@ export async function reachOutToNearbyProviders(lead: any, maxDistance: number =
   }
 
   try {
-    // Get all providers with ZIP codes who are NOT already opted in
+    // Get all providers with ZIP codes who are NOT already opted in.
+    //
+    // NOTIFIABLE_WHERE is essential here, not merely defensive: this query
+    // targets eligibleForLeads=false, and removing a provider sets exactly
+    // that. Without the guard a removal moved a provider INTO this
+    // recruitment blast instead of out of it.
     const providers = await prisma.provider.findMany({
       where: {
+        ...NOTIFIABLE_WHERE,
         zipCodes: { not: null },
         eligibleForLeads: false,  // Only non-opted-in providers
         status: 'VERIFIED'        // Only verified providers
@@ -149,7 +156,8 @@ export async function reachOutToNearbyProviders(lead: any, maxDistance: number =
         email: true,
         claimEmail: true,
         zipCodes: true,
-        slug: true
+        slug: true,
+        ...NOTIFY_GUARD_SELECT
       }
     })
 
@@ -176,9 +184,12 @@ export async function reachOutToNearbyProviders(lead: any, maxDistance: number =
       }
     }
 
-    // Sort by distance and take closest 5
+    // Sort by distance and take closest 5. Second suppression layer — if the
+    // where-clause above is ever loosened, nothing removed can still be sent.
     providersWithDistance.sort((a, b) => a.distance - b.distance)
-    const closestProviders = providersWithDistance.slice(0, 5)
+    const closestProviders = providersWithDistance
+      .filter(({ provider }) => canNotify(provider))
+      .slice(0, 5)
 
     if (closestProviders.length === 0) {
       console.log(`No non-opted-in providers within ${maxDistance} miles of ${lead.zip}`)

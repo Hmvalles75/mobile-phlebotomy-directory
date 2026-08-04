@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import sg from '@sendgrid/mail'
+import { NOTIFIABLE_WHERE } from '../lib/canNotify'
 import * as dotenv from 'dotenv'
 
 dotenv.config({ path: '.env.local' })
@@ -46,6 +47,7 @@ async function main() {
   // Find newly activated providers in those states
   const providers = await prisma.provider.findMany({
     where: {
+      ...NOTIFIABLE_WHERE,
       eligibleForLeads: true,
       primaryState: { in: TARGET_STATES },
     },
@@ -64,8 +66,8 @@ async function main() {
   // Also check featured providers with notify enabled in those states
   const featuredProviders = await prisma.provider.findMany({
     where: {
+      ...NOTIFIABLE_WHERE,
       isFeatured: true,
-      notifyEnabled: true,
       primaryState: { in: TARGET_STATES },
     },
     select: {

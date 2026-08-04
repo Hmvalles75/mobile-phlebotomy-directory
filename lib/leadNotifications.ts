@@ -2,6 +2,7 @@ import { prisma } from './prisma'
 import sg from '@sendgrid/mail'
 import { isLeadInServiceRadius } from './zip-geocode'
 import { isSendGridHealthy } from './sendgridHealth'
+import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -229,7 +230,10 @@ async function findFeaturedProvidersForNotification(
   // Find all providers eligible for lead notifications (Featured + opted-in free providers)
   const providers = await prisma.provider.findMany({
     where: {
-      notifyEnabled: true,
+      // removedAt matters independently of notifyEnabled: a removal done
+      // without also clearing notifyEnabled would otherwise still match the
+      // isFeatured branch below.
+      ...NOTIFIABLE_WHERE,
       OR: [
         { isFeatured: true },
         { AND: [{ eligibleForLeads: true }, { status: 'VERIFIED' }] },
@@ -247,6 +251,7 @@ async function findFeaturedProvidersForNotification(
       zipCodes: true,
       serviceRadiusMiles: true,
       primaryState: true,
+      ...NOTIFY_GUARD_SELECT,
       coverage: {
         select: {
           state: {
@@ -261,6 +266,10 @@ async function findFeaturedProvidersForNotification(
 
   // Filter by geographic coverage using radius-based matching
   const matchingProviders = providers.filter(provider => {
+    // Suppression first — removed or opted-out providers never reach a send,
+    // regardless of how well they match geographically.
+    if (!canNotify(provider)) return false
+
     // Check if provider has any email
     const hasEmail = provider.notificationEmail || provider.claimEmail || provider.email
     if (!hasEmail) return false

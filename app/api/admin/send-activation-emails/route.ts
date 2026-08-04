@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sg from '@sendgrid/mail'
+import { prisma } from '@/lib/prisma'
+import { canNotify } from '@/lib/canNotify'
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -79,7 +81,25 @@ export async function POST(req: NextRequest) {
 
   const results: { provider: string; status: string; error?: string }[] = []
 
+  // This list is hardcoded above, so there is no provider record to filter on.
+  // Look the addresses up and drop any that have since been removed or opted
+  // out — otherwise re-running this route re-emails providers who asked to be
+  // taken off the directory.
+  const suppressed = new Set<string>()
+  const records = await prisma.provider.findMany({
+    where: { email: { in: providers.map(p => p.email), mode: 'insensitive' } },
+    select: { email: true, removedAt: true, notifyEnabled: true },
+  })
+  for (const r of records) {
+    if (!canNotify(r) && r.email) suppressed.add(r.email.toLowerCase())
+  }
+
   for (const provider of providers) {
+    if (suppressed.has(provider.email.toLowerCase())) {
+      results.push({ provider: provider.name, status: 'skipped-suppressed' })
+      continue
+    }
+
     const subject = `Following up: Patient referrals for ${provider.name}`
 
     const text = `Hi,

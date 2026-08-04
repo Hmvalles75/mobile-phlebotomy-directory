@@ -19,6 +19,7 @@ import twilio from 'twilio'
 import { LeadStatus, OnboardingStatus, DispatchTaskReason } from '@prisma/client'
 import { isLeadInServiceRadius, getDistanceBetweenZips } from './zip-geocode'
 import { notifyPatientProviderAssigned, notifyPatientNeedsCoverage } from './patientSmsFlow'
+import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -46,6 +47,8 @@ async function findOptedInProviders(leadZip: string): Promise<EligibleProvider[]
   // Query only providers who have completed onboarding AND explicitly opted in
   const providers = await prisma.provider.findMany({
     where: {
+      // Must still be listed and accepting notifications
+      ...NOTIFIABLE_WHERE,
       // Must be activated for leads
       eligibleForLeads: true,
       // Must have explicitly opted in to SMS
@@ -64,7 +67,8 @@ async function findOptedInProviders(leadZip: string): Promise<EligibleProvider[]
       name: true,
       phonePublic: true,
       zipCodes: true,
-      serviceRadiusMiles: true
+      serviceRadiusMiles: true,
+      ...NOTIFY_GUARD_SELECT
     }
   })
 
@@ -74,6 +78,8 @@ async function findOptedInProviders(leadZip: string): Promise<EligibleProvider[]
   const eligibleProviders: EligibleProvider[] = []
 
   for (const provider of providers) {
+    // Second suppression layer before any SMS is built for this provider.
+    if (!canNotify(provider)) continue
     if (!provider.zipCodes || !provider.phonePublic) continue
 
     const serviceZips = provider.zipCodes.split(',').map(z => z.trim()).filter(z => z.length >= 5)

@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
+import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from '@/lib/canNotify'
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest) {
     // Get all featured providers with notifications enabled
     const featuredProviders = await prisma.provider.findMany({
       where: {
-        isFeatured: true,
-        notifyEnabled: true
+        ...NOTIFIABLE_WHERE,
+        isFeatured: true
       },
       select: {
         id: true,
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
         claimEmail: true,
         notificationEmail: true,
         zipCodes: true,
+        ...NOTIFY_GUARD_SELECT,
         coverage: {
           select: {
             state: { select: { abbr: true } }
@@ -77,6 +79,8 @@ export async function POST(req: NextRequest) {
     for (const lead of missedLeads) {
       // Find matching providers for this lead
       const matchingProviders = featuredProviders.filter(provider => {
+        // Suppression before geography — never re-notify a removed provider.
+        if (!canNotify(provider)) return false
         // Check state coverage
         const coverageStates = provider.coverage.map(c => c.state.abbr)
         if (coverageStates.includes(lead.state)) {

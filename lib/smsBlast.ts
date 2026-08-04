@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import twilio from 'twilio'
 import { isLeadInServiceRadius, getDistanceBetweenZips } from './zip-geocode'
+import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -121,6 +122,7 @@ interface EligibleProvider {
 async function findEligibleProvidersForSMS(leadZip: string): Promise<EligibleProvider[]> {
   const providers = await prisma.provider.findMany({
     where: {
+      ...NOTIFIABLE_WHERE,
       eligibleForLeads: true,
       zipCodes: {
         not: null
@@ -136,7 +138,8 @@ async function findEligibleProvidersForSMS(leadZip: string): Promise<EligiblePro
       zipCodes: true,
       serviceRadiusMiles: true,
       trialStatus: true,
-      trialExpiresAt: true
+      trialExpiresAt: true,
+      ...NOTIFY_GUARD_SELECT
     }
   })
 
@@ -144,6 +147,8 @@ async function findEligibleProvidersForSMS(leadZip: string): Promise<EligiblePro
   const eligibleProviders: EligibleProvider[] = []
 
   for (const provider of providers) {
+    // Second suppression layer before any SMS is built for this provider.
+    if (!canNotify(provider)) continue
     if (!provider.zipCodes) continue
 
     // Get provider's primary ZIP (first one in the list)
