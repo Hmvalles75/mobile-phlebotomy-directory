@@ -307,6 +307,24 @@ export default function ClinicalTrialsPage() {
         </div>
       </section>
 
+      {/* Cross-link to the corporate/facility funnel. Half of institutional
+          demand is senior living, skilled nursing and employer wellness rather
+          than research — those buyers need the recurring-schedule form, not the
+          study-protocol one. */}
+      <section className="py-10 bg-slate-50 border-t border-slate-200">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <p className="text-gray-700 mb-3">
+            Need recurring draws for a facility, senior living community, or employer?
+          </p>
+          <Link
+            href="/corporate-phlebotomy"
+            className="text-blue-700 hover:text-blue-800 underline font-medium"
+          >
+            See our corporate and facility phlebotomy services →
+          </Link>
+        </div>
+      </section>
+
       {/* Footer CTA */}
       <section className="py-12 bg-gray-50 border-t border-gray-200">
         <div className="container mx-auto px-4 max-w-4xl text-center">

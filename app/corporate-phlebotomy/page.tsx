@@ -298,6 +298,25 @@ export default function CorporatePhlebotomyPage() {
         </div>
       </section>
 
+      {/* Cross-link to the research funnel. Institutional demand splits about
+          evenly between corporate/senior-living and research/clinical-trial
+          buyers, and the two have different intake forms — a study coordinator
+          landing here should reach the one that asks about protocols, kits and
+          processing windows rather than filling in a corporate wellness quote. */}
+      <section className="py-10 bg-blue-50 border-t border-blue-100">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <p className="text-gray-700 mb-3">
+            Running a clinical trial or research study?
+          </p>
+          <Link
+            href="/clinical-trials-mobile-phlebotomy"
+            className="text-blue-700 hover:text-blue-800 underline font-medium"
+          >
+            See our clinical trial and research phlebotomy coordination →
+          </Link>
+        </div>
+      </section>
+
       {/* Footer CTA */}
       <section className="py-12 bg-white border-t">
         <div className="container mx-auto px-4 text-center">

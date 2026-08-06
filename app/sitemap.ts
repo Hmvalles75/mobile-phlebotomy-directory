@@ -113,6 +113,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    // ── Institutional funnel ──────────────────────────────────────────────
+    // /request-coverage is the only institutional page that converts: all
+    // three attributed coverage requests (The Wellness Group, Monell Chemical
+    // Senses Center, I Peace) landed on it directly from search. It was
+    // missing from this sitemap entirely, as were two of the three
+    // institutional content pages. Priority 0.9 — these buyers are worth
+    // 10-100x a single consumer draw.
+    {
+      url: `${baseUrl}/request-coverage`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/corporate-phlebotomy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/clinical-trials-mobile-phlebotomy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
     {
       url: `${baseUrl}/providers`,
       lastModified: new Date(),
