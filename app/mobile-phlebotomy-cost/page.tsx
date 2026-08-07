@@ -1,4 +1,6 @@
 import { Metadata } from 'next'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
@@ -30,12 +32,12 @@ export default function MobilePhlebotomyCostPage() {
     author: {
       '@type': 'Organization',
       name: 'MobilePhlebotomy.org',
-      url: 'https://mobilephlebotomy.org'
+      url: `${SITE_URL}`
     },
     publisher: {
       '@type': 'Organization',
       name: 'MobilePhlebotomy.org',
-      url: 'https://mobilephlebotomy.org'
+      url: `${SITE_URL}`
     },
     datePublished: '2024-01-01',
     dateModified: '2026-06-18'
@@ -509,7 +511,7 @@ export default function MobilePhlebotomyCostPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {majorMetros.map((metro) => (
                   <div key={metro.slug} className="text-center">
-                    <Link href={`/us/metro/${metro.slug}`} className="block hover:text-green-600">
+                    <Link href={metroHref(metro)} className="block hover:text-green-600">
                       <h3 className="font-semibold text-gray-900 mb-1">{metro.city}</h3>
                       <div className="text-2xl font-bold text-green-600 mb-2">
                         {metro.localInfo?.avgCost || '$60-120'}

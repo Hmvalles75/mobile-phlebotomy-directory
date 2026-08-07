@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { SITE_URL } from '@/lib/seo'
 import { topMetroAreas } from '@/data/top-metros'
 import { getAllProviders } from '@/lib/providers'
 
@@ -89,14 +91,14 @@ export default async function MetrosPage() {
     "@type": "CollectionPage",
     "name": "Mobile Phlebotomy Services - Top 50 US Metro Areas",
     "description": "Find mobile phlebotomy services in major US cities. Professional at-home blood draws available in 50+ metropolitan areas nationwide.",
-    "url": `${process.env.NEXT_PUBLIC_SITE_URL}/metros`,
+    "url": `${SITE_URL}/metros`,
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": topMetroAreas.length,
       "itemListElement": topMetroAreas.map((metro, index) => ({
         "@type": "ListItem",
         "position": index + 1,
-        "url": `${process.env.NEXT_PUBLIC_SITE_URL}/us/metro/${metro.slug}`,
+        "url": `${SITE_URL}${metroHref(metro)}`,
         "name": `Mobile Phlebotomy in ${metro.city}, ${metro.state}`
       }))
     }
@@ -154,7 +156,7 @@ export default async function MetrosPage() {
               return (
                 <Link
                   key={metro.slug}
-                  href={`/us/metro/${metro.slug}`}
+                  href={metroHref(metro)}
                   className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -198,7 +200,7 @@ export default async function MetrosPage() {
                     {metros.map((metro) => (
                       <li key={metro.slug}>
                         <Link
-                          href={`/us/metro/${metro.slug}`}
+                          href={metroHref(metro)}
                           className="text-primary-600 hover:text-primary-700 hover:underline block"
                         >
                           {metro.city}

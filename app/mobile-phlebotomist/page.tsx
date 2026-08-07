@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { topMetroAreas } from '@/data/top-metros'
 
 export default function MobilePhlebotomistPage() {
   const topStates = [
@@ -14,16 +16,19 @@ export default function MobilePhlebotomistPage() {
     { name: 'Michigan', slug: 'michigan' }
   ]
 
-  const topMetros = [
-    { name: 'Los Angeles', slug: 'los-angeles-metro' },
-    { name: 'New York City', slug: 'new-york-metro' },
-    { name: 'Chicago', slug: 'chicago-metro' },
-    { name: 'Houston', slug: 'houston-metro' },
-    { name: 'Phoenix', slug: 'phoenix-metro' },
-    { name: 'Philadelphia', slug: 'philadelphia-metro' },
-    { name: 'San Antonio', slug: 'san-antonio-metro' },
-    { name: 'San Diego', slug: 'san-diego-metro' }
+  // Resolved from data/top-metros.ts rather than hardcoded. The previous list
+  // used "-metro" suffixed slugs (los-angeles-metro, chicago-metro) that no
+  // longer exist — every link took a middleware redirect hop to reach the real
+  // metro page, and would have taken a second hop once metros canonicalise to
+  // city pages. Pulling from the shared source keeps these links direct and
+  // stops them drifting again.
+  const TOP_METRO_SLUGS = [
+    'los-angeles', 'new-york-city', 'chicago', 'houston',
+    'phoenix', 'philadelphia', 'san-antonio', 'san-diego',
   ]
+  const topMetros = TOP_METRO_SLUGS
+    .map(slug => topMetroAreas.find(m => m.slug === slug))
+    .filter((m): m is NonNullable<typeof m> => Boolean(m))
 
   return (
     <>
@@ -345,11 +350,11 @@ export default function MobilePhlebotomistPage() {
             {topMetros.map((metro) => (
               <Link
                 key={metro.slug}
-                href={`/us/metro/${metro.slug}`}
+                href={metroHref(metro)}
                 className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary-300 transition-all group"
               >
                 <h3 className="font-semibold text-gray-900 text-sm mb-1 group-hover:text-primary-600">
-                  {metro.name}
+                  {metro.city}
                 </h3>
                 <span className="text-xs text-primary-600 group-hover:underline">
                   Find Providers →

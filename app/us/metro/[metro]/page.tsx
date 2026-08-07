@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { SITE_URL } from '@/lib/seo'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -161,7 +162,7 @@ export default function MetroPage({ params }: MetroPageProps) {
     providers,
     `Mobile Phlebotomy in ${metro.city}, ${metro.state}`,
     `Find ${providers.length} certified mobile phlebotomy providers in ${metro.city}, ${metro.state}. Professional at-home blood draws starting at ${metro.localInfo?.avgCost || '$60-120'}. ${metro.localInfo?.typicalWaitTime || '24-48 hour'} appointments.`,
-    typeof window !== 'undefined' ? window.location.href : `${process.env.NEXT_PUBLIC_SITE_URL}/us/metro/${metro.slug}`
+    typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/us/metro/${metro.slug}`
   )
 
   const breadcrumbSchema = generateBreadcrumbSchema([

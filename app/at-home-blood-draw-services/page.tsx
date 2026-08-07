@@ -1,4 +1,6 @@
 import { Metadata } from 'next'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 import { topMetroAreas } from '@/data/top-metros'
 
@@ -32,14 +34,14 @@ export default function AtHomeBloodDrawServicesPage() {
       name: 'MobilePhlebotomy.org',
       logo: {
         '@type': 'ImageObject',
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`
+        url: `${SITE_URL}/logo.png`
       }
     },
     datePublished: '2024-01-01',
     dateModified: new Date().toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/at-home-blood-draw-services`
+      '@id': `${SITE_URL}/at-home-blood-draw-services`
     }
   }
 
@@ -447,7 +449,7 @@ export default function AtHomeBloodDrawServicesPage() {
               {featuredMetros.map((metro) => (
                 <Link
                   key={metro.slug}
-                  href={`/us/metro/${metro.slug}`}
+                  href={metroHref(metro)}
                   className="text-primary-600 hover:text-primary-700 text-sm"
                 >
                   {metro.city}, {metro.stateAbbr} →

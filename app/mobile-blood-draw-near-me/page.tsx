@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
 import { topMetroAreas } from '@/data/top-metros'
@@ -59,12 +61,12 @@ export default function MobileBloodDrawNearMePage() {
     '@type': 'WebPage',
     name: 'Mobile Blood Draw Near Me - Find Local At-Home Services',
     description: 'Find mobile blood draw services near you. Search 1000+ certified phlebotomists offering at-home blood collection in your area. Same-day appointments available.',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/mobile-blood-draw-near-me`,
+    url: `${SITE_URL}/mobile-blood-draw-near-me`,
     mainEntity: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL}/search?location={location}`
+        urlTemplate: `${SITE_URL}/search?location={location}`
       },
       'query-input': 'required name=location'
     }
@@ -241,7 +243,7 @@ export default function MobileBloodDrawNearMePage() {
             {topMetros.map((metro) => (
               <Link
                 key={metro.slug}
-                href={`/us/metro/${metro.slug}`}
+                href={metroHref(metro)}
                 className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all group"
               >
                 <div className="flex justify-between items-start mb-2">

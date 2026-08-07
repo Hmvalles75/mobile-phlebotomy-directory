@@ -1,3 +1,4 @@
+import { metroHref } from '@/lib/seo/metroCanonical'
 /**
  * Market Configuration
  *
@@ -97,10 +98,19 @@ export function isMarketLocked(): boolean {
 }
 
 /**
- * Get the URL path for the locked market's metro page
+ * Get the URL path for the locked market's metro page.
+ *
+ * Resolved through metroHref so a locked market never links at a metro URL
+ * that redirects — Los Angeles, the configured market, now canonicalises to
+ * /us/california/los-angeles. Falls back to the metro path for the two metros
+ * that keep theirs (New York City, Washington DC).
  */
 export function getMarketMetroPath(): string {
-  return `/us/metro/${MARKET_CONFIG.MARKET_SLUG}`
+  return metroHref({
+    slug: MARKET_CONFIG.MARKET_SLUG,
+    city: MARKET_CONFIG.MARKET_NAME,
+    state: MARKET_CONFIG.MARKET_STATE_NAME,
+  })
 }
 
 /**

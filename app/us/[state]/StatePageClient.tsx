@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { metroHref } from '@/lib/seo/metroCanonical'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -583,7 +584,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                       {metros.map((metro) => (
                         <Link
                           key={metro.slug}
-                          href={`/us/metro/${metro.slug}`}
+                          href={metroHref(metro)}
                           className="flex items-center px-4 py-3 bg-gray-50 hover:bg-primary-50 rounded-lg transition-colors group"
                         >
                           <span className="text-primary-600 mr-2 group-hover:text-primary-700">→</span>
