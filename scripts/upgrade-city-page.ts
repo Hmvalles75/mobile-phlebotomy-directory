@@ -27,6 +27,7 @@ dotenv.config({ path: '.env.local' })
 import { PrismaClient } from '@prisma/client'
 import * as fs from 'fs'
 import * as path from 'path'
+import { SITE_URL } from '../lib/seo'
 
 const prisma = new PrismaClient()
 
@@ -117,11 +118,23 @@ async function fetchCityData(slug: string, stateAbbr: string): Promise<CityData>
     },
   })
 
-  // De-dupe: a provider could match both city-specific AND statewide. Take the
-  // greater of the two as the displayed count rather than over-counting via
-  // additive math. (For an exact unique count we'd need a single union query —
-  // good enough for a marketing number.)
-  const providerCount = Math.max(citySpecific, statewide)
+  // INTERIM RULE (2026-08-07): advertise the city-specific count only.
+  //
+  // The previous max(citySpecific, statewide) inflated every page in a large
+  // state. The San Francisco audit is the clearest case: 28 advertised, and
+  // exactly ONE provider whose service radius actually reaches SF. Eighteen of
+  // the twenty-eight are based more than 300 miles away — San Diego, Indio,
+  // Temecula — counted purely because they ticked "CA statewide" while running
+  // a 25-mile radius.
+  //
+  // A statewide coverage row states willingness to serve the state, not ability
+  // to reach a given city, so it cannot back a per-city number. The honest
+  // version of this count is distance-aware (statewide providers whose radius
+  // reaches the city centroid), but that needs the ZIP centroid table, which is
+  // out of scope. Until then the city-specific count is the only figure we can
+  // defend, and MIN_COUNT_TO_ADVERTISE suppresses it where it is too thin to
+  // help. `statewide` is still returned for reference.
+  const providerCount = citySpecific
 
   // Specialty distribution — `services` is a relation (ProviderService → Service),
   // not a string array. Pull the Service.name to get human-readable specialty labels.
@@ -192,12 +205,24 @@ function generatePageContent(data: CityData): string {
   const specialtyList = specialties.length > 0 ? specialties.join(', ') : 'at-home blood draw, lab routing, and specialty collections'
   const providerNoun = providerCount === 1 ? 'provider' : 'providers'
 
-  // Title <= 60 chars to avoid SERP truncation. Lead with the target keyword.
-  const title = `Mobile Phlebotomy ${name}: ${providerCount} Vetted ${providerNoun.charAt(0).toUpperCase() + providerNoun.slice(1)} (2026)`
+  // Below this, the number argues against clicking. "Seattle: 2 Vetted
+  // Providers" advertises thinness on a page pulling 3,495 impressions, so
+  // suppress the count in the title, description and FAQ rather than lead
+  // with it. The page still renders and still carries schema — it just sells
+  // the service instead of the roster.
+  const MIN_COUNT_TO_ADVERTISE = 3
+  const showCount = providerCount >= MIN_COUNT_TO_ADVERTISE
 
-  const description =
-    `Find mobile phlebotomy in ${name}, ${state}. ${providerCount} vetted ${providerNoun} serving the ${name} area — ${specialtyList}. ` +
-    `Typical service fee ${priceRange} per visit. Same-day appointments available.`
+  // Title <= 60 chars to avoid SERP truncation. Lead with the target keyword.
+  const title = showCount
+    ? `Mobile Phlebotomy ${name}: ${providerCount} Vetted ${providerNoun.charAt(0).toUpperCase() + providerNoun.slice(1)} (2026)`
+    : `Mobile Phlebotomy ${name}, ${state}: At-Home Blood Draws (2026)`
+
+  const description = showCount
+    ? `Find mobile phlebotomy in ${name}, ${state}. ${providerCount} vetted ${providerNoun} serving the ${name} area — ${specialtyList}. ` +
+      `Typical service fee ${priceRange} per visit. Same-day appointments available.`
+    : `Find mobile phlebotomy in ${name}, ${state}. Vetted providers serving the ${name} area — ${specialtyList}. ` +
+      `Typical service fee ${priceRange} per visit. Same-day appointments available.`
 
   // JSON-LD strings — embedded directly into the generated file rather than
   // imported, so each generated city page is self-contained.
@@ -206,7 +231,7 @@ function generatePageContent(data: CityData): string {
     '@type': 'MedicalBusiness',
     name: `Mobile Phlebotomy in ${name}, ${state}`,
     description: `Directory of vetted mobile phlebotomists serving ${name}, ${stateName} and surrounding areas.`,
-    url: `https://mobilephlebotomy.org/us/${stateSlug(state)}/${slug}`,
+    url: `${SITE_URL}/us/${stateSlug(state)}/${slug}`,
     areaServed: {
       '@type': 'City',
       name,
@@ -233,7 +258,7 @@ function generatePageContent(data: CityData): string {
         name: `How fast can I get a mobile phlebotomist in ${name}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `Most ${name}-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider — our directory lists ${providerCount} ${providerNoun} serving the ${name} area.`,
+          text: `Most ${name}-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider${showCount ? ` — our directory lists ${providerCount} ${providerNoun} serving the ${name} area` : ''}.`,
         },
       },
       {
@@ -259,19 +284,19 @@ function generatePageContent(data: CityData): string {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mobilephlebotomy.org/' },
-      { '@type': 'ListItem', position: 2, name: 'United States', item: 'https://mobilephlebotomy.org/us' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'United States', item: `${SITE_URL}/us` },
       {
         '@type': 'ListItem',
         position: 3,
         name: stateName,
-        item: `https://mobilephlebotomy.org/us/${stateSlug(state)}`,
+        item: `${SITE_URL}/us/${stateSlug(state)}`,
       },
       {
         '@type': 'ListItem',
         position: 4,
         name,
-        item: `https://mobilephlebotomy.org/us/${stateSlug(state)}/${slug}`,
+        item: `${SITE_URL}/us/${stateSlug(state)}/${slug}`,
       },
     ],
   })
@@ -303,12 +328,12 @@ export const metadata: Metadata = {
     `mobile phlebotomy ${name.toLowerCase()}, mobile phlebotomist ${name.toLowerCase()}, ${name.toLowerCase()} mobile blood draw, at home blood draw ${name.toLowerCase()}, mobile lab ${name.toLowerCase()}, ${name.toLowerCase()} ${stateSlug(state)} phlebotomy, ${stateName.toLowerCase()} mobile phlebotomy`
   )},
   alternates: {
-    canonical: ${JSON.stringify(`https://mobilephlebotomy.org/us/${stateSlug(state)}/${slug}`)},
+    canonical: ${JSON.stringify(`${SITE_URL}/us/${stateSlug(state)}/${slug}`)},
   },
   openGraph: {
     title: ${JSON.stringify(title)},
     description: ${JSON.stringify(description)},
-    url: ${JSON.stringify(`https://mobilephlebotomy.org/us/${stateSlug(state)}/${slug}`)},
+    url: ${JSON.stringify(`${SITE_URL}/us/${stateSlug(state)}/${slug}`)},
     type: 'website',
   },
 }
