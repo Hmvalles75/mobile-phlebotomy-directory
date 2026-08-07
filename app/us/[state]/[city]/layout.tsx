@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import { cityByStateCity } from '@/data/cities-full'
 import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
@@ -28,7 +29,16 @@ function resolveCityState(stateSlug: string, citySlugRaw: string) {
 }
 
 export async function generateMetadata({ params }: { params: { state: string, city: string } }): Promise<Metadata> {
-  const { citySlug, cityName, stateAbbr, cityInfo } = resolveCityState(params.state, params.city)
+  const { citySlug, cityName, stateAbbr, stateSlug, cityInfo } = resolveCityState(params.state, params.city)
+
+  // Self-canonical. Without this the page inherits app/layout.tsx's
+  // `alternates: { canonical: '/' }` and every dynamic city page tells Google
+  // it is a duplicate of the homepage — 512 of the 530 city pages were doing
+  // exactly that, which is why legacy /{city}-{st}/ URLs outranked their /us/
+  // twins in nearly every pair: the legacy pages self-canonicalise correctly
+  // and these disclaimed themselves. The 18 generated static overrides set
+  // their own canonical and take precedence over this route entirely.
+  const canonical = `${SITE_URL}/us/${stateSlug}/${citySlug}`
 
   // CTR-optimized 2026-04-30. Old title format was generic and was getting
   // 0.27-0.9% CTR on high-impression city pages (Seattle 4,114 imp at
@@ -46,7 +56,8 @@ export async function generateMetadata({ params }: { params: { state: string, ci
       title,
       description,
       keywords: `mobile phlebotomy ${cityName}, at-home blood draw ${cityName} ${stateAbbr}, phlebotomist ${cityName}, mobile lab services ${stateAbbr}`,
-      openGraph: { title, description, type: 'website' },
+      alternates: { canonical },
+      openGraph: { title, description, url: canonical, type: 'website' },
       twitter: { title, description, card: 'summary_large_image' },
     }
   }
@@ -58,7 +69,8 @@ export async function generateMetadata({ params }: { params: { state: string, ci
     title,
     description,
     keywords: `mobile phlebotomy ${cityInfo.name}, at-home blood draw ${cityInfo.name} ${cityInfo.state}, phlebotomist ${cityInfo.name}, mobile lab ${cityInfo.name}, home blood test ${cityInfo.name}`,
-    openGraph: { title, description, type: 'website' },
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, type: 'website' },
     twitter: { title, description, card: 'summary_large_image' },
   }
 }
