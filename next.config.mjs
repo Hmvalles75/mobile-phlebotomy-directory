@@ -130,6 +130,30 @@ const nextConfig = {
       { source: '/us/metro/san-antonio', destination: '/us/texas/san-antonio', permanent: true },
       { source: '/us/metro/san-diego', destination: '/us/california/san-diego', permanent: true },
       { source: '/san-diego-ca/mobile-phlebotomy', destination: '/us/california/san-diego', permanent: true },
+
+      // ── Consolidation batch 1: Chicago (2026-08-07) ────────────────────
+      // Verification case for the remaining batches (Michigan, Texas, rest).
+      // Prerequisites met before shipping: /us/illinois/chicago is generated
+      // with LocalBusiness, FAQPage and BreadcrumbList schema, its canonical
+      // resolves through SITE_URL to the www host, and the legacy page's
+      // long-form prose has been ported into data/city-longform.ts so the
+      // redirect target does not lose the copy that was ranking.
+      //
+      // ALL variants fold, superseding the pilot's keep-the-intent-variants
+      // rule. That rule assumed the variants earned their own traffic; GSC
+      // says otherwise — 60 variant pages produced ~25 clicks in three months
+      // and Chicago's produced zero. Splitting a city's signal three ways to
+      // protect nothing is a bad trade.
+      //
+      // Sources are enumerated from disk by
+      // scripts/discover-legacy-city-routes.ts (--city=chicago-il --emit), not
+      // from a suffix list — variants are inconsistent per city
+      // (lab-draw-at-home and mobile-phlebotomist each appear only a handful
+      // of times) and a hardcoded list would miss them.
+      { source: '/us/metro/chicago', destination: '/us/illinois/chicago', permanent: true },
+      { source: '/chicago-il/blood-draw-at-home', destination: '/us/illinois/chicago', permanent: true },
+      { source: '/chicago-il/in-home-blood-draw', destination: '/us/illinois/chicago', permanent: true },
+      { source: '/chicago-il/mobile-phlebotomy', destination: '/us/illinois/chicago', permanent: true },
     ]
   },
 }

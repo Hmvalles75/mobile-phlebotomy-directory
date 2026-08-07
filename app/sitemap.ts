@@ -251,9 +251,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'houston-tx/blood-draw-at-home', priority: 0.7 },
 
     // CHICAGO METRO
-    { slug: 'chicago-il/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'chicago-il/in-home-blood-draw', priority: 0.7 },
-    { slug: 'chicago-il/blood-draw-at-home', priority: 0.7 },
+    // All three Chicago legacy variants removed 2026-08-07 — each now 308s to
+    // /us/illinois/chicago, which the city loop above already submits.
+    // Submitting a redirected URL wastes crawl budget and muddies the
+    // consolidation signal.
 
     // SAN DIEGO METRO
     // (san-diego-ca/mobile-phlebotomy removed 2026-07-24 — 301'd to the

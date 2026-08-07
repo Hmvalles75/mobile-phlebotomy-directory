@@ -14,6 +14,17 @@ export interface CityLongform {
 }
 
 export const CITY_LONGFORM: Record<string, CityLongform> = {
+  // Ported verbatim from the legacy /chicago-il/mobile-phlebotomy page ahead of
+  // its 308. Entities preserved as real characters; the price band is the
+  // legacy page's own figure, unchanged.
+  'illinois/chicago': {
+    paragraphs: [
+      "Chicago's harsh winters and dense urban layout make mobile phlebotomy especially practical — patients in high-rises, seniors on the South Side, and busy professionals in the Loop all benefit from at-home draws. Many Chicago providers also serve the western suburbs through Naperville, Schaumburg, and down to Joliet.",
+      "Services commonly requested in the Chicago area include routine lab work for Northwestern Medicine and Rush orders, corporate wellness screenings for downtown offices, pre-employment drug testing, and home health collections for agencies serving Cook County.",
+      "Expect to pay $70–$130 per visit in the Chicago metro. Providers in the city proper may charge a small parking surcharge. Illinois Medicaid covers mobile draws for homebound patients with a physician's order.",
+    ],
+  },
+
   // Ported verbatim from the legacy /san-diego-ca/mobile-phlebotomy page.
   'california/san-diego': {
     paragraphs: [
