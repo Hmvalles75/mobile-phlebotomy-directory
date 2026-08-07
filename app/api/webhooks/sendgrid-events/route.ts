@@ -126,10 +126,83 @@ export async function POST(req: NextRequest) {
       console.log(`[sendgrid-events] Stored ${stored} event(s), skipped ${skipped}`)
     }
 
+    // Hard bounces are acted on, not just recorded. An audit found 19 providers
+    // routable with a dead notification address — they receive nothing, look
+    // dormant in the roster, and nobody finds out until they email asking why
+    // it's quiet. Every one of those bounces had already been captured here and
+    // ignored.
+    await suppressHardBouncedProviders(events)
+
     return NextResponse.json({ ok: true, stored, skipped })
   } catch (err: any) {
     console.error('[sendgrid-events] Handler error:', err)
     return NextResponse.json({ ok: false, error: err.message || 'Internal error' }, { status: 500 })
+  }
+}
+
+/**
+ * Turn off notifications for providers whose address permanently bounced.
+ *
+ * Only permanent failures count. SendGrid reports transient problems as
+ * bounces too (full mailbox, greylisting, temporary DNS), and disabling a
+ * provider over a 4xx would silently cut off someone whose mail is fine an
+ * hour later. We require a 5xx reason, or a `dropped` event whose reason names
+ * SendGrid's own invalid/bounce suppression.
+ *
+ * notifyEnabled is the switch because canNotify() already honours it, so one
+ * write removes the provider from every send path at once. It is reversible:
+ * clearing the flag in the admin panel puts them straight back.
+ */
+const PERMANENT_5XX = /\b5\d{2}\b/
+const DROPPED_PERMANENT = /invalid|bounced address|unsubscribed address|spam report/i
+
+async function suppressHardBouncedProviders(events: SendGridEvent[]): Promise<void> {
+  const candidates = new Map<string, { email: string; reason: string }>()
+
+  for (const e of events) {
+    if (!e.providerId || !e.email) continue
+    const reason = e.reason || ''
+    const permanent =
+      (e.event === 'bounce' && PERMANENT_5XX.test(reason)) ||
+      (e.event === 'dropped' && DROPPED_PERMANENT.test(reason))
+    if (!permanent) continue
+    candidates.set(e.providerId, { email: e.email.toLowerCase(), reason: reason.slice(0, 200) })
+  }
+  if (candidates.size === 0) return
+
+  for (const [providerId, { email, reason }] of candidates) {
+    try {
+      const provider = await prisma.provider.findUnique({
+        where: { id: providerId },
+        select: {
+          id: true, name: true, notifyEnabled: true,
+          notificationEmail: true, claimEmail: true, email: true,
+        },
+      })
+      if (!provider || !provider.notifyEnabled) continue
+
+      // Only suppress if the address that bounced is the one we actually send
+      // to. A dead legacy `email` while `notificationEmail` is healthy is not a
+      // reason to stop notifying — that exact case is live in the data today.
+      const target = (provider.notificationEmail || provider.claimEmail || provider.email || '').toLowerCase()
+      if (!target || target !== email) {
+        console.log(`[sendgrid-events] Bounce for ${provider.name} on ${email}, but live target is ${target || 'none'} — not suppressing`)
+        continue
+      }
+
+      await prisma.provider.update({
+        where: { id: providerId },
+        data: { notifyEnabled: false },
+      })
+      console.warn(
+        `[sendgrid-events] SUPPRESSED ${provider.name} (${providerId}) — ` +
+        `notification address ${email} hard-bounced: ${reason}`
+      )
+    } catch (err: any) {
+      // Never let this fail the webhook; SendGrid retries on non-2xx and we
+      // would rather store events than block on a side effect.
+      console.error(`[sendgrid-events] Suppression failed for ${providerId}:`, err.message || err)
+    }
   }
 }
 

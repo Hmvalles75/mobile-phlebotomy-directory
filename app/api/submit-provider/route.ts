@@ -1,3 +1,4 @@
+import { checkProviderEmail } from '@/lib/emailValidation'
 import { NextRequest, NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/seo'
 import { addPendingSubmission } from '@/lib/pending-submissions'
@@ -132,6 +133,18 @@ export async function POST(request: NextRequest) {
     // SMS consent is OPTIONAL — providers can register without opting in to SMS.
     // Lead notifications default to email; SMS is an additional channel only
     // when the provider explicitly checks the consent box on /add-provider.
+
+    // This address becomes the provider's contact and, once activated, the one
+    // leads are sent to. Checked before the duplicate lookup so a malformed
+    // address is reported plainly rather than failing an email-keyed match.
+    const emailCheck = checkProviderEmail(formData.email)
+    if (!emailCheck.ok) {
+      return NextResponse.json(
+        { ok: false, error: emailCheck.error, suggestion: emailCheck.suggestion },
+        { status: 400 }
+      )
+    }
+    formData.email = emailCheck.normalized
 
     // Check for duplicate provider before accepting submission
     // Now checks both Provider table AND PendingSubmission table

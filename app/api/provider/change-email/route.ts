@@ -1,3 +1,4 @@
+import { checkProviderEmail } from '@/lib/emailValidation'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -28,8 +29,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const newEmail = String(body?.newEmail || '').toLowerCase().trim()
 
-    if (!newEmail || !EMAIL_RE.test(newEmail)) {
-      return NextResponse.json({ ok: false, error: 'Please enter a valid email address.' }, { status: 400 })
+    // Shared strict check rather than the local EMAIL_RE: this route rewrites
+    // email, claimEmail and notificationEmail together, so a typo here takes
+    // out every channel the provider has at once.
+    const emailCheck = checkProviderEmail(newEmail)
+    if (!emailCheck.ok) {
+      return NextResponse.json(
+        { ok: false, error: emailCheck.error, suggestion: emailCheck.suggestion },
+        { status: 400 }
+      )
     }
 
     const provider = await prisma.provider.findUnique({

@@ -1,3 +1,4 @@
+import { checkProviderEmail } from '@/lib/emailValidation'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { nanoid } from 'nanoid'
@@ -19,6 +20,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // claimEmail becomes the address leads are sent to when notificationEmail
+    // is unset, so a typo here means the provider silently receives nothing.
+    const emailCheck = checkProviderEmail(email)
+    if (!emailCheck.ok) {
+      return NextResponse.json(
+        { ok: false, error: emailCheck.error, suggestion: emailCheck.suggestion },
+        { status: 400 }
+      )
+    }
+
     const provider = await prisma.provider.findUnique({
       where: { id: providerId }
     })
@@ -36,7 +47,7 @@ export async function POST(req: NextRequest) {
       where: { id: providerId },
       data: {
         status: 'PENDING',
-        claimEmail: email,
+        claimEmail: emailCheck.normalized,
         claimToken: token
       }
     })
