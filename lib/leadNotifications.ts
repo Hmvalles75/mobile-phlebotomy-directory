@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { SITE_URL } from './seo'
 import sg from '@sendgrid/mail'
 import { isLeadInServiceRadius } from './zip-geocode'
 import { isSendGridHealthy } from './sendgridHealth'
@@ -53,7 +54,7 @@ async function sendProviderLeadNotificationEmail(
     return { success: false, error: 'Missing EMAIL_FROM config' }
   }
 
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org').replace(/\/+$/, '')
+  const siteUrl = (SITE_URL).replace(/\/+$/, '')
   const claimUrl = `${siteUrl}/claim/${lead.id}?provider=${provider.id}`
   const leadType = 'Individual'  // Default for Phase 1
   const notesShort = lead.notes ? lead.notes.substring(0, 200) : 'None'

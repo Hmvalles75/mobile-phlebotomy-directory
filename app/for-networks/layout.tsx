@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/for-networks',
+    canonical: `${SITE_URL}/for-networks`,
   },
 }
 

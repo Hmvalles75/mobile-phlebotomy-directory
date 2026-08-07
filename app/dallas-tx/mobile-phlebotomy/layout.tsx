@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomy Dallas TX | At-Home Blood Draw Services (2026)',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/dallas-tx/mobile-phlebotomy',
+    canonical: `${SITE_URL}/dallas-tx/mobile-phlebotomy`,
   },
 }
 

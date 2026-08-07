@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 
 // Targets the informational top-of-funnel query "what is a mobile phlebotomist"
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   description: 'A mobile phlebotomist is a certified blood-draw technician who travels to your home, office, or facility. Learn what they do, what they cost ($75–$150), and how to find one near you in 2026.',
   keywords: 'what is a mobile phlebotomist, mobile phlebotomist definition, mobile phlebotomist meaning, what does a mobile phlebotomist do, mobile blood draw technician, traveling phlebotomist',
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/what-is-a-mobile-phlebotomist',
+    canonical: `${SITE_URL}/what-is-a-mobile-phlebotomist`,
   },
   openGraph: {
     title: 'What Is a Mobile Phlebotomist? Definition + Cost (2026)',
@@ -29,12 +30,12 @@ export default function WhatIsAMobilePhlebotomistPage() {
     author: {
       '@type': 'Organization',
       name: 'MobilePhlebotomy.org',
-      url: 'https://mobilephlebotomy.org',
+      url: `${SITE_URL}`,
     },
     publisher: {
       '@type': 'Organization',
       name: 'MobilePhlebotomy.org',
-      url: 'https://mobilephlebotomy.org',
+      url: `${SITE_URL}`,
     },
     datePublished: '2026-06-18',
     dateModified: '2026-06-18',

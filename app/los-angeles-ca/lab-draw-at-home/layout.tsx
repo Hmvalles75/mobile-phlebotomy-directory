@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Lab Draw at Home Los Angeles CA | Mobile Lab Collection',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/los-angeles-ca/lab-draw-at-home',
+    canonical: `${SITE_URL}/los-angeles-ca/lab-draw-at-home`,
   },
 }
 

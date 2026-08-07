@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomist Detroit, MI | Find Certified Providers 2026',
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     title: 'Find a Mobile Phlebotomist in Detroit, MI',
     description: 'Directory of certified mobile phlebotomists serving Detroit and Wayne County. Licensed professionals, verified credentials.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/detroit-mi/mobile-phlebotomist',
+    url: `${SITE_URL}/detroit-mi/mobile-phlebotomist`,
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/detroit-mi/mobile-phlebotomist',
+    canonical: `${SITE_URL}/detroit-mi/mobile-phlebotomist`,
   },
 }
 

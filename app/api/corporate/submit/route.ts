@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
@@ -121,7 +122,7 @@ SOURCE
   Campaign: ${[req.utmSource, req.utmMedium, req.utmCampaign].filter(Boolean).join(' / ') || '(none)'}
 
 ---
-Admin: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
+Admin: ${SITE_URL}/admin
 Reply directly to: ${req.email}
 `
 

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Blood Draw at Home Bayonne NJ | Mobile Phlebotomy Services (2026)',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/bayonne-nj/blood-draw-at-home',
+    canonical: `${SITE_URL}/bayonne-nj/blood-draw-at-home`,
   },
 }
 

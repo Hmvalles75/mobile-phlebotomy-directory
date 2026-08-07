@@ -1,4 +1,5 @@
 import { type Provider } from './schemas'
+import { SITE_URL } from './seo'
 
 export interface LocalBusinessSchema {
   '@context': string
@@ -145,7 +146,7 @@ export interface ServiceSchema {
  */
 export function generateLocalBusinessSchema(
   provider: Provider,
-  baseUrl: string = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  baseUrl: string = SITE_URL
 ): MedicalBusinessSchema {
   const schema: MedicalBusinessSchema = {
     '@context': 'https://schema.org',
@@ -412,7 +413,7 @@ export function generateProviderListSchema(
       position: index + 1,
       item: {
         '@type': 'MedicalBusiness',
-        '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/provider/${provider.id}`,
+        '@id': `${SITE_URL}/provider/${provider.id}`,
         name: provider.name,
         description: provider.description,
         telephone: provider.phone,
@@ -441,7 +442,7 @@ export function generateBreadcrumbSchema(items: Array<{ name: string; url: strin
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: item.url.startsWith('http') ? item.url : `${process.env.NEXT_PUBLIC_SITE_URL}${item.url}`
+      item: item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`
     }))
   }
 }

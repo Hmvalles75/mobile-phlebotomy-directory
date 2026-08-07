@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomy Detroit, MI | At-Home Blood Draws 2026',
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: 'Mobile Phlebotomy in Detroit, MI | Professional At-Home Blood Draws',
     description: 'Licensed mobile phlebotomists serving Detroit and Wayne County. Convenient at-home blood draws with certified professionals. Insurance accepted.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/detroit-mi/mobile-phlebotomy',
+    url: `${SITE_URL}/detroit-mi/mobile-phlebotomy`,
   },
   twitter: {
     card: 'summary_large_image',
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     description: 'Find certified mobile phlebotomy services in Detroit. Professional at-home blood draws, insurance accepted, convenient scheduling.',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/detroit-mi/mobile-phlebotomy',
+    canonical: `${SITE_URL}/detroit-mi/mobile-phlebotomy`,
   },
 }
 

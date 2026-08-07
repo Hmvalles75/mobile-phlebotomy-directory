@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { SITE_URL } from './seo'
 import { prisma } from './prisma'
 import { verifyAdminSession } from './admin-auth'
 import { isLeadInServiceRadius } from './zip-geocode'
@@ -121,7 +122,7 @@ function buildRematchEmail(args: {
   notes: string | null
   daysWaiting: number
 }) {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org').replace(/\/+$/, '')
+  const siteUrl = (SITE_URL).replace(/\/+$/, '')
   const claimUrl = `${siteUrl}/claim/${args.leadId}?provider=${args.providerId}`
   const waitedPhrase = args.daysWaiting === 0
     ? 'today'

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 import Stripe from 'stripe'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     // Create Stripe billing portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: provider.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard`
+      return_url: `${SITE_URL}/dashboard`
     })
 
     console.log(`✅ Created billing portal session for ${provider.name} (${provider.id})`)

@@ -125,7 +125,7 @@ export function ProviderRosterTable({ rows, windowDays }: { rows: RosterRow[]; w
         r.notifications, r.claims, r.completions, fmtPct(r.claimRate),
         r.lastClaimAt ? r.lastClaimAt.slice(0, 10) : '',
         r.staleReleaseCount,
-        `https://mobilephlebotomy.org/provider/${r.slug}`,
+        `https://www.mobilephlebotomy.org/provider/${r.slug}`,
       ].map(esc).join(','))
     }
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
@@ -219,7 +219,7 @@ export function ProviderRosterTable({ rows, windowDays }: { rows: RosterRow[]; w
                   <tr key={r.id} className={dormant ? 'bg-amber-50' : r.paying ? 'bg-green-50' : ''}>
                     <td className="px-3 py-2">
                       <a
-                        href={`https://mobilephlebotomy.org/provider/${r.slug}`}
+                        href={`https://www.mobilephlebotomy.org/provider/${r.slug}`}
                         target="_blank"
                         rel="noreferrer"
                         className="font-medium text-gray-900 hover:text-blue-600 hover:underline"

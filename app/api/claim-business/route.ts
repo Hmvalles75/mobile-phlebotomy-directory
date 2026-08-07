@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 import { addBusinessClaim } from '@/lib/business-claims'
 
 /**
@@ -41,7 +42,7 @@ NEXT STEPS:
 4. Message: "Thanks for claiming ${claim.providerName}. Reply to this email to confirm you're authorized to manage this listing."
 5. Once they reply, verify the claim in admin dashboard
 
-Review claim at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
+Review claim at: ${SITE_URL}/admin
     `.trim()
 
     const response = await fetch('https://api.resend.com/emails', {

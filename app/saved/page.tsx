@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 import { ProviderActions, ProviderDetailsModal } from '@/components/ui/ProviderActions'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -108,7 +109,7 @@ export default function SavedProviders() {
     '@type': 'CollectionPage',
     name: 'Saved Mobile Phlebotomy Providers',
     description: 'Your saved mobile phlebotomy providers for easy access and comparison',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/saved`,
+    url: `${SITE_URL}/saved`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: providers.length,

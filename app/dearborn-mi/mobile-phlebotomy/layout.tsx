@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomy Dearborn, MI | At-Home Blood Draws 2026',
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     title: 'Mobile Phlebotomy in Dearborn, MI',
     description: 'Professional at-home blood draw services in Dearborn. Licensed phlebotomists, convenient scheduling, insurance accepted.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/dearborn-mi/mobile-phlebotomy',
+    url: `${SITE_URL}/dearborn-mi/mobile-phlebotomy`,
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/dearborn-mi/mobile-phlebotomy',
+    canonical: `${SITE_URL}/dearborn-mi/mobile-phlebotomy`,
   },
 }
 

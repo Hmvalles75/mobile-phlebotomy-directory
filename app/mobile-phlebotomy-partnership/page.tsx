@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 
 // Targets the high-intent B2B queries "mobile phlebotomy partnership" (170/mo)
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   description: 'Partner with vetted mobile phlebotomists nationwide for clinical research, senior living, corporate wellness, and lab routing. Single point of contact for multi-state coverage — request a written proposal in one business day.',
   keywords: 'mobile phlebotomy partnership, mobile phlebotomy contract, mobile phlebotomy services for research, b2b mobile phlebotomy, clinical trial phlebotomy partner, senior living phlebotomy contract, mobile lab routing partnership',
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/mobile-phlebotomy-partnership',
+    canonical: `${SITE_URL}/mobile-phlebotomy-partnership`,
   },
   openGraph: {
     title: 'Mobile Phlebotomy Partnership & Contract Services (2026)',
@@ -31,7 +32,7 @@ export default function MobilePhlebotomyPartnershipPage() {
     provider: {
       '@type': 'Organization',
       name: 'MobilePhlebotomy.org',
-      url: 'https://mobilephlebotomy.org',
+      url: `${SITE_URL}`,
     },
     areaServed: { '@type': 'Country', name: 'United States' },
     serviceType: 'Mobile Phlebotomy Partnership',

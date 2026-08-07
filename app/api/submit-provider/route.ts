@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 import { addPendingSubmission } from '@/lib/pending-submissions'
 import { checkForDuplicate } from '@/lib/duplicate-detection'
 
@@ -56,7 +57,7 @@ ${submission.landingPage ? `- Landing Page: ${submission.landingPage}` : ''}
 Submitted: ${new Date(submission.submittedAt).toLocaleString()}
 IP Address: ${submission.ipAddress}
 
-Review at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/admin
+Review at: ${SITE_URL}/admin
     `.trim()
 
     const response = await fetch('https://api.resend.com/emails', {

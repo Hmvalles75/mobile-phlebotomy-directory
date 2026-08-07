@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomy Livonia, MI | At-Home Blood Draws 2026',
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     title: 'Mobile Phlebotomy in Livonia, MI',
     description: 'Professional at-home blood draw services in Livonia. Licensed phlebotomists, convenient scheduling.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/livonia-mi/mobile-phlebotomy',
+    url: `${SITE_URL}/livonia-mi/mobile-phlebotomy`,
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/livonia-mi/mobile-phlebotomy',
+    canonical: `${SITE_URL}/livonia-mi/mobile-phlebotomy`,
   },
 }
 

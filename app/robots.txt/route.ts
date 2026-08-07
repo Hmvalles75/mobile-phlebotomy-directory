@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 
 export function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  const baseUrl = SITE_URL
   
   const robotsTxt = `User-agent: *
 Allow: /

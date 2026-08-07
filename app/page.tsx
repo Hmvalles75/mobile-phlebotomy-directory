@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { metroHref } from '@/lib/seo/metroCanonical'
+import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { AutocompleteSearchBar } from '@/components/ui/AutocompleteSearchBar'
@@ -137,13 +139,13 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'MobilePhlebotomy.org',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org',
+    url: SITE_URL,
     description: 'Find certified mobile phlebotomy services near you. Professional at-home blood draws, lab collections, and mobile health services nationwide.',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/search?q={search_term_string}`
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`
       },
       'query-input': 'required name=search_term_string'
     }
@@ -641,7 +643,7 @@ export default function HomePage() {
             {featuredMetros.map((metro) => (
               <Link
                 key={metro.slug}
-                href={`/us/metro/${metro.slug}`}
+                href={metroHref(metro)}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary-300 transition-all group"
               >
                 <div className="flex justify-between items-start mb-2">

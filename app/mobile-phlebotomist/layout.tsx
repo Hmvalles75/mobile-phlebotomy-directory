@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Mobile Phlebotomist Services | Find At-Home Blood Draw Near You',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/mobile-phlebotomist',
+    canonical: `${SITE_URL}/mobile-phlebotomist`,
   },
 }
 
@@ -51,7 +52,7 @@ export default function MobilePhlebotomistLayout({
     '@type': 'MedicalBusiness',
     name: 'Mobile Phlebotomist Services',
     description: 'Find certified mobile phlebotomists who provide at-home blood draw services across the United States',
-    url: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/mobile-phlebotomist` : 'https://mobilephlebotomy.org/mobile-phlebotomist',
+    url: `${SITE_URL}/mobile-phlebotomist`,
     medicalSpecialty: 'Phlebotomy',
     serviceType: ['Mobile Phlebotomy', 'At-Home Blood Draw', 'Mobile Lab Services'],
     areaServed: {
@@ -90,13 +91,13 @@ export default function MobilePhlebotomistLayout({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+        item: SITE_URL
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Mobile Phlebotomist Services',
-        item: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/mobile-phlebotomist` : 'https://mobilephlebotomy.org/mobile-phlebotomist'
+        item: `${SITE_URL}/mobile-phlebotomist`
       }
     ]
   }

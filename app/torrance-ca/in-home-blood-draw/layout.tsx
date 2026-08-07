@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'In-Home Blood Draw Torrance CA | Mobile Phlebotomy Services (2026)',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/torrance-ca/in-home-blood-draw',
+    canonical: `${SITE_URL}/torrance-ca/in-home-blood-draw`,
   },
 }
 

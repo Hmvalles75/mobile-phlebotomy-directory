@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'In-Home Blood Draw Detroit, MI | At-Home Lab Services 2026',
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: 'In-Home Blood Draw Services in Detroit, MI',
     description: 'Certified phlebotomists provide professional blood collection in your Detroit home. Convenient, safe, and accurate specimen collection.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/detroit-mi/in-home-blood-draw',
+    url: `${SITE_URL}/detroit-mi/in-home-blood-draw`,
   },
   twitter: {
     card: 'summary_large_image',
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     description: 'Professional in-home blood draw services in Detroit. Licensed phlebotomists, Medicare accepted, convenient scheduling.',
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/detroit-mi/in-home-blood-draw',
+    canonical: `${SITE_URL}/detroit-mi/in-home-blood-draw`,
   },
 }
 

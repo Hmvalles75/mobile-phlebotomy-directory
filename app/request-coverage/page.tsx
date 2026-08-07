@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import { CoverageRequestForm } from './CoverageRequestForm'
 
 export const metadata: Metadata = {
   title: 'Coverage for labs, studies, and institutional draws — MobilePhlebotomy.org',
   description:
     'Mobile phlebotomy coverage across the United States, coordinated through a single point of contact. Tell us what you need and we\'ll respond within one business day with available coverage and pricing.',
-  alternates: { canonical: 'https://mobilephlebotomy.org/request-coverage' },
+  alternates: { canonical: `${SITE_URL}/request-coverage` },
   openGraph: {
     title: 'Coverage for labs, studies, and institutional draws',
     description: 'Mobile phlebotomy coverage across the United States — single point of contact, response within one business day.',

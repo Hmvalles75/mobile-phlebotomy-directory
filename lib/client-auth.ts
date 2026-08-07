@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { SITE_URL } from './seo'
 import { nanoid } from 'nanoid'
 import { prisma } from './prisma'
 import sg from '@sendgrid/mail'
@@ -20,7 +21,7 @@ if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
  */
 
 const FROM = 'hector@mobilephlebotomy.org'
-const SITE = (process.env.PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mobilephlebotomy.org').replace(/\/+$/, '')
+const SITE = (process.env.PUBLIC_SITE_URL || SITE_URL).replace(/\/+$/, '')
 
 export const CLIENT_SESSION_COOKIE = 'client_session'
 const TOKEN_TTL_MIN = 15

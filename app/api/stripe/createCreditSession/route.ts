@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 
@@ -87,8 +88,8 @@ export async function POST(req: NextRequest) {
           quantity: 1
         }
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard?success=credits&pack=${packId}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'}/dashboard?canceled=1`,
+      success_url: `${SITE_URL}/dashboard?success=credits&pack=${packId}`,
+      cancel_url: `${SITE_URL}/dashboard?canceled=1`,
       metadata: {
         providerId,
         type: 'credit_purchase',

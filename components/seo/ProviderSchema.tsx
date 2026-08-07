@@ -1,6 +1,7 @@
 'use client'
 
 import { type Provider } from '@/lib/schemas'
+import { SITE_URL } from '@/lib/seo'
 import {
   generateLocalBusinessSchema,
   generateServiceSchema,
@@ -83,7 +84,7 @@ export function ProviderListSchema({
       position: index + 1,
       item: {
         '@type': 'MedicalBusiness',
-        '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/provider/${provider.id}`,
+        '@id': `${SITE_URL}/provider/${provider.id}`,
         name: provider.name,
         description: provider.description || `Mobile phlebotomy services by ${provider.name}`,
         telephone: provider.phone,

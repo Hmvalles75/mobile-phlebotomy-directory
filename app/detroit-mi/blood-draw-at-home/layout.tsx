@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Blood Draw at Home Detroit, MI | Home Blood Testing 2026',
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     title: 'Blood Draw at Home in Detroit, MI',
     description: 'Professional blood draws in your Detroit home. Licensed phlebotomists, accurate results, convenient scheduling.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/detroit-mi/blood-draw-at-home',
+    url: `${SITE_URL}/detroit-mi/blood-draw-at-home`,
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/detroit-mi/blood-draw-at-home',
+    canonical: `${SITE_URL}/detroit-mi/blood-draw-at-home`,
   },
 }
 

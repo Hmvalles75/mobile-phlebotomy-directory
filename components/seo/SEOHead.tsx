@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/seo'
 'use client'
 
 interface SEOHeadProps {
@@ -21,7 +22,7 @@ export function SEOHead({
   schema,
   noindex = false
 }: SEOHeadProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+  const siteUrl = SITE_URL
   const fullTitle = title ? `${title} | MobilePhlebotomy.org` : 'Mobile Phlebotomy Directory | Find At-Home Blood Draw Services'
   const defaultDescription = 'Find certified mobile phlebotomy services near you. Professional at-home blood draws, lab collections, and mobile health services nationwide.'
   const metaDescription = description || defaultDescription

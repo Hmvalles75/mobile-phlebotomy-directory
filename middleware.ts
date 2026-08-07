@@ -34,8 +34,39 @@ const METRO_REMAP: Record<string, string> = {
 // instead of treating them as transient 404s.
 const PLACEHOLDER_PROVIDER_SLUG = /^provider-\d+$/
 
+// The production Vercel alias got indexed as a full duplicate of the site —
+// ToS, Florida city pages and provider profiles all appear under
+// site:mobile-phlebotomy-directory.vercel.app. Every one of those competes with
+// its www twin. Preview deployments are a different problem: they must stay
+// reachable for review, so they get noindex rather than a redirect.
+const PROD_VERCEL_ALIAS = 'mobile-phlebotomy-directory.vercel.app'
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+
+  // Host handling runs before any path logic so a duplicate host can never be
+  // served real content. The apex (mobilephlebotomy.org) is deliberately NOT
+  // handled here — Vercel's platform-level domain redirect answers it before
+  // middleware runs, and adding a second rule would only create a redirect
+  // chain without changing the status code Vercel emits.
+  const host = (request.headers.get('host') || '').toLowerCase().split(':')[0]
+
+  if (host === PROD_VERCEL_ALIAS) {
+    const url = new URL(request.nextUrl.toString())
+    url.protocol = 'https:'
+    url.host = 'www.mobilephlebotomy.org'
+    url.port = ''
+    // 308 preserves the method and tells Google to transfer signals to the
+    // canonical host permanently.
+    return NextResponse.redirect(url, 308)
+  }
+
+  if (host.endsWith('.vercel.app')) {
+    // Preview deployment — keep it reachable, keep it out of the index.
+    const previewResponse = NextResponse.next()
+    previewResponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return previewResponse
+  }
 
   // Redirect common 404 patterns to homepage
   const invalidPatterns = [

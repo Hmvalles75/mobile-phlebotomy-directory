@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { SITE_URL as SHARED_SITE_URL } from '@/lib/seo'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
 
@@ -34,7 +35,7 @@ const ADMIN_EMAIL = 'hector@mobilephlebotomy.org'
 // Admin-bound escalation — only `hector@` is verified, so unverified fallbacks
 // were silently failing in SendGrid.
 const FROM_EMAIL = 'hector@mobilephlebotomy.org'
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mobilephlebotomy.org'
+const SITE_URL = SHARED_SITE_URL
 
 function fmtMinAgo(d: Date | null): string {
   if (!d) return '—'

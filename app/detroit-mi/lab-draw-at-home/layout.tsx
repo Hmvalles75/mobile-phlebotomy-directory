@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Lab Draw at Home Detroit, MI | Quest & Labcorp Home Collection 2026',
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     title: 'Lab Draw at Home in Detroit, MI',
     description: 'Professional lab specimen collection at your Detroit home. Transport to Quest, Labcorp, and all major laboratories.',
     type: 'website',
-    url: 'https://mobilephlebotomy.org/detroit-mi/lab-draw-at-home',
+    url: `${SITE_URL}/detroit-mi/lab-draw-at-home`,
   },
   alternates: {
-    canonical: 'https://mobilephlebotomy.org/detroit-mi/lab-draw-at-home',
+    canonical: `${SITE_URL}/detroit-mi/lab-draw-at-home`,
   },
 }
 
