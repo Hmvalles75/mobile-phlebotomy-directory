@@ -76,6 +76,41 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Re-claiming a lead you just lost to the stale-claim sweep is engagement,
+    // not neglect — so undo the strike the sweep put on the provider.
+    //
+    // The 6-hour SLA assumes someone who claims and forgets. What it actually
+    // catches is someone mid-booking: Precision Care re-claimed within an hour
+    // and logged APPOINTMENT_BOOKED, and has an outcome on every lead they have
+    // ever taken, yet carried 4 strikes. Three other providers hit the same
+    // thing. A provider who comes straight back is demonstrating exactly the
+    // behaviour the counter is meant to reward.
+    //
+    // Only the PROVIDER counter is decremented. lead.staleReleaseCount stays —
+    // that one is the loop guard behind MAX_STALE_RELEASE_CYCLES and must keep
+    // counting, or a lead could cycle forever between release and re-claim.
+    if (lead.releasedFromProviderId === providerId && lead.releaseReason === 'stale_claim') {
+      try {
+        const p = await prisma.provider.findUnique({
+          where: { id: providerId },
+          select: { staleReleaseCount: true },
+        })
+        if (p && p.staleReleaseCount > 0) {
+          await prisma.provider.update({
+            where: { id: providerId },
+            data: { staleReleaseCount: { decrement: 1 } },
+          })
+          console.log(
+            `[Claim] ${providerId} re-claimed lead ${leadId} after its own stale release — ` +
+            `strike reversed (${p.staleReleaseCount} → ${p.staleReleaseCount - 1})`
+          )
+        }
+      } catch (err: any) {
+        // Never fail a claim over a reputation counter.
+        console.error('[Claim] Failed to reverse stale strike:', err.message || err)
+      }
+    }
+
     // Calculate response time (time from first notification to claim)
     let responseTimeMinutes: number | null = null
     if (lead.routedAt) {

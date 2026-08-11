@@ -337,6 +337,30 @@ async function findFeaturedProvidersForNotification(
  * @param leadId - The ID of the newly created lead
  * @returns Promise<number> - Number of providers successfully notified
  */
+/**
+ * Wave 2 (free-tier) delay, in seconds.
+ *
+ * Exported because lib/cancelLeadNotifications.ts has to reconstruct which
+ * providers actually received their notification before a lead was claimed —
+ * a Wave 2 row is marked SENT the moment it is handed to SendGrid with a
+ * future sendAt, so "SENT" does not mean "delivered". Both files must agree on
+ * the window or the reconstruction silently drifts from reality.
+ *
+ * Returns 0 when no paying provider covers the lead (no head start to sell, so
+ * nobody waits) or when the request is STAT — an urgent patient must never
+ * wait on a monetization window.
+ */
+export const FREE_TIER_DELAY_STANDARD = 30 * 60  // 30-minute priority head start
+export const FREE_TIER_DELAY_STAT = 0            // urgent: everyone immediately
+
+export function freeTierDelaySeconds(
+  payingProviderCount: number,
+  urgency: 'STANDARD' | 'STAT',
+): number {
+  if (payingProviderCount === 0) return 0
+  return urgency === 'STAT' ? FREE_TIER_DELAY_STAT : FREE_TIER_DELAY_STANDARD
+}
+
 // Maximum age (in days) at which we'll still send lead notifications.
 // Beyond this, patients have almost certainly been served elsewhere and
 // notifying providers creates noise + false urgency.
@@ -417,12 +441,7 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     // just after the window, so overall coverage/claim reach is unchanged; only
     // the head start is sold. (Widened from 10m→30m on 2026-07-21 to give the
     // $79 tier genuine value for the top-converter upsell.)
-    const FREE_TIER_DELAY_STANDARD = 30 * 60  // 30-minute priority head start
-    const FREE_TIER_DELAY_STAT = 0            // urgent: everyone immediately
-    const otherDelay =
-      priorityProviders.length === 0 ? 0
-        : lead.urgency === 'STAT' ? FREE_TIER_DELAY_STAT
-          : FREE_TIER_DELAY_STANDARD
+    const otherDelay = freeTierDelaySeconds(priorityProviders.length, lead.urgency)
 
     if (priorityProviders.length > 0) {
       console.log(`[LeadNotifications] Wave 1 (paying): ${priorityProviders.length} provider(s), immediate`)
