@@ -28,8 +28,8 @@ const tiers: PricingTier[] = [
     features: [
       'Everything listed above',
       '"Founding Partner" label on your profile',
+      'First priority when waterfall lead routing launches',
       'Larger, more visible profile card highlighting your services',
-      'Monthly listing views and click stats',
       'Cancel anytime — no long-term contract',
     ],
   },
@@ -43,8 +43,6 @@ const tiers: PricingTier[] = [
       'Everything in Founding Partner, plus:',
       'Top spot on your city page — the #1 listing patients see',
       'Option to be the exclusive featured sponsor for your city',
-      'Detailed analytics: views, clicks, and conversion rates',
-      'Direct support line for account questions',
     ],
   },
 ]
@@ -145,7 +143,7 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-800">
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Higher placement on city &amp; state pages</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Gold &quot;Featured Provider&quot; badge</div>
-                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Priority lead routing in your area</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Priority routing when waterfall routing launches</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> No per-lead fees — leads are free to claim</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Cancel anytime, no contracts</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Listing upgraded instantly</div>

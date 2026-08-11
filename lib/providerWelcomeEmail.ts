@@ -39,8 +39,8 @@ const SITE_URL   = 'https://mobilephlebotomy.org'
  * becomes active. Idempotent at the call site (webhook gates on
  * customer.subscription.created so it only fires once per subscription).
  *
- * Describes what's live now (Featured placement + priority lead routing)
- * and includes deep links to the provider's own listing on the state page,
+ * Describes what's live now (Featured placement; routing priority arrives
+ * with the waterfall) and includes deep links to the provider's own listing,
  * city page, and detail page so they can verify the upgrade themselves.
  *
  * `overrideTo` replaces the usual notificationEmail-first resolution. Use it
@@ -69,10 +69,10 @@ export async function sendProviderWelcomeEmail(
     : null
   const detailPath = `/provider/${provider.slug}`
 
-  const isHighDensity = tier === 'HIGH_DENSITY'
-  const priorityLine = isHighDensity
-    ? 'You\'re on the top priority wave — you\'ll get patient lead notifications first in every ZIP you cover, with a head-start over every other provider.'
-    : 'You\'ll now get patient lead notifications with a 10-minute head-start over free providers in your area. Every lead gets emailed (and texted, if you\'ve shared a mobile number) with the patient\'s full contact info, so you can call them directly.'
+  // No timing claims. The paid head start was removed 2026-08-11 — every
+  // provider is now notified simultaneously — so the benefit set is placement
+  // today plus routing priority when the waterfall ships.
+  const priorityLine = "Top placement in your city's directory, a larger profile card, your Founding Partner badge, and first-in-line priority routing when our waterfall routing system launches."
 
   const subject = `Welcome to ${tierLabel} — your listing is live`
 

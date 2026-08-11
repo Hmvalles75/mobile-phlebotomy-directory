@@ -11,7 +11,7 @@ const tiers = [
     name: 'Founding Partner',
     price: 79,
     roi: '~3 leads pays for itself',
-    description: 'For providers in growing markets — premium placement and priority lead routing.',
+    description: 'For providers in growing markets — premium placement, plus priority routing at launch.',
     popular: true,
     icon: Award,
     features: [
@@ -33,7 +33,7 @@ const tiers = [
     features: [
       'Top placement in major metros',
       'Featured badge on your listing',
-      'Highest priority lead routing',
+      'Priority routing when waterfall routing launches',
       'City-exclusive featured sponsor option',
       'Advanced analytics & insights',
       'Dedicated account support',
@@ -257,8 +257,8 @@ export default function PricingPage() {
                 <p className="text-sm">Build trust with a verified premium provider badge</p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">✓ Priority Lead Routing</h4>
-                <p className="text-sm">Get first access to patient requests in your area</p>
+                <h4 className="font-semibold mb-2">✓ Priority Routing at Launch</h4>
+                <p className="text-sm">First priority when our waterfall lead routing system launches</p>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">✓ Cancel Anytime</h4>
