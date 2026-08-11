@@ -101,6 +101,7 @@ export async function GET(req: NextRequest) {
     // Fetch OPEN leads available to claim in provider's service area
     // Only show leads if provider is currently available
     let availableLeads: any[] = []
+    let recentlyClaimedLeads: any[] = []
 
     if (isProviderAvailableNow()) {
       // Get provider's primary ZIP code and service radius
@@ -138,6 +139,30 @@ export async function GET(req: NextRequest) {
         availableLeads = allOpenLeads.filter(lead =>
           isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius)
         ).slice(0, 20) // Limit to 20 leads
+
+        // Leads someone else took, kept visible for 7 days.
+        //
+        // Previously these vanished the instant they were claimed, so a
+        // provider watching the dashboard saw a lead appear and silently
+        // disappear with no explanation. Seeing what you missed is the point:
+        // every paid subscriber converted within hours of a live lead, and a
+        // lost one is the same signal.
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        const claimedElsewhere = await prisma.lead.findMany({
+          where: {
+            status: 'CLAIMED',
+            claimedAt: { gte: sevenDaysAgo },
+            routedToId: { not: session.providerId },
+          },
+          orderBy: { claimedAt: 'desc' },
+          select: {
+            id: true, createdAt: true, claimedAt: true,
+            city: true, state: true, zip: true, urgency: true,
+          },
+        })
+        recentlyClaimedLeads = claimedElsewhere
+          .filter(lead => isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius))
+          .slice(0, 20)
       } else {
         // No ZIP code set, show no leads
         availableLeads = []
@@ -171,6 +196,7 @@ export async function GET(req: NextRequest) {
       provider,
       claimedLeads,
       availableLeads,
+      recentlyClaimedLeads,
       stats,
       isTrialActive
     })

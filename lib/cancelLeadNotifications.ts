@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { SITE_URL } from './seo'
 import { freeTierDelaySeconds } from './leadNotifications'
 import sg from '@sendgrid/mail'
 
@@ -137,19 +138,42 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
       const recipient = n.provider.notificationEmail || n.provider.claimEmail || n.provider.email
       if (!recipient) { skipped++; continue }
 
+      // Losing a lead you actually saw is the one moment we can evidence as a
+      // conversion trigger — every paid subscriber signed up within hours of a
+      // live lead. Paying providers never see this block.
+      //
+      // Deliberately makes no claim that a paying provider got this lead
+      // first: since the head start was removed, every provider is notified
+      // simultaneously, and saying otherwise would be false.
+      const upgradeUrl = `${SITE_URL}/upgrade?provider=${n.providerId}&utm_source=lead_claimed&utm_medium=email&utm_campaign=loss_moment`
+      const showUpgrade = !n.provider.priorityRouting
+
+      const upgradeText = showUpgrade
+        ? `
+
+Founding Partners get top directory placement and first priority when our waterfall routing launches — upgrade here: ${upgradeUrl}`
+        : ''
+
+      const upgradeHtml = showUpgrade
+        ? `<div style="margin-top:24px;padding:16px 20px;background:#f8f9fa;border-left:4px solid #667eea;border-radius:0 6px 6px 0;">
+<p style="margin:0;font-size:14px;color:#4b5563;">Founding Partners get top directory placement and first priority when our waterfall routing launches — <a href="${upgradeUrl}" style="color:#667eea;font-weight:600;text-decoration:none;">upgrade here</a>.</p>
+</div>`
+        : ''
+
       const text = `Hi ${n.provider.name},
 
 Quick update — the patient request in ${lead.city}, ${lead.state} (${lead.zip}) was just claimed by another provider in your area, so no action needed on your side.
 
 We'll let you know when the next request lands near you.
 
-— MobilePhlebotomy.org`
+— MobilePhlebotomy.org${upgradeText}`
 
       const html = `<!DOCTYPE html><html><body style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 20px;">
 <p>Hi ${n.provider.name},</p>
 <p>Quick update — the patient request in <strong>${lead.city}, ${lead.state} (${lead.zip})</strong> was just claimed by another provider in your area, so no action needed on your side.</p>
 <p>We'll let you know when the next request lands near you.</p>
 <p style="color: #6b7280; font-size: 14px;">— MobilePhlebotomy.org</p>
+${upgradeHtml}
 </body></html>`
 
       try {

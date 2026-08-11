@@ -61,7 +61,10 @@ interface AvailableLead {
   state: string
   zip: string
   urgency: 'STANDARD' | 'STAT'
-  priceCents: number
+  priceCents?: number
+  // Present only on recentlyClaimedLeads — the claimed-elsewhere query does
+  // not select priceCents, since a lead you cannot claim has no price to show.
+  claimedAt?: string | null
 }
 
 interface Provider {
@@ -92,6 +95,7 @@ interface DashboardData {
   provider: Provider
   claimedLeads: Lead[]
   availableLeads: AvailableLead[]
+  recentlyClaimedLeads?: AvailableLead[]
   stats: {
     totalLeads: number
     claimedLeads: number
@@ -486,7 +490,7 @@ function DashboardContent() {
     )
   }
 
-  const { provider, claimedLeads, availableLeads, stats, isTrialActive } = data
+  const { provider, claimedLeads, availableLeads, recentlyClaimedLeads = [], stats, isTrialActive } = data
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1257,6 +1261,53 @@ function DashboardContent() {
             </div>
           )}
         </div>
+
+        {/* Recently claimed by someone else — visible for 7 days.
+            These used to vanish the moment they were taken, so a provider saw a
+            lead appear and silently disappear. Showing what was missed is the
+            point: it is the only conversion trigger we can evidence. */}
+        {recentlyClaimedLeads.length > 0 && (
+          <div className="bg-white rounded-lg shadow mt-8">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Recently Claimed Near You</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Requests in your area that another provider claimed in the last 7 days.
+              </p>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {recentlyClaimedLeads.map((lead: AvailableLead) => (
+                <div key={lead.id} className="px-6 py-4 flex items-center justify-between opacity-75">
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {lead.city}, {lead.state} {lead.zip}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {lead.urgency === 'STAT' ? 'STAT (urgent)' : 'Standard'}
+                      {lead.claimedAt ? ` · claimed ${new Date(lead.claimedAt).toLocaleDateString()}` : ''}
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                    Claimed
+                  </span>
+                </div>
+              ))}
+            </div>
+            {!provider.priorityRouting && (
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <p className="text-sm text-gray-700">
+                  Founding Partners get top directory placement and first priority when our
+                  waterfall routing launches.{' '}
+                  <button
+                    onClick={() => setShowPricingModal(true)}
+                    className="text-primary-600 font-semibold hover:underline"
+                  >
+                    See upgrade options
+                  </button>
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
