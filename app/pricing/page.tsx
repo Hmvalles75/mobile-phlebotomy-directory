@@ -17,9 +17,8 @@ const tiers = [
     features: [
       'Premium placement in search results',
       'Featured badge on your listing',
-      'Priority lead routing in your area',
+      'Priority routing when waterfall routing launches',
       'Enhanced profile visibility',
-      'Analytics dashboard',
       'Cancel anytime — no long-term contract',
     ],
   },
@@ -35,8 +34,6 @@ const tiers = [
       'Featured badge on your listing',
       'Priority routing when waterfall routing launches',
       'City-exclusive featured sponsor option',
-      'Advanced analytics & insights',
-      'Dedicated account support',
     ],
   },
 ]
@@ -217,14 +214,6 @@ export default function PricingPage() {
                 <li className="flex items-start gap-2">
                   <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
                   <span className="text-gray-700">Content updates on request</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
-                  <span className="text-gray-700">Priority email support</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
-                  <span className="text-gray-700">Analytics & visitor tracking</span>
                 </li>
               </ul>
               <a

@@ -14,17 +14,6 @@ export function tierRank(tier: FeaturedTier): number {
   }
 }
 
-// Priority delay (seconds) — how long non-premium providers wait before they get notified.
-// HIGH_DENSITY gets the 60-second head start.
-export function notificationDelaySeconds(tier: FeaturedTier): number {
-  switch (tier) {
-    case 'HIGH_DENSITY': return 0          // Immediate
-    case 'STANDARD_PREMIUM': return 60     // 60-second delay
-    case 'FOUNDING_PARTNER': return 60     // 60-second delay
-    default: return 60                      // All other featured providers also wait
-  }
-}
-
 export interface TierBadge {
   label: string
   icon: string
