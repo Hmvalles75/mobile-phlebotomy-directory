@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { PAID_HEAD_START_SECONDS } from '@/lib/leadNotifications'
 
 export async function GET(req: NextRequest) {
   try {
@@ -112,7 +113,7 @@ export async function GET(req: NextRequest) {
       // Fetch all OPEN leads from the last 14 days (we'll filter by radius in memory)
       // Older than 14 days = stale; patient most likely got service elsewhere
       const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-      const allOpenLeads = await prisma.lead.findMany({
+      let allOpenLeads = await prisma.lead.findMany({
         where: {
           status: 'OPEN',
           createdAt: { gte: fourteenDaysAgo },
@@ -131,6 +132,48 @@ export async function GET(req: NextRequest) {
           priceCents: true
         }
       })
+
+      // ── Paid head-start window ──────────────────────────────────────────
+      //
+      // This queue is why the paid head start never worked. Holding Wave 2
+      // *emails* back protected nothing while this route handed every OPEN
+      // lead to every logged-in provider the instant it existed — a free
+      // provider with the dashboard open saw the lead at the same moment the
+      // paying provider was emailed. A paying customer asked on 2026-08-14 how
+      // long his window was; the honest answer was that he had never had one.
+      //
+      // So the window applies here too. A non-paying provider does not see a
+      // lead that is still inside the head start, and only when the window is
+      // actually in force for that lead: a paying provider was notified, and
+      // the request is not urgent. Everything else is unchanged, and the lead
+      // appears here the moment the window closes.
+      if (!provider.priorityRouting) {
+        const cutoff = new Date(Date.now() - PAID_HEAD_START_SECONDS * 1000)
+        const inWindow = allOpenLeads.filter(l => l.urgency !== 'STAT' && l.createdAt > cutoff)
+
+        if (inWindow.length > 0) {
+          // Only leads a paying provider was actually notified about are held —
+          // freeTierDelaySeconds() applies no delay when none covers the area,
+          // and this must agree with it or free providers lose leads nobody
+          // was ever given a head start on.
+          const contested = await prisma.leadNotification.findMany({
+            where: {
+              leadId: { in: inWindow.map(l => l.id) },
+              provider: { priorityRouting: true },
+            },
+            select: { leadId: true },
+            distinct: ['leadId'],
+          })
+          const held = new Set(contested.map(c => c.leadId))
+          if (held.size > 0) {
+            allOpenLeads = allOpenLeads.filter(l => !held.has(l.id))
+            console.log(
+              `[Dashboard] Provider ${provider.id} (free tier) — withheld ${held.size} lead(s) ` +
+              `inside the ${PAID_HEAD_START_SECONDS}s paid head start`
+            )
+          }
+        }
+      }
 
       // Filter leads by radius if provider has a ZIP code
       if (primaryZip) {

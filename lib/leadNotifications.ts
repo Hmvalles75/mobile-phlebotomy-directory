@@ -336,28 +336,43 @@ async function findFeaturedProvidersForNotification(
  * @returns Promise<number> - Number of providers successfully notified
  */
 /**
- * Notification delay, in seconds. Always 0 — every provider is notified
- * simultaneously.
+ * Notification delay for free listings, in seconds.
  *
- * There used to be a 30-minute head start for paying providers on STANDARD
- * leads. It was removed 2026-08-11 because it was never a real advantage:
- * app/api/dashboard/route.ts serves every OPEN lead instantly to any
- * logged-in provider, so engaged free providers were already claiming inside
- * 30 seconds while their own email sat queued. The delay only penalised
- * providers who rely on email, and it suppressed the one conversion trigger we
- * can evidence — every paid subscriber signed up within hours of seeing a live
- * lead.
- *
- * Kept as a function rather than deleted because
- * lib/cancelLeadNotifications.ts reconstructs delivery times with it. With a
- * constant 0 every notification is treated as delivered on send, which is now
- * true. Remove it only when that reconstruction is removed too.
+ * lib/cancelLeadNotifications.ts reconstructs per-notification delivery times
+ * with this function to decide who actually received a lead before it was
+ * claimed. Any change here changes who gets a courtesy email, so the two must
+ * stay in agreement.
  */
+/**
+ * The paid tier's head-start window, in seconds.
+ *
+ * History worth keeping: this started at 600s, was widened to 1800s on
+ * 2026-07-21, then removed entirely on 2026-08-11 because it did not work.
+ * It never worked — app/api/dashboard/route.ts served every OPEN lead to every
+ * logged-in provider the instant it existed, so holding the *email* back
+ * protected nothing. A free provider with the dashboard open saw the lead at
+ * the same moment the paying provider was emailed.
+ *
+ * Reinstated 2026-08-14 with the actual defect fixed: the dashboard queue now
+ * honours the same window (see the head-start filter in that route). Without
+ * that half this is decorative again — do not restore one without the other.
+ *
+ * Back to 10 minutes, not 30. Free providers are the supply side (733 of them
+ * against 4 paying); a window long enough to make them feel shut out costs more
+ * than it earns.
+ */
+export const PAID_HEAD_START_SECONDS = 10 * 60
+
 export function freeTierDelaySeconds(
-  _payingProviderCount: number,
-  _urgency: 'STANDARD' | 'STAT',
+  payingProviderCount: number,
+  urgency: 'STANDARD' | 'STAT',
 ): number {
-  return 0
+  // Nobody paying covers this area — holding the lead back would delay the
+  // patient to protect a window that benefits no one.
+  if (payingProviderCount === 0) return 0
+  // An urgent patient never waits on a monetization window.
+  if (urgency === 'STAT') return 0
+  return PAID_HEAD_START_SECONDS
 }
 
 // Maximum age (in days) at which we'll still send lead notifications.
@@ -414,15 +429,29 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
 
     console.log(`[LeadNotifications] Found ${providers.length} provider(s) to notify`)
 
-    // No wave split — every matched provider is notified at once. See
-    // freeTierDelaySeconds above for why the paid head start was removed.
-    console.log(`[LeadNotifications] Notifying ${providers.length} provider(s), all immediate`)
+    // Wave split. Paying providers are emailed immediately; free listings are
+    // held for the head-start window, but only when a paying provider actually
+    // covers this area and the request is not urgent. Free providers still
+    // receive every lead — only the first look is sold.
+    const priorityProviders = providers.filter(p => p.priorityRouting)
+    const otherProviders    = providers.filter(p => !p.priorityRouting)
+    const otherDelay = freeTierDelaySeconds(priorityProviders.length, lead.urgency)
 
-    // Generate a SendGrid batch_id for this lead's notifications. Nothing is
-    // scheduled now that every send is immediate, so there is normally nothing
-    // to cancel — kept because the batch id is still the handle
-    // lib/cancelLeadNotifications.ts uses, and the waterfall's ring windows
-    // will reintroduce scheduled sends.
+    if (priorityProviders.length > 0) {
+      console.log(`[LeadNotifications] Wave 1 (paying): ${priorityProviders.length} provider(s), immediate`)
+    }
+    if (otherProviders.length > 0) {
+      console.log(
+        `[LeadNotifications] Wave 2 (free): ${otherProviders.length} provider(s), ` +
+        `${otherDelay > 0 ? `${otherDelay}s delay` : 'immediate'}`
+      )
+    }
+
+    // Generate a SendGrid batch_id for this lead's notifications. Wave 2 sends
+    // are scheduled with sendAt, so when a paying provider claims inside the
+    // head start lib/cancelLeadNotifications.ts cancels this batch and those
+    // emails never leave SendGrid — which is what makes the window real rather
+    // than a race the free provider still wins on arrival.
     let batchId: string | null = null
     if (process.env.SENDGRID_API_KEY) {
       try {
@@ -481,8 +510,13 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
 
     let successCount = 0
 
-    for (const provider of providers) {
+    for (const provider of priorityProviders) {
       const ok = await sendToProvider(provider, 0)
+      if (ok) successCount++
+    }
+
+    for (const provider of otherProviders) {
+      const ok = await sendToProvider(provider, otherDelay)
       if (ok) successCount++
     }
 
