@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
-import { sendSMSBlastToEligibleProviders } from '@/lib/smsBlast'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
@@ -413,8 +412,19 @@ export async function POST(req: NextRequest) {
 
     // Send notifications synchronously to ensure they complete before function terminates
     // This adds ~1-3 seconds to response time but guarantees delivery
+    // Email is the only provider notification channel. The SMS blast that used
+    // to run here was removed 2026-08-14: our Twilio A2P 10DLC campaign was
+    // rejected as third-party lead-gen (error 30897, 2026-07-17) and cannot be
+    // resubmitted, so every send failed. Because this section is synchronous,
+    // each patient submission was waiting on Twilio calls that could not
+    // succeed.
+    //
+    // Removing it is also a consent fix. sendSMSBlastToEligibleProviders
+    // targeted provider.phonePublic — the public listing number — and never
+    // consulted smsOptInAt, so had the campaign ever been approved it would
+    // have texted providers who never opted in. lib/smsBlast.ts is left in
+    // place but is no longer wired to any path.
     let emailCount = 0
-    let smsCount = 0
 
     try {
       // Send email notifications to featured providers (Phase 1)
@@ -424,26 +434,12 @@ export async function POST(req: NextRequest) {
       console.error(`[Lead ${lead.id}] ❌ Featured provider email FAILED:`, err.message || err)
     }
 
-    try {
-      // Send SMS blast to all eligible providers in the area (Race to Claim)
-      smsCount = await sendSMSBlastToEligibleProviders({
-        id: lead.id,
-        zip: payload.zip,
-        urgency: payload.urgency,
-        city,
-        state: payload.state
-      })
-      console.log(`[Lead ${lead.id}] ✅ SMS blast: ${smsCount} sent`)
-    } catch (err: any) {
-      console.error(`[Lead ${lead.id}] ❌ SMS blast FAILED:`, err.message || err)
-    }
-
     // Patient confirmation — only when at least one provider was actually
     // notified. Its job is to make the patient expect a call from an unknown
     // number, which is where a quarter of claimed leads currently die
     // (NO_ANSWER / VOICEMAIL). Fire-and-forget: a failed confirmation must
     // never fail the submission or delay the provider race.
-    if (emailCount > 0 || smsCount > 0) {
+    if (emailCount > 0) {
       sendLeadConfirmationToPatient({
         id: lead.id,
         fullName: lead.fullName,
@@ -458,7 +454,7 @@ export async function POST(req: NextRequest) {
 
     // If NO providers were notified at all, this is an uncovered area
     // Send expansion email to the lead and notify admin
-    if (emailCount === 0 && smsCount === 0) {
+    if (emailCount === 0) {
       console.log(`[Lead ${lead.id}] No coverage in ${city}, ${payload.state} - sending expansion email`)
 
       // Send expansion email to the lead
