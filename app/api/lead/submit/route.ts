@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
+import { findProviderBySubmissionContact, handleProviderTestSubmission } from '@/lib/providerTestSubmission'
 import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
@@ -412,6 +413,23 @@ export async function POST(req: NextRequest) {
 
     // Send notifications synchronously to ensure they complete before function terminates
     // This adds ~1-3 seconds to response time but guarantees delivery
+    // Provider test submissions never fan out. A new provider submitting a fake
+    // request to check the system works is reasonable, but on 2026-08-13 one
+    // reached 8 real DFW providers and cost the claiming provider a call, a
+    // voicemail and a text on a patient who did not exist. The tester only
+    // needs to see the notification arrive, so we send it to them alone and
+    // close the lead. See lib/providerTestSubmission.ts.
+    const testMatch = await findProviderBySubmissionContact(payload.email, payload.phone)
+    if (testMatch) {
+      await handleProviderTestSubmission(lead, testMatch)
+      return NextResponse.json({
+        ok: true,
+        leadId: lead.id,
+        status: 'closed_test',
+        message: 'Test submission recognised — preview sent to the submitting provider only',
+      })
+    }
+
     // Email is the only provider notification channel. The SMS blast that used
     // to run here was removed 2026-08-14: our Twilio A2P 10DLC campaign was
     // rejected as third-party lead-gen (error 30897, 2026-07-17) and cannot be
