@@ -149,17 +149,28 @@ export async function GET(req: NextRequest) {
       // appears here the moment the window closes.
       if (!provider.priorityRouting) {
         const cutoff = new Date(Date.now() - PAID_HEAD_START_SECONDS * 1000)
-        const inWindow = allOpenLeads.filter(l => l.urgency !== 'STAT' && l.createdAt > cutoff)
+        const candidates = allOpenLeads.filter(l => l.urgency !== 'STAT')
 
-        if (inWindow.length > 0) {
-          // Only leads a paying provider was actually notified about are held —
-          // freeTierDelaySeconds() applies no delay when none covers the area,
-          // and this must agree with it or free providers lose leads nobody
+        if (candidates.length > 0) {
+          // Keyed on when a paying provider was NOTIFIED, not on lead age.
+          //
+          // Lead age was the first attempt and it was wrong: a lead released by
+          // the stale-claim sweep is re-notified to everyone again, and by then
+          // it is hours old, so an age-based gate silently switched off for
+          // every round after the first. The Westminster lead of 2026-08-14 went
+          // out in three rounds — 0, 375 and 749 minutes after creation — and
+          // only the first was protected. The paying provider noticed.
+          //
+          // Notification recency handles first send and every re-offer
+          // identically. Restricting to paying providers keeps this in step
+          // with freeTierDelaySeconds(), which applies no delay when none
+          // covers the area — otherwise free providers would lose leads nobody
           // was ever given a head start on.
           const contested = await prisma.leadNotification.findMany({
             where: {
-              leadId: { in: inWindow.map(l => l.id) },
+              leadId: { in: candidates.map(l => l.id) },
               provider: { priorityRouting: true },
+              createdAt: { gt: cutoff },
             },
             select: { leadId: true },
             distinct: ['leadId'],
