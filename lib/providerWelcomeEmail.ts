@@ -69,10 +69,12 @@ export async function sendProviderWelcomeEmail(
     : null
   const detailPath = `/provider/${provider.slug}`
 
-  // No timing claims. The paid head start was removed 2026-08-11 — every
-  // provider is now notified simultaneously — so the benefit set is placement
-  // today plus routing priority when the waterfall ships.
-  const priorityLine = "Top placement in your city's directory, a larger profile card, your Founding Partner badge, and first-in-line priority routing when our waterfall routing system launches."
+  // The head start is real again as of 2026-08-14 (see PAID_HEAD_START_SECONDS
+  // in lib/leadNotifications.ts and the matching gate in the dashboard route).
+  // It is claimable in both places — email AND the dashboard queue — which is
+  // what it was missing the first time round. Say what we deliver and no more:
+  // ten minutes, standard requests only, and nothing at all on urgent ones.
+  const priorityLine = "Top placement in your city's directory, a larger profile card, your Founding Partner badge, and a 10-minute head start on new patient requests — standard requests reach you before free listings see them, by email and on your dashboard. Urgent requests still go to everyone at once; we won't hold back a patient who needs someone the same day."
 
   const subject = `Welcome to ${tierLabel} — your listing is live`
 
@@ -91,6 +93,7 @@ ${cityPath ? `2. Featured placement on your city page\n   ${SITE_URL}${cityPath}
 A few practical notes:
 
 - Confirm your profile looks right. If anything is wrong (phone, coverage ZIPs, description, hours), reply to this email and I'll fix it same-day.
+- Send me a photo. Reply with a headshot or your logo and I'll add it to your listing card. Several providers have done this — a card with a face or a logo on it reads very differently from a plain one.
 - You own your pricing. When leads come in, you call the patient and bill them directly — I don't touch the money or the appointment.
 - Cancel anytime. No hard feelings, no questions.
 
@@ -158,6 +161,7 @@ MobilePhlebotomy.org`
       <strong>A few practical notes:</strong>
       <ul>
         <li><strong>Confirm your profile looks right.</strong> If anything is wrong (phone, coverage ZIPs, description, hours), reply and I'll fix it same-day.</li>
+        <li><strong>Send me a photo.</strong> Reply with a headshot or your logo and I'll add it to your listing card. Several providers have done this &mdash; a card with a face or a logo on it reads very differently from a plain one.</li>
         <li><strong>You own your pricing.</strong> When leads come in, you call the patient and bill them directly — I don't touch the money or the appointment.</li>
         <li><strong>Cancel anytime.</strong> No hard feelings, no questions.</li>
       </ul>
