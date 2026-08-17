@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { SearchBar } from '@/components/ui/SearchBar'
 import InlineLeadForm from '@/components/InlineLeadForm'
 import { ProviderActions } from '@/components/ui/ProviderActions'
@@ -432,7 +433,27 @@ export default function CityPage({ params }: PageProps) {
                 />
 
                 <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
+                  {/* Provider logo. Previously these only appeared on the
+                      provider detail page, so a paying provider's brand never
+                      reached the city listings — the page patients actually
+                      browse, and the placement Founding Partner sells.
+                      Rendered only when one exists: no placeholder, so cards
+                      without a logo keep exactly their current layout.
+                      Not gated on tier — a logo is the provider's own asset,
+                      and several free listings have supplied one. */}
+                  {(provider.logo || provider.profileImage) && (
+                    <div className="flex-shrink-0 mr-4">
+                      <Image
+                        src={(provider.logo || provider.profileImage) as string}
+                        alt={`${provider.name} logo`}
+                        width={64}
+                        height={64}
+                        loading="lazy"
+                        className="w-16 h-16 rounded-lg object-contain bg-white border border-gray-200"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <Link
                         href={`/provider/${provider.slug}`}
