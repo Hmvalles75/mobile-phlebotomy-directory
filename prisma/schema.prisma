@@ -739,6 +739,14 @@ model LeadNotification {
   // Capped at MAX_NOTIFICATION_RETRIES so a permanently-bad address doesn't
   // retry forever. See retryFailedNotifications() in lib/leadNotifications.ts.
   retryCount   Int                @default(0)
+  // Set when a paying provider clicks "pass" on a lead inside their head-start
+  // window, instead of letting the clock run out. Releases the lead to free
+  // providers immediately — the dashboard gate stops withholding it and the
+  // held Wave 2 emails are re-sent. Only ever set on a paying provider's row;
+  // null everywhere else. Deliberately not folded into `status`, which is a
+  // delivery outcome (QUEUED/SENT/FAILED) — a pass says nothing about whether
+  // the email was delivered, and FAILED would make the retry cron re-send it.
+  passedAt     DateTime?
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailEvents  EmailEvent[]

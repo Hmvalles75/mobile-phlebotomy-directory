@@ -56,6 +56,12 @@ async function sendProviderLeadNotificationEmail(
 
   const siteUrl = (SITE_URL).replace(/\/+$/, '')
   const claimUrl = `${siteUrl}/claim/${lead.id}?provider=${provider.id}`
+
+  // Only paying providers are offered a pass, because only they hold a window
+  // worth giving up. Passing releases the lead to free providers immediately
+  // instead of making them — and the patient — wait out the full head start.
+  const canPass = provider.priorityRouting && lead.urgency !== 'STAT'
+  const passUrl = `${siteUrl}/api/lead/pass?lead=${lead.id}&provider=${provider.id}`
   const leadType = 'Individual'  // Default for Phase 1
   const notesShort = lead.notes ? lead.notes.substring(0, 200) : 'None'
 
@@ -77,6 +83,10 @@ Notes: ${notesShort}${lead.notes && lead.notes.length > 200 ? '...' : ''}
 
 Click below to claim this patient and see their full contact info:
 ${claimUrl}
+${canPass ? `
+Not available? Pass this one and we'll release it to other providers right away, instead of the patient waiting out your ${Math.round(PAID_HEAD_START_SECONDS / 60)}-minute window:
+${passUrl}
+` : ''}
 
 First provider to claim gets the patient. No fees — this referral is completely free.
 
@@ -141,6 +151,13 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
         <a href="${claimUrl}" class="button">Claim This Patient</a>
         <br>
         <span style="color: #28a745; font-size: 14px; font-weight: bold;">One click — no login required. Completely free.</span>
+        ${canPass ? `
+        <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #e5e7eb;">
+          <a href="${passUrl}" style="color: #6b7280; font-size: 14px; text-decoration: underline;">Not available &mdash; pass this one</a>
+          <div style="color: #9ca3af; font-size: 13px; margin-top: 6px;">
+            Releases it to other providers right away, so the patient isn't left waiting out your ${Math.round(PAID_HEAD_START_SECONDS / 60)}-minute window.
+          </div>
+        </div>` : ''}
       </center>
 
       <p style="color: #777; font-size: 14px; margin-top: 30px;">

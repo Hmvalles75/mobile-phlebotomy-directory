@@ -171,6 +171,11 @@ export async function GET(req: NextRequest) {
               leadId: { in: candidates.map(l => l.id) },
               provider: { priorityRouting: true },
               createdAt: { gt: cutoff },
+              // A passed lead is released immediately — the paying provider
+              // has said they don't want it, so there is nothing left to
+              // protect and the patient should stop waiting. See
+              // lib/passLead.ts.
+              passedAt: null,
             },
             select: { leadId: true },
             distinct: ['leadId'],
