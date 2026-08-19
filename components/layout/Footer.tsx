@@ -28,6 +28,19 @@ export function Footer() {
               <li><Link href="/mobile-phlebotomy-near-me" className="text-gray-600 hover:text-primary-600 transition-colors">Mobile Phlebotomy</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Facilities & Group Services</Link></li>
+              {/* Research draws are the highest-value inbound this site gets —
+                  Monell at 51-200 draws/month, Mass Eye and Ear at 50-100 — and
+                  this page had two internal links site-wide, so it ranked
+                  nowhere. Site-wide footer placement is the cheapest authority
+                  available to point at it. */}
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/clinical-trials-mobile-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Clinical Trial & Research Draws</Link></li>
+              {/* Both institutional deals ever closed — Monell and I Peace —
+                  came through /request-coverage, and nothing else has
+                  converted. It was the best-converting page on the site with no
+                  footer link at all. */}
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/request-coverage" className="text-gray-600 hover:text-primary-600 transition-colors">Request Coverage for Your Facility</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/at-home-blood-draw-services" className="text-gray-600 hover:text-primary-600 transition-colors">At-Home Blood Draw</Link></li>
             </ul>

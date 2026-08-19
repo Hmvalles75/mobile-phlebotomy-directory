@@ -514,13 +514,28 @@ export default function HomePage() {
                     <span className="text-primary-50">HIPAA-compliant workflows</span>
                   </li>
                 </ul>
-                <Link
-                  href="/corporate-phlebotomy"
-                  className="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold shadow-lg hover:shadow-xl"
-                >
-                  Learn More
-                  <span>→</span>
-                </Link>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/corporate-phlebotomy"
+                    className="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold shadow-lg hover:shadow-xl"
+                  >
+                    Learn More
+                    <span>→</span>
+                  </Link>
+                  {/* Research draws are the largest institutional requests we
+                      receive — 51-200 draws/month from Monell, 50-100 from a
+                      Harvard group — and both were found through search, not
+                      outreach. The page that speaks to that buyer had two
+                      internal links and none from the homepage, so the highest
+                      authority page on the site pointed everywhere except at
+                      the highest-value segment. */}
+                  <Link
+                    href="/clinical-trials-mobile-phlebotomy"
+                    className="inline-flex items-center gap-2 text-white underline underline-offset-4 hover:text-primary-100 transition-colors font-semibold"
+                  >
+                    Running a clinical trial or research study?
+                  </Link>
+                </div>
               </div>
 
               {/* Right: Visual Card */}

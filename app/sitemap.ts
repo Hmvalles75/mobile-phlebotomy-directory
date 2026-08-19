@@ -133,7 +133,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // Raised to 0.9 alongside /request-coverage on 2026-08-19. Research
+      // draws are the largest institutional requests received to date — Monell
+      // at 51-200/month, a Harvard group at 50-100 — and both arrived through
+      // search. Same buyer value as /request-coverage, so same priority.
       url: `${baseUrl}/clinical-trials-mobile-phlebotomy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      // Was in neither the sitemap nor any internal link — fully orphaned, so
+      // Google had no path to it at all. Targets "partnership" and "contract
+      // services" queries, which is the same buyer as the pages above.
+      url: `${baseUrl}/mobile-phlebotomy-partnership`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
