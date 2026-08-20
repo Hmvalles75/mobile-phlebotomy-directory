@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { SITE_URL } from './seo'
 import { freeTierDelaySeconds } from './leadNotifications'
+import { canNotify, NOTIFY_GUARD_SELECT } from './canNotify'
 import sg from '@sendgrid/mail'
 
 if (process.env.SENDGRID_API_KEY) {
@@ -93,6 +94,9 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
           select: {
             name: true, priorityRouting: true,
             notificationEmail: true, claimEmail: true, email: true,
+            // Suppression is checked below rather than in the `where`, because
+            // payingInBatch has to reflect the batch as it was actually sent.
+            ...NOTIFY_GUARD_SELECT,
           },
         },
       },
@@ -111,6 +115,22 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
       return deliveryTime <= claimedAt
     })
 
+    // Suppression. This path had none, which is how Quick Labs LLC was emailed
+    // on 2026-08-20 the day after asking to be taken off the list: turning
+    // notifyEnabled off stops new lead notifications, but the courtesy email
+    // reads existing LeadNotification rows, and hers predated the opt-out. She
+    // had to ask twice.
+    //
+    // Checked here rather than in the query above on purpose — payingInBatch
+    // must count the batch as it was actually sent, including providers who
+    // have since opted out, or the reconstructed delay would be wrong for
+    // everyone else.
+    const notifiable = delivered.filter(n => canNotify(n.provider))
+    const optedOut = delivered.length - notifiable.length
+    if (optedOut > 0) {
+      console.log(`[CancelNotifications] Suppressed ${optedOut} courtesy email(s) — provider removed or notifications off`)
+    }
+
     const suppressed = notifications.length - delivered.length - 1  // -1 = claimer
     if (suppressed > 0) {
       console.log(
@@ -119,8 +139,8 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
       )
     }
 
-    if (delivered.length === 0) {
-      console.log(`[CancelNotifications] No providers received the original before the claim`)
+    if (notifiable.length === 0) {
+      console.log(`[CancelNotifications] Nobody to write to — none received the original before the claim, or all have opted out`)
       return
     }
 
@@ -134,7 +154,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
 
     let sent = 0
     let skipped = 0
-    for (const n of delivered) {
+    for (const n of notifiable) {
       const recipient = n.provider.notificationEmail || n.provider.claimEmail || n.provider.email
       if (!recipient) { skipped++; continue }
 

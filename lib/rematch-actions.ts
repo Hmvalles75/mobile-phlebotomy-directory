@@ -5,6 +5,7 @@ import { SITE_URL } from './seo'
 import { prisma } from './prisma'
 import { verifyAdminSession } from './admin-auth'
 import { isLeadInServiceRadius } from './zip-geocode'
+import { canNotify, NOTIFY_GUARD_SELECT } from './canNotify'
 import sg from '@sendgrid/mail'
 
 if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
@@ -216,6 +217,7 @@ export async function rematchProviderToLead(
       select: {
         id: true, name: true,
         email: true, claimEmail: true, notificationEmail: true,
+        ...NOTIFY_GUARD_SELECT,
       },
     }),
     prisma.lead.findUnique({
@@ -229,6 +231,12 @@ export async function rematchProviderToLead(
   if (!provider) return { ok: false, error: 'Provider not found' }
   if (!lead) return { ok: false, error: 'Lead not found' }
   if (lead.status !== 'OPEN') return { ok: false, error: `Lead is ${lead.status}, not OPEN` }
+  // A rematch is a deliberate admin action, but it is still a provider-facing
+  // send and must respect an opt-out. Refuses loudly rather than silently
+  // skipping, so the admin knows why nothing was sent.
+  if (!canNotify(provider)) {
+    return { ok: false, error: `${provider.name} has notifications off or has been removed — not contacting them` }
+  }
 
   const recipientEmail = provider.notificationEmail || provider.claimEmail || provider.email
   if (!recipientEmail) return { ok: false, error: 'Provider has no email on file' }
