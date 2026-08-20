@@ -11,12 +11,18 @@ const prisma = new PrismaClient()
  *   npx tsx scripts/reconcile-suppressed-emails.ts --apply   # writes
  *
  * Until the Event Webhook was enabled on 2026-08-17 none of this was visible.
- * A provider whose address bounced kept appearing healthy in the roster,
- * kept being counted as reachable coverage, and kept "receiving" leads that
- * were dropped on the floor. Resolute Mobile Lab complained twice that leads
- * weren't showing up; her address had been bouncing since 2026-06-11 and the
- * answer was in SendGrid the whole time. Tender Touch shows 38 notifications
- * and zero claims because their mail host bans SendGrid's IP outright.
+ * A provider whose address bounced kept appearing healthy in the roster, kept
+ * being counted as reachable coverage, and kept "receiving" leads that were
+ * dropped on the floor. Tender Touch shows 38 notifications and zero claims
+ * because their mail host bans SendGrid's IP outright — they have never
+ * received one.
+ *
+ * A bounce is NOT automatically an explanation for a provider's complaint.
+ * Resolute Mobile lab asked on 2026-08-10 why leads weren't showing up; the
+ * cause was the Wave 2 delay plus batch cancellation, it was diagnosed and
+ * answered correctly at the time, and her notification address has worked
+ * throughout. The bounce on her record is a business-domain address that leads
+ * never use. Check which address actually receives before concluding anything.
  *
  * BOUNCED addresses (550 mailbox not found) are dead. With --apply their
  * provider's notifyEnabled is turned off so they stop being counted as
@@ -87,6 +93,7 @@ async function main() {
         },
         select: {
           id: true, name: true, phone: true, primaryCity: true, primaryState: true,
+          email: true, claimEmail: true, notificationEmail: true,
           notifyEnabled: true, eligibleForLeads: true, removedAt: true, priorityRouting: true,
         },
       })
@@ -101,6 +108,20 @@ async function main() {
       const state = p.removedAt ? 'removed' : p.notifyEnabled ? 'STILL NOTIFIABLE' : 'notifications off'
       console.log(`  ${when}  ${s.email.padEnd(44)} ${p.priorityRouting ? '[PAYING] ' : ''}${(p.name ?? '').slice(0, 30).padEnd(30)} ${state}  ${wasted} notification(s) sent`)
       console.log(`            ${String(s.reason).replace(/\s+/g, ' ').slice(0, 88)}`)
+
+      // A provider carries up to three addresses but sends resolve to exactly
+      // one: notificationEmail || claimEmail || email. Matching on any of the
+      // three and disabling on that basis is wrong, and the first run of this
+      // script proved it — Resolute Mobile lab and Operation Mobile Phlebotomy
+      // both had a dead address on their business domain while their leads went
+      // to a working Gmail. Both were cut off despite receiving mail fine.
+      // Only act when the address that actually receives is the dead one.
+      const recipient = (p.notificationEmail || p.claimEmail || p.email || '').toLowerCase()
+      const recipientIsDead = recipient === s.email.toLowerCase()
+      if (!recipientIsDead) {
+        console.log(`            -> leads go to ${recipient || '(none)'}, which is not suppressed — left alone`)
+        continue
+      }
 
       // Only bounced/invalid are treated as dead. Blocks are often transient.
       if ((kind === 'BOUNCED' || kind === 'INVALID') && !p.removedAt && p.notifyEnabled) {
