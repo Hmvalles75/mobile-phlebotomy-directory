@@ -4,6 +4,8 @@ import { CITY_MAPPING } from '@/data/cities-full'
 import { prisma } from '@/lib/prisma'
 import { SITE_URL } from '@/lib/seo'
 import { PROVIDERS_PER_PAGE } from '@/lib/seo/providersIndex'
+import { topMetroAreas } from '@/data/top-metros'
+import { metroHref } from '@/lib/seo/metroCanonical'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
@@ -199,6 +201,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.6,
+    })
+  }
+
+  // ── /us/metro/* ────────────────────────────────────────────────────────
+  // Only self-canonical metros belong here, which is two of the fifty.
+  //
+  // Four slugs (chicago, phoenix, san-antonio, san-diego) 308-redirect to their
+  // city page and must never be submitted. The other forty-four carry
+  // <link rel="canonical"> pointing AT their city twin — see the metro layout's
+  // generateMetadata, which deliberately cross-canonicalises to consolidate
+  // duplicates. Submitting a URL that disclaims itself asks Google to index a
+  // page that says "index the other one"; at best it is ignored, at worst it is
+  // a contradictory signal. So the filter is metroHref() returning the metro's
+  // own path, which is true only for New York City and Washington DC.
+  //
+  // Raising the other 44 would mean reversing the consolidation strategy, not
+  // adding sitemap entries. Flagged for Hector rather than decided here.
+  for (const metro of topMetroAreas) {
+    if (metroHref(metro) !== `/us/metro/${metro.slug}`) continue
+    routes.push({
+      url: `${baseUrl}/us/metro/${metro.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     })
   }
 

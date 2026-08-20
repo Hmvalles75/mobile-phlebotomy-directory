@@ -610,9 +610,14 @@ export default function MetroPage({ params }: MetroPageProps) {
           <div className="lg:col-span-2">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {filteredProviders.length} Provider{filteredProviders.length !== 1 ? 's' : ''} in {metro.city}
-                </h2>
+                {/* Only rendered with a real count — this used to server-render
+                    as "0 Providers in {city}" from the client component's
+                    pre-fetch state. */}
+                {filteredProviders.length > 0 && (
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {filteredProviders.length} Provider{filteredProviders.length !== 1 ? 's' : ''} in {metro.city}
+                  </h2>
+                )}
                 {groupedResults && (
                   <div className="text-sm text-gray-600">
                     {groupedResults.citySpecific.length > 0 && (

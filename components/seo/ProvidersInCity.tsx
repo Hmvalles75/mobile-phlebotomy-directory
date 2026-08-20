@@ -8,7 +8,32 @@ interface Props {
 }
 
 export default function ProvidersInCity({ providers, cityName, stateAbbr }: Props) {
-  if (providers.length === 0) return null
+  // Returning null here left Class C cities (a matching city page, no matching
+  // providers) with no server-rendered section at all — Pittsburgh shipped ~350
+  // fewer characters than Columbus for that reason alone. An empty state is
+  // thin, but it is real content and it tells the reader something true, which
+  // an absent section does not.
+  if (providers.length === 0) {
+    return (
+      <section className="mt-12 bg-white rounded-lg shadow-md p-8" aria-labelledby="providers-in-city-heading">
+        <h2 id="providers-in-city-heading" className="text-2xl font-bold text-gray-900 mb-4">
+          Mobile phlebotomists serving {cityName}
+        </h2>
+        <p className="text-gray-600 mb-3">
+          We don&apos;t yet have a provider listed with {cityName}, {stateAbbr} as their home base.
+          Providers based in nearby cities often travel here — the nearby cities below are the
+          quickest way to find one.
+        </p>
+        <p className="text-gray-600">
+          If you provide mobile phlebotomy in {cityName},{' '}
+          <a href="/add-provider" className="text-primary-700 font-medium hover:underline">
+            add your listing
+          </a>{' '}
+          and patients searching {cityName} will find you.
+        </p>
+      </section>
+    )
+  }
 
   return (
     <section className="mt-12 bg-white rounded-lg shadow-md p-8" aria-labelledby="providers-in-city-heading">

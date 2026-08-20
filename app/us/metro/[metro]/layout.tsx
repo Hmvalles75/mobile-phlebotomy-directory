@@ -2,6 +2,9 @@ import { Metadata } from 'next'
 import { getMetroBySlug } from '@/data/top-metros'
 import { SITE_URL } from '@/lib/seo'
 import { metroHref } from '@/lib/seo/metroCanonical'
+import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
+import ProvidersInCity from '@/components/seo/ProvidersInCity'
+import NearbyCities from '@/components/seo/NearbyCities'
 
 interface MetroLayoutProps {
   children: React.ReactNode
@@ -50,6 +53,42 @@ export async function generateMetadata({ params }: { params: { metro: string } }
   }
 }
 
-export default function MetroLayout({ children }: MetroLayoutProps) {
-  return children
+/**
+ * Metro pages carried no server-rendered provider content at all — this layout
+ * was `return children`, and the page above it is a client component whose
+ * listing arrives only after hydration. Googlebot received a metro page with
+ * zero provider links and a heading reading "0 Providers in {City}".
+ *
+ * Rendering the same section the city layout uses brings all three page classes
+ * to parity. Metro slugs map to a city for the lookup: 44 of the 50 metros have
+ * a city twin they already cross-canonicalise to, and the two that don't
+ * (New York City, Washington DC) still resolve by city name.
+ */
+export default async function MetroLayout({ children, params }: MetroLayoutProps) {
+  const metro = getMetroBySlug(params.metro)
+
+  if (!metro) return <>{children}</>
+
+  const citySlug = metro.city.toLowerCase().trim().replace(/\s+/g, '-')
+  const [providers, nearbyCities] = await Promise.all([
+    getProvidersForCity(citySlug, metro.stateAbbr),
+    getNearbyCities(citySlug, metro.stateAbbr, 8),
+  ])
+
+  return (
+    <>
+      {children}
+      <div className="bg-gray-50">
+        <div className="container mx-auto px-4 pb-12">
+          <ProvidersInCity providers={providers} cityName={metro.city} stateAbbr={metro.stateAbbr} />
+          <NearbyCities
+            cities={nearbyCities}
+            sourceCitySlug={citySlug}
+            sourceCityName={metro.city}
+            sourceStateName={metro.state}
+          />
+        </div>
+      </div>
+    </>
+  )
 }

@@ -25,9 +25,21 @@ export interface ProviderLink {
   description: string | null
 }
 
+/**
+ * Who appears in the internal link graph.
+ *
+ * `eligibleForLeads` was removed 2026-08-20. It is a lead-routing preference,
+ * not a listing state: a provider who doesn't want phone calls is still a
+ * legitimate directory entry, and coupling the two meant an operational action
+ * silently edited SEO content. That is not hypothetical — turning the flag off
+ * for 14 providers during the bounced-email cleanup earlier the same day also
+ * removed them from their city pages, which nobody would have predicted.
+ *
+ * `status: 'VERIFIED'` deliberately stays. Surfacing unverified records is a
+ * business decision about the verification backlog, not a rendering fix.
+ */
 const ACTIVE_FILTER = {
   status: 'VERIFIED' as const,
-  eligibleForLeads: true,
 }
 
 // Local stable hash — duplicated rather than re-imported so this file
