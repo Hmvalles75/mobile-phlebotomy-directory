@@ -4,6 +4,7 @@ import sg from '@sendgrid/mail'
 import { isLeadInServiceRadius } from './zip-geocode'
 import { isSendGridHealthy } from './sendgridHealth'
 import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
+import { notificationDelaySeconds } from './notificationTiming'
 
 sg.setApiKey(process.env.SENDGRID_API_KEY!)
 
@@ -26,6 +27,10 @@ interface Provider {
   featuredTier: string | null
   isFeatured: boolean
   priorityRouting: boolean
+  // Quiet hours are computed from the provider's state — see
+  // lib/notificationTiming.ts. Nullable because scraped records often lack it,
+  // and a missing state means no quiet-hours deferral rather than a guess.
+  primaryState: string | null
 }
 
 /**
@@ -343,6 +348,7 @@ async function findFeaturedProvidersForNotification(
     featuredTier: p.featuredTier,
     isFeatured: p.isFeatured,
     priorityRouting: p.priorityRouting,
+    primaryState: p.primaryState,
   }))
 }
 
@@ -452,7 +458,20 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     // receive every lead — only the first look is sold.
     const priorityProviders = providers.filter(p => p.priorityRouting)
     const otherProviders    = providers.filter(p => !p.priorityRouting)
-    const otherDelay = freeTierDelaySeconds(priorityProviders.length, lead.urgency)
+
+    // Delay is now per-provider, not per-wave: quiet hours depend on where the
+    // provider is. notificationDelaySeconds() is the single source of truth,
+    // shared with lib/cancelLeadNotifications.ts so the reconstruction of who
+    // actually received a lead cannot drift from what was really sent.
+    const sendAtSeconds = new Date()
+    const delayFor = (p: Provider) => notificationDelaySeconds({
+      provider: { priorityRouting: p.priorityRouting, primaryState: p.primaryState },
+      urgency: lead.urgency,
+      payingProviderCount: priorityProviders.length,
+      headStartSeconds: PAID_HEAD_START_SECONDS,
+      at: sendAtSeconds,
+    })
+    const otherDelay = otherProviders.length ? delayFor(otherProviders[0]) : 0
 
     if (priorityProviders.length > 0) {
       console.log(`[LeadNotifications] Wave 1 (paying): ${priorityProviders.length} provider(s), immediate`)
@@ -528,12 +547,12 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     let successCount = 0
 
     for (const provider of priorityProviders) {
-      const ok = await sendToProvider(provider, 0)
+      const ok = await sendToProvider(provider, delayFor(provider))
       if (ok) successCount++
     }
 
     for (const provider of otherProviders) {
-      const ok = await sendToProvider(provider, otherDelay)
+      const ok = await sendToProvider(provider, delayFor(provider))
       if (ok) successCount++
     }
 
@@ -672,7 +691,7 @@ export async function retryFailedNotifications(): Promise<RetryResult> {
       provider: {
         select: {
           id: true, name: true, notificationEmail: true, claimEmail: true, email: true,
-          featuredTier: true, isFeatured: true, priorityRouting: true,
+          featuredTier: true, isFeatured: true, priorityRouting: true, primaryState: true,
         },
       },
     },

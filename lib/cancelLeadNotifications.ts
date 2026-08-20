@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { SITE_URL } from './seo'
-import { freeTierDelaySeconds } from './leadNotifications'
+import { PAID_HEAD_START_SECONDS } from './leadNotifications'
+import { notificationDelaySeconds } from './notificationTiming'
 import { canNotify, NOTIFY_GUARD_SELECT } from './canNotify'
 import sg from '@sendgrid/mail'
 
@@ -92,7 +93,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
         createdAt: true,
         provider: {
           select: {
-            name: true, priorityRouting: true,
+            name: true, priorityRouting: true, primaryState: true,
             notificationEmail: true, claimEmail: true, email: true,
             // Suppression is checked below rather than in the `where`, because
             // payingInBatch has to reflect the batch as it was actually sent.
@@ -105,12 +106,23 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
     // The delay depends on whether a paying provider was in the batch, which
     // is judged across ALL notified providers including the claimer.
     const payingInBatch = notifications.filter(n => n.provider.priorityRouting).length
-    const otherDelaySeconds = freeTierDelaySeconds(payingInBatch, lead.urgency)
     const claimedAt = Date.now()
 
     const delivered = notifications.filter(n => {
       if (n.providerId === claimingProviderId) return false
-      const delaySeconds = n.provider.priorityRouting ? 0 : otherDelaySeconds
+      // Recomputed per provider with the SAME function the sender used, at the
+      // notification's own creation time. Quiet hours make this provider- and
+      // time-specific: a Californian held until 8am PT and a New Yorker held
+      // until 8am ET were sent at the same instant but received hours apart.
+      // A batch-level delay could not express that, and getting it wrong emails
+      // people about leads they never saw.
+      const delaySeconds = notificationDelaySeconds({
+        provider: { priorityRouting: n.provider.priorityRouting, primaryState: n.provider.primaryState },
+        urgency: lead.urgency,
+        payingProviderCount: payingInBatch,
+        headStartSeconds: PAID_HEAD_START_SECONDS,
+        at: n.createdAt,
+      })
       const deliveryTime = n.createdAt.getTime() + delaySeconds * 1000
       return deliveryTime <= claimedAt
     })
@@ -135,7 +147,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
     if (suppressed > 0) {
       console.log(
         `[CancelNotifications] Suppressed ${suppressed} courtesy email(s) — ` +
-        `those notifications were cancelled before delivery (Wave 2, ${otherDelaySeconds}s window)`
+        `those notifications were cancelled before delivery (head start / quiet hours)`
       )
     }
 
