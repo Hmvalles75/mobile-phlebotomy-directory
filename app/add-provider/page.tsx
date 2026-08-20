@@ -375,15 +375,26 @@ export default function AddProvider() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Service Area
+                  Service Area &mdash; how far will you travel?
                 </label>
                 <input
                   type="text"
                   value={formData.serviceArea}
                   onChange={(e) => setFormData(prev => ({...prev, serviceArea: e.target.value}))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="e.g., Los Angeles County, 25 mile radius"
+                  /* The old placeholder read "Los Angeles County, 25 mile
+                     radius" and anchored applicants on 25 — which, combined
+                     with a hardcoded 25 at approval, is why 186 providers sit
+                     at exactly that. Requests routinely land 30-80 miles out,
+                     so the example now shows a realistic distance and the
+                     helper text says plainly that the number decides what they
+                     are sent. */
+                  placeholder="e.g., 60 mile radius around Los Angeles"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Please include a distance in miles. This decides which patient requests reach you &mdash;
+                  set it too tight and we can&apos;t send you work just outside it. You can change it any time.
+                </p>
               </div>
 
               <div className="space-y-3">

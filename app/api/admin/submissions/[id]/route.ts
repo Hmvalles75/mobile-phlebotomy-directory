@@ -4,6 +4,7 @@ import { getSubmissionById, updateSubmissionStatus, deleteSubmission } from '@/l
 import { prisma } from '@/lib/prisma'
 import { emailProviderApprovedWithLeadChoice } from '@/lib/providerEmails'
 import { normalizeCityName, citySlug } from '@/lib/city-normalize'
+import { radiusFromSubmission } from '@/lib/serviceRadius'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -192,7 +193,7 @@ async function addProviderToDatabase(submission: any) {
       // freeloaders cleaned up 2026-04-30.
       isFeatured: false,
       notifyEnabled: wantsLeads,
-      serviceRadiusMiles: 25,
+      serviceRadiusMiles: radiusFromSubmission(submission.serviceArea),
     }
   })
 
