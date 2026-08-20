@@ -4,6 +4,22 @@ import { prisma } from '@/lib/prisma'
 import { CITY_MAPPING, cityByStateCity } from '@/data/cities-full'
 import { ABBR_TO_SLUG } from '@/data/states-full'
 
+/**
+ * SEO cache TTL. Dropped 3600 -> 300 on 2026-08-20.
+ *
+ * Nothing in the codebase calls revalidateTag('internal-links') — the tag is
+ * declared on every cache below and never invalidated. Tag-based invalidation
+ * was deferred: prisma.provider.update is called directly from ~25 files with
+ * no service layer to hang it on, and the payloads are built dynamically
+ * (app/api/provider/profile/route.ts writes `data: updateData`, which is where
+ * primaryCity and primaryCitySlug change), so the write surface cannot be
+ * identified statically.
+ *
+ * Until that lands, the TTL is the only thing bounding staleness on
+ * server-rendered city pages. Five minutes instead of an hour.
+ */
+export const SEO_CACHE_TTL_SECONDS = 300
+
 // Re-export pure helpers + types from the client-safe module so existing
 // server-component imports keep working through this path.
 export {
@@ -64,7 +80,7 @@ function deterministicShuffle<T>(arr: T[], seed: string): T[] {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Providers serving a given city (status=VERIFIED + eligibleForLeads)
+// Providers serving a given city (status=VERIFIED — see ACTIVE_FILTER)
 // ────────────────────────────────────────────────────────────────────
 export const getProvidersForCity = unstable_cache(
   async (citySlug: string, stateAbbr: string): Promise<ProviderLink[]> => {
@@ -106,7 +122,7 @@ export const getProvidersForCity = unstable_cache(
     return providers
   },
   ['providers-for-city'],
-  { revalidate: 3600, tags: ['internal-links'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )
 
 // ────────────────────────────────────────────────────────────────────
@@ -130,7 +146,7 @@ export const getNearbyCities = unstable_cache(
     return shuffled.slice(0, limit)
   },
   ['nearby-cities'],
-  { revalidate: 3600, tags: ['internal-links'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )
 
 function nameToCitySlug(name: string): string {
@@ -184,7 +200,7 @@ export const getCitiesInState = unstable_cache(
     return out
   },
   ['cities-in-state'],
-  { revalidate: 3600, tags: ['internal-links'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )
 
 // ────────────────────────────────────────────────────────────────────
@@ -236,7 +252,7 @@ export const getNearbyProviders = unstable_cache(
     }))
   },
   ['nearby-providers'],
-  { revalidate: 3600, tags: ['internal-links'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )
 
 // ────────────────────────────────────────────────────────────────────
@@ -286,5 +302,5 @@ export const getServiceAreasCovered = unstable_cache(
     return { cities, stateAbbr }
   },
   ['service-areas-covered'],
-  { revalidate: 3600, tags: ['internal-links'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )

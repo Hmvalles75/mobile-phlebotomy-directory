@@ -1,6 +1,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { SEO_CACHE_TTL_SECONDS } from './internalLinks'
 
 export const PROVIDERS_PER_PAGE = 50
 
@@ -34,7 +35,7 @@ export const getIndexedProviders = unstable_cache(
     })
   },
   ['providers-index'],
-  { revalidate: 3600, tags: ['internal-links', 'providers-index'] }
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links', 'providers-index'] }
 )
 
 export function totalProviderPages(count: number): number {
