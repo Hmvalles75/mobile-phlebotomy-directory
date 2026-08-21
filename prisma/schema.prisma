@@ -98,6 +98,20 @@ model Provider {
   // providers should refuse to insert when a matching (name + phone) row exists
   // with doNotRelist=true.
   doNotRelist           Boolean                @default(false)
+  // ── Fixed-site quarantine ──────────────────────────────────────────────────
+  // true = this record is a hospital / health-system draw station, reference lab
+  // or outpatient collection site, NOT a mobile phlebotomy business. Such records
+  // were pulled in by scraping and rendered on city pages as if they travelled to
+  // patients (Boston Children's Hospital listed as a mobile provider, etc).
+  //
+  // A FLAG, not a delete. Some health systems do genuinely offer outreach draws,
+  // so a record can be un-flagged individually rather than resurrected. The
+  // listing row also stays put so the unique slug keeps scrapers from re-inserting.
+  //
+  // Enforced in lib/providers-city.ts. This replaces a guard that branched on
+  // `is_mobile_phlebotomy`, a legacy JSON-era field the DB mapper never populates
+  // — so the guard silently never fired. See that file for the full story.
+  isFixedSite           Boolean                @default(false)
   // Stale-claim tracking. Incremented when the stale-claim-release cron
   // yanks a CLAIMED lead from this provider for failing to log an outcome
   // within SLA. Surfaces in admin to spot patterns; high counts can feed

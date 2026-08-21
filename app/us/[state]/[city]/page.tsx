@@ -30,9 +30,11 @@ export default async function CityPage({ params }: PageProps) {
   // Unmapped cities previously short-circuited to an empty list; keep that.
   const grouped = cityInfo
     ? await getProvidersByCity(cityName, stateAbbr)
-    : { citySpecific: [], regional: [], statewide: [] }
+    : { local: [], regional: [] }
 
-  const providers = [...grouped.citySpecific, ...grouped.regional, ...grouped.statewide]
+  // Local first, then the providers who only travel here. The client keeps them
+  // in separate sections; this flat list is what search and filtering run over.
+  const providers = [...grouped.local, ...grouped.regional]
 
   return (
     <CityPageClient

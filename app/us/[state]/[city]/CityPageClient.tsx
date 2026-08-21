@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -31,9 +31,10 @@ interface PageProps {
 }
 
 interface GroupedProviders {
-  citySpecific: Provider[]
+  /** Service radius covers this city. The only bucket counted as coverage. */
+  local: Provider[]
+  /** Within 100 miles but outside their radius — "also travel to {city}". */
   regional: Provider[]
-  statewide: Provider[]
 }
 
 interface CityPageClientProps extends PageProps {
@@ -99,6 +100,15 @@ export default function CityPageClient({ params, initialProviders, initialGroupe
     return 0
   }
   const rankedProviders = [...filteredProviders].sort((a, b) => tierWeight(b) - tierWeight(a))
+
+  // Headline coverage is LOCAL only. Regional providers are within 100 miles but
+  // do not list this city inside their service radius, so counting them as
+  // coverage is the overstatement this whole rewrite exists to remove.
+  const regionalIds = new Set((initialGrouped?.regional ?? []).map(p => p.id))
+  const localRanked = rankedProviders.filter(p => !regionalIds.has(p.id))
+  const regionalRanked = rankedProviders.filter(p => regionalIds.has(p.id))
+  const localCount = localRanked.length
+  const regionalCount = regionalRanked.length
 
   const handleServiceToggle = (service: string) => {
     setSelectedServices(prev =>
@@ -336,33 +346,33 @@ export default function CityPageClient({ params, initialProviders, initialGroupe
                 read "0 Providers Available in {city}" in the server-rendered
                 HTML — the pre-fetch state of a client component — so every city
                 page told Googlebot the directory was empty. */}
-            {filteredProviders.length > 0 && (
+            {/* Headline counts LOCAL only — providers whose service radius
+                actually covers this city. It previously counted every provider
+                in the state, so Pittsburgh advertised 23 when nobody covered
+                it. Regional providers get their own section below. */}
+            {localCount > 0 && (
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {filteredProviders.length} Provider{filteredProviders.length !== 1 ? 's' : ''} Available in {cityName}
+                {localCount} Provider{localCount !== 1 ? 's' : ''} Available in {cityName}
               </h2>
             )}
-            {groupedResults && (
-              <div className="text-sm text-gray-600 mb-2">
-                {groupedResults.citySpecific.length > 0 && (
-                  <span className="mr-4">
-                    <span className="font-medium text-green-700">{groupedResults.citySpecific.length}</span> city-specific
-                  </span>
-                )}
-                {groupedResults.regional.length > 0 && (
-                  <span className="mr-4">
-                    <span className="font-medium text-blue-700">{groupedResults.regional.length}</span> regional
-                  </span>
-                )}
-                {groupedResults.statewide.length > 0 && (
-                  <span className="mr-4">
-                    <span className="font-medium text-gray-700">{groupedResults.statewide.length}</span> statewide
-                  </span>
-                )}
-              </div>
+            <div className="text-sm text-gray-600 mb-2">
+              {localCount > 0 && (
+                <span className="mr-4">
+                  <span className="font-medium text-green-700">{localCount}</span>{' '}
+                  serve{localCount === 1 ? 's' : ''} {cityName} directly
+                </span>
+              )}
+              {regionalCount > 0 && (
+                <span className="mr-4">
+                  <span className="font-medium text-blue-700">{regionalCount}</span> also travel here
+                </span>
+              )}
+            </div>
+            {localCount > 0 && (
+              <p className="text-gray-600">
+                Professional mobile phlebotomy services available in your area
+              </p>
             )}
-            <p className="text-gray-600">
-              Professional mobile phlebotomy services available in your area
-            </p>
           </div>
           
           <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
@@ -382,17 +392,38 @@ export default function CityPageClient({ params, initialProviders, initialGroupe
           ) : filteredProviders.length === 0 ? (
             <InlineLeadForm city={cityName} state={state} variant="no-results" />
           ) : (
-            rankedProviders.map((provider) => {
-              // Determine provider type for visual indicator
-              let providerType = 'statewide';
-              if (groupedResults?.citySpecific.some(p => p.id === provider.id)) {
-                providerType = 'city-specific';
-              } else if (groupedResults?.regional.some(p => p.id === provider.id)) {
-                providerType = 'regional';
-              }
+            <>
+            {/* 0 local but some regional. The page must not imply coverage it
+                doesn't have, and it must still give the patient an action —
+                the copy promises we'll reach out, so the form has to be here,
+                not only in the fully-empty state. */}
+            {localCount === 0 && regionalCount > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <p className="text-gray-700 mb-4">
+                  No provider currently includes {cityName} in their service area.{' '}
+                  {regionalCount} provider{regionalCount !== 1 ? 's' : ''} within 100 miles
+                  may be willing to travel — request a draw and we&apos;ll reach out on your behalf.
+                </p>
+                <InlineLeadForm city={cityName} state={state} variant="no-results" />
+              </div>
+            )}
+            {[...localRanked, ...regionalRanked].map((provider, idx) => {
+              const providerType = regionalIds.has(provider.id) ? 'regional' : 'local'
 
               return (
-              <div key={provider.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <Fragment key={provider.id}>
+              {/* Divider before the first travels-here card, so the two buckets
+                  are visually distinct without duplicating the card markup. */}
+              {idx === localCount && regionalCount > 0 && (
+                <div className={localCount > 0 ? 'pt-6 border-t border-gray-200' : ''}>
+                  <h3 className="text-xl font-bold text-gray-900">Also travel to {cityName}</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Within 100 miles, but {cityName} isn&apos;t inside their listed service
+                    area. They may still take the appointment.
+                  </p>
+                </div>
+              )}
+              <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                 {/* Individual Provider Schema */}
                 <ProviderSchema
                   provider={provider}
@@ -481,14 +512,11 @@ export default function CityPageClient({ params, initialProviders, initialGroupe
                     {/* Coverage type indicator with improved messaging */}
                     <span
                       className={`text-xs px-2 py-1 rounded-full text-center ${
-                        providerType === 'city-specific' ? 'bg-green-100 text-green-800' :
-                        providerType === 'regional' ? 'bg-blue-100 text-blue-800' :
-                        'bg-orange-100 text-orange-800'
+                        providerType === 'local' ? 'bg-green-100 text-green-800' :
+                        'bg-blue-100 text-blue-800'
                       }`}
                     >
-                      {providerType === 'city-specific' ? '📍 Serves This Area' :
-                       providerType === 'regional' ? '🌐 Regional Coverage' :
-                       '🗺️ Statewide Service'}
+                      {providerType === 'local' ? '📍 Serves This Area' : '🚗 Travels Here'}
                     </span>
                     {provider.badges?.map((badge) => (
                       <span
@@ -563,8 +591,10 @@ export default function CityPageClient({ params, initialProviders, initialGroupe
                   </Link>
                 </div>
               </div>
+              </Fragment>
               )
-            })
+            })}
+            </>
           )}
         </div>
 

@@ -58,6 +58,10 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     listingTier: provider.listingTier,
     isFeatured: provider.isFeatured || false,
     isFeaturedCity: provider.isFeaturedCity || false,
+    // Fixed-site quarantine flag — see lib/providers-city.ts for why this exists.
+    isFixedSite: provider.isFixedSite || false,
+    serviceRadiusMiles: provider.serviceRadiusMiles ?? undefined,
+    coords: provider.coords ? { lat: provider.coords.lat, lng: provider.coords.lng } : undefined,
     // Languages
     languages: provider.languages || undefined,
     // Featured tier and premium page flag
@@ -96,6 +100,11 @@ export async function getAllProviders(): Promise<EnrichedProvider[]> {
         status: true,
         listingTier: true,
         isFeatured: true,
+        isFixedSite: true,
+        // Geography inputs for lib/providers-city.ts. Without these the city
+        // classifier cannot place a provider and silently drops them.
+        serviceRadiusMiles: true,
+        coords: { select: { lat: true, lng: true } },
         isFeaturedCity: true,
         logo: true,
         profileImage: true,

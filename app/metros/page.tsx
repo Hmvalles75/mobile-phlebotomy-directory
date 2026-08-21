@@ -2,76 +2,31 @@ import Link from 'next/link'
 import { metroHref } from '@/lib/seo/metroCanonical'
 import { SITE_URL } from '@/lib/seo'
 import { topMetroAreas } from '@/data/top-metros'
-import { getAllProviders } from '@/lib/providers'
+import { getProvidersByCity } from '@/lib/providers-city'
 
 export default async function MetrosPage() {
-  const providers = await getAllProviders()
-
-  // State abbreviation to full name mapping
-  const stateMap: Record<string, string> = {
-    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
-    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
-    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
-    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
-    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
-    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
-    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
-    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
-    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
-    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
-  }
-
-  // Function to count providers for a metro area (matches API logic exactly) - Updated 2025
-  const getProviderCount = (metroCity: string, metroStateAbbr: string) => {
-    const fullStateName = stateMap[metroStateAbbr]
-    const normalizedCity = metroCity.toLowerCase()
-    const normalizedState = metroStateAbbr.toUpperCase()
-
-    let count = 0
-
-    providers.forEach(provider => {
-      // Skip non-mobile phlebotomy services
-      if (provider.is_mobile_phlebotomy === 'No') {
-        return
-      }
-
-      // Include nationwide providers
-      if (provider.is_nationwide === 'Yes') {
-        count++
-        return
-      }
-
-      // Check if provider serves this state (both abbreviation and full name)
-      const servesState = provider.state === normalizedState ||
-                         provider.state === fullStateName ||
-                         provider.coverage?.states?.some(state =>
-                           state.toUpperCase() === normalizedState ||
-                           state.toLowerCase() === fullStateName?.toLowerCase()
-                         )
-
-      if (!servesState) return
-
-      // 1. Direct city match (city-specific)
-      const hasDirectCityMatch = provider.city?.toLowerCase() === normalizedCity ||
-                                provider.coverage?.cities?.some(city =>
-                                  city.toLowerCase() === normalizedCity
-                                )
-
-      // 2. Check if city is mentioned in verified service areas or validation notes (city-specific)
-      const serviceAreaMatch = provider.verified_service_areas?.toLowerCase().includes(normalizedCity) ||
-                              provider.validation_notes?.toLowerCase().includes(normalizedCity)
-
-      // 3. Regional match (covers state but not specifically this city)
-      const hasRegionalMatch = !hasDirectCityMatch && !serviceAreaMatch && servesState
-
-      // Count all providers: city-specific, regional, and statewide (like the API does)
-      if (hasDirectCityMatch || serviceAreaMatch || hasRegionalMatch) {
-        count++
-      }
-    })
-
-    return count
-  }
+  /**
+   * Provider counts come from the database via the shared city classifier.
+   *
+   * This page used to parse cleaned_providers.csv — a snapshot last touched
+   * 2025-11-10, 477 rows against 713 live records — through its own copy of the
+   * old name-based classifier, and it summed city-specific + regional +
+   * statewide into one number. "Regional" meant nothing more than "same state",
+   * so a metro's headline count was really a count of providers anywhere in its
+   * state. Same defect the city pages had, published on the index that links to
+   * them.
+   *
+   * Counting `local` only: providers whose service radius actually covers the
+   * metro. Regional providers appear on the city page under "also travel to",
+   * but they are not coverage and are not counted here.
+   */
+  const metroCounts = new Map<string, number>()
+  await Promise.all(
+    topMetroAreas.map(async (metro) => {
+      const { local } = await getProvidersByCity(metro.city, metro.stateAbbr)
+      metroCounts.set(`${metro.city}|${metro.stateAbbr}`, local.length)
+    }),
+  )
 
   const metrosByState = topMetroAreas.reduce((acc, metro) => {
     if (!acc[metro.state]) {
@@ -80,7 +35,7 @@ export default async function MetrosPage() {
     // Add provider count to metro object
     const metroWithCount = {
       ...metro,
-      providerCount: getProviderCount(metro.city, metro.stateAbbr)
+      providerCount: metroCounts.get(`${metro.city}|${metro.stateAbbr}`) ?? 0
     }
     acc[metro.state].push(metroWithCount)
     return acc
@@ -152,7 +107,7 @@ export default async function MetrosPage() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {topMetroAreas.slice(0, 10).map((metro) => {
-              const providerCount = getProviderCount(metro.city, metro.stateAbbr)
+              const providerCount = metroCounts.get(`${metro.city}|${metro.stateAbbr}`) ?? 0
               return (
                 <Link
                   key={metro.slug}

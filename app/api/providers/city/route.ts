@@ -33,9 +33,19 @@ export async function GET(request: NextRequest) {
 
 
     if (grouped) {
-      // Return grouped results for enhanced UI
+      // Buckets are geographic now (local / regional) — see lib/providers-city.ts.
+      // ~100 legacy P3 pages under app/{city}-{st}/ read citySpecific/regional/
+      // statewide off this response and flatten all three, so the old key names
+      // are kept as aliases. They inherit the geography fix without being edited,
+      // and the legacy route tree stays out of scope. `statewide` has always been
+      // empty in practice; it is returned only so those spreads keep type-checking.
       const results = await getProvidersByCity(city, state)
-      return NextResponse.json(results)
+      return NextResponse.json({
+        local: results.local,
+        regional: results.regional,
+        citySpecific: results.local,
+        statewide: [],
+      })
     } else {
       // Return flat list for backward compatibility
       const providers = await getAllProvidersForCity(city, state)

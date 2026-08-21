@@ -15,9 +15,28 @@ export interface EnrichedProvider {
   phone?: string
   categoryName?: string
   url?: string
+  isFixedSite?: boolean
+  serviceRadiusMiles?: number
+  coords?: { lat: number; lng: number }
+  /** @deprecated legacy JSON-era field. NEVER populated from the database —
+   *  toEnrichedProvider does not set it and Prisma has no such column. Any
+   *  `provider.is_mobile_phlebotomy === ...` branch on a DB-sourced record is dead code.
+   *  Only reachable via the legacy JSON import path. Do not add new reads. */
   is_mobile_phlebotomy?: string
+  /** @deprecated legacy JSON-era field. NEVER populated from the database —
+   *  toEnrichedProvider does not set it and Prisma has no such column. Any
+   *  `provider.is_nationwide === ...` branch on a DB-sourced record is dead code.
+   *  Only reachable via the legacy JSON import path. Do not add new reads. */
   is_nationwide?: string
+  /** @deprecated legacy JSON-era field. NEVER populated from the database —
+   *  toEnrichedProvider does not set it and Prisma has no such column. Any
+   *  `provider.verified_service_areas === ...` branch on a DB-sourced record is dead code.
+   *  Only reachable via the legacy JSON import path. Do not add new reads. */
   verified_service_areas?: string
+  /** @deprecated legacy JSON-era field. NEVER populated from the database —
+   *  toEnrichedProvider does not set it and Prisma has no such column. Any
+   *  `provider.validation_notes === ...` branch on a DB-sourced record is dead code.
+   *  Only reachable via the legacy JSON import path. Do not add new reads. */
   validation_notes?: string
   logo?: string
   profileImage?: string
