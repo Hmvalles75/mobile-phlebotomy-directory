@@ -11,7 +11,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
 
   // Optimized: only fetch fields needed for sitemap (much faster)
+  //
+  // removedAt filter added 2026-08-20. Without it every soft-removed provider
+  // was still submitted to Google, and each of those URLs 301-redirects via
+  // next.config.mjs — Search Console reports them as "Page with redirect"
+  // errors. Seven were in here, including `test-provider`, a test record being
+  // advertised to search engines. Soft removal is the only removal we do, so
+  // this is the filter that makes it mean something externally.
   const providers = await prisma.provider.findMany({
+    where: { removedAt: null },
     select: {
       slug: true,
       updatedAt: true,
