@@ -53,7 +53,7 @@ What this means:
   • You can still re-claim it if you have capacity — visit your dashboard.
   • If you contacted the patient any way we can't see — email, a text from your own phone, a call you're waiting on — tap "🔧 I'm working it" on the claim page. That alone keeps the lead assigned to you.
   • If you reached them and they didn't respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.). Any outcome counts as engagement and stops auto-release.
-  • Repeated auto-releases on your account flag a pattern we review monthly. We'd rather have you engaged with fewer leads than claiming widely and not following up.
+  • If this keeps happening, something on our side is probably getting in your way. Reply and tell me what you were doing when the lead was released — that is far more useful to me than the release itself.
 
 Dashboard: ${SITE_URL}/dashboard
 
@@ -79,7 +79,7 @@ MobilePhlebotomy.org
   <li>You can still re-claim it if you have capacity — visit your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a>.</li>
   <li>If you contacted the patient any way we can&apos;t see &mdash; email, a text from your own phone, a call you&apos;re waiting on &mdash; tap <strong>&ldquo;🔧 I&apos;m working it&rdquo;</strong> on the claim page. That alone keeps the lead assigned to you.</li>
   <li>If you reached them and they didn&apos;t respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.). Any outcome counts as engagement and stops auto-release.</li>
-  <li>Repeated auto-releases on your account flag a pattern we review monthly. We'd rather have you engaged with fewer leads than claiming widely and not following up.</li>
+  <li>If this keeps happening, something on our side is probably getting in your way. Reply and tell me what you were doing when the lead was released &mdash; that is far more useful to me than the release itself.</li>
 </ul>
 
 <p>If something on our end is blocking you from logging outcomes (a bug, a missing button, anything), reply to this email and I'll look into it.</p>
