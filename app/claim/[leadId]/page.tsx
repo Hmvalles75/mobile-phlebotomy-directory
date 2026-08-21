@@ -476,6 +476,35 @@ export default function ClaimLeadPage() {
                   {outcomeError}
                 </div>
               )}
+              {/* "I'm working it" — full width and first, because it is the
+                  one that stops the auto-release clock and the one providers
+                  most often need.
+
+                  This existed only on the dashboard. Providers arriving from a
+                  lead email land here, not there, so the July fix never reached
+                  the path they actually take: Sherin at All Veins emailed a
+                  patient, had nothing to tap that meant "I'm on it", and lost
+                  the claim to auto-release — twice, and she carries 9 stale
+                  strikes for leads she was genuinely working.
+
+                  Posts through the same /api/leads/[leadId]/update-status
+                  endpoint as every other button here, which accepts a
+                  providerId param instead of a session. The dedicated
+                  /api/provider/lead-working route is session-only and cannot be
+                  called from this page at all. */}
+              <button
+                onClick={() => handleOutcome('WORKING_IT', "Working it", false)}
+                disabled={outcomeSaving}
+                className="w-full mb-3 px-3 py-3 border-2 border-indigo-300 text-indigo-900 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors font-semibold text-sm disabled:opacity-50"
+              >
+                🔧 I&apos;m working it — keep this lead assigned to me
+              </button>
+              <p className="text-xs text-gray-500 mb-3 -mt-1">
+                Tap this if you&apos;ve contacted the patient any way we can&apos;t see — email, text
+                from your own phone, or a call back later. It stops the lead being released to other
+                providers while you follow up.
+              </p>
+
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleOutcome('APPOINTMENT_BOOKED', 'Booked', false)}

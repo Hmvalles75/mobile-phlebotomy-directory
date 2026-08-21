@@ -51,7 +51,8 @@ What this means:
 
   • The lead is now visible to other providers in your area. If one of them claims and converts it, that's fine.
   • You can still re-claim it if you have capacity — visit your dashboard.
-  • If you tried to reach the patient and they didn't respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.) on the claim page next time. Any outcome counts as engagement and stops auto-release.
+  • If you contacted the patient any way we can't see — email, a text from your own phone, a call you're waiting on — tap "🔧 I'm working it" on the claim page. That alone keeps the lead assigned to you.
+  • If you reached them and they didn't respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.). Any outcome counts as engagement and stops auto-release.
   • Repeated auto-releases on your account flag a pattern we review monthly. We'd rather have you engaged with fewer leads than claiming widely and not following up.
 
 Dashboard: ${SITE_URL}/dashboard
@@ -76,7 +77,8 @@ MobilePhlebotomy.org
 <ul>
   <li>The lead is now visible to other providers in your area. If one of them claims and converts it, that's fine.</li>
   <li>You can still re-claim it if you have capacity — visit your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a>.</li>
-  <li>If you tried to reach the patient and they didn't respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.) on the claim page next time. Any outcome counts as engagement and stops auto-release.</li>
+  <li>If you contacted the patient any way we can&apos;t see &mdash; email, a text from your own phone, a call you&apos;re waiting on &mdash; tap <strong>&ldquo;🔧 I&apos;m working it&rdquo;</strong> on the claim page. That alone keeps the lead assigned to you.</li>
+  <li>If you reached them and they didn&apos;t respond, log the outcome (📞 No answer / 📧 Voicemail left / 💬 Text sent / etc.). Any outcome counts as engagement and stops auto-release.</li>
   <li>Repeated auto-releases on your account flag a pattern we review monthly. We'd rather have you engaged with fewer leads than claiming widely and not following up.</li>
 </ul>
 
