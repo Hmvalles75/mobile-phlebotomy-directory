@@ -93,6 +93,15 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Quick Labs LLC — removed 2026-08-20 at the provider's request.
+        // Mary Berry asked to be taken off the list, had to ask a second time
+        // after a courtesy email reached her through a path with no
+        // suppression check, then confirmed she wanted the listing gone too.
+        source: '/provider/quick-labs-llc',
+        destination: '/us/pennsylvania/doylestown',
+        permanent: true,
+      },
+      {
         source: '/provider/comfortcare-mobile-labs',
         destination: '/us/california/sacramento',
         permanent: true,
