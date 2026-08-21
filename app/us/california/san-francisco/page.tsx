@@ -14,23 +14,23 @@ import NearbyCities from '@/components/seo/NearbyCities'
 // (client) component cannot. The provider list, filters, search, and lead form
 // are delegated to the existing dynamic CityPage component below.
 
-const PROVIDER_COUNT = 0
+const PROVIDER_COUNT = 2
 const CITY_NAME = "San Francisco"
 const STATE_ABBR = "CA"
 const STATE_NAME = "California"
 const PRICE_RANGE = "$80–$160"
-const CITY_SPECIFIC_COUNT = 0
+const CITY_SPECIFIC_COUNT = 2
 
 export const metadata: Metadata = {
   title: "Mobile Phlebotomy San Francisco, CA: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in San Francisco, CA. Vetted providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
+  description: "Find mobile phlebotomy in San Francisco, CA. Providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
   keywords: "mobile phlebotomy san francisco, mobile phlebotomist san francisco, san francisco mobile blood draw, at home blood draw san francisco, mobile lab san francisco, san francisco california phlebotomy, california mobile phlebotomy",
   alternates: {
     canonical: "https://www.mobilephlebotomy.org/us/california/san-francisco",
   },
   openGraph: {
     title: "Mobile Phlebotomy San Francisco, CA: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in San Francisco, CA. Vetted providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
+    description: "Find mobile phlebotomy in San Francisco, CA. Providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
     url: "https://www.mobilephlebotomy.org/us/california/san-francisco",
     type: 'website',
   },

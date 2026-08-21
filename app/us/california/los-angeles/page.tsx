@@ -14,23 +14,23 @@ import NearbyCities from '@/components/seo/NearbyCities'
 // (client) component cannot. The provider list, filters, search, and lead form
 // are delegated to the existing dynamic CityPage component below.
 
-const PROVIDER_COUNT = 1
+const PROVIDER_COUNT = 16
 const CITY_NAME = "Los Angeles"
 const STATE_ABBR = "CA"
 const STATE_NAME = "California"
 const PRICE_RANGE = "$80–$160"
-const CITY_SPECIFIC_COUNT = 1
+const CITY_SPECIFIC_COUNT = 16
 
 export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Los Angeles, CA: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in Los Angeles, CA. Vetted providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
+  title: "Mobile Phlebotomy Los Angeles: 16 Providers (2026)",
+  description: "Find mobile phlebotomy in Los Angeles, CA. 16 providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
   keywords: "mobile phlebotomy los angeles, mobile phlebotomist los angeles, los angeles mobile blood draw, at home blood draw los angeles, mobile lab los angeles, los angeles california phlebotomy, california mobile phlebotomy",
   alternates: {
     canonical: "https://www.mobilephlebotomy.org/us/california/los-angeles",
   },
   openGraph: {
-    title: "Mobile Phlebotomy Los Angeles, CA: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in Los Angeles, CA. Vetted providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
+    title: "Mobile Phlebotomy Los Angeles: 16 Providers (2026)",
+    description: "Find mobile phlebotomy in Los Angeles, CA. 16 providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
     url: "https://www.mobilephlebotomy.org/us/california/los-angeles",
     type: 'website',
   },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Los Angeles, CA","description":"Directory of vetted mobile phlebotomists serving Los Angeles, California and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/california/los-angeles","areaServed":{"@type":"City","name":"Los Angeles","containedInPlace":{"@type":"State","name":"California"}},"priceRange":"$80–$160","medicalSpecialty":"Phlebotomy"}
 
-const faqSchema = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does mobile phlebotomy cost in Los Angeles?","acceptedAnswer":{"@type":"Answer","text":"Mobile phlebotomy in Los Angeles, CA typically costs $80–$160 per visit for the phlebotomist's service fee. Independent providers usually charge less than national services like Quest Mobile ($79) or NPPN ($99). Lab processing fees are billed separately by your lab. Medicare and Medicaid patients in California typically pay $0–$25 when the draw is medically necessary and ordered by a physician."}},{"@type":"Question","name":"How fast can I get a mobile phlebotomist in Los Angeles?","acceptedAnswer":{"@type":"Answer","text":"Most Los Angeles-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider."}},{"@type":"Question","name":"Do mobile phlebotomists in Los Angeles accept insurance?","acceptedAnswer":{"@type":"Answer","text":"Many mobile phlebotomists in Los Angeles, CA accept insurance, including Medicare Part B for homebound patients (typical copay $0–$25), state Medicaid programs, and major private insurance plans (often with pre-authorization). Independent providers usually also accept HSA, FSA, and competitive self-pay rates. Confirm insurance acceptance directly with the provider before booking."}},{"@type":"Question","name":"Which labs do Los Angeles mobile phlebotomists work with?","acceptedAnswer":{"@type":"Answer","text":"Most Los Angeles-area mobile phlebotomists routinely drop off specimens at LabCorp and Quest Diagnostics patient service centers. Many also deliver to hospital-affiliated labs and specialty labs when your physician's order specifies a particular lab. Confirm your provider can route to your preferred lab before booking."}}]}
+const faqSchema = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does mobile phlebotomy cost in Los Angeles?","acceptedAnswer":{"@type":"Answer","text":"Mobile phlebotomy in Los Angeles, CA typically costs $80–$160 per visit for the phlebotomist's service fee. Independent providers usually charge less than national services like Quest Mobile ($79) or NPPN ($99). Lab processing fees are billed separately by your lab. Medicare and Medicaid patients in California typically pay $0–$25 when the draw is medically necessary and ordered by a physician."}},{"@type":"Question","name":"How fast can I get a mobile phlebotomist in Los Angeles?","acceptedAnswer":{"@type":"Answer","text":"Most Los Angeles-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider — our directory lists 16 providers serving the Los Angeles area."}},{"@type":"Question","name":"Do mobile phlebotomists in Los Angeles accept insurance?","acceptedAnswer":{"@type":"Answer","text":"Many mobile phlebotomists in Los Angeles, CA accept insurance, including Medicare Part B for homebound patients (typical copay $0–$25), state Medicaid programs, and major private insurance plans (often with pre-authorization). Independent providers usually also accept HSA, FSA, and competitive self-pay rates. Confirm insurance acceptance directly with the provider before booking."}},{"@type":"Question","name":"Which labs do Los Angeles mobile phlebotomists work with?","acceptedAnswer":{"@type":"Answer","text":"Most Los Angeles-area mobile phlebotomists routinely drop off specimens at LabCorp and Quest Diagnostics patient service centers. Many also deliver to hospital-affiliated labs and specialty labs when your physician's order specifies a particular lab. Confirm your provider can route to your preferred lab before booking."}}]}
 
 const breadcrumbSchema = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.mobilephlebotomy.org/"},{"@type":"ListItem","position":2,"name":"United States","item":"https://www.mobilephlebotomy.org/us"},{"@type":"ListItem","position":3,"name":"California","item":"https://www.mobilephlebotomy.org/us/california"},{"@type":"ListItem","position":4,"name":"Los Angeles","item":"https://www.mobilephlebotomy.org/us/california/los-angeles"}]}
 

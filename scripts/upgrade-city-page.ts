@@ -25,6 +25,8 @@
 import * as dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 import { PrismaClient } from '@prisma/client'
+import { getAllProviders } from '../lib/providers-db'
+import { bucketProvidersForCity } from '../lib/cityGeography'
 import * as fs from 'fs'
 import * as path from 'path'
 import { SITE_URL } from '../lib/seo'
@@ -83,58 +85,22 @@ async function fetchCityData(slug: string, stateAbbr: string): Promise<CityData>
   const stateName = STATE_NAMES[stateAbbr.toUpperCase()] || stateAbbr.toUpperCase()
   const priceRange = STATE_PRICE_RANGES[stateAbbr.toUpperCase()] || '$70–$135'
 
-  // City-specific: explicit city coverage in the relational `coverage` table
-  const citySpecific = await prisma.provider.count({
-    where: {
-      eligibleForLeads: true,
-      removedAt: null,
-      coverage: {
-        some: {
-          state: { abbr: stateAbbr.toUpperCase() },
-          city: { name: { equals: cityName, mode: 'insensitive' } },
-        },
-      },
-    },
-  })
-
-  // Statewide / regional: providers covering the state without a specific city,
-  // OR providers whose primaryState matches. Captures both routing eligibility
-  // signals so the count reflects real available coverage.
-  const statewide = await prisma.provider.count({
-    where: {
-      eligibleForLeads: true,
-      removedAt: null,
-      OR: [
-        {
-          coverage: {
-            some: {
-              state: { abbr: stateAbbr.toUpperCase() },
-              cityId: null,
-            },
-          },
-        },
-        { primaryState: stateAbbr.toUpperCase() },
-      ],
-    },
-  })
-
-  // INTERIM RULE (2026-08-07): advertise the city-specific count only.
+  // Counts come from the SAME rule the page renders — bucketProvidersForCity
+  // in lib/cityGeography.ts. This used to be its own prisma.count over explicit
+  // coverage rows, which meant the number baked into <title> and the number the
+  // page displayed were computed two different ways and disagreed. Philadelphia
+  // shipped "3 Vetted Providers" in its title while the page listed 17.
   //
-  // The previous max(citySpecific, statewide) inflated every page in a large
-  // state. The San Francisco audit is the clearest case: 28 advertised, and
-  // exactly ONE provider whose service radius actually reaches SF. Eighteen of
-  // the twenty-eight are based more than 300 miles away — San Diego, Indio,
-  // Temecula — counted purely because they ticked "CA statewide" while running
-  // a 25-mile radius.
-  //
-  // A statewide coverage row states willingness to serve the state, not ability
-  // to reach a given city, so it cannot back a per-city number. The honest
-  // version of this count is distance-aware (statewide providers whose radius
-  // reaches the city centroid), but that needs the ZIP centroid table, which is
-  // out of scope. Until then the city-specific count is the only figure we can
-  // defend, and MIN_COUNT_TO_ADVERTISE suppresses it where it is too thin to
-  // help. `statewide` is still returned for reference.
-  const providerCount = citySpecific
+  // The 2026-08-07 note below this used to say the honest count would be
+  // distance-aware "but that needs the ZIP centroid table, which is out of
+  // scope." It is in scope now: `local` means the provider's stated radius
+  // reaches this city, or they named the city themselves. Nothing is counted on
+  // the strength of a default we supplied.
+  const allProviders = await getAllProviders()
+  const { local, regional } = bucketProvidersForCity(allProviders, cityName, stateAbbr.toUpperCase())
+  const providerCount = local.length
+  const citySpecific = providerCount
+  const statewide = regional.length
 
   // Specialty distribution — `services` is a relation (ProviderService → Service),
   // not a string array. Pull the Service.name to get human-readable specialty labels.
@@ -213,15 +179,22 @@ function generatePageContent(data: CityData): string {
   const MIN_COUNT_TO_ADVERTISE = 3
   const showCount = providerCount >= MIN_COUNT_TO_ADVERTISE
 
+  // "Vetted" is gone. The local bucket now mixes VERIFIED providers with
+  // records we have not vetted, so the word was writing a check the count
+  // could not universally cash — in SERP copy, where it does the most work.
+  // Plain "N Providers" is the same honesty standard the page headline holds
+  // itself to. Bring the word back per-city only if a page's local bucket is
+  // entirely verified.
+  //
   // Title <= 60 chars to avoid SERP truncation. Lead with the target keyword.
   const title = showCount
-    ? `Mobile Phlebotomy ${name}: ${providerCount} Vetted ${providerNoun.charAt(0).toUpperCase() + providerNoun.slice(1)} (2026)`
+    ? `Mobile Phlebotomy ${name}: ${providerCount} ${providerNoun.charAt(0).toUpperCase() + providerNoun.slice(1)} (2026)`
     : `Mobile Phlebotomy ${name}, ${state}: At-Home Blood Draws (2026)`
 
   const description = showCount
-    ? `Find mobile phlebotomy in ${name}, ${state}. ${providerCount} vetted ${providerNoun} serving the ${name} area — ${specialtyList}. ` +
+    ? `Find mobile phlebotomy in ${name}, ${state}. ${providerCount} ${providerNoun} serving the ${name} area — ${specialtyList}. ` +
       `Typical service fee ${priceRange} per visit. Same-day appointments available.`
-    : `Find mobile phlebotomy in ${name}, ${state}. Vetted providers serving the ${name} area — ${specialtyList}. ` +
+    : `Find mobile phlebotomy in ${name}, ${state}. Providers serving the ${name} area — ${specialtyList}. ` +
       `Typical service fee ${priceRange} per visit. Same-day appointments available.`
 
   // JSON-LD strings — embedded directly into the generated file rather than

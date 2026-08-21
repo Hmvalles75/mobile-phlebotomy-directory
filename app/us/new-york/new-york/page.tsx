@@ -14,23 +14,23 @@ import NearbyCities from '@/components/seo/NearbyCities'
 // (client) component cannot. The provider list, filters, search, and lead form
 // are delegated to the existing dynamic CityPage component below.
 
-const PROVIDER_COUNT = 1
+const PROVIDER_COUNT = 18
 const CITY_NAME = "New York"
 const STATE_ABBR = "NY"
 const STATE_NAME = "New York"
 const PRICE_RANGE = "$75–$150"
-const CITY_SPECIFIC_COUNT = 1
+const CITY_SPECIFIC_COUNT = 18
 
 export const metadata: Metadata = {
-  title: "Mobile Phlebotomy New York, NY: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in New York, NY. Vetted providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
+  title: "Mobile Phlebotomy New York: 18 Providers (2026)",
+  description: "Find mobile phlebotomy in New York, NY. 18 providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
   keywords: "mobile phlebotomy new york, mobile phlebotomist new york, new york mobile blood draw, at home blood draw new york, mobile lab new york, new york new-york phlebotomy, new york mobile phlebotomy",
   alternates: {
     canonical: "https://www.mobilephlebotomy.org/us/new-york/new-york",
   },
   openGraph: {
-    title: "Mobile Phlebotomy New York, NY: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in New York, NY. Vetted providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
+    title: "Mobile Phlebotomy New York: 18 Providers (2026)",
+    description: "Find mobile phlebotomy in New York, NY. 18 providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
     url: "https://www.mobilephlebotomy.org/us/new-york/new-york",
     type: 'website',
   },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in New York, NY","description":"Directory of vetted mobile phlebotomists serving New York, New York and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/new-york/new-york","areaServed":{"@type":"City","name":"New York","containedInPlace":{"@type":"State","name":"New York"}},"priceRange":"$75–$150","medicalSpecialty":"Phlebotomy"}
 
-const faqSchema = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does mobile phlebotomy cost in New York?","acceptedAnswer":{"@type":"Answer","text":"Mobile phlebotomy in New York, NY typically costs $75–$150 per visit for the phlebotomist's service fee. Independent providers usually charge less than national services like Quest Mobile ($79) or NPPN ($99). Lab processing fees are billed separately by your lab. Medicare and Medicaid patients in New York typically pay $0–$25 when the draw is medically necessary and ordered by a physician."}},{"@type":"Question","name":"How fast can I get a mobile phlebotomist in New York?","acceptedAnswer":{"@type":"Answer","text":"Most New York-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider."}},{"@type":"Question","name":"Do mobile phlebotomists in New York accept insurance?","acceptedAnswer":{"@type":"Answer","text":"Many mobile phlebotomists in New York, NY accept insurance, including Medicare Part B for homebound patients (typical copay $0–$25), state Medicaid programs, and major private insurance plans (often with pre-authorization). Independent providers usually also accept HSA, FSA, and competitive self-pay rates. Confirm insurance acceptance directly with the provider before booking."}},{"@type":"Question","name":"Which labs do New York mobile phlebotomists work with?","acceptedAnswer":{"@type":"Answer","text":"Most New York-area mobile phlebotomists routinely drop off specimens at LabCorp and Quest Diagnostics patient service centers. Many also deliver to hospital-affiliated labs and specialty labs when your physician's order specifies a particular lab. Confirm your provider can route to your preferred lab before booking."}}]}
+const faqSchema = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does mobile phlebotomy cost in New York?","acceptedAnswer":{"@type":"Answer","text":"Mobile phlebotomy in New York, NY typically costs $75–$150 per visit for the phlebotomist's service fee. Independent providers usually charge less than national services like Quest Mobile ($79) or NPPN ($99). Lab processing fees are billed separately by your lab. Medicare and Medicaid patients in New York typically pay $0–$25 when the draw is medically necessary and ordered by a physician."}},{"@type":"Question","name":"How fast can I get a mobile phlebotomist in New York?","acceptedAnswer":{"@type":"Answer","text":"Most New York-area providers offer same-day or next-day appointments, especially for morning routine draws. STAT (urgent) draws are typically available within 2–4 hours for an added fee. Weekend and evening appointments are available from many independent providers. Confirm availability when you contact the provider — our directory lists 18 providers serving the New York area."}},{"@type":"Question","name":"Do mobile phlebotomists in New York accept insurance?","acceptedAnswer":{"@type":"Answer","text":"Many mobile phlebotomists in New York, NY accept insurance, including Medicare Part B for homebound patients (typical copay $0–$25), state Medicaid programs, and major private insurance plans (often with pre-authorization). Independent providers usually also accept HSA, FSA, and competitive self-pay rates. Confirm insurance acceptance directly with the provider before booking."}},{"@type":"Question","name":"Which labs do New York mobile phlebotomists work with?","acceptedAnswer":{"@type":"Answer","text":"Most New York-area mobile phlebotomists routinely drop off specimens at LabCorp and Quest Diagnostics patient service centers. Many also deliver to hospital-affiliated labs and specialty labs when your physician's order specifies a particular lab. Confirm your provider can route to your preferred lab before booking."}}]}
 
 const breadcrumbSchema = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.mobilephlebotomy.org/"},{"@type":"ListItem","position":2,"name":"United States","item":"https://www.mobilephlebotomy.org/us"},{"@type":"ListItem","position":3,"name":"New York","item":"https://www.mobilephlebotomy.org/us/new-york"},{"@type":"ListItem","position":4,"name":"New York","item":"https://www.mobilephlebotomy.org/us/new-york/new-york"}]}
 

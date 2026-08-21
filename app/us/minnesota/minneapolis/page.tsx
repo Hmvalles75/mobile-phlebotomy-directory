@@ -14,23 +14,23 @@ import NearbyCities from '@/components/seo/NearbyCities'
 // (client) component cannot. The provider list, filters, search, and lead form
 // are delegated to the existing dynamic CityPage component below.
 
-const PROVIDER_COUNT = 1
+const PROVIDER_COUNT = 2
 const CITY_NAME = "Minneapolis"
 const STATE_ABBR = "MN"
 const STATE_NAME = "Minnesota"
 const PRICE_RANGE = "$70–$135"
-const CITY_SPECIFIC_COUNT = 1
+const CITY_SPECIFIC_COUNT = 2
 
 export const metadata: Metadata = {
   title: "Mobile Phlebotomy Minneapolis, MN: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in Minneapolis, MN. Vetted providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
+  description: "Find mobile phlebotomy in Minneapolis, MN. Providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
   keywords: "mobile phlebotomy minneapolis, mobile phlebotomist minneapolis, minneapolis mobile blood draw, at home blood draw minneapolis, mobile lab minneapolis, minneapolis minnesota phlebotomy, minnesota mobile phlebotomy",
   alternates: {
     canonical: "https://www.mobilephlebotomy.org/us/minnesota/minneapolis",
   },
   openGraph: {
     title: "Mobile Phlebotomy Minneapolis, MN: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in Minneapolis, MN. Vetted providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
+    description: "Find mobile phlebotomy in Minneapolis, MN. Providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
     url: "https://www.mobilephlebotomy.org/us/minnesota/minneapolis",
     type: 'website',
   },
