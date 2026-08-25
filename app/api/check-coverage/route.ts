@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import zipcodes from 'zipcodes'
+import { STATE_DATA } from '@/data/states-full'
 
 const schema = z.object({
   city: z.string().min(1).optional(),
@@ -12,6 +13,11 @@ const schema = z.object({
 })
 
 // Speedy Sticks affiliate URL (fallback for low-coverage areas)
+/** Abbreviation -> full state name, for exact matching against a malformed states table. */
+const STATE_ABBR_TO_FULL: Record<string, string> = Object.fromEntries(
+  Object.values(STATE_DATA).map(s => [s.abbr, s.name])
+)
+
 const AFFILIATE_URL = process.env.NEXT_PUBLIC_SPEEDY_STICKS_AFFILIATE_URL || 'https://speedysticks.com?ref=mobilephlebotomy'
 
 export async function POST(req: NextRequest) {
@@ -57,35 +63,50 @@ export async function POST(req: NextRequest) {
       }, { status: 400 })
     }
 
-    // Step 2: Find the state in database
+    // Step 2: Resolve the state — EXACT matches only.
+    //
+    // This previously fell back to `name: { contains: <2-letter abbr> }`, which
+    // matched abbreviations against the middle of other states' names. "HI"
+    // matched "O-HI-o", so a visitor in Volcano, Hawaii was shown 27 Ohio
+    // providers averaging 4,400 miles away under a green "Excellent Coverage"
+    // banner. A SCORE small-business mentor reported it. Sixteen states resolved
+    // to the wrong record this way: AL->California, DE->Rhode Island,
+    // ID->Florida, LA->Alabama, ME->New Mexico, OR->Colorado, VA->Pennsylvania,
+    // and more.
+    //
+    // The full name is also accepted because the states table is malformed: 56
+    // of its 66 rows have name === abbr, and Hawaii's row is
+    // { abbr: "Hawaii", name: "Hawaii" } with no "HI" anywhere. Matching the
+    // name exactly reaches those rows without reintroducing substring matching.
+    // Repairing the table itself is tracked separately.
+    const stateFullName = STATE_ABBR_TO_FULL[state.toUpperCase()] || null
     const stateRecord = await prisma.state.findFirst({
       where: {
         OR: [
-          { abbr: state },
-          { name: { contains: state, mode: 'insensitive' } }
-        ]
-      }
+          { abbr: { equals: state, mode: 'insensitive' as const } },
+          ...(stateFullName
+            ? [
+                { name: { equals: stateFullName, mode: 'insensitive' as const } },
+                { abbr: { equals: stateFullName, mode: 'insensitive' as const } },
+              ]
+            : []),
+        ],
+      },
     })
 
     if (!stateRecord) {
-      console.log(`[Coverage Check] State ${state} not found in database`)
-      // Fallback: show all providers if state not in DB
-      const allProviders = await prisma.provider.findMany({
-        where: { status: { in: ['VERIFIED', 'PENDING', 'UNVERIFIED'] } },
-        select: { id: true, name: true, listingTier: true }
-      })
-
-      console.log(`[Coverage Check] Fallback - found ${allProviders.length} total providers`)
-
+      // No state row: say so. This used to return EVERY provider in the
+      // database as "nationwide search" results, which turned an unknown state
+      // into a coverage claim of several hundred providers — the same lie the
+      // Ohio bug told, by a different route.
+      console.log(`[Coverage Check] State ${state} not found — reporting no coverage`)
       return NextResponse.json({
         ok: true,
-        coverage: allProviders.length >= 3 ? 'high' : 'low',
-        providerCount: allProviders.length,
-        action: allProviders.length >= 3 ? 'lead_form' : 'affiliate',
+        coverage: 'low',
+        providerCount: 0,
+        action: 'affiliate',
         affiliateUrl: AFFILIATE_URL,
-        message: allProviders.length > 0
-          ? `We found ${allProviders.length} providers (nationwide search - ${state} not in our database yet)`
-          : `No providers found in database. Please import provider data.`
+        message: `We don't have coverage in ${city}, ${state} yet. For availability in your area, we recommend our partner Speedy Sticks.`,
       })
     }
 
@@ -135,7 +156,12 @@ export async function POST(req: NextRequest) {
         coverage: 'high',
         providerCount: providers.length,
         action: 'lead_form',
-        message: `Great news! We found ${providers.length} certified providers in your area.`
+        // "certified" is gone: this count includes UNVERIFIED and PENDING
+        // listings and hospital draw stations. "in your area" is gone too —
+        // matching is by state coverage row, not by ZIP or distance, so the
+        // page must not imply a ZIP-level guarantee. Tightening the match
+        // itself to ZIP + radius is tracked separately.
+        message: `We found ${providers.length} providers listed in ${state}. Submit the form and we'll confirm who can cover ${city}.`
       })
     } else {
       // LOW COVERAGE: Route to affiliate (Speedy Sticks)
@@ -146,7 +172,7 @@ export async function POST(req: NextRequest) {
         action: 'affiliate',
         affiliateUrl: AFFILIATE_URL,
         message: providers.length > 0
-          ? `We found ${providers.length} provider(s) in your area. For guaranteed availability, we recommend our trusted partner Speedy Sticks.`
+          ? `We found ${providers.length} provider(s) listed in ${state}. For guaranteed availability in ${city}, we recommend our trusted partner Speedy Sticks.`
           : 'For guaranteed availability in your area, we recommend our trusted partner Speedy Sticks.'
       })
     }

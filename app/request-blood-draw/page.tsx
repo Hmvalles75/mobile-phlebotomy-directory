@@ -530,7 +530,7 @@ function RequestBloodDrawForm() {
                     Limited Provider Availability in Your Area
                   </h3>
                   <p className="text-blue-800 text-sm mb-3">
-                    We found {coverageData.providerCount} provider{coverageData.providerCount !== 1 ? 's' : ''} in your ZIP code.
+                    We have {coverageData.providerCount} provider{coverageData.providerCount !== 1 ? 's' : ''} listed in {formData.state.toUpperCase()}, and we can&apos;t promise coverage at your address.
                     For guaranteed same-day or next-day service, you may want to check our trusted nationwide partner.
                   </p>
                   <a
@@ -558,12 +558,19 @@ function RequestBloodDrawForm() {
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 text-green-500 text-2xl">✓</div>
                 <div className="flex-1">
+                  {/* Wording corrected 2026-08-25 after a visitor in Volcano, HI
+                      was shown "27 certified providers serving your ZIP code"
+                      when all 27 were in Ohio, ~4,400 miles away, and most were
+                      unverified listings. The count is of providers LISTED IN
+                      THE STATE — it is not ZIP-matched and it is not a
+                      certification claim, so it must not be described as
+                      either. */}
                   <h3 className="font-semibold text-green-900 mb-1">
-                    Great News! Excellent Coverage in Your Area.
+                    Providers Available in {formData.state.toUpperCase()}
                   </h3>
                   <p className="text-green-800 text-sm">
-                    We found {coverageData.providerCount} certified providers serving your ZIP code.
-                    Submit the form above and we will immediately match your request to the top 3-5 best-rated professionals. They will contact you shortly to confirm pricing.
+                    We have {coverageData.providerCount} provider{coverageData.providerCount !== 1 ? 's' : ''} listed in {formData.state.toUpperCase()}.
+                    Submit the form above and we&apos;ll confirm which of them can cover your address, then have them contact you about timing and pricing.
                   </p>
                 </div>
               </div>
