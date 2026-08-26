@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CorporateInquiriesPanel } from './CorporateInquiriesPanel'
 import { LeadsPanel } from './LeadsPanel'
 import { ChargeProviderPanel } from './ChargeProviderPanel'
+import { MessagesPanel } from './MessagesPanel'
 import { ProvidersManagementPanel } from './ProvidersManagementPanel'
 
 interface PendingProvider {
@@ -71,7 +72,8 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'submissions' | 'provider-mgmt' | 'corporate' | 'leads' | 'billing'>('submissions')
+  const [activeTab, setActiveTab] = useState<'submissions' | 'provider-mgmt' | 'corporate' | 'leads' | 'messages' | 'billing'>('submissions')
+  const [messageAttention, setMessageAttention] = useState<number>(0)
   const [submissions, setSubmissions] = useState<PendingProvider[]>([])
   const [coverageAttention, setCoverageAttention] = useState<{
     count: number
@@ -131,6 +133,7 @@ export default function AdminDashboard() {
         setIsAuthenticated(true)
         loadSubmissions()
         loadCoverageAttention()
+        loadMessageAttention()
         loadLeadAttention()
       } else {
         // Token invalid, clear it
@@ -168,6 +171,7 @@ export default function AdminDashboard() {
         setIsAuthenticated(true)
         loadSubmissions()
         loadCoverageAttention()
+        loadMessageAttention()
         loadLeadAttention()
       } else {
         setLoginError(data.error || 'Login failed')
@@ -210,6 +214,20 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to load lead attention:', error)
+    }
+  }
+
+  // Unread /contact messages, plus anything that arrived without an alert.
+  // The contact form was invisible in this panel until 2026-08-26 — a corporate
+  // event inquiry landed in contact_messages and could not be found here.
+  const loadMessageAttention = async () => {
+    try {
+      const res = await fetch('/api/admin/contact-messages', { credentials: 'include' })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.success) setMessageAttention(data.counts.attention)
+    } catch (error) {
+      console.error('Failed to load message attention:', error)
     }
   }
 
@@ -545,6 +563,7 @@ export default function AdminDashboard() {
                 setActiveTab('corporate')
                 setShowAddForm(false)
                 loadCoverageAttention()
+        loadMessageAttention()
               }}
               className={`px-4 py-2 font-medium transition-colors inline-flex items-center gap-2 ${
                 activeTab === 'corporate'
@@ -559,6 +578,28 @@ export default function AdminDashboard() {
                   title={`${coverageAttention.newCount} new · ${coverageAttention.staleContactedCount} stale contacted`}
                 >
                   {coverageAttention.count}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('messages')
+                setShowAddForm(false)
+                loadMessageAttention()
+              }}
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap inline-flex items-center gap-2 ${
+                activeTab === 'messages'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Messages
+              {messageAttention > 0 && (
+                <span
+                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full bg-red-600 text-white"
+                  title="Unread contact messages, plus anything that arrived without an alert"
+                >
+                  {messageAttention}
                 </span>
               )}
             </button>
@@ -733,6 +774,7 @@ export default function AdminDashboard() {
                     setActiveTab('corporate')
                     setShowAddForm(false)
                     loadCoverageAttention()
+        loadMessageAttention()
                   }}
                   className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
                 >
@@ -1273,6 +1315,10 @@ export default function AdminDashboard() {
         {/* Corporate Inquiries Tab */}
         {activeTab === 'corporate' && (
           <CorporateInquiriesPanel />
+        )}
+
+        {activeTab === 'messages' && (
+          <MessagesPanel />
         )}
 
         {/* Billing & Charges Tab */}
