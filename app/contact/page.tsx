@@ -10,11 +10,34 @@ export default function Contact() {
     message: '',
     userType: 'patient'
   })
+  // Honeypot — never shown to humans.
+  const [websiteUrl, setWebsiteUrl] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Handle form submission
-    console.log('Contact form submitted:', formData)
+    if (status === 'sending') return
+    setStatus('sending')
+    setErrorMessage('')
+    try {
+      const res = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, website_url: websiteUrl }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.ok) {
+        setErrorMessage(json.message || 'Something went wrong. Please email hector@mobilephlebotomy.org directly.')
+        setStatus('error')
+        return
+      }
+      setStatus('sent')
+    } catch {
+      setErrorMessage('We could not reach the server. Please email hector@mobilephlebotomy.org directly.')
+      setStatus('error')
+    }
   }
 
   return (
@@ -32,7 +55,27 @@ export default function Contact() {
             <div className="bg-white rounded-lg shadow-md p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
               
+              {status === 'sent' ? (
+                <div className="rounded-lg border border-green-200 bg-green-50 p-6">
+                  <h3 className="font-semibold text-green-900 mb-2">Message sent</h3>
+                  <p className="text-green-800 text-sm">
+                    Thanks {formData.name.split(' ')[0] || 'for reaching out'} — your message is with us
+                    and Hector will reply to {formData.email} personally, usually within one business day.
+                  </p>
+                </div>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Honeypot — off-screen, unfocusable, hidden from assistive tech. */}
+                <input
+                  type="text"
+                  name="website_url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  style={{ position: 'absolute', left: '-9999px' }}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     I am a... *
@@ -107,13 +150,21 @@ export default function Contact() {
                   />
                 </div>
 
+                {status === 'error' && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <p className="text-red-800 text-sm">{errorMessage}</p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                  disabled={status === 'sending'}
+                  className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {status === 'sending' ? 'Sending…' : 'Send Message'}
                 </button>
               </form>
+              )}
             </div>
 
             <div className="space-y-8">

@@ -1019,3 +1019,47 @@ enum DispatchTaskReason {
   PATIENT_UNRESPONSIVE      // Patient stopped responding
   MANUAL_ESCALATION         // Manually escalated by system
 }
+
+/// Messages from the public /contact form.
+///
+/// The form existed from the initial commit (2025-08-17) with a submit handler
+/// that was nothing but `console.log`. No fetch, no route, no persistence, no
+/// email — and no success message either, so a visitor clicked Send and nothing
+/// happened at all. It was linked in the footer of every page and submitted to
+/// Google in the sitemap the whole time. At least one institutional prospect
+/// (Binghamton University) told us they had written in and heard nothing;
+/// there was no record of it anywhere, because there never could have been.
+///
+/// The row is written BEFORE any email is attempted, and notifiedAt/notifyError
+/// record what happened to the alert. That ordering is deliberate: every inbound
+/// failure found on this codebase has been an email that quietly didn't send,
+/// and a message that only exists inside a send attempt is a message you lose.
+model ContactMessage {
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  userType    String               // patient | provider | business | media | other
+  name        String
+  email       String
+  subject     String
+  message     String               @db.Text
+  status      ContactMessageStatus @default(NEW)
+  /// Set when the admin alert is confirmed accepted by SendGrid. Null means the
+  /// message arrived but nobody was told — query for these.
+  notifiedAt  DateTime?
+  /// Why the alert failed, when it did. Kept so a silent failure leaves a trace.
+  notifyError String?
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([status, createdAt])
+  @@map("contact_messages")
+}
+
+enum ContactMessageStatus {
+  NEW
+  READ
+  REPLIED
+  /// Honeypot hits. Recorded rather than dropped: after this form, "no record"
+  /// can no longer be allowed to mean two different things.
+  SPAM
+}
