@@ -108,11 +108,17 @@ export function passesNotificationGate(p: CoverageProvider): boolean {
   return zips.length > 0
 }
 
-/** Mirrors findFeaturedProvidersForNotification() — the primary (email) routing path. */
+/**
+ * Mirrors findFeaturedProvidersForNotification() — the primary (email) routing path.
+ *
+ * The same-state precondition was dropped here on 2026-08-24 to stay in step
+ * with that function, which no longer consults state at all: a ZIP list names
+ * the places a provider actually works, and gating it behind a state row broke
+ * every metro spanning a state line. This map exists to tell us what routing
+ * really does, so it has to move whenever routing moves.
+ */
 export function isNotifiable(p: CoverageProvider, metro: MetroArea): boolean {
   if (!passesNotificationGate(p)) return false
-  const inState = p.coverageStates.includes(metro.stateAbbr) || p.primaryState === metro.stateAbbr
-  if (!inState) return false
   return reachesMetro(p, metro)
 }
 

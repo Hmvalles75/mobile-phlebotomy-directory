@@ -1,7 +1,7 @@
 import { prisma } from './prisma'
 import { SITE_URL } from './seo'
 import sg from '@sendgrid/mail'
-import { isLeadInServiceRadius } from './zip-geocode'
+import { isLeadInServiceRadius, getDistanceBetweenZips } from './zip-geocode'
 import { isSendGridHealthy } from './sendgridHealth'
 import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 import { notificationDelaySeconds } from './notificationTiming'
@@ -295,48 +295,75 @@ async function findFeaturedProvidersForNotification(
     const hasEmail = provider.notificationEmail || provider.claimEmail || provider.email
     if (!hasEmail) return false
 
-    // Must be in the same state (quick filter)
-    const coverageStates = provider.coverage.map(c => c.state.abbr)
-    const inSameState = coverageStates.includes(leadState) || provider.primaryState === leadState
-    if (!inSameState) return false
+    // Geography is decided by DISTANCE, not by state.
+    //
+    // The state check used to run before any distance calculation and rejected a
+    // provider outright when the lead's state was absent from their coverage
+    // rows and primaryState. That silently broke every metro spanning a state
+    // line, and Washington DC is the worst case: the metro covers DC, Maryland
+    // and Virginia, so a DC-area provider was guaranteed to lose leads in two of
+    // the three.
+    //
+    // The case that surfaced it: a paying Founding Partner registered in MD,
+    // 75-mile radius, with Alexandria VA ZIPs in her own service list, dropped
+    // from a lead 19 miles away in Fairfax Station VA — rejected on state before
+    // her radius was ever considered, while three free listings were notified.
+    // 35 providers carry ZIP lists spanning multiple regions while declaring a
+    // single state, so she was not alone.
+    //
+    // The state filter is gone rather than reordered. It could only ever change
+    // the outcome for a provider WITH ZIPs, which is exactly the broken case: a
+    // provider with no usable ZIPs returned false either way, then and now,
+    // because a state row alone cannot establish proximity. A ZIP list is the
+    // more specific claim — it names the places someone actually works — so it
+    // decides the match on its own.
+    const serviceZips = (provider.zipCodes || '')
+      .split(',')
+      .map(z => z.trim())
+      .filter(z => z.length >= 5)
 
-    // If provider has ZIP codes, use radius-based matching
-    if (provider.zipCodes) {
-      const serviceZips = provider.zipCodes
-        .split(',')
-        .map(z => z.trim())
-        .filter(z => z.length >= 5)
-
-      if (serviceZips.length > 0) {
-        const primaryZip = serviceZips[0]
-        const radius = provider.serviceRadiusMiles || 25
-
-        // Check radius from provider's primary ZIP
-        if (isLeadInServiceRadius(primaryZip, leadZip, radius)) {
-          return true
-        }
-
-        // Also check explicit ZIP matches (exact, wildcard, range)
-        return serviceZips.some(serviceZip => {
-          if (serviceZip === leadZip) return true
-          if (serviceZip.includes('*')) {
-            const prefix = serviceZip.replace('*', '')
-            return leadZip.startsWith(prefix)
-          }
-          if (serviceZip.includes('-') && !serviceZip.startsWith('-')) {
-            const [start, end] = serviceZip.split('-').map(z => z.trim())
-            if (start.length >= 5 && end.length >= 5) {
-              return leadZip >= start && leadZip <= end
-            }
-          }
-          return false
-        })
-      }
+    if (serviceZips.length === 0) {
+      console.log(`[LeadNotifications] Skipping ${provider.name} — no ZIP codes configured, cannot determine proximity`)
+      return false
     }
 
-    // No ZIP codes set — skip (don't notify for entire state)
-    console.log(`[LeadNotifications] Skipping ${provider.name} — no ZIP codes configured, cannot determine proximity`)
-    return false
+    // Radius from the provider's primary ZIP.
+    const radius = provider.serviceRadiusMiles || 25
+    if (isLeadInServiceRadius(serviceZips[0], leadZip, radius)) {
+      return true
+    }
+
+    // Otherwise an explicit ZIP match (exact, wildcard, or range) — but only
+    // within MAX_LISTED_ZIP_DISTANCE_MILES of where the provider actually is.
+    //
+    // Dropping the state filter exposed a record whose ZIP list holds 187
+    // entries, 110 of them more than 150 miles from its primary ZIP and one
+    // 1,926 miles away: a Dearborn, Michigan provider listed ZIPs in Alabama,
+    // Mississippi, Georgia and Utah. The state check had been masking that, so
+    // removing it would have started notifying them about leads in Aspen and
+    // Boise. That is data-entry noise, not a service area.
+    //
+    // Only 2 of 46 multi-ZIP providers have anything beyond 150 miles, and the
+    // highest legitimate reach among the rest is 96, so this bound removes the
+    // noise without touching a real service area.
+    return serviceZips.some(serviceZip => {
+      const plausible = (z: string) => {
+        const d = getDistanceBetweenZips(serviceZips[0], z)
+        return d === null || d <= MAX_LISTED_ZIP_DISTANCE_MILES
+      }
+      if (serviceZip === leadZip) return plausible(serviceZip)
+      if (serviceZip.includes('*')) {
+        const prefix = serviceZip.replace('*', '')
+        return leadZip.startsWith(prefix) && plausible(prefix.padEnd(5, '0'))
+      }
+      if (serviceZip.includes('-') && !serviceZip.startsWith('-')) {
+        const [start, end] = serviceZip.split('-').map(z => z.trim())
+        if (start.length >= 5 && end.length >= 5) {
+          return leadZip >= start && leadZip <= end && plausible(start)
+        }
+      }
+      return false
+    })
   })
 
   return matchingProviders.map(p => ({
@@ -384,6 +411,13 @@ async function findFeaturedProvidersForNotification(
  * against 4 paying); a window long enough to make them feel shut out costs more
  * than it earns.
  */
+/**
+ * A ZIP listed more than this far from a provider's primary ZIP is treated as
+ * data-entry noise rather than coverage. See the explicit-ZIP branch in
+ * findFeaturedProvidersForNotification() for why this exists.
+ */
+export const MAX_LISTED_ZIP_DISTANCE_MILES = 150
+
 export const PAID_HEAD_START_SECONDS = 10 * 60
 
 export function freeTierDelaySeconds(
