@@ -51,28 +51,15 @@ export function middleware(request: NextRequest) {
   // chain without changing the status code Vercel emits.
   const host = (request.headers.get('host') || '').toLowerCase().split(':')[0]
 
-  // ── TEMPORARILY DISABLED 2026-08-25 — RESTORE WHEN DNS IS BACK ────────────
-  // The domain lapsed and Namecheap moved it to parking nameservers
-  // (ns1/ns2.lander.d.parity.domains). It has been renewed, but the registry
-  // has not yet been handed back, so www.mobilephlebotomy.org does not resolve.
-  // This redirect pointed the one working hostname at the dead one, leaving no
-  // reachable URL at all despite the deployment being healthy.
-  //
-  // With it off, the alias falls through to the `.vercel.app` branch below and
-  // is served with X-Robots-Tag: noindex, nofollow — reachable for people,
-  // still kept out of the index, so it cannot start competing with the real
-  // domain the way it did before commit 9b3bd17.
-  //
-  // TO RESTORE: uncomment this block. Nothing else changes.
-  // if (host === PROD_VERCEL_ALIAS) {
-  //   const url = new URL(request.nextUrl.toString())
-  //   url.protocol = 'https:'
-  //   url.host = 'www.mobilephlebotomy.org'
-  //   url.port = ''
-  //   // 308 preserves the method and tells Google to transfer signals to the
-  //   // canonical host permanently.
-  //   return NextResponse.redirect(url, 308)
-  // }
+  if (host === PROD_VERCEL_ALIAS) {
+    const url = new URL(request.nextUrl.toString())
+    url.protocol = 'https:'
+    url.host = 'www.mobilephlebotomy.org'
+    url.port = ''
+    // 308 preserves the method and tells Google to transfer signals to the
+    // canonical host permanently.
+    return NextResponse.redirect(url, 308)
+  }
 
   if (host.endsWith('.vercel.app')) {
     // Preview deployment — keep it reachable, keep it out of the index.
