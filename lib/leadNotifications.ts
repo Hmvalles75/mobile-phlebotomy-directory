@@ -327,6 +327,17 @@ async function findFeaturedProvidersForNotification(
       return false
     }
 
+    // Hard distance ceiling, applied before either match path so neither can
+    // route around it. An explicit ZIP is a more specific claim than a radius,
+    // but it is still a claim to serve a place — and the two claims recorded
+    // beyond 100 miles that arrived this way (Sticks & Needles at 136mi, Ponce
+    // at 146mi) converted no better than the radius ones. Whatever route a
+    // provider matches by, they must actually be within reach.
+    const leadDistance = getDistanceBetweenZips(serviceZips[0], leadZip)
+    if (leadDistance !== null && leadDistance > MAX_ROUTING_DISTANCE_MILES) {
+      return false
+    }
+
     // Radius from the provider's primary ZIP.
     const radius = provider.serviceRadiusMiles || 25
     if (isLeadInServiceRadius(serviceZips[0], leadZip, radius)) {
@@ -416,6 +427,33 @@ async function findFeaturedProvidersForNotification(
  * data-entry noise rather than coverage. See the explicit-ZIP branch in
  * findFeaturedProvidersForNotification() for why this exists.
  */
+/**
+ * Hard ceiling on how far a lead may travel to a provider, whatever radius they
+ * state. Matches REGIONAL_CAP_MILES on the city pages.
+ *
+ * Every notification ever sent was measured against the lead's actual ZIP.
+ * Booking rate holds flat to 100 miles and then stops:
+ *
+ *     0-50mi    206 claimed   64 booked   31%
+ *    51-100mi    44 claimed   13 booked   30%
+ *   101-150mi     4 claimed    1 booked   25%
+ *     151mi+      1 claimed    0 booked    0%
+ *
+ * Read the tail individually and even that overstates it. The five real claims
+ * beyond 100 miles produced no completed draw at all: ProStik at 227mi, Ponce at
+ * 146mi (marked booked, outcome NO_ANSWER), Sticks & Needles at 136mi, Graceful
+ * needles at 112mi, AspenPath at 103mi.
+ *
+ * The cost is not the wasted email. A claim REMOVES the lead from everyone
+ * closer, so each of those five locked out a nearer provider who might have
+ * completed it. Capping is about who gets to take a lead, not who gets told.
+ *
+ * Three providers state 200 miles — a round number that reads as aspiration, and
+ * nobody sits between 101 and 150. Small sample beyond 100mi (five claims), so
+ * revisit if a provider with real delivered volume at that range asks.
+ */
+export const MAX_ROUTING_DISTANCE_MILES = 100
+
 export const MAX_LISTED_ZIP_DISTANCE_MILES = 150
 
 export const PAID_HEAD_START_SECONDS = 10 * 60
