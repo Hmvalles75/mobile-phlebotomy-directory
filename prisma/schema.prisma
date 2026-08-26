@@ -705,6 +705,19 @@ model CoverageRequest {
   lastContactedAt  DateTime?
   contactAttempts  ContactAttempt[]
 
+  // Notification outcomes (2026-08-26). Both sends used to be fire-and-forget
+  // — `sendAdminNotification(created).catch(console.error)` — and the route
+  // returned ok:true regardless, so a failure left no trace anywhere. The
+  // confirmation in particular could never have succeeded: it posted to Resend
+  // behind a key that has never been configured, meaning no institutional
+  // prospect has ever been acknowledged after submitting the form.
+  //
+  // Null adminNotifiedAt means the submission arrived and nobody was told.
+  // Query for it rather than guessing.
+  adminNotifiedAt     DateTime?
+  confirmationSentAt  DateTime?
+  notifyError         String?
+
   @@map("coverage_requests")
 }
 

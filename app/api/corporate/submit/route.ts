@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/seo'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
+import { sendTransactionalEmail } from '@/lib/sendTransactionalEmail'
 
 if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -142,10 +143,18 @@ Reply directly to: ${req.email}
   }
 }
 
-async function sendConfirmationEmail(req: any) {
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (!resendApiKey) return false
-  try {
+/**
+ * Confirmation to the submitter. Returns null on success, or the error to store.
+ *
+ * This posted to api.resend.com behind `if (!resendApiKey) return false`, and
+ * RESEND_API_KEY has never been configured in this project — so it returned
+ * false on its first line every time and no institutional prospect has ever
+ * been acknowledged after submitting the form. Commit f1a1200 moved the ADMIN
+ * alert off Resend for exactly this reason and left this one behind.
+ *
+ * The copy below is unchanged; only the transport moved.
+ */
+async function sendConfirmationEmail(req: any): Promise<string | null> {
     const body = `Hi ${firstName(req.contactName)},
 
 Thanks for reaching out about coverage for ${req.organizationName}.
@@ -169,30 +178,11 @@ Founder, MobilePhlebotomy.org
 hector@mobilephlebotomy.org
 `
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Hector Valles <hector@mobilephlebotomy.org>',
-        to: [req.email],
-        replyTo: ['hector@mobilephlebotomy.org'],
-        subject: 'We received your coverage request — MobilePhlebotomy.org',
-        text: body,
-      }),
-    })
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Failed to send confirmation email:', error)
-      return false
-    }
-    return true
-  } catch (error) {
-    console.error('Error sending confirmation email:', error)
-    return false
-  }
+  return sendTransactionalEmail({
+    to: req.email,
+    subject: 'We received your coverage request — MobilePhlebotomy.org',
+    text: body,
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -277,8 +267,26 @@ export async function POST(req: NextRequest) {
 
     console.log(`Coverage request created: ${created.id} (${created.organizationName})`)
 
-    sendAdminNotification(created).catch(err => console.error('Admin notification failed:', err))
-    sendConfirmationEmail(created).catch(err => console.error('Confirmation email failed:', err))
+    // Awaited and recorded, not fire-and-forget. These previously ran as
+    // `.catch(console.error)` while the route returned ok:true regardless, so a
+    // failed alert left no trace in the database and nobody knew a lead had
+    // gone unnoticed. adminNotifiedAt / confirmationSentAt / notifyError make
+    // that a query instead of a guess.
+    const [adminOk, confirmError] = await Promise.all([
+      sendAdminNotification(created),
+      sendConfirmationEmail(created),
+    ])
+    const adminError = adminOk ? null : 'admin notification failed (see logs)'
+    const combined = [adminError, confirmError].filter(Boolean).join(' | ') || null
+    await prisma.coverageRequest.update({
+      where: { id: created.id },
+      data: {
+        adminNotifiedAt: adminOk ? new Date() : null,
+        confirmationSentAt: confirmError ? null : new Date(),
+        notifyError: combined,
+      },
+    })
+    if (combined) console.error(`[coverage-request] ${created.id} notify issues: ${combined}`)
 
     return NextResponse.json({
       ok: true,

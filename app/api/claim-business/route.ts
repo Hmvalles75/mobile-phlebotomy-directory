@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sendTransactionalEmail } from '@/lib/sendTransactionalEmail'
 import { SITE_URL } from '@/lib/seo'
 import { addBusinessClaim } from '@/lib/business-claims'
 
@@ -6,12 +7,6 @@ import { addBusinessClaim } from '@/lib/business-claims'
  * Send email notification to admin about new business claim
  */
 async function sendClaimNotification(claim: any) {
-  const resendApiKey = process.env.RESEND_API_KEY
-
-  if (!resendApiKey) {
-    console.warn('⚠️  RESEND_API_KEY not configured - skipping email notification')
-    return false
-  }
 
   try {
     const emailBody = `
@@ -45,26 +40,12 @@ NEXT STEPS:
 Review claim at: ${SITE_URL}/admin
     `.trim()
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        // Verified Resend sender only — `noreply@` is not verified.
-        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
-        to: ['hector@mobilephlebotomy.org'],
-        subject: `Business Claim: ${claim.providerName}`,
-        text: emailBody,
-      }),
+    const error = await sendTransactionalEmail({
+      to: 'hector@mobilephlebotomy.org',
+      subject: `Business Claim: ${claim.providerName}`,
+      text: emailBody,
     })
-
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Failed to send claim notification:', error)
-      return false
-    }
+    if (error) return false
 
     console.log('✅ Claim notification sent to admin')
     return true
@@ -78,12 +59,6 @@ Review claim at: ${SITE_URL}/admin
  * Send verification email to claimant
  */
 async function sendVerificationEmail(claim: any) {
-  const resendApiKey = process.env.RESEND_API_KEY
-
-  if (!resendApiKey) {
-    console.warn('⚠️  RESEND_API_KEY not configured - skipping verification email')
-    return false
-  }
 
   try {
     const verificationEmail = `
@@ -110,26 +85,14 @@ Reference: ${claim.id}
 Submitted: ${new Date(claim.submittedAt).toLocaleString()}
     `.trim()
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'MobilePhlebotomy.org <noreply@mobilephlebotomy.org>',
-        to: [claim.claimantEmail],
-        replyTo: ['hector@mobilephlebotomy.org'],
-        subject: `Verify Your Business Claim - ${claim.providerName}`,
-        text: verificationEmail,
-      }),
+    // Sent from the verified sender, not `noreply@` — that address has never
+    // been verified in SendGrid and every message from it would be rejected.
+    const error = await sendTransactionalEmail({
+      to: claim.claimantEmail,
+      subject: `Verify Your Business Claim - ${claim.providerName}`,
+      text: verificationEmail,
     })
-
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Failed to send verification email:', error)
-      return false
-    }
+    if (error) return false
 
     console.log('✅ Verification email sent to claimant')
     return true

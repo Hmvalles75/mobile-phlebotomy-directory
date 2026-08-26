@@ -3,17 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/seo'
 import { addPendingSubmission } from '@/lib/pending-submissions'
 import { checkForDuplicate } from '@/lib/duplicate-detection'
+import { sendTransactionalEmail } from '@/lib/sendTransactionalEmail'
 
 /**
  * Send email notification to admin about new submission
  */
 async function sendAdminNotification(submission: any) {
-  const resendApiKey = process.env.RESEND_API_KEY
-
-  if (!resendApiKey) {
-    console.warn('⚠️  RESEND_API_KEY not configured - skipping email notification')
-    return false
-  }
 
   try {
     const emailBody = `
@@ -61,26 +56,12 @@ IP Address: ${submission.ipAddress}
 Review at: ${SITE_URL}/admin
     `.trim()
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        // Verified Resend sender only — `noreply@` is not verified.
-        from: 'MobilePhlebotomy.org <hector@mobilephlebotomy.org>',
-        to: ['hector@mobilephlebotomy.org'],
-        subject: `New Provider Application: ${submission.businessName}`,
-        text: emailBody,
-      }),
+    const error = await sendTransactionalEmail({
+      to: 'hector@mobilephlebotomy.org',
+      subject: `New Provider Application: ${submission.businessName}`,
+      text: emailBody,
     })
-
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Failed to send email notification:', error)
-      return false
-    }
+    if (error) return false
 
     console.log('✅ Email notification sent to admin')
     return true
