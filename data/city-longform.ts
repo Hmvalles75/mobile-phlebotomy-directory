@@ -51,4 +51,46 @@ export const CITY_LONGFORM: Record<string, CityLongform> = {
       "Most services require a valid lab requisition from a physician. Laboratory testing can usually be billed to insurance when ordered by a licensed provider, while the mobile collection fee is often an out-of-pocket convenience charge. Medicare and some private plans may cover in-home draws for homebound patients. Confirm credentials, insurance acceptance, and pricing directly with any provider before booking.",
     ],
   },
+
+  // ── Legacy P3 consolidation, 2026-08-21 ────────────────────────────────────
+  // Ported verbatim from the /{city}-{st}/mobile-phlebotomy pages ahead of their
+  // 308s. HTML entities (&apos; &ndash; &amp;) converted to real characters, per
+  // the Chicago entry above. Hero subtitles were not ported — they are page
+  // furniture, not prose. Price bands are each legacy page's own figure.
+
+  // Ported verbatim from the legacy /boston-ma/mobile-phlebotomy page.
+  'massachusetts/boston': {
+    paragraphs: [
+      "Boston is one of the world's leading medical hubs — home to Mass General, Brigham and Women's, Beth Israel Deaconess, Tufts Medical, and the Longwood Medical Area cluster. Despite that density, many patients in high-rise apartments, Back Bay brownstones, and the ring of commuter suburbs (Cambridge, Somerville, Brookline, Newton, Quincy) still struggle to reach a lab during business hours.",
+      "Boston-area mobile phlebotomists serve patients with routine lab draws for MGB (Mass General Brigham) orders, IVF and fertility panels for the region's major reproductive endocrinology practices, corporate wellness programs for Cambridge biotech and Financial District firms, and home health collections for homebound seniors in Dorchester, Jamaica Plain, and Roxbury.",
+      "Boston mobile phlebotomy visits typically cost $85–$160, with a small parking premium in the city proper. Massachusetts phlebotomists must operate under a CLIA-certified lab, and all providers listed here carry the appropriate clinical credentials.",
+    ],
+  },
+
+  // Ported verbatim from the legacy /dallas-tx/mobile-phlebotomy page.
+  'texas/dallas': {
+    paragraphs: [
+      "Dallas anchors the fourth-largest metro in the U.S. — a sprawling 9,000+ square mile region that includes Fort Worth, Plano, Arlington, Irving, and dozens of rapidly growing suburbs. The Dallas-Fort Worth Metroplex is home to major medical systems like UT Southwestern, Baylor Scott & White, and Medical City Healthcare, but with so much distance between communities, mobile phlebotomy is a practical alternative to driving 45 minutes for a 10-minute blood draw.",
+      "DFW mobile phlebotomists handle routine lab draws for UT Southwestern and Baylor orders, pre-employment and DOT drug testing for the region's logistics and transportation companies, corporate wellness programs for the many Fortune 500 HQs in the metro, and home health collections for Dallas's growing retiree population across Collin and Denton counties.",
+      "Dallas-area mobile phlebotomy typically runs $65–$130 per visit, below the national average. Texas requires phlebotomists to work under a CLIA-certified lab and carry appropriate certifications; all providers listed here meet those requirements.",
+    ],
+  },
+
+  // Ported verbatim from the legacy /houston-tx/mobile-phlebotomy page.
+  'texas/houston': {
+    paragraphs: [
+      "Houston is the largest city in Texas and the fourth-largest in the U.S., home to the Texas Medical Center — the world's largest medical complex. Despite this, many patients across the Houston metro still need blood draws but can't easily get to a lab, especially in sprawling suburbs like Katy, Cypress, and The Woodlands.",
+      "Mobile phlebotomists in Houston typically serve the entire metro area within a 30–50 mile radius. Services include routine venipuncture for Quest and Labcorp orders, drug and alcohol testing, DOT physicals collections, wellness panels, and specialty draws for clinical trials at MD Anderson and Houston Methodist.",
+      "Most Houston-area providers charge $60–$120 per visit for the draw fee, with lab processing billed separately. Medicare patients with homebound documentation typically pay $0–$25.",
+    ],
+  },
+
+  // Ported verbatim from the legacy /miami-fl/mobile-phlebotomy page.
+  'florida/miami': {
+    paragraphs: [
+      "Miami's sprawling geography, heavy traffic, and large senior population make mobile phlebotomy an essential service across Miami-Dade. Whether you're in a high-rise in Brickell, a home in Coral Gables, or a condo in Aventura, getting to a lab can eat up hours — mobile phlebotomists eliminate that entirely.",
+      "Florida providers in the Miami area serve a mix of needs: routine draws for Jackson Health System, Baptist Health, and Cleveland Clinic Florida lab orders, Spanish-speaking patient care (critical in a city where 70%+ of residents speak Spanish at home), fertility and specialty testing for the region's concierge medical practices, and home health collections for Miami's substantial retiree population.",
+      "Miami-area mobile phlebotomy typically costs $75–$140. Florida doesn't require a separate state phlebotomy license, but all providers on our platform carry national certifications (ASCP, NHA, or AMT) and work under CLIA-approved lab supervision.",
+    ],
+  },
 }

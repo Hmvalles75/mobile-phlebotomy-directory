@@ -163,6 +163,129 @@ const nextConfig = {
       { source: '/chicago-il/blood-draw-at-home', destination: '/us/illinois/chicago', permanent: true },
       { source: '/chicago-il/in-home-blood-draw', destination: '/us/illinois/chicago', permanent: true },
       { source: '/chicago-il/mobile-phlebotomy', destination: '/us/illinois/chicago', permanent: true },
+
+      // ── Legacy P3 tier consolidation (2026-08-21) ──────────────────────────
+      // The /{city}-{st}/{slug} pages were the last URL tier still splitting
+      // ranking signal. Unlike /us/metro/* — which cross-canonicals to its city
+      // page and needed no redirects — every legacy page declared ITSELF
+      // canonical via its own layout.tsx, and app/sitemap.ts submitted 102 of
+      // them. The site was actively telling Google these were distinct pages.
+      //
+      // Prose from the content-bearing pages was ported into
+      // data/city-longform.ts BEFORE these redirects, following the pattern set
+      // by the Chicago and San Diego consolidations: port, then redirect, so a
+      // 308 never discards copy that was ranking.
+      //
+      // Manhattan and Queens were the only NYC boroughs missing from
+      // CITY_MAPPING while bronx, brooklyn and staten-island all had entries
+      // and rendered. They were added rather than folded into
+      // /us/new-york/new-york, so all five boroughs now behave the same way and
+      // each legacy URL redirects to its own borough page.
+      //
+      // The remaining cities absent from CITY_MAPPING redirect to their nearest
+      // parent city page rather than to a page that does not exist:
+      //   beverly-hills, west-hollywood  -> /us/california/los-angeles
+      //   livonia, southfield, troy      -> /us/michigan/detroit
+      //   bayonne                        -> /us/new-jersey/jersey-city
+      // The last six are independent municipalities rather than neighbourhoods
+      // of their targets; folding them trades locality precision for a single
+      // ranking signal.
+      //
+      // NOT redirected yet: worcester-ma, lowell-ma, charlotte-nc, columbus-oh
+      // (12 URLs). Each carries city-specific prose, but CITY_LONGFORM renders
+      // only through a generated static override and none of those four has
+      // one. Redirecting them would destroy the copy. Generating the overrides
+      // needs scripts/upgrade-city-page.ts, which reads the database.
+      { source: '/bayonne-nj/blood-draw-at-home', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/bayonne-nj/in-home-blood-draw', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/bayonne-nj/mobile-phlebotomy', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/beverly-hills-ca/blood-draw-at-home', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/beverly-hills-ca/in-home-blood-draw', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/beverly-hills-ca/mobile-phlebotomy', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/boston-ma/blood-draw-at-home', destination: '/us/massachusetts/boston', permanent: true },
+      { source: '/boston-ma/in-home-blood-draw', destination: '/us/massachusetts/boston', permanent: true },
+      { source: '/boston-ma/mobile-phlebotomy', destination: '/us/massachusetts/boston', permanent: true },
+      { source: '/bronx-ny/blood-draw-at-home', destination: '/us/new-york/bronx', permanent: true },
+      { source: '/bronx-ny/in-home-blood-draw', destination: '/us/new-york/bronx', permanent: true },
+      { source: '/bronx-ny/mobile-phlebotomy', destination: '/us/new-york/bronx', permanent: true },
+      { source: '/brooklyn-ny/blood-draw-at-home', destination: '/us/new-york/brooklyn', permanent: true },
+      { source: '/brooklyn-ny/in-home-blood-draw', destination: '/us/new-york/brooklyn', permanent: true },
+      { source: '/brooklyn-ny/mobile-phlebotomy', destination: '/us/new-york/brooklyn', permanent: true },
+      { source: '/burbank-ca/blood-draw-at-home', destination: '/us/california/burbank', permanent: true },
+      { source: '/burbank-ca/in-home-blood-draw', destination: '/us/california/burbank', permanent: true },
+      { source: '/burbank-ca/mobile-phlebotomy', destination: '/us/california/burbank', permanent: true },
+      { source: '/dallas-tx/blood-draw-at-home', destination: '/us/texas/dallas', permanent: true },
+      { source: '/dallas-tx/in-home-blood-draw', destination: '/us/texas/dallas', permanent: true },
+      { source: '/dallas-tx/mobile-phlebotomy', destination: '/us/texas/dallas', permanent: true },
+      { source: '/dearborn-mi/blood-draw-at-home', destination: '/us/michigan/dearborn', permanent: true },
+      { source: '/dearborn-mi/in-home-blood-draw', destination: '/us/michigan/dearborn', permanent: true },
+      { source: '/dearborn-mi/mobile-phlebotomy', destination: '/us/michigan/dearborn', permanent: true },
+      { source: '/detroit-mi/blood-draw-at-home', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/detroit-mi/in-home-blood-draw', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/detroit-mi/lab-draw-at-home', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/detroit-mi/mobile-phlebotomist', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/detroit-mi/mobile-phlebotomy', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/glendale-ca/blood-draw-at-home', destination: '/us/california/glendale', permanent: true },
+      { source: '/glendale-ca/in-home-blood-draw', destination: '/us/california/glendale', permanent: true },
+      { source: '/glendale-ca/mobile-phlebotomy', destination: '/us/california/glendale', permanent: true },
+      { source: '/houston-tx/blood-draw-at-home', destination: '/us/texas/houston', permanent: true },
+      { source: '/houston-tx/in-home-blood-draw', destination: '/us/texas/houston', permanent: true },
+      { source: '/houston-tx/mobile-phlebotomy', destination: '/us/texas/houston', permanent: true },
+      { source: '/jersey-city-nj/blood-draw-at-home', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/jersey-city-nj/in-home-blood-draw', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/jersey-city-nj/mobile-phlebotomy', destination: '/us/new-jersey/jersey-city', permanent: true },
+      { source: '/livonia-mi/blood-draw-at-home', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/livonia-mi/in-home-blood-draw', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/livonia-mi/mobile-phlebotomy', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/long-beach-ca/blood-draw-at-home', destination: '/us/california/long-beach', permanent: true },
+      { source: '/long-beach-ca/in-home-blood-draw', destination: '/us/california/long-beach', permanent: true },
+      { source: '/long-beach-ca/mobile-phlebotomy', destination: '/us/california/long-beach', permanent: true },
+      { source: '/los-angeles-ca/blood-draw-at-home', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/los-angeles-ca/in-home-blood-draw', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/los-angeles-ca/lab-draw-at-home', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/los-angeles-ca/mobile-phlebotomy', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/manhattan-ny/blood-draw-at-home', destination: '/us/new-york/manhattan', permanent: true },
+      { source: '/manhattan-ny/in-home-blood-draw', destination: '/us/new-york/manhattan', permanent: true },
+      { source: '/manhattan-ny/mobile-phlebotomy', destination: '/us/new-york/manhattan', permanent: true },
+      { source: '/miami-fl/blood-draw-at-home', destination: '/us/florida/miami', permanent: true },
+      { source: '/miami-fl/in-home-blood-draw', destination: '/us/florida/miami', permanent: true },
+      { source: '/miami-fl/mobile-phlebotomy', destination: '/us/florida/miami', permanent: true },
+      { source: '/new-york-ny/blood-draw-at-home', destination: '/us/new-york/new-york', permanent: true },
+      { source: '/new-york-ny/in-home-blood-draw', destination: '/us/new-york/new-york', permanent: true },
+      { source: '/new-york-ny/lab-draw-at-home', destination: '/us/new-york/new-york', permanent: true },
+      { source: '/new-york-ny/mobile-phlebotomy', destination: '/us/new-york/new-york', permanent: true },
+      { source: '/newark-nj/blood-draw-at-home', destination: '/us/new-jersey/newark', permanent: true },
+      { source: '/newark-nj/in-home-blood-draw', destination: '/us/new-jersey/newark', permanent: true },
+      { source: '/newark-nj/mobile-phlebotomy', destination: '/us/new-jersey/newark', permanent: true },
+      { source: '/pasadena-ca/blood-draw-at-home', destination: '/us/california/pasadena', permanent: true },
+      { source: '/pasadena-ca/in-home-blood-draw', destination: '/us/california/pasadena', permanent: true },
+      { source: '/pasadena-ca/mobile-phlebotomy', destination: '/us/california/pasadena', permanent: true },
+      { source: '/queens-ny/blood-draw-at-home', destination: '/us/new-york/queens', permanent: true },
+      { source: '/queens-ny/in-home-blood-draw', destination: '/us/new-york/queens', permanent: true },
+      { source: '/queens-ny/mobile-phlebotomy', destination: '/us/new-york/queens', permanent: true },
+      { source: '/san-diego-ca/blood-draw-at-home', destination: '/us/california/san-diego', permanent: true },
+      { source: '/san-diego-ca/in-home-blood-draw', destination: '/us/california/san-diego', permanent: true },
+      { source: '/santa-monica-ca/blood-draw-at-home', destination: '/us/california/santa-monica', permanent: true },
+      { source: '/santa-monica-ca/in-home-blood-draw', destination: '/us/california/santa-monica', permanent: true },
+      { source: '/santa-monica-ca/mobile-phlebotomy', destination: '/us/california/santa-monica', permanent: true },
+      { source: '/southfield-mi/blood-draw-at-home', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/southfield-mi/in-home-blood-draw', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/southfield-mi/mobile-phlebotomy', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/staten-island-ny/blood-draw-at-home', destination: '/us/new-york/staten-island', permanent: true },
+      { source: '/staten-island-ny/in-home-blood-draw', destination: '/us/new-york/staten-island', permanent: true },
+      { source: '/staten-island-ny/mobile-phlebotomy', destination: '/us/new-york/staten-island', permanent: true },
+      { source: '/torrance-ca/blood-draw-at-home', destination: '/us/california/torrance', permanent: true },
+      { source: '/torrance-ca/in-home-blood-draw', destination: '/us/california/torrance', permanent: true },
+      { source: '/torrance-ca/mobile-phlebotomy', destination: '/us/california/torrance', permanent: true },
+      { source: '/troy-mi/blood-draw-at-home', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/troy-mi/in-home-blood-draw', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/troy-mi/mobile-phlebotomy', destination: '/us/michigan/detroit', permanent: true },
+      { source: '/warren-mi/blood-draw-at-home', destination: '/us/michigan/warren', permanent: true },
+      { source: '/warren-mi/in-home-blood-draw', destination: '/us/michigan/warren', permanent: true },
+      { source: '/warren-mi/mobile-phlebotomy', destination: '/us/michigan/warren', permanent: true },
+      { source: '/west-hollywood-ca/blood-draw-at-home', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/west-hollywood-ca/in-home-blood-draw', destination: '/us/california/los-angeles', permanent: true },
+      { source: '/west-hollywood-ca/mobile-phlebotomy', destination: '/us/california/los-angeles', permanent: true },
     ]
   },
 }

@@ -244,58 +244,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // DETROIT METRO
     // Main hub
-    { slug: 'detroit-mi/mobile-phlebotomy', priority: 0.9 },
     // Suburbs
-    { slug: 'dearborn-mi/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'livonia-mi/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'troy-mi/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'southfield-mi/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'warren-mi/mobile-phlebotomy', priority: 0.8 },
     // Intent variants
-    { slug: 'detroit-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'detroit-mi/mobile-phlebotomist', priority: 0.7 },
-    { slug: 'detroit-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'detroit-mi/lab-draw-at-home', priority: 0.7 },
 
     // NYC METRO
     // Main hub
-    { slug: 'new-york-ny/mobile-phlebotomy', priority: 0.9 },
     // Five Boroughs
-    { slug: 'manhattan-ny/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'brooklyn-ny/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'queens-ny/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'bronx-ny/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'staten-island-ny/mobile-phlebotomy', priority: 0.85 },
     // Northern NJ
-    { slug: 'newark-nj/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'jersey-city-nj/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'bayonne-nj/mobile-phlebotomy', priority: 0.8 },
     // Intent variants
-    { slug: 'new-york-ny/in-home-blood-draw', priority: 0.7 },
-    { slug: 'new-york-ny/blood-draw-at-home', priority: 0.7 },
-    { slug: 'new-york-ny/lab-draw-at-home', priority: 0.7 },
 
     // LA METRO
     // Main hub
-    { slug: 'los-angeles-ca/mobile-phlebotomy', priority: 0.9 },
     // Suburbs
-    { slug: 'pasadena-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'santa-monica-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'burbank-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'glendale-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'long-beach-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'torrance-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'west-hollywood-ca/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'beverly-hills-ca/mobile-phlebotomy', priority: 0.8 },
     // Intent variants
-    { slug: 'los-angeles-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'los-angeles-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'los-angeles-ca/lab-draw-at-home', priority: 0.7 },
 
     // HOUSTON METRO
-    { slug: 'houston-tx/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'houston-tx/in-home-blood-draw', priority: 0.7 },
-    { slug: 'houston-tx/blood-draw-at-home', priority: 0.7 },
 
     // CHICAGO METRO
     // All three Chicago legacy variants removed 2026-08-07 — each now 308s to
@@ -306,8 +269,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // SAN DIEGO METRO
     // (san-diego-ca/mobile-phlebotomy removed 2026-07-24 — 301'd to the
     // canonical /us/california/san-diego during the URL consolidation pilot.)
-    { slug: 'san-diego-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'san-diego-ca/blood-draw-at-home', priority: 0.7 },
 
     // COLUMBUS METRO
     { slug: 'columbus-oh/mobile-phlebotomy', priority: 0.85 },
@@ -320,11 +281,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'charlotte-nc/blood-draw-at-home', priority: 0.7 },
 
     // BOSTON METRO (MA)
-    { slug: 'boston-ma/mobile-phlebotomy', priority: 0.9 },
-    { slug: 'boston-ma/in-home-blood-draw', priority: 0.75 },
-    { slug: 'boston-ma/blood-draw-at-home', priority: 0.75 },
 
     // WORCESTER METRO (MA)
+    // ── Legacy P3 tier removed 2026-08-21 ──────────────────────────────────
+    // 90 legacy /{city}-{st}/{slug} URLs were dropped when they gained 308s in
+    // next.config.mjs. Submitting a URL that redirects wastes crawl budget and
+    // muddies the consolidation signal — the same reasoning as the Chicago and
+    // San Diego notes that preceded this.
+    //
+    // The 12 entries below are the exception: worcester-ma, lowell-ma,
+    // charlotte-nc and columbus-oh still serve 200 because their city-specific
+    // prose has nowhere to render yet (CITY_LONGFORM only renders through a
+    // generated static override, and none of those four has one). They stay in
+    // the sitemap until they are redirected.
     { slug: 'worcester-ma/mobile-phlebotomy', priority: 0.85 },
     { slug: 'worcester-ma/in-home-blood-draw', priority: 0.7 },
     { slug: 'worcester-ma/blood-draw-at-home', priority: 0.7 },
@@ -335,60 +304,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { slug: 'lowell-ma/blood-draw-at-home', priority: 0.7 },
 
     // MIAMI METRO (FL)
-    { slug: 'miami-fl/mobile-phlebotomy', priority: 0.9 },
-    { slug: 'miami-fl/in-home-blood-draw', priority: 0.75 },
-    { slug: 'miami-fl/blood-draw-at-home', priority: 0.75 },
 
     // DALLAS METRO (TX)
-    { slug: 'dallas-tx/mobile-phlebotomy', priority: 0.9 },
-    { slug: 'dallas-tx/in-home-blood-draw', priority: 0.75 },
-    { slug: 'dallas-tx/blood-draw-at-home', priority: 0.75 },
 
     // INTENT VARIANTS — added 2026-04-18 for 21 cities that previously
     // only had /mobile-phlebotomy. New variants are in-home-blood-draw
     // and blood-draw-at-home for each.
-    { slug: 'bayonne-nj/in-home-blood-draw', priority: 0.7 },
-    { slug: 'bayonne-nj/blood-draw-at-home', priority: 0.7 },
-    { slug: 'beverly-hills-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'beverly-hills-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'bronx-ny/in-home-blood-draw', priority: 0.7 },
-    { slug: 'bronx-ny/blood-draw-at-home', priority: 0.7 },
-    { slug: 'brooklyn-ny/in-home-blood-draw', priority: 0.7 },
-    { slug: 'brooklyn-ny/blood-draw-at-home', priority: 0.7 },
-    { slug: 'burbank-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'burbank-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'dearborn-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'dearborn-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'glendale-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'glendale-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'jersey-city-nj/in-home-blood-draw', priority: 0.7 },
-    { slug: 'jersey-city-nj/blood-draw-at-home', priority: 0.7 },
-    { slug: 'livonia-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'livonia-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'long-beach-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'long-beach-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'manhattan-ny/in-home-blood-draw', priority: 0.75 },
-    { slug: 'manhattan-ny/blood-draw-at-home', priority: 0.75 },
-    { slug: 'newark-nj/in-home-blood-draw', priority: 0.7 },
-    { slug: 'newark-nj/blood-draw-at-home', priority: 0.7 },
-    { slug: 'pasadena-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'pasadena-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'queens-ny/in-home-blood-draw', priority: 0.7 },
-    { slug: 'queens-ny/blood-draw-at-home', priority: 0.7 },
-    { slug: 'santa-monica-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'santa-monica-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'southfield-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'southfield-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'staten-island-ny/in-home-blood-draw', priority: 0.7 },
-    { slug: 'staten-island-ny/blood-draw-at-home', priority: 0.7 },
-    { slug: 'torrance-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'torrance-ca/blood-draw-at-home', priority: 0.7 },
-    { slug: 'troy-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'troy-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'warren-mi/in-home-blood-draw', priority: 0.7 },
-    { slug: 'warren-mi/blood-draw-at-home', priority: 0.7 },
-    { slug: 'west-hollywood-ca/in-home-blood-draw', priority: 0.7 },
-    { slug: 'west-hollywood-ca/blood-draw-at-home', priority: 0.7 },
   ]
 
   customPages.forEach((page) => {
