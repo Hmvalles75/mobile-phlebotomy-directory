@@ -126,6 +126,23 @@ const nextConfig = {
         destination: '/us/nevada/las-vegas',
         permanent: true,
       },
+      {
+        // All Things Phlebotomy LLC (Flint, MI). Not a removal — a slug repair.
+        // The submitted business name carried a trailing space, so the listing
+        // was created at `all-things-phlebotomy-` with a dangling hyphen, while
+        // the clean slug was held by a duplicate a scraper created two days
+        // after the owner signed up himself. The duplicate is soft-removed and
+        // the real listing now holds the clean slug.
+        source: '/provider/all-things-phlebotomy-',
+        destination: '/provider/all-things-phlebotomy',
+        permanent: true,
+      },
+      {
+        // The retired scraped duplicate, renamed off the clean slug.
+        source: '/provider/all-things-phlebotomy-dup-20260826',
+        destination: '/provider/all-things-phlebotomy',
+        permanent: true,
+      },
       // ── URL consolidation pilot (2026-07) ──────────────────────────────
       // Phoenix, San Diego, and San Antonio each had a canonical
       // /us/{state}/{city} page plus a P2 /us/metro/{city} duplicate (and,
