@@ -174,21 +174,34 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
       // conversion trigger — every paid subscriber signed up within hours of a
       // live lead. Paying providers never see this block.
       //
-      // Deliberately makes no claim that a paying provider got this lead
-      // first: since the head start was removed, every provider is notified
-      // simultaneously, and saying otherwise would be false.
+      // The copy below promised priority "when our waterfall routing launches".
+      // It was written on 2026-08-11, when the head start had just been removed
+      // and claiming otherwise would have been false. The head start came back
+      // on 2026-08-14 (a6e6e4b) and this text was never updated, so for two
+      // weeks the highest-intent upsell we send told providers that the thing
+      // which would have won them the lead did not exist yet.
+      //
+      // It exists. PAID_HEAD_START_SECONDS is 10 minutes: a paying provider is
+      // notified immediately and free listings in the same batch are held for
+      // that window. Only claim what the code actually does — if the head start
+      // is ever removed again, this text has to move with it.
       const upgradeUrl = `${SITE_URL}/upgrade?provider=${n.providerId}&utm_source=lead_claimed&utm_medium=email&utm_campaign=loss_moment`
       const showUpgrade = !n.provider.priorityRouting
+
+      const headStartMinutes = Math.round(PAID_HEAD_START_SECONDS / 60)
 
       const upgradeText = showUpgrade
         ? `
 
-Founding Partners get top directory placement and first priority when our waterfall routing launches — upgrade here: ${upgradeUrl}`
+Requests like this go to Founding Partners first — a ${headStartMinutes}-minute head start before free listings see them, so claiming isn't a race. Founding Partners also get top directory placement.
+
+Upgrade here: ${upgradeUrl}`
         : ''
 
       const upgradeHtml = showUpgrade
         ? `<div style="margin-top:24px;padding:16px 20px;background:#f8f9fa;border-left:4px solid #667eea;border-radius:0 6px 6px 0;">
-<p style="margin:0;font-size:14px;color:#4b5563;">Founding Partners get top directory placement and first priority when our waterfall routing launches — <a href="${upgradeUrl}" style="color:#667eea;font-weight:600;text-decoration:none;">upgrade here</a>.</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4b5563;">Requests like this go to Founding Partners first — a <strong>${headStartMinutes}-minute head start</strong> before free listings see them, so claiming isn't a race. Founding Partners also get top directory placement.</p>
+<p style="margin:0;font-size:14px;"><a href="${upgradeUrl}" style="color:#667eea;font-weight:600;text-decoration:none;">Upgrade here</a></p>
 </div>`
         : ''
 
