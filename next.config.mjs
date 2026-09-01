@@ -143,6 +143,16 @@ const nextConfig = {
         destination: '/provider/all-things-phlebotomy',
         permanent: true,
       },
+      {
+        // Salina's Mobile Phlebotomy (Colorado Springs). Slug repair, not a
+        // removal. The stored business name carried a trailing space and the
+        // words "Biometric screening", producing a very long slug ending in a
+        // dangling hyphen. She asked to drop those words on her fourth
+        // submission of the same business; the listing is the same record.
+        source: '/provider/salinas-mobile-phlebotomy-biometric-screening-healthcare-service-',
+        destination: '/provider/salinas-mobile-phlebotomy-healthcare-service',
+        permanent: true,
+      },
       // ── URL consolidation pilot (2026-07) ──────────────────────────────
       // Phoenix, San Diego, and San Antonio each had a canonical
       // /us/{state}/{city} page plus a P2 /us/metro/{city} duplicate (and,
