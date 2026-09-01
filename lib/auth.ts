@@ -19,10 +19,21 @@ export function generateAuthToken(): string {
   return nanoid(64) // Long, secure token
 }
 
-// Token expiration: 15 minutes for magic links
+/**
+ * Magic-link lifetime.
+ *
+ * Was 15 minutes, and the value was computed and then thrown away — it was
+ * never written to the database, so verifyMagicLinkToken did no time check and
+ * tokens in fact lived forever. Now that the expiry is actually enforced, 15
+ * minutes is too tight to impose: the email has to be delivered, possibly
+ * rescued from spam, and opened on a phone. An hour is still short enough that
+ * a forwarded or screenshotted link goes stale quickly.
+ */
+export const MAGIC_LINK_TTL_MINUTES = 60
+
 export function getTokenExpiration(): Date {
   const expiry = new Date()
-  expiry.setMinutes(expiry.getMinutes() + 15)
+  expiry.setMinutes(expiry.getMinutes() + MAGIC_LINK_TTL_MINUTES)
   return expiry
 }
 
@@ -63,6 +74,9 @@ export async function createMagicLinkToken(email: string): Promise<{ ok: boolean
       where: { id: provider.id },
       data: {
         claimToken: token,
+        // Previously computed and discarded, which is the whole reason the
+        // 15-minute window never existed.
+        claimTokenExpiresAt: expiresAt,
         updatedAt: new Date()
       }
     })
@@ -81,13 +95,27 @@ export async function verifyMagicLinkToken(token: string): Promise<{ ok: boolean
       where: { claimToken: token }
     })
 
+    // Three different things produce this, and they used to be indistinguishable:
+    // the link was already used (the token is cleared below on success), a newer
+    // link was requested (claimToken holds one token, so requesting another
+    // silently kills the previous), or the token is simply wrong. Providers were
+    // told "expired" for all three, which pushed them to request yet another link
+    // and invalidate the one they were holding.
     if (!provider) {
-      return { ok: false, error: 'Invalid or expired magic link' }
+      return { ok: false, error: 'link_superseded' }
+    }
+
+    if (provider.claimTokenExpiresAt && provider.claimTokenExpiresAt < new Date()) {
+      await prisma.provider.update({
+        where: { id: provider.id },
+        data: { claimToken: null, claimTokenExpiresAt: null },
+      })
+      return { ok: false, error: 'link_expired' }
     }
 
     // Clear the token and verify the provider if not already verified
     // This handles both login (already verified) and initial verification (unverified)
-    const updateData: any = { claimToken: null }
+    const updateData: any = { claimToken: null, claimTokenExpiresAt: null }
 
     if (provider.status !== 'VERIFIED') {
       updateData.status = 'VERIFIED'

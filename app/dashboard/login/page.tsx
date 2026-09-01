@@ -24,8 +24,17 @@ function LoginForm() {
 
     if (error === 'missing_token') {
       setMessage({ type: 'error', text: 'Invalid login link. Please request a new one.' })
+    } else if (error === 'link_superseded') {
+      // The overwhelmingly common case: they requested a second link, which
+      // cancelled the first, then went back and clicked the first email.
+      setMessage({
+        type: 'error',
+        text: 'That link is not valid — it may have already been used, or been replaced when a newer login email was sent. Open the most recent login email and use the link in that one. Requesting another cancels the link you are holding.',
+      })
+    } else if (error === 'link_expired') {
+      setMessage({ type: 'error', text: 'That login link is more than an hour old. Request a fresh one below.' })
     } else if (error === 'invalid_token') {
-      setMessage({ type: 'error', text: 'This login link has expired or is invalid. Please request a new one.' })
+      setMessage({ type: 'error', text: 'That login link could not be read. Request a new one below.' })
     } else if (error === 'server_error') {
       setMessage({ type: 'error', text: 'An error occurred. Please try again.' })
     } else if (logout === 'success') {

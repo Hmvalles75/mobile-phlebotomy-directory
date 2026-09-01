@@ -27,6 +27,15 @@ model Provider {
   stripeCustomerId      String?
   claimEmail            String?
   claimToken            String?
+  /// When the magic-link token in claimToken stops working.
+  ///
+  /// lib/auth.ts computed a 15-minute expiry from the start and never stored
+  /// it, so verifyMagicLinkToken did no time check at all — a token lived until
+  /// it was used or overwritten by a newer request. That is also why providers
+  /// were told a link had "expired" when it had actually been superseded:
+  /// requesting a second link silently kills the first, and the error text sent
+  /// them to request yet another.
+  claimTokenExpiresAt   DateTime?
   claimVerifiedAt       DateTime?
   twilioNumber          String?
   zipCodes              String?

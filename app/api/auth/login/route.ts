@@ -79,7 +79,7 @@ Click the link below to access your provider dashboard:
 
 ${magicLink}
 
-This link will expire in 15 minutes and can only be used once.
+This link works for one hour and can only be used once. If you request another login email, this one stops working, so always use the most recent email.
 
 If you didn't request this login link, please ignore this email.
 
@@ -100,7 +100,7 @@ If you didn't request this login link, please ignore this email.
               <a href="${magicLink}" style="color: #0070f3;">${magicLink}</a>
             </p>
             <p style="color: #999; font-size: 12px; margin-top: 30px;">
-              This link will expire in 15 minutes and can only be used once.<br>
+              This link works for one hour and can only be used once. If you request another login email, this one stops working, so always use the most recent email.<br>
               If you didn't request this login link, please ignore this email.
             </p>
           </div>

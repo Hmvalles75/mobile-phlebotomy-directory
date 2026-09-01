@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyMagicLinkToken, encodeSession } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
+  // PUBLIC_SITE_URL carries a trailing slash, which produced //dashboard/login
+  // on every redirect out of this route.
+  const baseUrl = (process.env.PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
   try {
     const { searchParams } = new URL(req.url)
     const token = searchParams.get('token')
 
     if (!token) {
       return NextResponse.redirect(
-        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=missing_token`
+        `${baseUrl}/dashboard/login?error=missing_token`
       )
     }
 
@@ -16,8 +19,16 @@ export async function GET(req: NextRequest) {
     const result = await verifyMagicLinkToken(token)
 
     if (!result.ok || !result.session) {
+      // Pass the specific reason through. Every failure used to arrive as
+      // `invalid_token` and render as "expired", including the common case
+      // where the provider was simply holding an older email — which sent them
+      // to request another link and kill the one that still worked.
+      const reason =
+        result.error === 'link_expired' || result.error === 'link_superseded'
+          ? result.error
+          : 'invalid_token'
       return NextResponse.redirect(
-        `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=invalid_token`
+        `${baseUrl}/dashboard/login?error=${reason}`
       )
     }
 
@@ -26,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     // Redirect to dashboard with session cookie
     const response = NextResponse.redirect(
-      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard?login=success`
+      `${baseUrl}/dashboard?login=success`
     )
 
     // Set session cookie (30 days)
@@ -43,7 +54,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error('[Auth] Verify error:', error)
     return NextResponse.redirect(
-      `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/login?error=server_error`
+      `${baseUrl}/dashboard/login?error=server_error`
     )
   }
 }
