@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { notifyProviderOfLead } from '@/lib/notifyProvider'
+import { sendPatientClaimNotice } from '@/lib/patientClaimNotice'
 import { cancelLeadNotifications } from '@/lib/cancelLeadNotifications'
 
 export async function POST(req: NextRequest) {
@@ -18,7 +19,9 @@ export async function POST(req: NextRequest) {
     // Verify provider exists
     const provider = await prisma.provider.findUnique({
       where: { id: providerId },
-      select: { id: true, name: true }
+      // phonePublic feeds the patient claim notice — recognising the number
+      // that is about to ring is the whole point of that email.
+      select: { id: true, name: true, phonePublic: true, phone: true }
     })
 
     if (!provider) {
@@ -128,6 +131,33 @@ export async function POST(req: NextRequest) {
     cancelLeadNotifications(leadId, providerId).catch(err => {
       console.error('Failed to cancel/notify other providers:', err)
     })
+
+    // Tell the PATIENT who is coming. Until now a claim notified the claiming
+    // provider and the providers who lost it, and said nothing to the person
+    // waiting — who then sits in silence until an unknown mobile rings, while
+    // working down a Google results page. PATIENT_FOUND_OTHER is the fourth
+    // most common outcome on record (17 against 31 booked), every one of them
+    // after a provider had already claimed and begun work.
+    //
+    // Fire-and-forget: a failed notice must never fail a claim.
+    prisma.lead
+      .findUnique({
+        where: { id: leadId },
+        select: { fullName: true, email: true, city: true, state: true },
+      })
+      .then(patient => {
+        if (!patient) return
+        return sendPatientClaimNotice({
+          leadId,
+          fullName: patient.fullName,
+          email: patient.email,
+          city: patient.city,
+          state: patient.state,
+          providerName: provider.name,
+          providerPhone: provider.phonePublic || provider.phone,
+        })
+      })
+      .catch(err => console.error('Failed to send patient claim notice:', err))
 
     console.log(`✅ Lead ${leadId} claimed by ${provider.name} (${providerId}). Response time: ${responseTimeMinutes !== null ? responseTimeMinutes + ' min' : 'N/A'}`)
 
