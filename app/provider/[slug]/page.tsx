@@ -56,14 +56,35 @@ function deriveZipCoverage(zipCodes: string | null | undefined): string | null {
   return `${cities.slice(0, MAX).join(', ')}, and ${extra} more ${extra === 1 ? 'area' : 'areas'}`
 }
 
-// Enable ISR (Incremental Static Regeneration) - revalidate every 60 seconds
-export const revalidate = 60
+/**
+ * ISR window. Was 60 seconds, which meant every provider page re-queried the
+ * database every minute it was being viewed. Provider records change a few
+ * times a week, so a minute bought nothing and cost a query per page per
+ * minute. An hour is still fresh enough that an edit shows up the same session.
+ */
+export const revalidate = 3600
 
+/**
+ * Pre-render PAYING providers only. Everything else is generated on first
+ * request and then cached by the ISR window above.
+ *
+ * This used to return all 767 providers. Each one costs two database queries at
+ * build time — generateMetadata and the page itself — so a build fired roughly
+ * 1,500 queries at Neon in parallel batches and regularly killed it with
+ * "out of memory in ExecutorState". Every local build this week has needed at
+ * least one retry, and the page count keeps climbing as the directory grows.
+ *
+ * Nothing is lost by not pre-rendering. dynamicParams defaults to true, so an
+ * unlisted slug still renders on demand with full server-side HTML — Googlebot
+ * sees exactly what it saw before, just generated when asked rather than in
+ * advance. Paying providers keep instant first loads because placement is what
+ * they bought.
+ */
 export async function generateStaticParams() {
   const providers = await getAllProviders()
-  return providers.map((provider) => ({
-    slug: provider.slug
-  }))
+  return providers
+    .filter(p => (p as any).isFeatured)
+    .map(provider => ({ slug: provider.slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
