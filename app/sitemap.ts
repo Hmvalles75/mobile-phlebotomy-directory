@@ -82,6 +82,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      // State-level companion to the national cost page. Florida is the second
+      // largest lead source and the national page ranks for the generic query
+      // but not the state one.
+      url: `${baseUrl}/mobile-phlebotomy-cost-florida`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      // Provider-facing. Distinct from /mobile-phlebotomy-insurance-coverage,
+      // which answers the patient question about their own insurance; this one
+      // answers what a phlebotomist needs to carry.
+      url: `${baseUrl}/mobile-phlebotomist-insurance-requirements`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/resources`,
       lastModified: new Date(),
       changeFrequency: 'monthly',

@@ -28,6 +28,11 @@ interface StatePageClientProps {
   stateSlug: string
 }
 
+/** States that have a dedicated cost page. Add here when a new one ships. */
+const STATE_COST_GUIDES: Record<string, string> = {
+  florida: '/mobile-phlebotomy-cost-florida',
+}
+
 export default function StatePageClient({ stateSlug }: StatePageClientProps) {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
@@ -193,6 +198,17 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
           >
             ← Back to the national mobile phlebotomy guide
           </Link>
+          {/* State-level cost guides, where one exists. A map rather than a
+              hardcoded link because this component renders every state — a
+              Florida link would otherwise appear on all fifty. */}
+          {STATE_COST_GUIDES[stateSlug] && (
+            <Link
+              href={STATE_COST_GUIDES[stateSlug]}
+              className="ml-4 inline-flex items-center text-sm text-primary-600 hover:text-primary-700 hover:underline"
+            >
+              {stateName} pricing guide →
+            </Link>
+          )}
         </div>
       </div>
 
