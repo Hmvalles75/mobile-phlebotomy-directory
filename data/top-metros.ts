@@ -5,6 +5,19 @@ export interface MetroArea {
   stateAbbr: string;
   rank: number;
   zipCodes: string[];
+  /**
+   * City name to use when resolving this metro against the bundled ZIP dataset,
+   * for records whose `city` is a colloquial name rather than a place name.
+   *
+   * Only new-york-city needs it: "New York City" has no entry in the dataset —
+   * the place is "New York" — so the metro page resolved to nothing and rendered
+   * "Find 0 certified mobile phlebotomy providers", on one of the only two
+   * self-canonical metros. All 50 were checked; it is the only one.
+   *
+   * Omit everywhere else and the lookup falls back to `city`.
+   * scripts/check-metro-geo.ts fails the build if any metro stops resolving.
+   */
+  geoCity?: string;
   neighborhoods?: string[];
   majorHospitals?: string[];
   localInfo?: {
@@ -20,6 +33,7 @@ export const topMetroAreas: MetroArea[] = [
     rank: 1,
     slug: 'new-york-city',
     city: 'New York City',
+    geoCity: 'New York',
     state: 'New York',
     stateAbbr: 'NY',
     zipCodes: ['10001', '10002', '10003', '10004', '10005', '10006', '10007', '10009', '10010', '10011'],

@@ -34,21 +34,11 @@ export default async function MetroPage({ params }: PageProps) {
     notFound()
   }
 
-  // One metro name does not resolve against the bundled ZIP dataset: the record
-  // for new-york-city carries city "New York City", which has no entry — the
-  // city is "New York". Checked all 50; it is the only one. Aliasing here rather
-  // than in lib/cityGeography.ts keeps the geography module untouched, and this
-  // is a property of the metro data, not of how matching works.
-  //
-  // It matters more than one row suggests: new-york-city is one of only two
-  // self-canonical metros, so it is indexed on its own merits — and it was the
-  // page still claiming zero coverage.
-  const CITY_NAME_ALIASES: Record<string, string> = {
-    'New York City': 'New York',
-  }
-  const lookupCity = CITY_NAME_ALIASES[metro.city] || metro.city
-
-  const { local, regional } = await getProvidersByCity(lookupCity, metro.stateAbbr)
+  // geoCity where a metro's display name is not a place name — see MetroArea.
+  const { local, regional } = await getProvidersByCity(
+    metro.geoCity || metro.city,
+    metro.stateAbbr
+  )
 
   // The client renders from the legacy citySpecific/regional/statewide shape,
   // the same aliasing /api/providers/city already does for the ~100 legacy P3

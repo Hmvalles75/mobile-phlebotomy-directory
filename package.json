@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "postinstall": "prisma generate",
-    "postbuild": "tsx scripts/postbuild-checklist.ts",
+    "postbuild": "tsx scripts/check-metro-geo.ts && tsx scripts/postbuild-checklist.ts",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
