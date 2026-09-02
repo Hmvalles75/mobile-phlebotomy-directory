@@ -193,6 +193,17 @@ export const ga4 = {
     source_page?: string
     provider_slug?: string | null
     placement?: string
+    /**
+     * Which of the four submit surfaces produced this lead. Distinct from
+     * `placement`, which describes the CTA that opened the form; this names the
+     * form component itself, so the same placement can be compared across
+     * surfaces.
+     */
+    form_location?:
+      | 'lead_form_modal'
+      | 'inline_lead_form'
+      | 'request_blood_draw_page'
+      | 'los_angeles_request_page'
     // Legacy params kept so existing analytics queries still work during
     // the cutover window — drop after 30d of clean data on the new event.
     location_type?: 'city' | 'metro' | 'state' | 'not_found'
@@ -302,6 +313,50 @@ export const ga4 = {
 
   policyView: (policyType: 'privacy' | 'terms') => {
     trackEvent('policy_view', { policy_type: policyType })
+  },
+
+  // ========================================
+  // KEY EVENTS (marked as conversions in GA4)
+  // ========================================
+
+  /**
+   * A provider listing was successfully created.
+   *
+   * Fires only after POST /api/submit-provider returns ok, never on click —
+   * a click measures intent, and intent was already visible. `plan` is always
+   * 'free' today: listing submission is free and any paid tier is a later,
+   * separate decision tracked by checkoutStart.
+   */
+  providerSignup: (params: { plan: 'free' | 'founding_partner' | 'metro_pro'; state?: string }) => {
+    trackEvent('provider_signup', params)
+  },
+
+  /**
+   * A provider is being sent to Stripe Checkout.
+   *
+   * Fires immediately before the redirect, which is the last moment we control.
+   * Completion is not observable here — the Stripe webhook is the source of
+   * truth for a subscription actually starting, so this measures intent to pay,
+   * not revenue.
+   *
+   * price_id is deliberately absent. It lives server-side in TIER_PRICES and
+   * the client only ever knows the tier name; surfacing it would mean changing
+   * the checkout API for an analytics label.
+   */
+  checkoutStart: (params: { tier: string; entry_point: 'pricing_modal' | 'upgrade_page' }) => {
+    trackEvent('checkout_start', params)
+  },
+
+  /**
+   * Someone clicked through to The Draw Report signup.
+   *
+   * A CLICK, not a subscription. The signup form lives on
+   * thedrawreport.beehiiv.com, so the outcome happens on a domain we do not
+   * control and cannot observe. Named *_cta_click rather than
+   * newsletter_subscribe so the funnel never implies we know who subscribed.
+   */
+  newsletterCtaClick: (params: { source: 'draw_report_cta' | 'add_provider_page' }) => {
+    trackEvent('newsletter_cta_click', params)
   },
 
   disclaimerView: () => {

@@ -179,6 +179,7 @@ function LARequestForm() {
         source_page: typeof window !== 'undefined' ? window.location.href : undefined,
         provider_slug: null,  // LA market-locked request page, no specific provider
         placement: 'la_market_request',
+        form_location: 'los_angeles_request_page',
         city,
         state,
         zip: formData.zip,

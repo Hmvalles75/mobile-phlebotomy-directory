@@ -146,6 +146,7 @@ function RequestBloodDrawForm() {
           source_page: typeof window !== 'undefined' ? window.location.href : undefined,
           provider_slug: null,  // dedicated /request-blood-draw page never sits on a provider listing
           placement: 'dedicated_request_page',
+          form_location: 'request_blood_draw_page',
           city: formData.city,
           state: formData.state,
           zip: formData.zip,

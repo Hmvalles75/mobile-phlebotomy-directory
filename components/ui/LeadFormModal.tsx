@@ -167,6 +167,7 @@ export function LeadFormModal({
         lead_id: data.leadId || data.id,
         source_page: sourcePage,
         provider_slug: providerSlug,
+        form_location: 'lead_form_modal',
         // Legacy params kept for analytics continuity during the 30d cutover
         location_type: locationType,
         city: formData.city,

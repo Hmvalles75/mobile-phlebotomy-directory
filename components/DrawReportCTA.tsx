@@ -1,4 +1,8 @@
-import Link from 'next/link'
+'use client'
+
+// Client only so the subscribe link can report a click. The component holds no
+// server data — it is presentational — so the boundary costs nothing.
+import { ga4 } from '@/lib/ga4'
 
 export default function DrawReportCTA() {
   return (
@@ -13,6 +17,9 @@ export default function DrawReportCTA() {
         href="https://thedrawreport.beehiiv.com/subscribe"
         target="_blank"
         rel="noopener noreferrer"
+        // A click, not a subscription: the form lives on beehiiv.com and the
+        // outcome is not observable from here.
+        onClick={() => ga4.newsletterCtaClick({ source: 'draw_report_cta' })}
         className="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
       >
         Subscribe Free

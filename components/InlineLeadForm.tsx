@@ -93,6 +93,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
             source_page: window.location.href,
             provider_slug: null,  // inline city form never sits on a provider page
             placement: 'inline',
+            form_location: 'inline_lead_form',
             city: submitCity,
             state: submitState,
             zip: formData.zip,

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { captureAttribution } from '@/lib/attribution'
+import { ga4 } from '@/lib/ga4'
 
 export default function AddProvider() {
   const [formData, setFormData] = useState({
@@ -76,6 +77,12 @@ export default function AddProvider() {
       const data = await response.json()
 
       if (data.success) {
+        // Fired on a successful response, not on click. A click measures
+        // intent; this measures a listing that actually exists. `plan` is
+        // 'free' because listing submission is free — any paid tier is a
+        // separate later decision, tracked by checkout_start.
+        ga4.providerSignup({ plan: 'free', state: formData.state || undefined })
+
         // Show success modal instead of alert
         setShowSuccessModal(true)
 
@@ -572,6 +579,7 @@ export default function AddProvider() {
                 </p>
                 <a
                   href="https://thedrawreport.beehiiv.com/subscribe"
+                  onClick={() => ga4.newsletterCtaClick({ source: 'add_provider_page' })}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block bg-primary-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary-700 transition-colors"

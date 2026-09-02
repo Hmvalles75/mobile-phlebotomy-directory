@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X, Check, TrendingUp, Award } from 'lucide-react'
+import { ga4 } from '@/lib/ga4'
 
 interface PricingTier {
   id: 'FOUNDING_PARTNER' | 'HIGH_DENSITY'
@@ -91,6 +92,11 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
       const data = await response.json()
 
       if (data.ok && data.url) {
+        // Last moment we control. Completion is not observable here — the
+        // Stripe webhook is the source of truth for a subscription starting —
+        // so this measures intent to pay, not revenue.
+        ga4.checkoutStart({ tier: tierId, entry_point: 'pricing_modal' })
+
         // Redirect to Stripe Checkout
         window.location.href = data.url
       } else {

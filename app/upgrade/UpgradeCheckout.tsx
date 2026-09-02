@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ga4 } from '@/lib/ga4'
 
 /**
  * Checkout button for the linkable upgrade page. Posts to the same
@@ -34,6 +35,10 @@ export function UpgradeCheckout({ providerId }: { providerId: string }) {
       })
       const data = await res.json()
       if (data.ok && data.url) {
+        // Fired immediately before the redirect — see the note in
+        // PremiumPricingModal: this is intent to pay, not revenue.
+        ga4.checkoutStart({ tier: 'FOUNDING_PARTNER', entry_point: 'upgrade_page' })
+
         window.location.href = data.url
       } else {
         setError(data.error || 'Could not start checkout. Please try again.')
