@@ -58,6 +58,10 @@ export default function MetroPageClient({ params, initialProviders, initialGroup
     notFound()
   }
 
+  // Providers whose service radius actually covers this metro, as opposed to
+  // those who travel here. `citySpecific` is the shell's alias for `local`.
+  const localProviders = initialGrouped?.citySpecific ?? initialProviders
+
 
   const serviceOptions = [
     'At-Home Blood Draw',
@@ -162,7 +166,12 @@ export default function MetroPageClient({ params, initialProviders, initialGroup
       "@type": "Neighborhood",
       "name": neighborhood
     })) || [],
-    "serviceProvider": providers.slice(0, 5).map(provider => ({
+    // Local only. This array asserts who provides the service in this city, and
+    // it was built from local + regional — so a provider who merely travels here
+    // could be published as a Miami service provider in structured data, while
+    // the visible page said "Also travel to Miami" about the same business. The
+    // ItemList below still covers both: listing someone is not the same claim.
+    "serviceProvider": localProviders.slice(0, 5).map(provider => ({
       "@type": "MedicalBusiness",
       "name": provider.name,
       "telephone": provider.phone
