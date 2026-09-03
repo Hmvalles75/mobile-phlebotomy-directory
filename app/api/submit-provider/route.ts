@@ -1,4 +1,5 @@
 import { checkProviderEmail } from '@/lib/emailValidation'
+import { checkDeliverability } from '@/lib/emailDeliverability'
 import { NextRequest, NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/seo'
 import { addPendingSubmission } from '@/lib/pending-submissions'
@@ -127,6 +128,27 @@ export async function POST(request: NextRequest) {
     }
     formData.email = emailCheck.normalized
 
+    // Syntax passing does not mean the address can receive anything. Four
+    // providers signed up with perfectly-formed addresses whose mailboxes did
+    // not exist, and each spent months assuming the directory produced no work
+    // while eighteen lead notifications bounced. See lib/emailDeliverability.ts.
+    //
+    // The website field is passed because a provider who mistypes their email
+    // usually spells their own domain correctly one field later -- that is how
+    // both known typos here are recoverable rather than merely detectable.
+    const delivery = await checkDeliverability(formData.email, formData.website)
+    if (!delivery.ok) {
+      return NextResponse.json(
+        { ok: false, error: delivery.error, suggestion: delivery.suggestion },
+        { status: 400 }
+      )
+    }
+    // A near-miss against their own website is a strong hint but not proof, so
+    // it rides along with the success response for the form to surface rather
+    // than refusing a signup we cannot be sure is wrong.
+    const emailWarning = delivery.warning
+    const emailSuggestion = delivery.suggestion
+
     // Check for duplicate provider before accepting submission
     // Now checks both Provider table AND PendingSubmission table
     const duplicateCheck = await checkForDuplicate(
@@ -221,7 +243,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Thank you! Your application has been submitted and is pending review. We will contact you within 24-48 hours.',
-      submissionId: submission.id
+      submissionId: submission.id,
+      // Present when the address looks like a near-miss for their own domain.
+      // The submission is accepted either way; this exists so the confirmation
+      // can say "we will send leads to X" while they still remember typing it.
+      emailWarning,
+      emailSuggestion,
     })
 
   } catch (error) {
