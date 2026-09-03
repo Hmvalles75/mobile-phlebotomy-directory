@@ -1,10 +1,15 @@
 import { PrismaClient } from '@prisma/client'
+import { assertEndpoint, requireArg } from './_endpoint-guard'
 
 /**
  * Close the backfill window before the job's first run.
  *
- *   npx tsx scripts/backfill-patient-outcome-window.ts           # dry run
- *   npx tsx scripts/backfill-patient-outcome-window.ts --apply
+ *   npx tsx scripts/backfill-patient-outcome-window.ts --endpoint <id>
+ *   npx tsx scripts/backfill-patient-outcome-window.ts --endpoint <id> --apply
+ *
+ * --endpoint is required and must match the Neon endpoint actually connected.
+ * Production is ep-cool-surf-a4vqw8lh. See scripts/_endpoint-guard.ts for why
+ * naming it up front is not ceremony.
  *
  * On first deploy every claimed lead in history looks due, because
  * outcomeRequestSentAt is null on all of them. Without this the first hourly
@@ -31,9 +36,9 @@ import { PrismaClient } from '@prisma/client'
  * fact with more moving parts. Reconciliation reads patientOutcome, which stays
  * null here, so nothing downstream is misled: these rows are simply never asked.
  *
- * Deliberately reads DATABASE_URL/POSTGRES_PRISMA_URL from the ambient
- * environment rather than loading .env.local, so it targets whatever the shell
- * points at. Check before running.
+ * Reads POSTGRES_PRISMA_URL from the ambient environment rather than loading
+ * .env.local, so it targets whatever the shell points at -- which is why the
+ * endpoint guard exists.
  */
 
 const prisma = new PrismaClient()
@@ -41,6 +46,13 @@ const APPLY = process.argv.includes('--apply')
 const WINDOW_DAYS = 14
 
 async function main() {
+  const expected = requireArg('--endpoint')
+  console.log('')
+  await assertEndpoint(prisma, {
+    expected,
+    label: expected.includes('cool-surf') ? 'PRODUCTION' : 'non-production',
+  })
+
   const cutoff = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000)
 
   const stale = await prisma.lead.count({
