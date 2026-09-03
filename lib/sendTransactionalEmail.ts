@@ -36,6 +36,17 @@ export interface TransactionalEmail {
   subject: string
   text: string
   replyTo?: string
+  /**
+   * Optional HTML alternative. `text` stays required and must carry the whole
+   * message on its own -- it is the fallback, not a summary.
+   *
+   * Added for the patient completion confirmation, which needs a tappable
+   * button. The alternative was a second direct sg.send() call site, and the
+   * reason not to is the error-string return below: callers depend on it to
+   * decide whether to record that a send happened, and a second path would
+   * have to reimplement that and then keep it in step.
+   */
+  html?: string
 }
 
 export async function sendTransactionalEmail(
@@ -52,6 +63,7 @@ export async function sendTransactionalEmail(
       replyTo: message.replyTo || VERIFIED_SENDER,
       subject: message.subject,
       text: message.text,
+      ...(message.html ? { html: message.html } : {}),
     })
     return null
   } catch (error: any) {

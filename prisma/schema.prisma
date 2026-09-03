@@ -307,6 +307,29 @@ model Lead {
   appointmentDate   DateTime?
   completedAt       DateTime?
   providerNotes     String?
+
+  // Patient-side completion confirmation (2026-09-03).
+  //
+  // Every completion figure we have is self-reported by the provider, who has
+  // no incentive to misreport today and would have a direct one the moment a
+  // draw is billable. 45 of 784 leads are marked APPOINTMENT_COMPLETED and 56
+  // claimed leads carry no outcome at all, so the provider's own logging
+  // cannot be checked against anything. This asks the patient, who is the only
+  // party to the draw with nothing riding on the answer.
+  //
+  // Collected deliberately BEFORE any per-draw billing exists. Once money is
+  // attached to the field the baseline is unrecoverable -- there is no way to
+  // learn afterwards what the honest rate had been.
+  //
+  // Read-only with respect to the rest of the lead: nothing here feeds routing,
+  // status transitions, or anything provider-facing.
+  // See docs/findings/patient-confirmation.md.
+  patientOutcome        PatientOutcome?   // null = not yet answered
+  patientOutcomeReason  String?           // free text, only set alongside NOT_COMPLETED
+  patientOutcomeAt      DateTime?
+  patientOutcomeToken   String?  @unique  // nanoid(32), minted at send time
+  outcomeRequestSentAt  DateTime?         // first email
+  outcomeReminderSentAt DateTime?         // second email; at most one, ever
   // New fields for patient SMS qualification flow
   timeWindow        String?            // e.g. "tomorrow 9-12"
   patientNotes      String?            // Notes from patient SMS
@@ -903,6 +926,22 @@ enum LeadStatus {
   CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
   CLOSED_DUPLICATE      // Older submission from a patient who re-submitted; canonical row is the most recent submission
   EXPIRED_NO_RESPONSE   // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
+}
+
+/**
+ * The patient's own answer, kept separate from LeadOutcome on purpose.
+ *
+ * LeadOutcome is what the provider says happened. This is what the patient
+ * says happened. Merging them would destroy the only disagreement signal the
+ * reconciliation is built to surface.
+ *
+ * NO_RESPONSE is deliberately absent -- it is derived, not stored:
+ * outcomeRequestSentAt set, patientOutcome null, more than 7 days elapsed.
+ * Storing it would mean writing a row for silence and having to keep it true.
+ */
+enum PatientOutcome {
+  COMPLETED
+  NOT_COMPLETED
 }
 
 enum LeadOutcome {
