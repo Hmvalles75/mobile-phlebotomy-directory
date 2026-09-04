@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
+import { rematchForProviderAfterChange } from '@/lib/leadRematch'
 
 export async function PATCH(
   req: NextRequest,
@@ -51,6 +52,13 @@ export async function PATCH(
     })
 
     console.log(`[Admin] Updated provider ${provider.slug}: eligibleForLeads=${provider.eligibleForLeads}`)
+
+    // A provider switched on now covers whatever is already sitting OPEN in
+    // their radius. Scoped to leads they were never sent, so re-saving an
+    // already-eligible provider is a no-op. See lib/leadRematch.ts.
+    if (provider.eligibleForLeads) {
+      await rematchForProviderAfterChange(provider.id, 'admin_eligible_on')
+    }
 
     return NextResponse.json({
       ok: true,

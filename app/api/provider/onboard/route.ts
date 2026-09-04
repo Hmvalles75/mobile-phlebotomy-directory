@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { OnboardingStatus } from '@prisma/client'
+import { rematchForProviderAfterChange } from '@/lib/leadRematch'
 
 /**
  * GET - Validate token and return provider data
@@ -188,6 +189,9 @@ export async function POST(req: NextRequest) {
     })
 
     console.log(`✅ Provider ${provider.name} (${provider.id}) completed onboarding with SMS consent`)
+
+    // Newly eligible: hand them anything already OPEN in their radius.
+    await rematchForProviderAfterChange(provider.id, 'onboarding_complete')
 
     return NextResponse.json({
       ok: true,

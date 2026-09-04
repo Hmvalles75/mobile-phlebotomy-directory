@@ -8,12 +8,21 @@
  * dashboards and misleads admins about current demand.
  *
  * Runs daily at 6am Pacific (13:00 UTC).
+ *
+ * Vercel crons invoke with GET. This file exported only POST from its first
+ * commit, so the schedule 405'd every day and the job never ran once: on
+ * 2026-09-04 there were 166 OPEN leads with no notification row going back
+ * 108 days. GET is the cron entry; POST stays for manual invocation.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 const STALE_DAYS = 14
+
+export async function GET(req: NextRequest) {
+  return POST(req)
+}
 
 export async function POST(req: NextRequest) {
   try {

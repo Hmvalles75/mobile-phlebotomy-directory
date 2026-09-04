@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { emailProviderApprovedWithLeadChoice } from '@/lib/providerEmails'
 import { normalizeCityName, citySlug } from '@/lib/city-normalize'
 import { radiusFromSubmission } from '@/lib/serviceRadius'
+import { rematchForProviderAfterChange } from '@/lib/leadRematch'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -196,6 +197,11 @@ async function addProviderToDatabase(submission: any) {
       serviceRadiusMiles: radiusFromSubmission(submission.serviceArea),
     }
   })
+
+  // Newly eligible: hand them anything already OPEN in their radius.
+  if (wantsLeads) {
+    await rematchForProviderAfterChange(provider.id, 'submission_approved')
+  }
 
   // Add coverage for the city
   await prisma.providerCoverage.create({
