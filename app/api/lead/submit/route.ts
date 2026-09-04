@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
+import { markLeadNeedsCoverage } from '@/lib/coverageGap'
 import { findProviderBySubmissionContact, handleProviderTestSubmission } from '@/lib/providerTestSubmission'
 import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
@@ -252,8 +253,9 @@ export async function POST(req: NextRequest) {
     // 26526 (Granville WV) are all valid ZIPs simply absent from
     // lib/zip-geocode's table. The gap is in our data, not the patient's typing,
     // so the lead is accepted and flagged instead. Without coordinates it will
-    // match no providers and land in NEEDS_COVERAGE — the warning is what makes
-    // that visible so the table can be filled.
+    // match no providers; the zero-match branch below parks it as
+    // NEEDS_COVERAGE and the warning is what makes that visible so the table
+    // can be filled.
     if (!zipInfo) {
       console.warn(
         `[lead/submit] ZIP_NOT_IN_GEOCODE_TABLE — ${payload.zip} (${payload.city}, ${payload.state}). ` +
@@ -472,7 +474,21 @@ export async function POST(req: NextRequest) {
 
     // If NO providers were notified at all, this is an uncovered area
     // Send expansion email to the lead and notify admin
+    let needsCoverage = false
     if (emailCount === 0) {
+      // Park it as NEEDS_COVERAGE -- but only when nobody MATCHED. A zero count
+      // with notification rows present means providers exist and the sends
+      // failed; that lead stays OPEN for the retry cron. Until 2026-09 this
+      // branch left the lead OPEN either way, so a coverage gap and an ignored
+      // lead were the same row. See lib/coverageGap.ts.
+      const attempted = await prisma.leadNotification.count({ where: { leadId: lead.id } })
+      if (attempted === 0) {
+        needsCoverage = await markLeadNeedsCoverage(lead.id, 'submit_no_match').catch(err => {
+          console.error(`[Lead ${lead.id}] NEEDS_COVERAGE flip failed:`, err?.message || err)
+          return false
+        })
+      }
+
       console.log(`[Lead ${lead.id}] No coverage in ${city}, ${payload.state} - sending expansion email`)
 
       // Send expansion email to the lead
@@ -492,7 +508,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       leadId: lead.id,
-      status: 'open',
+      status: needsCoverage ? 'needs_coverage' : 'open',
       message: 'Lead created and notifications sent to providers'
     })
   } catch (e: any) {

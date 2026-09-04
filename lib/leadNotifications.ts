@@ -478,7 +478,48 @@ export function freeTierDelaySeconds(
 // Separate from the 14-day auto-expire cron at /api/cron/expire-stale-leads.
 const MAX_NOTIFICATION_AGE_DAYS = 4
 
-export async function notifyFeaturedProvidersForLead(leadId: string): Promise<number> {
+// Upper bound for the rematch path (lib/leadRematch.ts), which is allowed to
+// bypass the 4-day cap. Matches the 14-day auto-expire horizon: past that a
+// lead is closed anyway, so there is nothing to rematch.
+export const MAX_REMATCH_AGE_DAYS = 14
+
+export interface NotifyOptions {
+  /**
+   * Rematch path only. Lets a lead older than MAX_NOTIFICATION_AGE_DAYS be
+   * notified, up to `maxAgeDays` (default MAX_REMATCH_AGE_DAYS). The default
+   * cap stays in force for every other caller — the release endpoint, the
+   * stale-claim re-notify and the manual scripts are unchanged.
+   */
+  bypassAgeCap?: boolean
+  maxAgeDays?: number
+  /**
+   * Skip providers that already have a LeadNotification row for this lead,
+   * whatever its status. A rematch must never send the same lead twice to the
+   * same inbox; a FAILED row is the retry cron's job, not ours.
+   */
+  onlyNewProviders?: boolean
+}
+
+/**
+ * Providers the matcher would notify for this lead today who have never been
+ * sent it. Pure read: no rows, no emails. This is what the rematch previews
+ * before it decides whether a NEEDS_COVERAGE lead can go back to OPEN.
+ */
+export async function findNewProvidersForLead(leadId: string): Promise<Provider[]> {
+  const lead = await prisma.lead.findUnique({
+    where: { id: leadId },
+    select: { zip: true, state: true, leadNotifications: { select: { providerId: true } } },
+  })
+  if (!lead) return []
+  const already = new Set(lead.leadNotifications.map(n => n.providerId))
+  const matched = await findFeaturedProvidersForNotification(lead.zip, lead.state)
+  return matched.filter(p => !already.has(p.id))
+}
+
+export async function notifyFeaturedProvidersForLead(
+  leadId: string,
+  options: NotifyOptions = {},
+): Promise<number> {
   try {
     // Fetch the lead (+ createdAt so we can gate on age)
     const lead = await prisma.lead.findUnique({
@@ -504,10 +545,13 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     // paths (release endpoint, catch-missed-notifications cron, etc.) so
     // 2-month-old leads bouncing back into the pool don't spam providers.
     const ageDays = (Date.now() - lead.createdAt.getTime()) / (1000 * 60 * 60 * 24)
-    if (ageDays > MAX_NOTIFICATION_AGE_DAYS) {
+    const ageCapDays = options.bypassAgeCap
+      ? (options.maxAgeDays ?? MAX_REMATCH_AGE_DAYS)
+      : MAX_NOTIFICATION_AGE_DAYS
+    if (ageDays > ageCapDays) {
       console.log(
         `[LeadNotifications] SKIP — lead ${leadId} is ${ageDays.toFixed(1)} days old ` +
-        `(> ${MAX_NOTIFICATION_AGE_DAYS}-day cap). No notifications sent.`
+        `(> ${ageCapDays}-day cap${options.bypassAgeCap ? ', rematch bound' : ''}). No notifications sent.`
       )
       return 0
     }
@@ -515,7 +559,20 @@ export async function notifyFeaturedProvidersForLead(leadId: string): Promise<nu
     console.log(`[LeadNotifications] Processing lead ${leadId} in ${lead.city}, ${lead.state} ${lead.zip} (${ageDays.toFixed(1)}d old)`)
 
     // Find matching featured providers
-    const providers = await findFeaturedProvidersForNotification(lead.zip, lead.state)
+    let providers = await findFeaturedProvidersForNotification(lead.zip, lead.state)
+
+    if (options.onlyNewProviders && providers.length > 0) {
+      const existing = await prisma.leadNotification.findMany({
+        where: { leadId: lead.id },
+        select: { providerId: true },
+      })
+      const already = new Set(existing.map(n => n.providerId))
+      const before = providers.length
+      providers = providers.filter(p => !already.has(p.id))
+      if (before !== providers.length) {
+        console.log(`[LeadNotifications] onlyNewProviders: ${before - providers.length} already notified, ${providers.length} new`)
+      }
+    }
 
     if (providers.length === 0) {
       console.log(`[LeadNotifications] No featured providers found for ${lead.state} / ${lead.zip}`)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { rematchForProviderAfterChange } from '@/lib/leadRematch'
 
 // GET - Fetch provider settings
 export async function GET(req: NextRequest) {
@@ -103,6 +104,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Previous radius, so a widened service area can pick up OPEN leads that
+    // were outside it at submit time. See lib/leadRematch.ts.
+    const before = await prisma.provider.findUnique({
+      where: { id: session.providerId },
+      select: { serviceRadiusMiles: true },
+    })
+
     // Update provider settings
     const updatedProvider = await prisma.provider.update({
       where: { id: session.providerId },
@@ -124,6 +132,11 @@ export async function POST(req: NextRequest) {
     console.log(`   Days: ${operatingDays}`)
     console.log(`   Hours: ${operatingHoursStart} - ${operatingHoursEnd}`)
     console.log(`   Radius: ${serviceRadiusMiles} miles`)
+
+    const previousRadius = before?.serviceRadiusMiles ?? 25
+    if ((updatedProvider.serviceRadiusMiles ?? 0) > previousRadius) {
+      await rematchForProviderAfterChange(session.providerId, `radius_${previousRadius}_to_${updatedProvider.serviceRadiusMiles}`)
+    }
 
     return NextResponse.json({
       ok: true,
