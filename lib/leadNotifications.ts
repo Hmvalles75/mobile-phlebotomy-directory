@@ -432,7 +432,8 @@ async function findFeaturedProvidersForNotification(
   // them. Replay over those 60 days: 38 leads gain a provider at 60 miles.
   const matchedIds = new Set(matchingProviders.map(p => p.id))
   const nearMisses = providers
-    .filter(p => !matchedIds.has(p.id) && canNotify(p) && (p.notificationEmail || p.claimEmail || p.email))
+    .filter(p => !matchedIds.has(p.id) && canNotify(p) && (p.notificationEmail || p.claimEmail || p.email)
+      && (p.serviceRadiusMiles || 25) > ZIP_LIST_ONLY_RADIUS_MILES)
     .map(p => {
       const home = (p.zipCodes || '').split(',').map(z => z.trim()).find(z => /^\d{5}$/.test(z))
       const d = home ? getDistanceBetweenZips(home, leadZip) : null
@@ -516,6 +517,10 @@ export const MAX_LISTED_ZIP_DISTANCE_MILES = 150
 // Fan-out floor (2026-09-07). See findFeaturedProvidersForNotification.
 export const MIN_FANOUT = 3
 export const WIDEN_MAX_MILES = 60
+// A provider with a radius this small has asked for ZIP-list-only routing
+// (Skilled Labs, 2026-09-07: 'only from our specified ZIP codes'). The floor
+// never widens to them; their list is the whole answer.
+export const ZIP_LIST_ONLY_RADIUS_MILES = 10
 
 export const PAID_HEAD_START_SECONDS = 10 * 60
 
