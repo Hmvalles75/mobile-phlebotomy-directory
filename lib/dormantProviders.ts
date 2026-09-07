@@ -36,6 +36,13 @@ export const MIN_AGE_DAYS = 60        // provider must be at least this old
 export const WARN_GRACE_DAYS = 7      // warn -> pause
 export const RESUME_GRACE_DAYS = 60   // after a resume, leave them alone this long
 
+// Never warned or paused, whatever the numbers say. Partners who route work
+// to us and to other providers by hand, not through the claim button. The
+// sweep sees only claims, so it would read them as dormant.
+export const DORMANT_EXEMPT_PROVIDER_IDS: string[] = [
+  'cmk1sm7od0002lb04gj5d29o7', // Optimal Paramedical Exams (Janelle Lashley) -- referred the NeuroAge draw to Nekia Mood, 2026-09
+]
+
 const days = (n: number) => new Date(Date.now() - n * 86400000)
 
 export interface DormantCandidate {
@@ -55,6 +62,7 @@ export interface DormantCandidate {
 export async function findDormantCandidates(): Promise<DormantCandidate[]> {
   const providers = await prisma.provider.findMany({
     where: {
+      id: { notIn: DORMANT_EXEMPT_PROVIDER_IDS },
       removedAt: null,
       notifyEnabled: true,
       eligibleForLeads: true,
