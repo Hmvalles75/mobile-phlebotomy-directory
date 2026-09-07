@@ -40,7 +40,7 @@ export const RESUME_GRACE_DAYS = 60   // after a resume, leave them alone this l
 // to us and to other providers by hand, not through the claim button. The
 // sweep sees only claims, so it would read them as dormant.
 export const DORMANT_EXEMPT_PROVIDER_IDS: string[] = [
-  'cmk1sm7od0002lb04gj5d29o7', // Optimal Paramedical Exams (Janelle Lashley) -- referred the NeuroAge draw to Nekia Mood, 2026-09
+  'cmk1sm7od0002lb04gj5d29o7', // Optimal Paramedical Exams (Janelle Lashley) -- completed a NeuroAge research draw via her staff, 2026-09; never a claim-button user
 ]
 
 const days = (n: number) => new Date(Date.now() - n * 86400000)
