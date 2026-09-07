@@ -39,12 +39,23 @@ interface Provider {
  * @param lead - The lead details
  * @returns Promise<boolean> - true if sent successfully, false if failed
  */
+/**
+ * Reminder framing for a lead that has already been sent once and is still
+ * unclaimed. A second copy of "New patient request just came in!" reads as a
+ * duplicate and gets ignored; this says what is actually true.
+ */
+export interface ReminderVariant {
+  kind: 'still_unclaimed'
+  hoursOpen: number
+}
+
 async function sendProviderLeadNotificationEmail(
   provider: Provider,
   lead: Lead,
   delaySeconds: number = 0,
   batchId: string | null = null,
   notificationId: string | null = null,
+  variant: ReminderVariant | null = null,
 ): Promise<{ success: boolean; error?: string; sgMessageId?: string }> {
   // Determine recipient email (priority: notificationEmail > claimEmail > email)
   const recipientEmail = provider.notificationEmail || provider.claimEmail || provider.email
@@ -75,10 +86,20 @@ async function sendProviderLeadNotificationEmail(
     ? 'Lab to be confirmed directly with patient — proceed to schedule draw.'
     : ''
 
+  const hoursOpen = variant ? Math.max(1, Math.round(variant.hoursOpen)) : 0
+  const waitText = hoursOpen >= 48 ? `${Math.round(hoursOpen / 24)} days` : `${hoursOpen} hours`
+  const headline = variant ? 'Patient Still Waiting' : 'New Patient Request'
+  const intro = variant
+    ? `A patient in ${lead.city}, ${lead.state} has been waiting ${waitText} and nobody has claimed the request yet.`
+    : `New patient request in ${lead.city}, ${lead.state} just came in!`
+  const subject = variant
+    ? `Still unclaimed: patient in ${lead.city}, ${lead.state} waiting ${waitText}`
+    : `New request in ${lead.city}, ${lead.state} - Reply ASAP`
+
   // Plain text email body
   const textBody = `Hi ${provider.name},
 
-New patient request in ${lead.city}, ${lead.state} just came in!
+${intro}
 
 Location: ${lead.city}, ${lead.state} ${lead.zip}
 Lab preference: ${lead.labPreference}${labNote ? '\n' + labNote : ''}
@@ -127,11 +148,11 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
 <body>
   <div class="container">
     <div class="header">
-      <h2 style="margin: 0;">New Patient Request</h2>
+      <h2 style="margin: 0;">${headline}</h2>
     </div>
     <div class="content">
       <p>Hi ${provider.name},</p>
-      <p><strong>New patient request in ${lead.city}, ${lead.state} just came in!</strong></p>
+      <p><strong>${intro}</strong></p>
 
       <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
         <div class="detail-row">
@@ -188,7 +209,7 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
     const sendPayload: any = {
       to: recipientEmail,
       from: process.env.LEAD_EMAIL_FROM,
-      subject: `New request in ${lead.city}, ${lead.state} - Reply ASAP`,
+      subject,
       text: textBody,
       html: htmlBody
     }
@@ -766,6 +787,103 @@ export async function notifyFeaturedProvidersForLeadDryRun(leadId: string): Prom
 // Retry tuning. A FAILED notification is re-attempted at most this many times,
 // and only within the window below — old failures are for leads that have long
 // since routed elsewhere or expired.
+// A provider is not reminded about the same lead more often than this.
+export const MIN_RENOTIFY_HOURS = 12
+
+export interface RenotifyResult {
+  leadId: string
+  dryRun: boolean
+  hoursOpen: number
+  recipients: { providerId: string; name: string; email: string | null; alreadyNotified: boolean; sent: boolean; skipped?: string }[]
+  sent: number
+  skipped: number
+  reason?: string
+}
+
+/**
+ * Re-send an OPEN lead to the providers who already received it, with the
+ * "still unclaimed" framing, and optionally to any provider the matcher
+ * would add today. Built for the reached-but-ignored case: a lead sent to
+ * four providers, opened by all, claimed by none (Miami, 2026-09-04).
+ *
+ * Guards: lead must be OPEN and within MAX_REMATCH_AGE_DAYS; a provider is
+ * skipped if any notification row for this lead was created for them in the
+ * last MIN_RENOTIFY_HOURS. Sends immediately, no head-start and no batch --
+ * a reminder that arrives 10 minutes later defeats its own purpose. The
+ * retry cron ignores these rows (it retires any FAILED row whose provider
+ * already has a SENT one), so a failed reminder is reported, not retried.
+ */
+export async function renotifyOpenLead(
+  leadId: string,
+  opts: { includeNew?: boolean; dryRun?: boolean } = {},
+): Promise<RenotifyResult> {
+  const lead = await prisma.lead.findUnique({
+    where: { id: leadId },
+    select: {
+      id: true, createdAt: true, status: true, city: true, state: true, zip: true,
+      labPreference: true, urgency: true, notes: true,
+      leadNotifications: { select: { providerId: true, status: true, createdAt: true } },
+    },
+  })
+  const base: RenotifyResult = { leadId, dryRun: !!opts.dryRun, hoursOpen: 0, recipients: [], sent: 0, skipped: 0 }
+  if (!lead) return { ...base, reason: 'Lead not found' }
+  base.hoursOpen = Math.round(((Date.now() - lead.createdAt.getTime()) / 3600000) * 10) / 10
+  if (lead.status !== 'OPEN') return { ...base, reason: `Lead is ${lead.status}, not OPEN` }
+  if (base.hoursOpen > MAX_REMATCH_AGE_DAYS * 24) return { ...base, reason: `Lead is ${(base.hoursOpen / 24).toFixed(1)} days old, past the ${MAX_REMATCH_AGE_DAYS}-day bound` }
+
+  const sentTo = new Set(lead.leadNotifications.filter(n => n.status === 'SENT').map(n => n.providerId))
+  const lastRowAt = new Map<string, Date>()
+  for (const n of lead.leadNotifications) {
+    const prev = lastRowAt.get(n.providerId)
+    if (!prev || n.createdAt > prev) lastRowAt.set(n.providerId, n.createdAt)
+  }
+
+  // Everyone the matcher would notify today, then narrow to already-sent
+  // unless includeNew. Using the live matcher means a provider who has since
+  // been removed or opted out is not reminded.
+  const matched = await findFeaturedProvidersForNotification(lead.zip, lead.state)
+  const targets = matched.filter(p => sentTo.has(p.id) || opts.includeNew)
+  const cutoff = Date.now() - MIN_RENOTIFY_HOURS * 3600000
+
+  for (const p of targets) {
+    const email = p.notificationEmail || p.claimEmail || p.email
+    const row = { providerId: p.id, name: p.name.trim(), email, alreadyNotified: sentTo.has(p.id), sent: false as boolean, skipped: undefined as string | undefined }
+    const last = lastRowAt.get(p.id)
+    if (last && last.getTime() > cutoff) {
+      row.skipped = `notified ${Math.round((Date.now() - last.getTime()) / 3600000)}h ago (min ${MIN_RENOTIFY_HOURS}h)`
+      base.skipped++
+      base.recipients.push(row)
+      continue
+    }
+    if (opts.dryRun) { base.recipients.push(row); continue }
+
+    const notification = await prisma.leadNotification.create({
+      data: { leadId: lead.id, providerId: p.id, channel: 'email', status: 'QUEUED' },
+    })
+    const result = await sendProviderLeadNotificationEmail(
+      p, lead as Lead, 0, null, notification.id, { kind: 'still_unclaimed', hoursOpen: base.hoursOpen },
+    )
+    await prisma.leadNotification.update({
+      where: { id: notification.id },
+      data: result.success
+        ? { status: 'SENT', sentAt: new Date(), sgMessageId: result.sgMessageId || null }
+        : { status: 'FAILED', errorMessage: result.error || 'Unknown error' },
+    })
+    row.sent = result.success
+    if (!result.success) row.skipped = `send failed: ${result.error}`
+    if (result.success) base.sent++
+    base.recipients.push(row)
+  }
+
+  if (!opts.dryRun && base.sent > 0) {
+    const ids = base.recipients.filter(r => r.sent).map(r => r.providerId)
+    const cur = await prisma.lead.findUnique({ where: { id: leadId }, select: { routedProviderIds: true } })
+    await prisma.lead.update({ where: { id: leadId }, data: { routedProviderIds: [...new Set([...(cur?.routedProviderIds || []), ...ids])] } })
+  }
+  console.log(`[Renotify] lead ${leadId} (${base.hoursOpen}h open) dryRun=${!!opts.dryRun} targets=${targets.length} sent=${base.sent} skipped=${base.skipped}`)
+  return base
+}
+
 const MAX_NOTIFICATION_RETRIES = 3
 const RETRY_WINDOW_HOURS = 24
 
