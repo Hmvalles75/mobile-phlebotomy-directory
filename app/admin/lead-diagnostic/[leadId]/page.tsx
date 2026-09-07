@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import RenotifyButton from './RenotifyButton'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
@@ -148,6 +149,10 @@ export default async function LeadDiagnosticPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {lead.status === 'OPEN' && (
+          <RenotifyButton leadId={lead.id} hoursOpen={Math.round((Date.now() - lead.createdAt.getTime()) / 3600000)} notified={totalNotified} />
+        )}
 
         {/* Funnel summary */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
