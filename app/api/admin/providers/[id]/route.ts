@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
+import { resumeLeads } from '@/lib/dormantProviders'
 
 export async function PATCH(
   req: NextRequest,
@@ -57,6 +58,9 @@ export async function PATCH(
     // their radius. Scoped to leads they were never sent, so re-saving an
     // already-eligible provider is a no-op. See lib/leadRematch.ts.
     if (provider.eligibleForLeads) {
+      // Counts as a resume: clears any dormant warning/pause and starts the
+      // grace period, so the sweep does not re-pause someone admin just re-enabled.
+      await resumeLeads(provider.id, 'admin')
       await rematchForProviderAfterChange(provider.id, 'admin_eligible_on')
     }
 

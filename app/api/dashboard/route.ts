@@ -39,7 +39,10 @@ export async function GET(req: NextRequest) {
         operatingDays: true,
         operatingHoursStart: true,
         operatingHoursEnd: true,
-        serviceRadiusMiles: true
+        serviceRadiusMiles: true,
+        eligibleForLeads: true,
+        dormantWarnedAt: true,
+        leadsPausedAt: true
       }
     })
 

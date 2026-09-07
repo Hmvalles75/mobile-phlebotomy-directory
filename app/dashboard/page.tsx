@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
+import LeadsPausedBanner from './LeadsPausedBanner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CreditCard, Star, TrendingUp, Users, LogOut, AlertCircle, Clock, Zap, Settings, MapPin, Calendar, Save, CheckCircle, Building2 } from 'lucide-react'
 import Link from 'next/link'
@@ -74,6 +75,9 @@ interface Provider {
   leadCredit: number
   featuredTier: string | null
   priorityRouting: boolean
+  eligibleForLeads?: boolean
+  dormantWarnedAt?: string | null
+  leadsPausedAt?: string | null
   status: 'UNVERIFIED' | 'PENDING' | 'VERIFIED'
   claimEmail: string | null
   zipCodes: string | null
@@ -494,6 +498,9 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {(provider.leadsPausedAt || provider.dormantWarnedAt) && (
+        <LeadsPausedBanner paused={!!provider.leadsPausedAt} warnedAt={provider.dormantWarnedAt ?? null} onResumed={fetchDashboardData} />
+      )}
       {/* Success message */}
       {searchParams.get('login') === 'success' && (
         <div className="bg-green-50 border-b border-green-200 px-4 py-3">
