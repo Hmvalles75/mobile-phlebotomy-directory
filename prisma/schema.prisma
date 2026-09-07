@@ -815,6 +815,9 @@ model LeadNotification {
   // delivery outcome (QUEUED/SENT/FAILED) — a pass says nothing about whether
   // the email was delivered, and FAILED would make the retry cron re-send it.
   passedAt     DateTime?
+  // True when the fan-out floor sent this lead to a provider outside their
+  // own service radius (2026-09-07). Excluded from dormant-sweep counts.
+  outsideRadius Boolean            @default(false)
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailEvents  EmailEvent[]
