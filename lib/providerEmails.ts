@@ -69,6 +69,42 @@ Questions? Reply to this email or contact support@mobilephlebotomy.org
   )
 }
 
+export async function emailLeadsPauseWarning(to: string, providerName: string, leadsSent: number, lookbackDays: number, graceDays: number, dashboardUrl: string) {
+  return send(
+    to,
+    'Still want patient requests from MobilePhlebotomy.org?',
+    `Hi ${providerName},
+
+Over the last ${lookbackDays} days we sent you ${leadsSent} patient requests and none were claimed. That usually means one of three things: the requests are outside where you actually work, the emails are landing somewhere you do not check, or you are not taking new patients right now. All fine, but each request we send you is a slot we are not giving to someone who will call the patient.
+
+If you do want to keep receiving requests, log in and click "Keep my leads on":
+${dashboardUrl}
+
+If we do not hear from you in ${graceDays} days, we will pause routing to your listing. Your listing stays live on the site either way, and you can turn requests back on with one click whenever you like.
+
+Hector Valles
+MobilePhlebotomy.org`
+  )
+}
+
+export async function emailLeadsPaused(to: string, providerName: string, leadsSent: number, lookbackDays: number, dashboardUrl: string) {
+  return send(
+    to,
+    'We have paused patient requests to your listing',
+    `Hi ${providerName},
+
+We sent you ${leadsSent} patient requests over the last ${lookbackDays} days and did not hear back, so we have paused routing new ones to you. Your listing is still live on the site; only the request emails have stopped.
+
+To turn them back on, log in and click "Turn leads back on":
+${dashboardUrl}
+
+Anything still open in your area will come to you right away.
+
+Hector Valles
+MobilePhlebotomy.org`
+  )
+}
+
 export async function emailCreditsDepleted(to: string, dashboardUrl: string) {
   return send(
     to,

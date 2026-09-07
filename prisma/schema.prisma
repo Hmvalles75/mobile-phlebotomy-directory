@@ -128,6 +128,15 @@ model Provider {
   // workflow. lastStaleReleaseAt enables cooldown / "third strike" timing.
   staleReleaseCount     Int                    @default(0)
   lastStaleReleaseAt    DateTime?
+  // Dormant-provider sweep (2026-09-07). A free listing that keeps receiving
+  // leads and never claims is warned (dormantWarnedAt), then paused
+  // (leadsPausedAt + eligibleForLeads=false). Resuming clears both and sets
+  // leadsResumedAt, which exempts them from the sweep for a grace period.
+  // See lib/dormantProviders.ts.
+  dormantWarnedAt       DateTime?
+  leadsPausedAt         DateTime?
+  leadsPausedReason     String?
+  leadsResumedAt        DateTime?
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]
