@@ -5,6 +5,9 @@ import { priceFor } from '@/lib/leadPricing'
 import { notifyAdminUnservedLead, reachOutToNearbyProviders, sendExpansionEmailToLead } from '@/lib/notifyProvider'
 import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
 import { markLeadNeedsCoverage } from '@/lib/coverageGap'
+import { sendInstitutionalAcknowledgment } from '@/lib/institutionalIntake'
+import { SITE_URL } from '@/lib/seo'
+import { alertAdminSMS } from '@/lib/alertAdmin'
 import { findProviderBySubmissionContact, handleProviderTestSubmission } from '@/lib/providerTestSubmission'
 import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
@@ -367,7 +370,9 @@ export async function POST(req: NextRequest) {
         source: payload.source || 'web_form',
         preferredProviderId: payload.preferredProviderId || null,
         priceCents,
-        status: 'OPEN',  // Ready for claiming
+        // Institutional requests are held for the admin's written proposal and
+        // never enter the provider race. See lib/institutionalIntake.ts.
+        status: isHighValue ? 'INSTITUTIONAL_REVIEW' : 'OPEN',
         drawCount,
         requestType,
         isHighValue,
@@ -444,6 +449,24 @@ export async function POST(req: NextRequest) {
     // consulted smsOptInAt, so had the campaign ever been approved it would
     // have texted providers who never opted in. lib/smsBlast.ts is left in
     // place but is no longer wired to any path.
+    // Institutional gate. The high-value email above already went to the admin;
+    // add an SMS, acknowledge the requester, and stop here. No fan-out, no
+    // 'expect a call from a phlebotomist' email, no coverage-gap parking.
+    if (isHighValue) {
+      const who = lead.organizationName ? `${lead.organizationName} (${lead.fullName})` : lead.fullName
+      alertAdminSMS(`Institutional lead held for you: ${who}, ${lead.city} ${lead.state}, ${lead.drawCount} draws. Not sent to providers. ${SITE_URL}/admin/lead-diagnostic/${lead.id}`)
+        .catch(err => console.error(`[Lead ${lead.id}] Institutional SMS failed:`, err?.message || err))
+      sendInstitutionalAcknowledgment({ id: lead.id, fullName: lead.fullName, email: lead.email, city: lead.city, state: lead.state, organizationName: lead.organizationName })
+        .catch(err => console.error(`[Lead ${lead.id}] Institutional ack failed:`, err?.message || err))
+      console.log(`[Lead ${lead.id}] INSTITUTIONAL_REVIEW - held for admin, not routed`)
+      return NextResponse.json({
+        ok: true,
+        leadId: lead.id,
+        status: 'institutional_review',
+        message: 'Request received. A written proposal will follow within one business day.',
+      })
+    }
+
     let emailCount = 0
 
     try {

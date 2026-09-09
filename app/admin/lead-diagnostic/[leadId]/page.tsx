@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import RenotifyButton from './RenotifyButton'
+import ReleaseToProvidersButton from './ReleaseToProvidersButton'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
@@ -149,6 +150,10 @@ export default async function LeadDiagnosticPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {lead.status === 'INSTITUTIONAL_REVIEW' && (
+          <ReleaseToProvidersButton leadId={lead.id} />
+        )}
 
         {lead.status === 'OPEN' && (
           <RenotifyButton leadId={lead.id} hoursOpen={Math.round((Date.now() - lead.createdAt.getTime()) / 3600000)} notified={totalNotified} />
