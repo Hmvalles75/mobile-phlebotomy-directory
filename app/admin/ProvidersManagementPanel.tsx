@@ -30,6 +30,30 @@ export function ProvidersManagementPanel() {
   const [filter, setFilter] = useState<'all' | 'eligible' | 'not-eligible' | 'removed'>('all')
   const [search, setSearch] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [inviteMsg, setInviteMsg] = useState<{ id: string; text: string; ok: boolean } | null>(null)
+
+  // Onboarding invite for a listing that never completed signup (scraped
+  // record, or a self-signup that stalled). Uses the existing invite route;
+  // needs an email on the record. Completing the link sets ZIPs/radius,
+  // marks VERIFIED, turns leads on, and rematches OPEN leads in radius.
+  const sendInvite = async (provider: Provider) => {
+    if (!confirm(`Send an onboarding invite to ${provider.businessName}${provider.email ? ` at ${provider.email}` : ''}?`)) return
+    setUpdating(provider.id)
+    setInviteMsg(null)
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/providers/${provider.id}/invite`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      setInviteMsg({ id: provider.id, ok: !!data.ok, text: data.ok ? `Invite sent to ${data.provider?.email || provider.email}` : (data.error || 'Invite failed') })
+    } catch (e: any) {
+      setInviteMsg({ id: provider.id, ok: false, text: e?.message || 'Invite failed' })
+    } finally {
+      setUpdating(null)
+    }
+  }
   // Removal is a separate, deliberate action from the Activate/Deactivate
   // pause — it delists the provider from the public site and blocks re-import.
   const [removeTarget, setRemoveTarget] = useState<Provider | null>(null)
@@ -354,6 +378,19 @@ export function ProvidersManagementPanel() {
                         >
                           {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
                         </button>
+                        {!provider.eligibleForLeads && (
+                          <button
+                            onClick={() => sendInvite(provider)}
+                            disabled={updating === provider.id}
+                            className="text-xs text-blue-600 hover:underline whitespace-nowrap disabled:opacity-50"
+                            title="Email a one-time onboarding link: they confirm contact, enter ZIPs and radius, and leads switch on. Needs an email on the record."
+                          >
+                            Send onboarding invite
+                          </button>
+                        )}
+                        {inviteMsg?.id === provider.id && (
+                          <span className={`text-xs ${inviteMsg.ok ? 'text-green-700' : 'text-red-600'}`}>{inviteMsg.text}</span>
+                        )}
                         {provider.eligibleForLeads && (
                           <Link
                             href={`/admin/providers/${provider.id}/rematch`}
