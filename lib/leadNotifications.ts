@@ -31,6 +31,9 @@ interface Provider {
   // lib/notificationTiming.ts. Nullable because scraped records often lack it,
   // and a missing state means no quiet-hours deferral rather than a guess.
   primaryState: string | null
+  // Set only when the fan-out floor pulled this provider in from outside
+  // their own radius. Miles from their base ZIP to the lead.
+  widenedMiles?: number
 }
 
 /**
@@ -44,10 +47,9 @@ interface Provider {
  * unclaimed. A second copy of "New patient request just came in!" reads as a
  * duplicate and gets ignored; this says what is actually true.
  */
-export interface ReminderVariant {
-  kind: 'still_unclaimed'
-  hoursOpen: number
-}
+export type ReminderVariant =
+  | { kind: 'still_unclaimed'; hoursOpen: number }
+  | { kind: 'outside_radius'; miles: number }
 
 async function sendProviderLeadNotificationEmail(
   provider: Provider,
@@ -86,14 +88,20 @@ async function sendProviderLeadNotificationEmail(
     ? 'Lab to be confirmed directly with patient — proceed to schedule draw.'
     : ''
 
-  const hoursOpen = variant ? Math.max(1, Math.round(variant.hoursOpen)) : 0
+  const hoursOpen = variant?.kind === 'still_unclaimed' ? Math.max(1, Math.round(variant.hoursOpen)) : 0
   const waitText = hoursOpen >= 48 ? `${Math.round(hoursOpen / 24)} days` : `${hoursOpen} hours`
-  const headline = variant ? 'Patient Still Waiting' : 'New Patient Request'
-  const intro = variant
+  const milesOut = variant?.kind === 'outside_radius' ? Math.round(variant.miles) : 0
+  const headline = variant?.kind === 'still_unclaimed' ? 'Patient Still Waiting'
+    : variant?.kind === 'outside_radius' ? 'Patient Request Nearby' : 'New Patient Request'
+  const intro = variant?.kind === 'still_unclaimed'
     ? `A patient in ${lead.city}, ${lead.state} has been waiting ${waitText} and nobody has claimed the request yet.`
+    : variant?.kind === 'outside_radius'
+    ? `New patient request in ${lead.city}, ${lead.state}, about ${milesOut} miles from your base and just outside your listed service radius. Few providers cover this area, so we are sending it to you in case you can travel. No obligation.`
     : `New patient request in ${lead.city}, ${lead.state} just came in!`
-  const subject = variant
+  const subject = variant?.kind === 'still_unclaimed'
     ? `Still unclaimed: patient in ${lead.city}, ${lead.state} waiting ${waitText}`
+    : variant?.kind === 'outside_radius'
+    ? `Patient request ${milesOut} mi from you in ${lead.city}, ${lead.state} - can you travel?`
     : `New request in ${lead.city}, ${lead.state} - Reply ASAP`
 
   // Plain text email body
@@ -398,7 +406,7 @@ async function findFeaturedProvidersForNotification(
     })
   })
 
-  return matchingProviders.map(p => ({
+  const toProvider = (p: (typeof providers)[number], widenedMiles?: number): Provider => ({
     id: p.id,
     name: p.name,
     notificationEmail: p.notificationEmail,
@@ -408,7 +416,36 @@ async function findFeaturedProvidersForNotification(
     isFeatured: p.isFeatured,
     priorityRouting: p.priorityRouting,
     primaryState: p.primaryState,
-  }))
+    ...(widenedMiles !== undefined ? { widenedMiles } : {}),
+  })
+
+  const result = matchingProviders.map(p => toProvider(p))
+  if (result.length >= MIN_FANOUT) return result
+
+  // Fan-out floor. Claim rate tracks how many providers a lead reaches:
+  // 1-2 providers claimed 53% in the 60 days to 2026-09-07, 3-4 claimed 73%,
+  // 5+ claimed 79%. When the radius match comes up short, pull in the nearest
+  // eligible providers within WIDEN_MAX_MILES of the lead even though it sits
+  // outside their own radius, up to the floor. They get a different email
+  // that says so, and the notification row is flagged outsideRadius so the
+  // dormant sweep does not hold an unanswered long-distance request against
+  // them. Replay over those 60 days: 38 leads gain a provider at 60 miles.
+  const matchedIds = new Set(matchingProviders.map(p => p.id))
+  const nearMisses = providers
+    .filter(p => !matchedIds.has(p.id) && canNotify(p) && (p.notificationEmail || p.claimEmail || p.email)
+      && (p.serviceRadiusMiles || 25) > ZIP_LIST_ONLY_RADIUS_MILES)
+    .map(p => {
+      const home = (p.zipCodes || '').split(',').map(z => z.trim()).find(z => /^\d{5}$/.test(z))
+      const d = home ? getDistanceBetweenZips(home, leadZip) : null
+      return { p, d }
+    })
+    .filter(x => x.d !== null && x.d <= WIDEN_MAX_MILES)
+    .sort((a, b) => a.d! - b.d!)
+    .slice(0, MIN_FANOUT - result.length)
+  if (nearMisses.length > 0) {
+    console.log(`[LeadNotifications] Fan-out floor: ${result.length} in-radius match(es) for ${leadZip}, widening to ${nearMisses.map(x => `${x.p.name.trim()} @${Math.round(x.d!)}mi`).join(', ')}`)
+  }
+  return [...result, ...nearMisses.map(x => toProvider(x.p, Math.round(x.d!)))]
 }
 
 /**
@@ -476,6 +513,14 @@ async function findFeaturedProvidersForNotification(
 export const MAX_ROUTING_DISTANCE_MILES = 100
 
 export const MAX_LISTED_ZIP_DISTANCE_MILES = 150
+
+// Fan-out floor (2026-09-07). See findFeaturedProvidersForNotification.
+export const MIN_FANOUT = 3
+export const WIDEN_MAX_MILES = 60
+// A provider with a radius this small has asked for ZIP-list-only routing
+// (Skilled Labs, 2026-09-07: 'only from our specified ZIP codes'). The floor
+// never widens to them; their list is the whole answer.
+export const ZIP_LIST_ONLY_RADIUS_MILES = 10
 
 export const PAID_HEAD_START_SECONDS = 10 * 60
 
@@ -664,16 +709,21 @@ export async function notifyFeaturedProvidersForLead(
     }
 
     const sendToProvider = async (provider: Provider, delaySeconds: number) => {
+      const widened = provider.widenedMiles !== undefined
       const notification = await prisma.leadNotification.create({
         data: {
           leadId: lead.id,
           providerId: provider.id,
           channel: 'email',
-          status: 'QUEUED'
+          status: 'QUEUED',
+          outsideRadius: widened,
         }
       })
 
-      const result = await sendProviderLeadNotificationEmail(provider, lead, delaySeconds, batchId, notification.id)
+      const result = await sendProviderLeadNotificationEmail(
+        provider, lead, delaySeconds, batchId, notification.id,
+        widened ? { kind: 'outside_radius', miles: provider.widenedMiles! } : null,
+      )
 
       if (result.success) {
         await prisma.leadNotification.update({
@@ -858,7 +908,7 @@ export async function renotifyOpenLead(
     if (opts.dryRun) { base.recipients.push(row); continue }
 
     const notification = await prisma.leadNotification.create({
-      data: { leadId: lead.id, providerId: p.id, channel: 'email', status: 'QUEUED' },
+      data: { leadId: lead.id, providerId: p.id, channel: 'email', status: 'QUEUED', outsideRadius: p.widenedMiles !== undefined },
     })
     const result = await sendProviderLeadNotificationEmail(
       p, lead as Lead, 0, null, notification.id, { kind: 'still_unclaimed', hoursOpen: base.hoursOpen },

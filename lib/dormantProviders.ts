@@ -77,7 +77,7 @@ export async function findDormantCandidates(): Promise<DormantCandidate[]> {
     select: {
       id: true, name: true, email: true, notificationEmail: true, claimEmail: true, primaryState: true, createdAt: true,
       dormantWarnedAt: true,
-      leadNotifications: { where: { status: 'SENT', sentAt: { gte: days(LOOKBACK_DAYS) } }, select: { leadId: true } },
+      leadNotifications: { where: { status: 'SENT', outsideRadius: false, sentAt: { gte: days(LOOKBACK_DAYS) } }, select: { leadId: true } },
       leads: { where: { claimedAt: { not: null } }, select: { claimedAt: true } },
     },
   })

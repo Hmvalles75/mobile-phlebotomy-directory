@@ -212,6 +212,7 @@ export default async function LeadDiagnosticPage({ params }: Props) {
                       <td className="px-4 py-3">
                         <div className="font-medium text-gray-900">
                           {r.n.provider.name?.trim() || '—'}
+                          {r.n.outsideRadius && <span className="ml-1 text-xs bg-purple-100 text-purple-800 px-1 rounded" title="Fan-out floor: outside their listed radius">widened</span>}
                           {r.n.provider.priorityRouting && <span className="ml-1 text-xs text-amber-600">★paid</span>}
                           {r.n.provider.isFeatured && <span className="ml-1 text-xs text-blue-600">featured</span>}
                         </div>
