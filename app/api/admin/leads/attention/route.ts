@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     // High-value, OPEN, not yet claimed.
     const highValueLeads = await prisma.lead.findMany({
-      where: { isHighValue: true, status: 'OPEN', claimedAt: null },
+      where: { isHighValue: true, status: { in: ['OPEN', 'INSTITUTIONAL_REVIEW'] }, claimedAt: null },
       select: { id: true, createdAt: true, estimatedValueCents: true, fullName: true, city: true, state: true },
       orderBy: { createdAt: 'asc' },
     })

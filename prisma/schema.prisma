@@ -815,6 +815,9 @@ model LeadNotification {
   // delivery outcome (QUEUED/SENT/FAILED) — a pass says nothing about whether
   // the email was delivered, and FAILED would make the retry cron re-send it.
   passedAt     DateTime?
+  // True when the fan-out floor sent this lead to a provider outside their
+  // own service radius (2026-09-07). Excluded from dormant-sweep counts.
+  outsideRadius Boolean            @default(false)
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailEvents  EmailEvent[]
@@ -934,6 +937,7 @@ enum LeadStatus {
   CLOSED_UNCONFIRMED    // Patient didn't confirm (timed out)
   CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
   CLOSED_DUPLICATE      // Older submission from a patient who re-submitted; canonical row is the most recent submission
+  INSTITUTIONAL_REVIEW  // High-value / B2B request held for the admin's written proposal (2026-09-09). Never routed to providers, never claimable, never auto-expired. Admin can release it to OPEN if it is an ordinary patient. See lib/institutionalIntake.ts.
   EXPIRED_NO_RESPONSE   // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
 }
 
