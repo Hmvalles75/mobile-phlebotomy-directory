@@ -18,11 +18,16 @@ import { EventStaffingForm } from './EventStaffingForm'
  * that said "event phlebotomy staffing" in a citeable way. See
  * docs/findings/lead-diagnostic-2026-09-04.md and lib/institutionalIntake.ts.
  *
- * Pricing figures come from PRICING-RATE-CARD.md ("Quote this").
+ * Pricing is published as a RANGE, not a rate card: a card kills thin-market
+ * flexibility and a stated 4-hour minimum stops a 90-minute event from ever
+ * submitting the form. Throughput is the real event pace (fasting walk-ups, ID
+ * check, labeling, a coordinator on the line), not a lab bench number. The
+ * first event booked off this funnel was $500 per phlebotomist for a two-hour
+ * block, four phlebotomists for 38 attendees (2026-09-10).
  */
 
 const TITLE = 'Event Phlebotomy Staffing: On-Site Blood Draws for 20 to 500 People'
-const DESCRIPTION = 'Certified phlebotomists for wellness events, biometric screenings, research days and corporate health fairs, nationwide. Priced per phlebotomist per block with a 4-hour minimum. COI, supplies and disposal included. Written proposal within one business day.'
+const DESCRIPTION = 'Certified phlebotomists for wellness events, biometric screenings, research days and corporate health fairs, nationwide. Most events run $500 to $850 per phlebotomist depending on hours, headcount and location; two-hour minimum. COI, supplies and disposal included. Written proposal within one business day.'
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -44,15 +49,15 @@ const faqs = [
   },
   {
     q: 'How is event phlebotomy staffing priced?',
-    a: 'Per phlebotomist, per block of time, not per draw. A full day is $700 to $850 per phlebotomist depending on metro and specimen handling; half-day blocks are available. Travel inside the metro is included. You receive a flat written total before the event, and the number does not change if fewer people show up than planned.',
+    a: 'Per phlebotomist, per block of time, not per draw. Most events run $500 to $850 per phlebotomist depending on hours, headcount and location. Travel inside the metro is included. You receive a flat written total before the event, and the number does not change if fewer people show up than planned.',
   },
   {
     q: 'What is the minimum booking?',
-    a: 'Four hours per phlebotomist. A four-hour block is enough for most events of 50 to 60 attendees with two to three phlebotomists. There is no minimum number of draws.',
+    a: 'Two hours per phlebotomist. Short events are fine; a 90-minute screening is quoted as a two-hour block. There is no minimum number of draws.',
   },
   {
     q: 'How many phlebotomists do I need?',
-    a: 'Plan on about 12 to 15 draws per phlebotomist per hour when kits are prepared in advance and attendees arrive in waves. For roughly 50 attendees over a three to four hour window, that is two to three phlebotomists. For 100 to 150, plan on four to five. We recommend the count in the proposal based on your headcount and hours, and we always include a small buffer for no-shows and late arrivals in the schedule rather than the invoice.',
+    a: 'Real event pace, with fasting walk-ups, ID checks and labeling, is roughly 8 to 10 draws per phlebotomist per hour. We typically recommend one phlebotomist per 12 to 15 attendees, so a 50-person event gets three to four, and a 100-person event gets seven to eight. We recommend the count in the proposal based on your headcount and hours, and we build the no-show and late-arrival buffer into the schedule rather than the invoice.',
   },
   {
     q: 'Can you provide a certificate of insurance?',
@@ -68,7 +73,7 @@ const faqs = [
   },
   {
     q: 'How far in advance should we book?',
-    a: 'Two weeks is comfortable for a crew of two to three in a major metro. We have staffed events on five days notice. If your date is inside the next ten days, say so in the request and it moves to the front.',
+    a: 'Two weeks is comfortable for a crew of three to four in a major metro. We have staffed events on five days notice. If your date is inside the next ten days, say so in the request and it moves to the front.',
   },
   {
     q: 'Which cities do you cover?',
@@ -117,9 +122,9 @@ export default function EventPhlebotomyStaffingPage() {
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         priceCurrency: 'USD',
-        minPrice: 700,
+        minPrice: 500,
         maxPrice: 850,
-        unitText: 'per phlebotomist per day',
+        unitText: 'per phlebotomist per event block',
       },
     },
     url: `${SITE_URL}/event-phlebotomy-staffing`,
@@ -140,7 +145,7 @@ export default function EventPhlebotomyStaffingPage() {
                 Certified phlebotomists for on-site blood draws at wellness events, screenings, research days and health fairs. Anywhere in the United States.
               </p>
               <p className="text-lg text-primary-50 mb-6">
-                Priced per phlebotomist per block with a four-hour minimum. Certificate of insurance, supplies and biohazard disposal included. One written proposal within one business day.
+                Most events run $500 to $850 per phlebotomist depending on hours, headcount and location, with a two-hour minimum. Certificate of insurance, supplies and biohazard disposal included. One written proposal within one business day.
               </p>
               <a href="#event-request" className="inline-block bg-white text-primary-700 px-8 py-4 rounded-lg font-semibold hover:bg-primary-50 transition-colors shadow-lg">
                 Request a written proposal
@@ -150,9 +155,9 @@ export default function EventPhlebotomyStaffingPage() {
               <h2 className="text-xl font-bold mb-5">The short answers</h2>
               <dl className="space-y-3 text-primary-50">
                 <div><dt className="font-semibold text-white">Do you staff events?</dt><dd>Yes, one-day and multi-day, nationwide.</dd></div>
-                <div><dt className="font-semibold text-white">Pricing</dt><dd>$700 to $850 per phlebotomist per day. Half-day blocks available. Flat total in writing.</dd></div>
-                <div><dt className="font-semibold text-white">Minimum</dt><dd>Four hours per phlebotomist. No minimum draw count.</dd></div>
-                <div><dt className="font-semibold text-white">How many phlebotomists</dt><dd>Two to three for about 50 attendees over three to four hours.</dd></div>
+                <div><dt className="font-semibold text-white">Pricing</dt><dd>Most events run $500 to $850 per phlebotomist, depending on hours, headcount and location. Flat total in writing.</dd></div>
+                <div><dt className="font-semibold text-white">Minimum</dt><dd>Two hours per phlebotomist. No minimum draw count.</dd></div>
+                <div><dt className="font-semibold text-white">How many phlebotomists</dt><dd>One per 12 to 15 attendees. Three to four for a 50-person event.</dd></div>
                 <div><dt className="font-semibold text-white">COI</dt><dd>Provided before the event; can name you or the venue.</dd></div>
                 <div><dt className="font-semibold text-white">Supplies and disposal</dt><dd>We bring draw supplies and sharps containers and remove all biohazard waste.</dd></div>
                 <div><dt className="font-semibold text-white">You provide</dt><dd>Collection kits and lab processing if using your lab, a private space with tables and chairs, and a day-of contact.</dd></div>
