@@ -24,7 +24,16 @@ function normalizeSource(raw: string | null | undefined): string {
   if (s.includes('instagram') || s.includes('ig.com')) return 'instagram'
   if (s.includes('tiktok')) return 'tiktok'
   if (s.includes('linkedin') || s.includes('lnkd.in')) return 'linkedin'
-  if (s.includes('twitter') || s.includes('t.co') || s.includes('x.com')) return 'twitter'
+  // AI assistants, checked before Twitter: 'chatgpt.com' contains 't.co',
+  // which mislabeled every ChatGPT referral as Twitter until 2026-09-10
+  // (9 of 19 'twitter' leads, including two institutional requests).
+  if (s.includes('chatgpt') || s.includes('openai')) return 'chatgpt'
+  if (s.includes('claude.ai') || s.includes('anthropic')) return 'claude'
+  if (s.includes('perplexity')) return 'perplexity'
+  if (s.includes('gemini.google') || s.includes('bard.google')) return 'gemini'
+  if (s.includes('copilot.microsoft') || s.includes('bing.com/chat')) return 'copilot'
+  // t.co only as a host, never as a substring of another domain.
+  if (s.includes('twitter') || /(^|\/\/|\.)t\.co(\/|$)/.test(s) || s === 't.co' || s.includes('x.com')) return 'twitter'
   if (s.includes('youtube') || s.includes('youtu.be')) return 'youtube'
   if (s.includes('google')) return 'google'
   if (s.includes('bing')) return 'bing'
