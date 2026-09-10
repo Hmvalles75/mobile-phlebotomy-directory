@@ -87,6 +87,40 @@ export async function generateStaticParams() {
     .map(provider => ({ slug: provider.slug }))
 }
 
+/**
+ * Meta description for a provider page.
+ *
+ * 317 of 781 live listings had a description under 110 characters and 157
+ * were under 70 ("Mobile phlebotomy services."), which Bing Webmaster flagged
+ * as too short to give searchers context (2026-09-10). A short or generic
+ * description is padded with the provider's name, service and location; an
+ * empty one gets the same sentence on its own. Long descriptions are trimmed
+ * to a snippet-friendly length at a word boundary.
+ */
+const META_DESC_MIN = 110
+const META_DESC_MAX = 300
+const GENERIC_DESC = /^(mobile )?phlebotomy services( in [a-z .,-]+)?\.?$/i
+
+function buildProviderMetaDescription(
+  name: string,
+  bio: string | null | undefined,
+  specialties: string | null | undefined,
+  location: string,
+): string {
+  const clean = (bio || '').replace(/\s+/g, ' ').trim()
+  const spec = specialties ? ` Specialties: ${specialties.replace(/\s+/g, ' ').trim()}.` : ''
+  const base = `${name.trim()} provides mobile phlebotomy and at-home blood draw services in ${location}.${spec}`
+  let out: string
+  if (!clean || GENERIC_DESC.test(clean)) out = `${base} Certified phlebotomists come to your home, office or facility.`
+  else if (clean.length < META_DESC_MIN) out = `${clean.replace(/[.!]?$/, '.')} ${base}`
+  else out = clean
+  if (out.length > META_DESC_MAX) {
+    out = out.slice(0, META_DESC_MAX)
+    out = out.slice(0, Math.max(out.lastIndexOf(' '), 200)).replace(/[,;:\s]+$/, '') + '...'
+  }
+  return out
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const provider = await getProviderBySlug(params.slug)
 
@@ -97,10 +131,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || 'USA'
+  const description = buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, location)
 
   return {
     title: `${provider.name} - Mobile Phlebotomy Services in ${location}`,
-    description: provider.bio || provider.validation_notes || `${provider.name} provides professional mobile phlebotomy and blood draw services in ${location}. ${provider.specialties ? `Specializing in: ${provider.specialties}` : ''}`,
+    description,
     keywords: [
       provider.name,
       'mobile phlebotomy',
@@ -112,7 +147,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ].filter(Boolean).join(', '),
     openGraph: {
       title: `${provider.name} - Mobile Phlebotomy Services`,
-      description: provider.bio || provider.validation_notes || `Professional mobile phlebotomy services in ${location}`,
+      description,
       type: 'website',
       images: provider.logo ? [{
         url: provider.logo,
