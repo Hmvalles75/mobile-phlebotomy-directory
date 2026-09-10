@@ -1,6 +1,5 @@
 import { prisma } from './prisma'
-import { notifyFeaturedProvidersForLead } from './leadNotifications'
-import { sendSMSBlastToEligibleProviders } from './smsBlast'
+import { renotifyOpenLead } from './leadNotifications'
 import { sendClaimReleasedEmail } from './notifyClaimReleased'
 
 // SLA: time from claim before an outcome MUST be logged or the claim
@@ -209,6 +208,7 @@ export async function runStaleClaimReleaseSweep(opts: { dryRun?: boolean } = {})
         sendClaimReleasedEmail({
           toEmail: c.providerEmail,
           providerName: c.providerName,
+          leadId: c.id,
           leadFullName: c.fullName,
           leadCity: c.city,
           leadState: c.state,
@@ -230,6 +230,7 @@ export async function runStaleClaimReleaseSweep(opts: { dryRun?: boolean } = {})
       sendClaimReleasedEmail({
         toEmail: c.providerEmail,
         providerName: c.providerName,
+        leadId: c.id,
         leadFullName: c.fullName,
         leadCity: c.city,
         leadState: c.state,
@@ -243,23 +244,17 @@ export async function runStaleClaimReleaseSweep(opts: { dryRun?: boolean } = {})
 
       // Re-fire the standard fan-out so other providers can claim.
       // Synchronous so we know if it failed during the sweep window.
+      // Re-alert the pool with the 'still unclaimed' framing, at most once per
+      // inbox per 12 hours, never to the provider who just lost it, plus
+      // anyone the matcher would add today. Until 2026-09-10 this re-ran the
+      // full 'new request' fan-out on every release, so a looping lead hit the
+      // same four inboxes six times in two days (Miami, 9/7-9/8). The SMS
+      // blast that used to follow was removed: A2P was rejected 2026-07-17.
       try {
-        await notifyFeaturedProvidersForLead(c.id)
+        await renotifyOpenLead(c.id, { includeNew: true, excludeProviderIds: [c.routedToId] })
       } catch (err: any) {
         result.notificationFailures++
-        console.error(`[stale-claim-release] Featured fan-out failed for lead ${c.id}:`, err.message || err)
-      }
-      try {
-        await sendSMSBlastToEligibleProviders({
-          id: c.id,
-          zip: c.zip,
-          urgency: c.urgency,
-          city: c.city,
-          state: c.state,
-        })
-      } catch (err: any) {
-        result.notificationFailures++
-        console.error(`[stale-claim-release] SMS blast failed for lead ${c.id}:`, err.message || err)
+        console.error(`[stale-claim-release] Re-notify failed for lead ${c.id}:`, err.message || err)
       }
     } catch (err: any) {
       result.errors.push({ leadId: c.id, error: err.message || String(err) })
