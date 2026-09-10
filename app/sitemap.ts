@@ -171,6 +171,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      // Event staffing (2026-09-10). 21 requests had arrived via ChatGPT
+      // referrals, two of them event/institutional, with no page an assistant
+      // could cite for 'event phlebotomy staffing'. Same buyer value as the
+      // research page, same priority.
+      url: `${baseUrl}/event-phlebotomy-staffing`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
       // Was in neither the sitemap nor any internal link — fully orphaned, so
       // Google had no path to it at all. Targets "partnership" and "contract
       // services" queries, which is the same buyer as the pages above.

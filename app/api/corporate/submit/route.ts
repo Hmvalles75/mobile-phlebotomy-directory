@@ -95,7 +95,9 @@ async function sendAdminNotification(req: any) {
     // Subject formatted for at-a-glance triage in the inbox
     // Research leads are the high-value lane — flag them in the subject so they
     // are distinguishable at a glance in the inbox.
-    const tag = req.intakeForm === 'clinical-research' ? '[RESEARCH]' : '[Coverage Request]'
+    const tag = req.intakeForm === 'clinical-research' ? '[RESEARCH]'
+      : req.intakeForm === 'event-staffing' ? '[EVENT]'
+      : '[Coverage Request]'
     const subject = `${tag} ${req.organizationName} — ${req.estimatedVolume} — ${req.location}`
     const body = `New coverage request submitted at ${new Date(req.createdAt).toLocaleString()}
 

@@ -306,6 +306,10 @@ export default function CorporatePhlebotomyPage() {
       <section className="py-10 bg-blue-50 border-t border-blue-100">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <p className="text-gray-700 mb-3">
+            Staffing a one-day event, screening or health fair?{' '}
+            <Link href="/event-phlebotomy-staffing" className="text-blue-700 hover:text-blue-800 underline font-medium">See event phlebotomy staffing, pricing and minimums</Link>
+          </p>
+          <p className="text-gray-700 mb-3">
             Running a clinical trial or research study?
           </p>
           <Link

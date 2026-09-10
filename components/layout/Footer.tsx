@@ -28,6 +28,8 @@ export function Footer() {
               <li><Link href="/mobile-phlebotomy-near-me" className="text-gray-600 hover:text-primary-600 transition-colors">Mobile Phlebotomy</Link></li>
               {/* @ts-ignore - Next.js typedRoutes compatibility */}
               <li><Link href="/corporate-phlebotomy" className="text-gray-600 hover:text-primary-600 transition-colors">Facilities & Group Services</Link></li>
+              {/* @ts-ignore - Next.js typedRoutes compatibility */}
+              <li><Link href="/event-phlebotomy-staffing" className="text-gray-600 hover:text-primary-600 transition-colors">Event Phlebotomy Staffing</Link></li>
               {/* Research draws are the highest-value inbound this site gets —
                   Monell at 51-200 draws/month, Mass Eye and Ear at 50-100 — and
                   this page had two internal links site-wide, so it ranked
