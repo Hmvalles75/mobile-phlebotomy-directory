@@ -14,6 +14,7 @@ export interface ClaimReleasedParams {
   leadZip: string
   claimedMinutesAgo: number
   slaMinutes: number
+  leadId?: string
 }
 
 /**
@@ -56,6 +57,7 @@ What this means:
   • If this keeps happening, something on our side is probably getting in your way. Reply and tell me what you were doing when the lead was released — that is far more useful to me than the release itself.
 
 Dashboard: ${SITE_URL}/dashboard
+Lead ID: ${p.leadId}
 
 If something on our end is blocking you from logging outcomes (a bug, a missing button, anything), reply to this email and I'll look into it.
 
@@ -92,6 +94,7 @@ MobilePhlebotomy.org</p>
     await sg.send({
       to: p.toEmail,
       from: FROM_EMAIL,
+      ...(process.env.LEAD_REPLY_TO ? { replyTo: process.env.LEAD_REPLY_TO } : {}),
       subject,
       text,
       html,

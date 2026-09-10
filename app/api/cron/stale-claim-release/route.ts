@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runStaleClaimReleaseSweep, SLA_MINUTES_STAT, SLA_MINUTES_STANDARD } from '@/lib/staleClaimRelease'
+import { runClaimReminderSweep, REMINDER_MINUTES_BEFORE_SLA } from '@/lib/claimReminder'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -33,6 +34,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Reminder first, release second: a claim is always warned before it is
+    // taken. See lib/claimReminder.ts.
+    const reminder = await runClaimReminderSweep()
     const result = await runStaleClaimReleaseSweep()
 
     console.log(`[stale-claim-release] scanned=${result.scanned} released=${result.released} expired=${result.expired} notifyFails=${result.notificationFailures} errors=${result.errors.length}`)
@@ -40,6 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       ...result,
+      reminder: { ...reminder, minutesBeforeSla: REMINDER_MINUTES_BEFORE_SLA },
       sla: { statMinutes: SLA_MINUTES_STAT, standardMinutes: SLA_MINUTES_STANDARD },
     })
   } catch (err: any) {

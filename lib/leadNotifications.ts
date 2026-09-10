@@ -128,6 +128,8 @@ How payment works: You bill the patient directly at your own rate. We don't char
 
 No action is required if you're unavailable.
 
+Lead ID: ${lead.id}
+
 — MobilePhlebotomy.org
 
 ---
@@ -221,6 +223,11 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
       text: textBody,
       html: htmlBody
     }
+    // Replies to provider emails only reach /api/webhooks/email-reply if they
+    // go to a SendGrid Inbound Parse address. Without LEAD_REPLY_TO they land
+    // in the founder's inbox and 'reply BOOKED' silently does nothing, which
+    // is how a paying provider lost a booked patient on 2026-09-10.
+    if (process.env.LEAD_REPLY_TO) sendPayload.replyTo = process.env.LEAD_REPLY_TO
 
     // sendAt holds the email at SendGrid until the given timestamp. Every
     // caller now passes 0, so nothing is scheduled — the parameter is kept
@@ -865,7 +872,7 @@ export interface RenotifyResult {
  */
 export async function renotifyOpenLead(
   leadId: string,
-  opts: { includeNew?: boolean; dryRun?: boolean } = {},
+  opts: { includeNew?: boolean; dryRun?: boolean; excludeProviderIds?: string[] } = {},
 ): Promise<RenotifyResult> {
   const lead = await prisma.lead.findUnique({
     where: { id: leadId },
@@ -892,7 +899,8 @@ export async function renotifyOpenLead(
   // unless includeNew. Using the live matcher means a provider who has since
   // been removed or opted out is not reminded.
   const matched = await findFeaturedProvidersForNotification(lead.zip, lead.state)
-  const targets = matched.filter(p => sentTo.has(p.id) || opts.includeNew)
+  const excluded = new Set(opts.excludeProviderIds || [])
+  const targets = matched.filter(p => !excluded.has(p.id) && (sentTo.has(p.id) || opts.includeNew))
   const cutoff = Date.now() - MIN_RENOTIFY_HOURS * 3600000
 
   for (const p of targets) {

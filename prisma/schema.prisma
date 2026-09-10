@@ -374,6 +374,9 @@ model Lead {
   // re-alerting on the same lead on every subsequent cron tick. Null on
   // STANDARD leads and on STAT leads that get claimed in time.
   statEscalatedAt      DateTime?
+  // Pre-SLA claim reminder (2026-09-10): set when the one-tap reminder email
+  // was sent to the claimer, one per claim. See lib/claimReminder.ts.
+  claimReminderSentAt  DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases
   // a CLAIMED lead because the provider didn't log an outcome within the
   // SLA (STAT 2h, STANDARD 6h). Lead flips status back to OPEN and these
