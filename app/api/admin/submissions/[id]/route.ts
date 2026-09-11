@@ -6,6 +6,7 @@ import { emailProviderApprovedWithLeadChoice } from '@/lib/providerEmails'
 import { normalizeCityName, citySlug } from '@/lib/city-normalize'
 import { radiusFromSubmission } from '@/lib/serviceRadius'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
+import { runAsActor } from '@/lib/providerAudit'
 
 /**
  * Find and remove duplicate providers (both scraped and verified duplicates)
@@ -237,7 +238,7 @@ async function addProviderToDatabase(submission: any) {
 /**
  * Approve a submission (add to CSV)
  */
-export async function POST(
+async function __POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -343,7 +344,7 @@ export async function POST(
 /**
  * Delete a submission
  */
-export async function DELETE(
+async function __DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -385,3 +386,7 @@ export async function DELETE(
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('admin', 'admin/submissions', () => __POST(...args))
+export const DELETE = (...args: Parameters<typeof __DELETE>) => runAsActor('admin', 'admin/submissions', () => __DELETE(...args))

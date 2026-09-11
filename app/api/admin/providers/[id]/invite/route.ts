@@ -18,6 +18,7 @@ import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { emailOnboardingInvitation } from '@/lib/providerEmails'
 import { OnboardingStatus } from '@prisma/client'
 import crypto from 'crypto'
+import { runAsActor } from '@/lib/providerAudit'
 
 /**
  * Generate a secure random token for onboarding
@@ -26,7 +27,7 @@ function generateOnboardingToken(): string {
   return crypto.randomBytes(32).toString('hex')
 }
 
-export async function POST(
+async function __POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -134,7 +135,7 @@ export async function POST(
 /**
  * GET - Check invitation status
  */
-export async function GET(
+async function __GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -197,3 +198,7 @@ export async function GET(
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('admin', 'admin/providers/invite', () => __POST(...args))
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('admin', 'admin/providers/invite', () => __GET(...args))

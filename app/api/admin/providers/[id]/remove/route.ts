@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
+import { runAsActor } from '@/lib/providerAudit'
 
 /**
  * Soft-remove a provider from the directory.
@@ -31,7 +32,7 @@ function authed(req: NextRequest): boolean {
   return verifyAdminSessionFromCookies(authHeader || cookieHeader)
 }
 
-export async function POST(
+async function __POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -147,7 +148,7 @@ export async function POST(
 }
 
 /** Undo a mistaken removal. Does not re-enable lead routing — reactivate separately. */
-export async function DELETE(
+async function __DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -194,3 +195,7 @@ export async function DELETE(
     return NextResponse.json({ ok: false, error: 'Failed to restore provider' }, { status: 500 })
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('admin', 'admin/providers/remove', () => __POST(...args))
+export const DELETE = (...args: Parameters<typeof __DELETE>) => runAsActor('admin', 'admin/providers/remove', () => __DELETE(...args))

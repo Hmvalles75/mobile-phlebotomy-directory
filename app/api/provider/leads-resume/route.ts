@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { resumeLeads } from '@/lib/dormantProviders'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
+import { runAsActor } from '@/lib/providerAudit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic'
  * Clears the stamps, starts the resume grace period, and hands them anything
  * already OPEN in their radius. See lib/dormantProviders.ts.
  */
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   const session = getSessionFromRequest(req)
   if (!session) {
     return NextResponse.json({ ok: false, error: 'Not authenticated' }, { status: 401 })
@@ -25,3 +26,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: err.message || 'Failed to resume leads' }, { status: 500 })
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('provider', 'provider/leads-resume', () => __POST(...args))

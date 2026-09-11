@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runDormantSweep, MIN_LEADS_SENT, LOOKBACK_DAYS, WARN_GRACE_DAYS } from '@/lib/dormantProviders'
+import { runAsActor } from '@/lib/providerAudit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic'
  * Schedule (vercel.json): daily 14:00 UTC. `?dryRun=1` reports only.
  * Security: requires `Authorization: Bearer ${CRON_SECRET}`.
  */
-export async function GET(req: NextRequest) {
+async function __GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
@@ -40,3 +41,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: err.message || 'Unknown error' }, { status: 500 })
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('system:dormant-sweep', 'cron/dormant-providers', () => __GET(...args))

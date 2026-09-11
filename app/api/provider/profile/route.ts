@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { normalizeCityName, citySlug } from '@/lib/city-normalize'
+import { runAsActor } from '@/lib/providerAudit'
 
 // GET - Fetch provider profile for editing
-export async function GET(req: NextRequest) {
+async function __GET(req: NextRequest) {
   try {
     const session = getSessionFromRequest(req)
 
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST - Update provider profile
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   try {
     const session = getSessionFromRequest(req)
 
@@ -190,3 +191,7 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('provider', 'provider/profile', () => __GET(...args))
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('provider', 'provider/profile', () => __POST(...args))

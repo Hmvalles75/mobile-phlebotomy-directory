@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
 import { resumeLeads } from '@/lib/dormantProviders'
+import { runAsActor } from '@/lib/providerAudit'
 
-export async function PATCH(
+async function __PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -77,3 +78,6 @@ export async function PATCH(
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const PATCH = (...args: Parameters<typeof __PATCH>) => runAsActor('admin', 'admin/providers/[id]', () => __PATCH(...args))

@@ -17,11 +17,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { OnboardingStatus } from '@prisma/client'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
+import { runAsActor } from '@/lib/providerAudit'
 
 /**
  * GET - Validate token and return provider data
  */
-export async function GET(req: NextRequest) {
+async function __GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
 
   if (!token) {
@@ -86,7 +87,7 @@ export async function GET(req: NextRequest) {
 /**
  * POST - Complete onboarding with explicit consent
  */
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
@@ -206,3 +207,7 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('provider', 'provider/onboard', () => __GET(...args))
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('provider', 'provider/onboard', () => __POST(...args))
