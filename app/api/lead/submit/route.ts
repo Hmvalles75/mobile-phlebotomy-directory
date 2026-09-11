@@ -13,7 +13,7 @@ import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
-import { getZipInfo } from '@/lib/zip-geocode'
+import { getZipInfo, resolveZipForRouting } from '@/lib/zip-geocode'
 import { US_STATES } from '@/lib/states'
 
 // US_STATES drives site navigation and covers the 50 states only. Intake must
@@ -259,11 +259,22 @@ export async function POST(req: NextRequest) {
     // match no providers; the zero-match branch below parks it as
     // NEEDS_COVERAGE and the warning is what makes that visible so the table
     // can be filled.
+    // Unknown ZIP: route on the ZIP the typed city and state resolve to, and
+    // say so on the lead. See resolveZipForRouting().
+    let routingZip = payload.zip
+    let zipCorrectionNote = ''
     if (!zipInfo) {
-      console.warn(
-        `[lead/submit] ZIP_NOT_IN_GEOCODE_TABLE — ${payload.zip} (${payload.city}, ${payload.state}). ` +
-        `Lead accepted but cannot be distance-matched. Verify the ZIP and backfill lib/zip-geocode if valid.`
-      )
+      const resolved = resolveZipForRouting(payload.zip, payload.city, payload.state)
+      if (resolved.corrected) {
+        routingZip = resolved.zip
+        zipCorrectionNote = `[ZIP corrected for routing: patient typed ${resolved.from}, not a known ZIP; using ${resolved.zip} (${resolved.city}, ${resolved.state}) from the city and state entered.]`
+        console.warn(`[lead/submit] ZIP_CORRECTED — ${resolved.from} -> ${resolved.zip} for ${payload.city}, ${payload.state}`)
+      } else {
+        console.warn(
+          `[lead/submit] ZIP_NOT_IN_GEOCODE_TABLE — ${payload.zip} (${payload.city}, ${payload.state}). ` +
+          `Lead accepted but cannot be distance-matched. Verify the ZIP and backfill lib/zip-geocode if valid.`
+        )
+      }
     }
 
     if (zipInfo?.state && zipInfo.state.toUpperCase() !== payload.state.toUpperCase()) {
@@ -363,10 +374,10 @@ export async function POST(req: NextRequest) {
         address1: payload.address1,
         city,
         state: payload.state,
-        zip: payload.zip,
+        zip: routingZip,
         labPreference: payload.labPreference,
         urgency: payload.urgency,
-        notes: payload.notes,
+        notes: zipCorrectionNote ? `${payload.notes ? payload.notes + '\n\n' : ''}${zipCorrectionNote}` : payload.notes,
         source: payload.source || 'web_form',
         preferredProviderId: payload.preferredProviderId || null,
         priceCents,

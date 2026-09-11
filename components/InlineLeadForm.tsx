@@ -28,6 +28,24 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  // Non-blocking ZIP hint. An unknown ZIP still submits (real ZIPs are
+  // missing from the table), but a typo we can name is worth one line.
+  const [zipHint, setZipHint] = useState<{ text: string; suggestion?: string } | null>(null)
+
+  const checkZip = async (zip: string) => {
+    setZipHint(null)
+    if (zip.length !== 5) return
+    try {
+      const q = new URLSearchParams({ zip, city: city || formData.cityInput || '', state: state || '' })
+      const res = await fetch(`/api/zip-lookup?${q.toString()}`)
+      const data = await res.json()
+      if (data.ok) return
+      if (data.suggestion?.zip) setZipHint({ text: `We don't recognize ZIP ${zip}. Did you mean ${data.suggestion.zip} (${data.suggestion.city}, ${data.suggestion.state})?`, suggestion: data.suggestion.zip })
+      else setZipHint({ text: `We don't recognize ZIP ${zip}. Please double-check it; you can still submit.` })
+    } catch {
+      // hint only; never block
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -209,9 +227,18 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
               maxLength={5}
               value={formData.zip}
               onChange={(e) => setFormData({ ...formData, zip: e.target.value.replace(/\D/g, '') })}
+              onBlur={(e) => checkZip(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="ZIP code"
             />
+            {zipHint && (
+              <p className="mt-1 text-xs text-amber-700">
+                {zipHint.text}{' '}
+                {zipHint.suggestion && (
+                  <button type="button" onClick={() => { setFormData({ ...formData, zip: zipHint.suggestion! }); setZipHint(null) }} className="underline font-medium">Use {zipHint.suggestion}</button>
+                )}
+              </p>
+            )}
           </div>
         </div>
 
