@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,21 +15,9 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Check if it's a session token (base64 encoded JSON)
-    let isAuthenticated = false
-
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8')
-      const session = JSON.parse(decoded)
-      if (session.authenticated && session.expiresAt > Date.now()) {
-        isAuthenticated = true
-      }
-    } catch {
-      // Not a valid session token, check if it's the raw password
-      if (token === process.env.ADMIN_PASSWORD || token === process.env.ADMIN_SECRET) {
-        isAuthenticated = true
-      }
-    }
+    // Session tokens are signed (lib/admin-auth.ts). The old inline parse
+    // accepted any base64 JSON with authenticated:true, and a raw password.
+    const isAuthenticated = verifyAdminSessionFromCookies(`Bearer ${token}`)
 
     if (!isAuthenticated) {
       return NextResponse.json(
