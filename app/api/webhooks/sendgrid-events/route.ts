@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { emailAdmin } from '@/lib/adminEmail'
 import crypto from 'crypto'
 
 export const runtime = 'nodejs'
@@ -157,51 +158,62 @@ const PERMANENT_5XX = /\b5\d{2}\b/
 const DROPPED_PERMANENT = /invalid|bounced address|unsubscribed address|spam report/i
 
 async function suppressHardBouncedProviders(events: SendGridEvent[]): Promise<void> {
-  const candidates = new Map<string, { email: string; reason: string }>()
-
+  // Keyed by address, not providerId: reminder, release, outreach and admin
+  // sends carry no customArgs, so their bounces arrive with no providerId and
+  // used to be ignored. Fifteen dead provider addresses bounced in the 90
+  // days to 2026-09-11 and only three were suppressed, all from lead emails.
+  const candidates = new Map<string, { providerId: string | null; reason: string }>()
   for (const e of events) {
-    if (!e.providerId || !e.email) continue
+    if (!e.email) continue
     const reason = e.reason || ''
     const permanent =
       (e.event === 'bounce' && PERMANENT_5XX.test(reason)) ||
       (e.event === 'dropped' && DROPPED_PERMANENT.test(reason))
     if (!permanent) continue
-    candidates.set(e.providerId, { email: e.email.toLowerCase(), reason: reason.slice(0, 200) })
+    candidates.set(e.email.toLowerCase(), { providerId: e.providerId || null, reason: reason.slice(0, 200) })
   }
   if (candidates.size === 0) return
 
-  for (const [providerId, { email, reason }] of candidates) {
+  for (const [email, { providerId, reason }] of candidates) {
     try {
-      const provider = await prisma.provider.findUnique({
-        where: { id: providerId },
-        select: {
-          id: true, name: true, notifyEnabled: true,
-          notificationEmail: true, claimEmail: true, email: true,
-        },
-      })
+      const provider = providerId
+        ? await prisma.provider.findUnique({
+            where: { id: providerId },
+            select: { id: true, name: true, notifyEnabled: true, notificationEmail: true, claimEmail: true, email: true, phone: true, phonePublic: true },
+          })
+        : await prisma.provider.findFirst({
+            where: {
+              removedAt: null,
+              OR: [
+                { notificationEmail: { equals: email, mode: 'insensitive' } },
+                { claimEmail: { equals: email, mode: 'insensitive' } },
+                { email: { equals: email, mode: 'insensitive' } },
+              ],
+            },
+            select: { id: true, name: true, notifyEnabled: true, notificationEmail: true, claimEmail: true, email: true, phone: true, phonePublic: true },
+          })
       if (!provider || !provider.notifyEnabled) continue
-
       // Only suppress if the address that bounced is the one we actually send
       // to. A dead legacy `email` while `notificationEmail` is healthy is not a
-      // reason to stop notifying — that exact case is live in the data today.
+      // reason to stop notifying.
       const target = (provider.notificationEmail || provider.claimEmail || provider.email || '').toLowerCase()
       if (!target || target !== email) {
-        console.log(`[sendgrid-events] Bounce for ${provider.name} on ${email}, but live target is ${target || 'none'} — not suppressing`)
+        console.log(`[sendgrid-events] Bounce for ${provider.name} on ${email}, but live target is ${target || 'none'}; not suppressing`)
         continue
       }
-
-      await prisma.provider.update({
-        where: { id: providerId },
-        data: { notifyEnabled: false },
-      })
-      console.warn(
-        `[sendgrid-events] SUPPRESSED ${provider.name} (${providerId}) — ` +
-        `notification address ${email} hard-bounced: ${reason}`
-      )
+      await prisma.provider.update({ where: { id: provider.id }, data: { notifyEnabled: false } })
+      console.warn(`[sendgrid-events] SUPPRESSED ${provider.name} (${provider.id}); notification address ${email} hard-bounced: ${reason}`)
+      // The founder is the only recovery path (phone call, new address), so
+      // say so the moment it happens instead of leaving it for a quarterly audit.
+      const phone = provider.phonePublic || provider.phone || 'no phone on file'
+      emailAdmin(
+        `Notifications off: ${provider.name.trim()} (address bounced)`,
+        `${provider.name.trim()} stopped receiving lead notifications because ${email} hard-bounced.\n\nReason: ${reason}\nPhone on file: ${phone}\n\nThey will get no leads until the address is fixed. If you reach them, have them log in and change their email (that re-enables notifications automatically), or update the record and flip notifyEnabled back on.\n\nProvider: https://www.mobilephlebotomy.org/admin/providers/${provider.id}`,
+      ).catch(err => console.error('[sendgrid-events] admin alert failed:', err?.message || err))
     } catch (err: any) {
       // Never let this fail the webhook; SendGrid retries on non-2xx and we
       // would rather store events than block on a side effect.
-      console.error(`[sendgrid-events] Suppression failed for ${providerId}:`, err.message || err)
+      console.error(`[sendgrid-events] Suppression failed for ${email}:`, err.message || err)
     }
   }
 }
