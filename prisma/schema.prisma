@@ -137,6 +137,11 @@ model Provider {
   leadsPausedAt         DateTime?
   leadsPausedReason     String?
   leadsResumedAt        DateTime?
+  // Audit stamp (2026-09-11). Set by the Prisma extension in lib/prisma.ts on
+  // every app write; read by the provider_change_log trigger to attribute the
+  // change. Not meaningful on its own. See lib/providerAudit.ts.
+  auditActor            String?
+  auditAt               DateTime?
   // Relations
   callLogs              CallLog[]
   leadNotifications     LeadNotification[]
@@ -152,6 +157,7 @@ model Provider {
   payment               ProviderPayment[]
   services              ProviderService[]
   institutionalOrders   InstitutionalOrder[]
+  changeLog             ProviderChangeLog[]
 
   @@index([primaryState])
   @@index([primaryCity])
@@ -411,6 +417,25 @@ model Lead {
  * tracked in GA4; click events are tracked here so we can join intent with
  * downstream conversion in SQL rather than relying on external analytics.
  */
+/// One row per tracked provider field changed, written by the Postgres trigger
+/// in scripts/sql/provider-change-log.sql on every UPDATE of providers. Actor is
+/// the app's stamp when the app made the change, "db" for database-tool and
+/// script edits. Answers "who turned this provider off, and when."
+model ProviderChangeLog {
+  id         String   @id
+  providerId String
+  changedAt  DateTime @default(now())
+  actor      String
+  source     String?
+  field      String
+  oldValue   String?
+  newValue   String?
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, changedAt])
+  @@map("provider_change_log")
+}
+
 model PhoneClickEvent {
   id         String   @id @default(cuid())
   createdAt  DateTime @default(now())

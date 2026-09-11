@@ -391,6 +391,7 @@ export function ProvidersManagementPanel() {
                         {inviteMsg?.id === provider.id && (
                           <span className={`text-xs ${inviteMsg.ok ? 'text-green-700' : 'text-red-600'}`}>{inviteMsg.text}</span>
                         )}
+                        <Link href={`/admin/providers/${provider.id}/history`} className="text-xs text-gray-500 hover:underline whitespace-nowrap" title="Who changed what on this record, and when">History</Link>
                         {provider.eligibleForLeads && (
                           <Link
                             href={`/admin/providers/${provider.id}/rematch`}

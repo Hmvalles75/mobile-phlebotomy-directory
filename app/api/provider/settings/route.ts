@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { rematchForProviderAfterChange } from '@/lib/leadRematch'
+import { runAsActor } from '@/lib/providerAudit'
 
 // GET - Fetch provider settings
-export async function GET(req: NextRequest) {
+async function __GET(req: NextRequest) {
   try {
     // Verify authentication
     const session = getSessionFromRequest(req)
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST - Update provider settings
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   try {
     // Verify authentication
     const session = getSessionFromRequest(req)
@@ -152,3 +153,7 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('provider', 'provider/settings', () => __GET(...args))
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('provider', 'provider/settings', () => __POST(...args))

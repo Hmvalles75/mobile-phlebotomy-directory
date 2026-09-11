@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
+import { runAsActor } from '@/lib/providerAudit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  * email + claimEmail, and keeps notificationEmail in sync when it matched the
  * old login address so lead emails don't keep going to a dead inbox.
  */
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   try {
     const session = getSessionFromRequest(req)
     if (!session) {
@@ -128,3 +129,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Failed to update login email' }, { status: 500 })
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('provider', 'provider/change-email', () => __POST(...args))

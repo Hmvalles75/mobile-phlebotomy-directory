@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runStaleClaimReleaseSweep, SLA_MINUTES_STAT, SLA_MINUTES_STANDARD } from '@/lib/staleClaimRelease'
 import { runClaimReminderSweep, REMINDER_MINUTES_BEFORE_SLA } from '@/lib/claimReminder'
+import { runAsActor } from '@/lib/providerAudit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -26,7 +27,7 @@ export const dynamic = 'force-dynamic'
  *
  * Security: requires `Authorization: Bearer ${CRON_SECRET}` header.
  */
-export async function GET(req: NextRequest) {
+async function __GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
@@ -52,3 +53,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: err.message || 'Unknown error' }, { status: 500 })
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('system:stale-claim', 'cron/stale-claim-release', () => __GET(...args))

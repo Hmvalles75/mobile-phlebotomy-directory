@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
 import { sendProviderWelcomeEmail } from '@/lib/providerWelcomeEmail'
+import { runAsActor } from '@/lib/providerAudit'
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-10-29.clover' })
@@ -38,7 +39,7 @@ async function notifyAdmin(subject: string, body: string) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   if (!stripe) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
   }
@@ -325,3 +326,6 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('webhook:stripe', 'stripe-webhook', () => __POST(...args))

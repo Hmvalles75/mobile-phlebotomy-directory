@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emailAdmin } from '@/lib/adminEmail'
 import crypto from 'crypto'
+import { runAsActor } from '@/lib/providerAudit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -75,7 +76,7 @@ function verifySignature(rawBody: string, signature: string | null, timestamp: s
   }
 }
 
-export async function POST(req: NextRequest) {
+async function __POST(req: NextRequest) {
   try {
     const rawBody = await req.text()
     const signature = req.headers.get('x-twilio-email-event-webhook-signature')
@@ -219,6 +220,10 @@ async function suppressHardBouncedProviders(events: SendGridEvent[]): Promise<vo
 }
 
 // SG sometimes sends a HEAD/GET to verify the URL is alive
-export async function GET() {
+async function __GET() {
   return NextResponse.json({ ok: true, message: 'SendGrid event webhook receiver' })
 }
+
+// Provider writes inside these handlers are attributed in provider_change_log. See lib/providerAudit.ts.
+export const POST = (...args: Parameters<typeof __POST>) => runAsActor('webhook:sendgrid', 'sendgrid-events', () => __POST(...args))
+export const GET = (...args: Parameters<typeof __GET>) => runAsActor('webhook:sendgrid', 'sendgrid-events', () => __GET(...args))
