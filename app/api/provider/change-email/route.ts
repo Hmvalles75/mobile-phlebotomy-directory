@@ -80,9 +80,12 @@ export async function POST(req: NextRequest) {
     const notifMatchedOld =
       !provider.notificationEmail ||
       provider.notificationEmail.toLowerCase().trim() === oldEmail
-    const data: { email: string; claimEmail: string; notificationEmail?: string } = {
+    // A changed address is the fix for a hard bounce, so notifications come
+    // back on here. This is the only self-service path that re-enables them.
+    const data: { email: string; claimEmail: string; notificationEmail?: string; notifyEnabled: boolean } = {
       email: newEmail,
       claimEmail: newEmail,
+      notifyEnabled: true,
     }
     if (notifMatchedOld) data.notificationEmail = newEmail
 
