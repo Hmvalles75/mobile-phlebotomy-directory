@@ -56,6 +56,37 @@ export function getZipInfo(zip: string) {
 }
 
 /**
+ * Resolve a ZIP the table does not know from the city and state the patient
+ * typed alongside it.
+ *
+ * Why: an unknown ZIP is accepted at intake (rejecting it blocks real ZIPs
+ * missing from the table) but it can never be distance-matched, so the lead
+ * quietly reaches nobody. On 2026-06-17 a 20-participant clinical study in
+ * Sandy, UT was submitted as 84707 instead of 84070; two Utah providers 14
+ * miles away never saw it. When the city and state resolve to ZIPs, we route
+ * on the one that looks most like what was typed (shared leading digits, then
+ * fewest character differences) and record the correction on the lead.
+ */
+export function resolveZipForRouting(zip: string, city: string | null | undefined, state: string | null | undefined): {
+  zip: string
+  corrected: boolean
+  from?: string
+  city?: string
+  state?: string
+} {
+  const typed = (zip || '').replace(/[\s-]/g, '').slice(0, 5)
+  if (getZipInfo(typed)) return { zip: typed, corrected: false }
+  if (!city || !state) return { zip: typed, corrected: false }
+  const candidates = (zipcodes.lookupByName(city.trim(), state.trim().toUpperCase()) || []) as Array<{ zip: string; city: string; state: string }>
+  if (candidates.length === 0) return { zip: typed, corrected: false }
+  const shared = (a: string, b: string) => { let n = 0; while (n < 5 && a[n] === b[n]) n++; return n }
+  const diff = (a: string, b: string) => { let d = 0; for (let i = 0; i < 5; i++) if (a[i] !== b[i]) d++; return d }
+  const best = [...candidates].sort((a, b) =>
+    shared(b.zip, typed) - shared(a.zip, typed) || diff(a.zip, typed) - diff(b.zip, typed) || a.zip.localeCompare(b.zip))[0]
+  return { zip: best.zip, corrected: true, from: typed, city: best.city, state: best.state }
+}
+
+/**
  * Calculate distance between two coordinates using Haversine formula
  * Returns distance in miles
  */
