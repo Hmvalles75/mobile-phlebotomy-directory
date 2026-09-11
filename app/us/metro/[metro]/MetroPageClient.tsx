@@ -295,7 +295,7 @@ export default function MetroPageClient({ params, initialProviders, initialGroup
               Mobile phlebotomists serve patients throughout the {metro.city} metropolitan area, bringing lab collection services directly to homes, offices, and assisted living facilities. Rather than traveling to a draw station and waiting, residents of {metro.city} can schedule a licensed phlebotomist to visit at a convenient time and location.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              This directory lists mobile phlebotomy providers operating in the {metro.city} area. Some are verified and registered, while others are unverified public listings. We recommend confirming credentials, insurance acceptance, and pricing directly with any provider before booking an appointment.
+              This directory lists independent mobile phlebotomy providers operating in the {metro.city} area. Listings with the Verified badge have confirmed their details with us; others come from public records. Confirm credentials, insurance acceptance, and pricing directly with any provider before booking an appointment.
             </p>
           </div>
 

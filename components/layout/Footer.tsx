@@ -80,8 +80,8 @@ export function Footer() {
         {/* Global Disclaimer */}
         <div className="border-t border-gray-200 mt-8 pt-6">
           <p className="text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
-            Directory of publicly listed mobile phlebotomy services. Not all providers are verified.
-            We connect verified providers with patient requests.
+            Directory of independent mobile phlebotomy providers. Listings with the Verified badge have confirmed their details with us.
+            Patient requests are sent to verified providers.
           </p>
         </div>
       </div>

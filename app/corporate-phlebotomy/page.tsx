@@ -71,7 +71,7 @@ const audiences = [
 const faqs = [
   {
     question: 'Do you supply the phlebotomists?',
-    answer: 'We coordinate certified mobile phlebotomists who have experience with facility and event-based draws. All providers are vetted, certified, and insured independent professionals.'
+    answer: 'We coordinate certified mobile phlebotomists with facility and event experience. For every coordinated job we confirm the phlebotomist we assign: current certification, insurance, and relevant experience, before the proposal goes out. They remain independent professionals.'
   },
   {
     question: 'Can you coordinate supplies and shipping?',

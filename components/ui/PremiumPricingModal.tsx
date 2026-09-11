@@ -29,7 +29,7 @@ const tiers: PricingTier[] = [
     features: [
       'Everything listed above',
       '"Founding Partner" label on your profile',
-      'First priority when waterfall lead routing launches',
+      'A 10-minute head start on every patient request in your area',
       'Larger, more visible profile card highlighting your services',
       'Cancel anytime — no long-term contract',
     ],
@@ -149,7 +149,7 @@ export function PremiumPricingModal({ isOpen, onClose, providerId, providerName 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-800">
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Higher placement on city &amp; state pages</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Gold &quot;Featured Provider&quot; badge</div>
-                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Priority routing when waterfall routing launches</div>
+                <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Priority routing: a 10-minute head start on every request</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> No per-lead fees — leads are free to claim</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Cancel anytime, no contracts</div>
                 <div className="flex items-center gap-2"><Check className="text-green-600 flex-shrink-0" size={16} /> Listing upgraded instantly</div>

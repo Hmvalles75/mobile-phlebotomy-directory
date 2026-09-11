@@ -1302,8 +1302,8 @@ function DashboardContent() {
             {!provider.priorityRouting && (
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <p className="text-sm text-gray-700">
-                  Founding Partners get top directory placement and first priority when our
-                  waterfall routing launches.{' '}
+                  Founding Partners get top directory placement and a 10-minute head start on
+                  every patient request in their area.{' '}
                   <button
                     onClick={() => setShowPricingModal(true)}
                     className="text-primary-600 font-semibold hover:underline"
@@ -1339,7 +1339,7 @@ function DashboardContent() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Upgrade to Premium</h3>
             <p className="text-gray-600 mb-4">
-              Get premium placement, a featured badge, and priority routing when waterfall routing launches — starting at $79/month.
+              Get premium placement, a featured badge, and a 10-minute head start on every request in your area — starting at $79/month.
             </p>
             <button
               onClick={() => setShowPricingModal(true)}
