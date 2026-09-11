@@ -16,7 +16,7 @@ const faqSchema = {
       "name": "How do I find a qualified mobile phlebotomist in Detroit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Look for mobile phlebotomists in Detroit with current state certification, liability insurance, and verified credentials. Check reviews, ask about their lab partnerships (Quest, Labcorp), and confirm they serve your Detroit area. This directory lists verified and unverified providers serving Wayne County."
+        "text": "Look for mobile phlebotomists in Detroit with current state certification, liability insurance, and verified credentials. Check reviews, ask about their lab partnerships (Quest, Labcorp), and confirm they serve your Detroit area. Listings with the Verified badge have confirmed their details with us; others come from public records."
       }
     },
     {

@@ -46,7 +46,7 @@ export default function MobilePhlebotomyNearMePage() {
     },
     {
       question: 'Does MobilePhlebotomy.org provide medical advice or results?',
-      answer: 'No. MobilePhlebotomy.org is a directory website that lists mobile phlebotomy providers based on publicly available information. We do not provide medical advice, lab orders, test results, or healthcare services. We do not verify credentials for all listed providers—some are verified, others are not. You must confirm all details including licensing, insurance acceptance, pricing, and qualifications directly with any provider before booking. Your test results will be delivered to your ordering healthcare provider or posted to your laboratory portal, never to this directory.'
+      answer: 'No. MobilePhlebotomy.org is a directory website that lists mobile phlebotomy providers based on publicly available information. We do not provide medical advice, lab orders, test results, or healthcare services. Providers are independent businesses. Listings that carry the Verified badge have confirmed their contact details and service area with us; other listings come from public records. Confirm licensing, insurance acceptance, pricing, and qualifications directly with any provider before booking. Your test results will be delivered to your ordering healthcare provider or posted to your laboratory portal, never to this directory.'
     }
   ]
 
@@ -116,7 +116,7 @@ export default function MobilePhlebotomyNearMePage() {
         "name": "Does MobilePhlebotomy.org provide medical advice or results?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "No. MobilePhlebotomy.org is a directory website that lists mobile phlebotomy providers based on publicly available information. We do not provide medical advice, lab orders, test results, or healthcare services. We do not verify credentials for all listed providers—some are verified, others are not. You must confirm all details including licensing, insurance acceptance, pricing, and qualifications directly with any provider before booking. Your test results will be delivered to your ordering healthcare provider or posted to your laboratory portal, never to this directory."
+          "text": "No. MobilePhlebotomy.org is a directory website that lists mobile phlebotomy providers based on publicly available information. We do not provide medical advice, lab orders, test results, or healthcare services. Providers are independent businesses. Listings that carry the Verified badge have confirmed their contact details and service area with us; other listings come from public records. Confirm licensing, insurance acceptance, pricing, and qualifications directly with any provider before booking. Your test results will be delivered to your ordering healthcare provider or posted to your laboratory portal, never to this directory."
         }
       }
     ]
@@ -146,7 +146,7 @@ export default function MobilePhlebotomyNearMePage() {
               This comprehensive national guide explains how at-home blood draws work, what they cost, and how to find verified providers in your area. Submit a request below or browse our state-by-state directory.
             </p>
             <p className="text-sm text-primary-200 italic">
-              MobilePhlebotomy.org is a directory of publicly listed mobile phlebotomy providers. Not all providers are verified. Always confirm credentials, pricing, and details directly with the provider before booking.
+              Providers listed here are independent businesses. Look for the Verified badge, and confirm credentials, pricing, and details directly with the provider before booking.
             </p>
           </div>
         </div>

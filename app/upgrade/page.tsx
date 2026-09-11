@@ -91,7 +91,7 @@ export default async function UpgradePage({
             <li>• Top placement in your city&apos;s directory</li>
             <li>• A larger, more visible profile card</li>
             <li>• Your &quot;Founding Partner&quot; badge</li>
-            <li>• First priority when our waterfall lead routing launches</li>
+            <li>• A 10-minute head start on every patient request in your area</li>
             <li>• Cancel anytime — no long-term contract</li>
           </ul>
           <p className="text-sm text-gray-500 mt-4">

@@ -17,7 +17,7 @@ const tiers = [
     features: [
       'Premium placement in search results',
       'Featured badge on your listing',
-      'Priority routing when waterfall routing launches',
+      'Priority routing: a 10-minute head start on every request in your area',
       'Enhanced profile visibility',
       'Cancel anytime — no long-term contract',
     ],
@@ -32,7 +32,7 @@ const tiers = [
     features: [
       'Top placement in major metros',
       'Featured badge on your listing',
-      'Priority routing when waterfall routing launches',
+      'Priority routing: a 10-minute head start on every request in your area',
       'City-exclusive featured sponsor option',
     ],
   },
@@ -246,8 +246,8 @@ export default function PricingPage() {
                 <p className="text-sm">Build trust with a verified premium provider badge</p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">✓ Priority Routing at Launch</h4>
-                <p className="text-sm">First priority when our waterfall lead routing system launches</p>
+                <h4 className="font-semibold mb-2">✓ Priority Routing</h4>
+                <p className="text-sm">Patient requests in your area reach you 10 minutes before free listings see them</p>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">✓ Cancel Anytime</h4>

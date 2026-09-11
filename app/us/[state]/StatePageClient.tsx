@@ -232,7 +232,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
                 About verification on this directory
               </summary>
               <p className="mt-2 leading-relaxed">
-                MobilePhlebotomy.org lists publicly available mobile phlebotomy providers. Some are verified; others are not. Always confirm details directly with the provider before scheduling a visit.
+                Providers on MobilePhlebotomy.org are independent businesses. Listings with the Verified badge have confirmed their details with us; others are public listings. Confirm details directly with the provider before scheduling a visit.
               </p>
             </details>
           </div>
