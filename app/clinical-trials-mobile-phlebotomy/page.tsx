@@ -5,20 +5,20 @@ import { ClinicalTrialIntakeForm } from './ClinicalTrialIntakeForm'
 
 export const metadata: Metadata = {
   title: 'Clinical Trial Mobile Phlebotomy Services | MobilePhlebotomy.org',
-  description: 'Nationwide coordination of certified mobile phlebotomists for clinical research studies, decentralized trials, and protocol-driven blood draws.',
+  description: 'Nationwide coordination of certified mobile phlebotomists for clinical research: protocol-driven collection at volume, single-site or decentralized, with the same collector every session. Recent project: 120 draws in 16 days.',
   alternates: {
     canonical: `${SITE_URL}/clinical-trials-mobile-phlebotomy`,
   },
   openGraph: {
     title: 'Clinical Trial Mobile Phlebotomy Services',
-    description: 'Nationwide coordination of certified mobile phlebotomists for clinical research studies.',
+    description: 'Protocol-driven research collection at volume, single-site or decentralized, same collector every session. Recent project: 120 draws in 16 days.',
     url: `${SITE_URL}/clinical-trials-mobile-phlebotomy`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Clinical Trial Mobile Phlebotomy Services',
-    description: 'Nationwide coordination of certified mobile phlebotomists for clinical research studies.',
+    description: 'Protocol-driven research collection at volume, single-site or decentralized, same collector every session. Recent project: 120 draws in 16 days.',
   },
 }
 
@@ -265,6 +265,39 @@ export default function ClinicalTrialsPage() {
           <p className="text-gray-700 mt-8">
             If you're evaluating mobile phlebotomy as part of your study design, we can help assess feasibility and coverage options.
           </p>
+        </div>
+      </section>
+
+      {/* Recent project. One anonymized case study directly above the intake
+          form, so the last thing a research buyer reads before asking for a
+          review is evidence that the coordination model works under a real
+          protocol on a real timeline. Copy is fixed; do not paraphrase. */}
+      <section className="py-16 bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            Recent project
+          </h2>
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Research center, Philadelphia &mdash; 120 draws in 16 days after a late IRB approval
+            </h3>
+            <p className="text-gray-700 mb-4">
+              A chemical senses research center had a protocol change land in IRB review a week before draws were scheduled to start. When approval came through, they needed daily on-site venous collection to begin within days and stay flexible as participant numbers shifted session to session.
+            </p>
+            <p className="text-gray-700 mb-4">
+              <span className="font-semibold text-gray-900">Scope:</span> Single site, 9 session days across 16 calendar days, 20-draw daily minimum, SST plus lavender EDTA per participant, specimens labeled and staged for the client&apos;s own courier.
+            </p>
+            <p className="text-gray-700 mb-4">
+              <span className="font-semibold text-gray-900">What we did:</span> Sourced and vetted a local phlebotomist to the protocol, supplied all tubes, and held the same collector on every session so the site never re-onboarded anyone. Schedule changes came in the morning of; coverage was confirmed the same day. A mid-study tube spec change was relayed and in place for the next session.
+            </p>
+            <p className="text-gray-700 mb-4">
+              <span className="font-semibold text-gray-900">Result:</span> 120 completed draws, zero missed sessions, one point of contact, three invoices. Study fully drawn in under three weeks from approval.
+            </p>
+            <blockquote className="border-l-4 border-blue-600 pl-4 italic text-gray-700">
+              &ldquo;All went well today. [Our phlebotomist] is wonderful.&rdquo;
+              <span className="block not-italic text-sm text-gray-600 mt-2">&mdash; Principal investigator, day one</span>
+            </blockquote>
+          </div>
         </div>
       </section>
 
