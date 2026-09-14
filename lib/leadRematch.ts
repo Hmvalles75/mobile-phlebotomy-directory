@@ -158,7 +158,7 @@ export async function rematchOpenLeadsForProvider(providerId: string, opts: { dr
     where: {
       status: { in: REMATCHABLE },
       createdAt: { gte: windowStart() },
-      leadNotifications: { none: { providerId } },
+      leadNotifications: { none: { providerId, status: { not: 'CANCELLED' } } },
     },
     select: { id: true },
     orderBy: { createdAt: 'desc' },
@@ -214,7 +214,7 @@ export async function runCoverageSweep(opts: { dryRun?: boolean } = {}): Promise
       createdAt: { lt: new Date(Date.now() - SWEEP_MIN_AGE_MINUTES * 60 * 1000) },
       // No rows at all. A lead whose rows are all FAILED had providers and
       // lost the send; that is the retry cron's job, not a coverage gap.
-      leadNotifications: { none: {} },
+      leadNotifications: { none: { status: { not: 'CANCELLED' } } },
     },
     select: { id: true, city: true, state: true, zip: true, createdAt: true },
     orderBy: { createdAt: 'asc' },

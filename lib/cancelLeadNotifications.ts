@@ -48,6 +48,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
     }
 
     // ── Step 1: Cancel scheduled SendGrid batch ─────────────────────
+    let cancelOk = false
     if (lead.notificationBatchId && process.env.SENDGRID_API_KEY) {
       try {
         const resp = await fetch('https://api.sendgrid.com/v3/user/scheduled_sends', {
@@ -59,6 +60,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
           body: JSON.stringify({ batch_id: lead.notificationBatchId, status: 'cancel' }),
         })
         if (resp.ok || resp.status === 201) {
+          cancelOk = true
           console.log(`[CancelNotifications] ✅ Cancelled SendGrid batch ${lead.notificationBatchId}`)
         } else {
           const text = await resp.text()
@@ -89,6 +91,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
         status: { in: ['SENT', 'QUEUED'] },
       },
       select: {
+        id: true,
         providerId: true,
         createdAt: true,
         provider: {
@@ -126,6 +129,28 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
       const deliveryTime = n.createdAt.getTime() + delaySeconds * 1000
       return deliveryTime <= claimedAt
     })
+
+    // Rows whose delivery time had not arrived were cancelled at SendGrid in
+    // step 1 and will never reach the provider. Until 2026-09-14 they kept
+    // status SENT, so when the claimer later released the lead (Palm Springs,
+    // 2026-09-12) every re-notify path counted those providers as already
+    // told and skipped them: the lead sat OPEN for days with nobody but the
+    // paying claimer ever having seen it. Mark them CANCELLED so release,
+    // rematch and renotify treat them as never notified. The SendGrid
+    // 'dropped / user cancel' event does the same from the other side.
+    if (cancelOk) {
+      const deliveredIds = new Set(delivered.map(n => n.id))
+      const undeliveredIds = notifications
+        .filter(n => n.providerId !== claimingProviderId && !deliveredIds.has(n.id))
+        .map(n => n.id)
+      if (undeliveredIds.length > 0) {
+        await prisma.leadNotification.updateMany({
+          where: { id: { in: undeliveredIds }, status: { in: ['SENT', 'QUEUED'] } },
+          data: { status: 'CANCELLED', errorMessage: 'Cancelled before delivery: lead claimed during the hold window' },
+        })
+        console.log(`[CancelNotifications] Marked ${undeliveredIds.length} undelivered notification(s) CANCELLED`)
+      }
+    }
 
     // Suppression. This path had none, which is how Quick Labs LLC was emailed
     // on 2026-08-20 the day after asking to be taken off the list: turning

@@ -118,6 +118,16 @@ async function __POST(req: NextRequest) {
           },
           update: {}, // idempotent — never overwrite an event that already arrived
         })
+        // SendGrid's own word that a held send was cancelled before delivery
+        // (batch cancel when the lead was claimed inside the head start).
+        // Mirror it onto the notification row so no re-notify path counts
+        // this provider as already told. See lib/cancelLeadNotifications.ts.
+        if (e.event === 'dropped' && /^user cancel/i.test(e.reason || '') && e.leadNotificationId) {
+          await prisma.leadNotification.updateMany({
+            where: { id: e.leadNotificationId, status: { in: ['SENT', 'QUEUED'] } },
+            data: { status: 'CANCELLED', errorMessage: `Cancelled at SendGrid before delivery: ${e.reason}` },
+          })
+        }
         stored++
       } catch (err: any) {
         console.error(`[sendgrid-events] Failed to upsert event ${e.sg_event_id}:`, err.message || err)

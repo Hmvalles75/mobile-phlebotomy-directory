@@ -46,6 +46,30 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Delivery truth per notification, from SendGrid's events. `sentAt` is
+    // when we handed the email to SendGrid; free-tier sends are held there for
+    // the paid head start (and quiet hours) and dropped if the lead is claimed
+    // first. Without this the panel showed every provider as SENT at the same
+    // second, which read as "no head start" (2026-09-14). Last 30 days only;
+    // older rows show the hand-off time as before.
+    const recentCutoff = Date.now() - 30 * 24 * 60 * 60 * 1000
+    const notifIds = leads.filter(l => l.createdAt.getTime() > recentCutoff).flatMap(l => l.leadNotifications.map(n => n.id))
+    const delivery = new Map<string, { deliveredAt?: string; droppedAt?: string; dropReason?: string }>()
+    if (notifIds.length > 0) {
+      const events = await prisma.emailEvent.findMany({
+        where: { leadNotificationId: { in: notifIds }, event: { in: ['delivered', 'dropped', 'bounce'] } },
+        select: { leadNotificationId: true, event: true, timestamp: true, reason: true },
+        orderBy: { timestamp: 'asc' },
+      })
+      for (const e of events) {
+        if (!e.leadNotificationId) continue
+        const d = delivery.get(e.leadNotificationId) || {}
+        if (e.event === 'delivered' && !d.deliveredAt) d.deliveredAt = e.timestamp.toISOString()
+        if (e.event !== 'delivered' && !d.droppedAt) { d.droppedAt = e.timestamp.toISOString(); d.dropReason = e.reason || e.event }
+        delivery.set(e.leadNotificationId, d)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       leads: leads.map(lead => ({
@@ -89,7 +113,10 @@ export async function GET(req: NextRequest) {
           providerName: notif.provider.name,
           status: notif.status,
           sentAt: notif.sentAt?.toISOString(),
-          errorMessage: notif.errorMessage
+          errorMessage: notif.errorMessage,
+          deliveredAt: delivery.get(notif.id)?.deliveredAt || null,
+          droppedAt: delivery.get(notif.id)?.droppedAt || null,
+          dropReason: delivery.get(notif.id)?.dropReason || null,
         }))
       }))
     })

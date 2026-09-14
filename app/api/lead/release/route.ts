@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { notifyFeaturedProvidersForLead } from '@/lib/leadNotifications'
+import { notifyFeaturedProvidersForLead, renotifyOpenLead } from '@/lib/leadNotifications'
 
 /**
  * Release a claimed lead back to the pool.
@@ -75,11 +75,21 @@ export async function POST(req: NextRequest) {
 
     console.log(`[LeadRelease] Lead ${leadId} released back to pool by provider ${providerId} (reason: ${reason})`)
 
-    // Re-notify other providers in the area so someone else can pick it up.
-    // Fire-and-forget — don't block the response on delivery.
-    notifyFeaturedProvidersForLead(leadId).catch(err => {
+    // Re-offer the lead. Awaited: Next 14 on Vercel has no waitUntil, so a
+    // fire-and-forget send can be cut off when the response returns.
+    //   1. Providers who never actually saw it: matched providers with no row,
+    //      plus rows CANCELLED at SendGrid during the claimer's head start
+    //      (Palm Springs 2026-09-12: three free listings were skipped here as
+    //      "already notified" and the lead sat OPEN for days).
+    //   2. Providers who did see it and did not claim: the still-unclaimed
+    //      reminder, which keeps its own 12-hour minimum, so a quick
+    //      claim-and-release does not double-email anyone.
+    try {
+      await notifyFeaturedProvidersForLead(leadId, { onlyNewProviders: true })
+      await renotifyOpenLead(leadId, { excludeProviderIds: [providerId] })
+    } catch (err: any) {
       console.error(`[LeadRelease] Re-notification failed for ${leadId}:`, err.message || err)
-    })
+    }
 
     return NextResponse.json({
       ok: true,
