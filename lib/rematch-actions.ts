@@ -178,9 +178,9 @@ MobilePhlebotomy.org
     </div>
     ${args.daysWaiting > 0 ? `<div class="heads-up">Heads up: this patient submitted ${args.daysWaiting} day${args.daysWaiting === 1 ? '' : 's'} ago. They may have already found service elsewhere — please confirm with them before scheduling.</div>` : ''}
     <center>
-      <a href="${claimUrl}" class="button">Claim this patient</a>
+      <a href="${claimUrl}" class="button" style="display: inline-block; padding: 16px 36px; background-color: #28a745; color: #ffffff !important; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 16px;"><span style="color: #ffffff;">Claim this patient</span></a>
     </center>
-    <p style="color: #777; font-size: 13px; margin-top: 24px;">No fees, patients pay you directly. No action required if you can't take this one.</p>
+    <p style="color: #777; font-size: 13px; margin-top: 24px;">No referral fee. You bill the patient at your own rate. No action required if you can't take this one.</p>
   </div>
   <div class="footer">
     <p>— Hector Valles<br>MobilePhlebotomy.org</p>
