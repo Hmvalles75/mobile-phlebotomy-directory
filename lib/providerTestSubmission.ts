@@ -213,7 +213,7 @@ MobilePhlebotomy.org`
   <p style="margin:0 0 14px 0;"><strong>Notes:</strong> ${notesShort}</p>
   <div style="background:#e5e7eb;color:#6b7280;text-align:center;padding:12px;border-radius:6px;font-weight:600;">Claim This Patient</div>
   <p style="margin:8px 0 0 0;font-size:13px;color:#6b7280;">In a real request this button opens the patient's full name, phone number and address. First provider to claim gets the patient.</p>
-  <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">No fees — this referral is completely free. You bill the patient directly at your own rate. We don't charge fees or take a commission.</p>
+  <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">No referral fee. You bill the patient directly at your own rate; we don't charge you anything or take a commission.</p>
 </div>
 
 <p><strong>So: it works.</strong> When a real patient in your area submits a request, that email lands in this inbox within seconds.</p>

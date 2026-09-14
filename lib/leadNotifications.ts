@@ -122,9 +122,9 @@ Not available? Pass this one and we'll release it to other providers right away,
 ${passUrl}
 ` : ''}
 
-First provider to claim gets the patient. No fees — this referral is completely free.
+First provider to claim gets the patient.
 
-How payment works: You bill the patient directly at your own rate. We don't charge fees or take a commission.
+No referral fee. You bill the patient directly at your own rate; we don't charge you anything or take a commission.
 
 No action is required if you're unavailable.
 
@@ -184,9 +184,11 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
       </div>
 
       <center>
-        <a href="${claimUrl}" class="button">Claim This Patient</a>
+        <a href="${claimUrl}" class="button" style="display: inline-block; padding: 18px 40px; background-color: #28a745; color: #ffffff !important; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 18px;"><span style="color: #ffffff;">Claim This Patient</span></a>
         <br>
-        <span style="color: #28a745; font-size: 14px; font-weight: bold;">One click — no login required. Completely free.</span>
+        <span style="color: #28a745; font-size: 14px; font-weight: bold;">One click, no login required.</span>
+        <br>
+        <span style="color: #4b5563; font-size: 14px;">No referral fee. You bill the patient at your own rate.</span>
         ${canPass ? `
         <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #e5e7eb;">
           <a href="${passUrl}" style="color: #6b7280; font-size: 14px; text-decoration: underline;">Not available &mdash; pass this one</a>
