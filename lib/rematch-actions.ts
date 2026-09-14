@@ -78,6 +78,7 @@ export async function findOpenLeadsInProviderRadius(
       id: true, fullName: true, city: true, state: true, zip: true,
       urgency: true, createdAt: true, notes: true,
       leadNotifications: {
+        where: { status: { not: 'CANCELLED' } },
         select: { providerId: true },
       },
     },

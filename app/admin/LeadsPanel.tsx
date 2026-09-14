@@ -7,9 +7,14 @@ interface LeadNotification {
   id: string
   providerId: string
   providerName: string
-  status: 'QUEUED' | 'SENT' | 'FAILED'
+  status: 'QUEUED' | 'SENT' | 'FAILED' | 'CANCELLED'
   sentAt: string | null
   errorMessage: string | null
+  // From SendGrid events (last 30 days). sentAt is the hand-off to SendGrid;
+  // free-tier sends are held there for the paid head start.
+  deliveredAt?: string | null
+  droppedAt?: string | null
+  dropReason?: string | null
 }
 
 interface Lead {
@@ -504,17 +509,22 @@ export function LeadsPanel() {
                               <div key={notif.id} className="text-xs bg-purple-50 border border-purple-200 rounded px-2 py-1">
                                 <span className="font-medium text-purple-900">{notif.providerName}</span>
                                 <span className={`ml-2 ${
+                                  notif.status === 'CANCELLED' ? 'text-amber-600' :
                                   notif.status === 'SENT' ? 'text-green-600' :
                                   notif.status === 'FAILED' ? 'text-red-600' :
                                   'text-gray-600'
                                 }`}>
-                                  ({notif.status})
+                                  ({notif.status === 'CANCELLED' ? 'CANCELLED before delivery' : notif.status})
                                 </span>
-                                {notif.sentAt && (
-                                  <span className="ml-2 text-gray-500">
-                                    {new Date(notif.sentAt).toLocaleTimeString()}
-                                  </span>
-                                )}
+                                <span className="ml-2 text-gray-500">
+                                  {notif.deliveredAt
+                                    ? `delivered ${new Date(notif.deliveredAt).toLocaleTimeString()}`
+                                    : notif.droppedAt
+                                    ? `dropped ${new Date(notif.droppedAt).toLocaleTimeString()}${notif.dropReason?.startsWith('user cancel') ? ' (lead claimed during hold)' : ''}`
+                                    : notif.sentAt
+                                    ? `handed to SendGrid ${new Date(notif.sentAt).toLocaleTimeString()}, no delivery event yet`
+                                    : ''}
+                                </span>
                               </div>
                             ))}
                           </div>

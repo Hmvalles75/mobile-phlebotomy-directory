@@ -1093,6 +1093,12 @@ enum NotificationStatus {
   QUEUED
   SENT
   FAILED
+  // Handed to SendGrid with a future sendAt (head start / quiet hours) and then
+  // cancelled before delivery because the lead was claimed. The provider never
+  // saw the request, so every "already notified" check must ignore these rows.
+  // Set by lib/cancelLeadNotifications.ts at claim time and confirmed by the
+  // SendGrid 'dropped / user cancel' event (2026-09-14).
+  CANCELLED
 }
 
 // New enums for provider onboarding and patient SMS flow

@@ -583,7 +583,7 @@ export interface NotifyOptions {
 export async function findNewProvidersForLead(leadId: string): Promise<Provider[]> {
   const lead = await prisma.lead.findUnique({
     where: { id: leadId },
-    select: { zip: true, state: true, leadNotifications: { select: { providerId: true } } },
+    select: { zip: true, state: true, leadNotifications: { where: { status: { not: 'CANCELLED' } }, select: { providerId: true } } },
   })
   if (!lead) return []
   const already = new Set(lead.leadNotifications.map(n => n.providerId))
@@ -638,7 +638,9 @@ export async function notifyFeaturedProvidersForLead(
 
     if (options.onlyNewProviders && providers.length > 0) {
       const existing = await prisma.leadNotification.findMany({
-        where: { leadId: lead.id },
+        // CANCELLED rows were never delivered (held for the head start, then the
+        // lead was claimed); those providers count as new.
+        where: { leadId: lead.id, status: { not: 'CANCELLED' } },
         select: { providerId: true },
       })
       const already = new Set(existing.map(n => n.providerId))
@@ -881,7 +883,9 @@ export async function renotifyOpenLead(
     select: {
       id: true, createdAt: true, status: true, city: true, state: true, zip: true,
       labPreference: true, urgency: true, notes: true,
-      leadNotifications: { select: { providerId: true, status: true, createdAt: true } },
+      // CANCELLED rows never reached the provider; they neither count as sent
+      // nor start the 12-hour reminder clock.
+      leadNotifications: { where: { status: { not: 'CANCELLED' } }, select: { providerId: true, status: true, createdAt: true } },
     },
   })
   const base: RenotifyResult = { leadId, dryRun: !!opts.dryRun, hoursOpen: 0, recipients: [], sent: 0, skipped: 0 }

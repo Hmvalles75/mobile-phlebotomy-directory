@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
 
         // Check if notification already exists (race condition protection)
         const existing = await prisma.leadNotification.findFirst({
-          where: { leadId: lead.id, providerId: provider.id }
+          where: { leadId: lead.id, providerId: provider.id, status: { not: 'CANCELLED' } }
         })
         if (existing) continue
 

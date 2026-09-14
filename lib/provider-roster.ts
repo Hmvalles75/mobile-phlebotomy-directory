@@ -107,7 +107,7 @@ export async function getProviderRoster(): Promise<{
     prisma.leadNotification.groupBy({
       by: ['providerId'],
       _count: { _all: true },
-      where: { createdAt: { gte: since } },
+      where: { createdAt: { gte: since }, status: { not: 'CANCELLED' } },
     }),
     prisma.lead.groupBy({
       by: ['routedToId'],
