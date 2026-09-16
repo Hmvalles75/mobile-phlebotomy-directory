@@ -290,7 +290,8 @@ async function __POST(
             submission.contactName,
             submission.leadOptIn,
             submission.leadContactMethod,
-            hasWebsite
+            hasWebsite,
+            result.provider.slug
           )
           const emailType = submission.leadOptIn === 'yes' ? 'lead-ready' :
                            submission.leadOptIn === 'no' ? 'listing-only' : 'standard'
