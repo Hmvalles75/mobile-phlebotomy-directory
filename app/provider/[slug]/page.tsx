@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers-db'
@@ -21,6 +22,7 @@ import { getNearbyProviders, getServiceAreasCovered } from '@/lib/seo/internalLi
 import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
 import NearbyProviders from '@/components/seo/NearbyProviders'
 import { getZipInfo } from '@/lib/zip-geocode'
+import { serviceHighlights } from '@/lib/providerServices'
 
 interface PageProps {
   params: {
@@ -148,6 +150,27 @@ function buildProviderMetaDescription(
   return out
 }
 
+/**
+ * Premium pages: one sentence per provider, under 155 characters, built from
+ * the record rather than truncated from the About text. Includes the keyword,
+ * the city and the two most distinctive service families. The price anchor
+ * belongs here too once structured pricing exists; nothing is written in its
+ * place until then.
+ */
+function buildPremiumMetaDescription(name: string, city: string | undefined, state: string | undefined, services: string[]): string {
+  const where = city ? `${city}, ${state}` : state || 'your area'
+  const lead = `${name.trim()}: mobile phlebotomy in ${where}.`
+  const highlights = serviceHighlights(services, 3).filter(h => h !== 'at-home blood draws')
+  const tail = ' Licensed, insured, we come to you.'
+  let out = lead
+  for (let n = Math.min(2, highlights.length); n >= 1; n--) {
+    const candidate = `${lead} At-home blood draws, ${highlights.slice(0, n).join(', ')}.${tail}`
+    if (candidate.length <= 155) { out = candidate; break }
+  }
+  if (out === lead) out = `${lead} At-home blood draws.${tail}`.slice(0, 155)
+  return out
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const provider = await getProviderBySlug(params.slug)
 
@@ -158,10 +181,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || 'USA'
-  const description = buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, location)
+  const description = provider.premiumPage
+    ? buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])
+    : buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, location)
+  const ogTitle = `${provider.name} - Mobile Phlebotomy Services in ${location}`
 
   return {
-    title: `${provider.name} - Mobile Phlebotomy Services in ${location}`,
+    title: ogTitle,
     description,
     keywords: [
       provider.name,
@@ -172,14 +198,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ...(provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []),
       ...(provider.specialties ? provider.specialties.split(',').map(s => s.trim()) : [])
     ].filter(Boolean).join(', '),
+    // og:image / twitter:image come from opengraph-image.tsx (1200x630 card
+    // built from the poster or logo). The raw logo used to be the OG image and
+    // rendered as a blank or tiny mark in link previews.
     openGraph: {
-      title: `${provider.name} - Mobile Phlebotomy Services`,
+      title: ogTitle,
       description,
       type: 'website',
-      images: provider.logo ? [{
-        url: provider.logo,
-        alt: `${provider.name} logo`
-      }] : undefined
+      url: `${SITE_URL}/provider/${params.slug}`,
+      siteName: 'MobilePhlebotomy.org',
+    },
+    // Without an explicit twitter block Next merged the sitewide defaults from
+    // app/layout.tsx, so twitter:title read "Mobile Phlebotomy Near You |
+    // At-Home Blood Draw Directory" on every provider page.
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description,
     },
     alternates: {
       canonical: `/provider/${params.slug}`

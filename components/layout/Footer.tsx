@@ -17,7 +17,7 @@ export function Footer() {
               insured providers for at-home blood draws and lab collections near you.
             </p>
             <div className="flex space-x-4">
-              <span className="text-sm text-gray-500">© 2024 MobilePhlebotomy.org</span>
+              <span className="text-sm text-gray-500">© {new Date().getFullYear()} MobilePhlebotomy.org</span>
             </div>
           </div>
 

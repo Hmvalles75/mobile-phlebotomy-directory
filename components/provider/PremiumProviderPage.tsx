@@ -412,21 +412,21 @@ export default function PremiumProviderPage({
               {zipList.length > 0 && (
                 <div>
                   <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">Covered ZIP codes</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <ul className="flex flex-wrap gap-2 list-none p-0 m-0" aria-label="Covered ZIP codes">
                     {zipList.map((zip) => (
-                      <span
+                      <li
                         key={zip}
                         className="bg-white border border-teal-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-mono font-medium shadow-sm"
                       >
                         {zip}
-                      </span>
+                      </li>
                     ))}
                     {provider.zipCodes && provider.zipCodes.split(',').length > 20 && (
-                      <span className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                      <li className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
                         +{provider.zipCodes.split(',').length - 20} more
-                      </span>
+                      </li>
                     )}
-                  </div>
+                  </ul>
                 </div>
               )}
             </div>
