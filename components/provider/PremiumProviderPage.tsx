@@ -1,6 +1,3 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import {
   MapPin, Phone, Mail, Clock, Shield, CheckCircle, Award, Globe,
@@ -8,8 +5,9 @@ import {
   Briefcase, Activity, Stethoscope, FileCheck,
   Instagram, Facebook, Youtube, Linkedin
 } from 'lucide-react'
-import { LeadFormModal } from '@/components/ui/LeadFormModal'
-import { trackPhoneClick } from '@/lib/trackPhoneClick'
+import { PremiumLeadFormProvider, BookNowButton } from '@/components/provider/PremiumLeadForm'
+import { TrackedPhoneLink } from '@/components/provider/TrackedPhoneLink'
+import { ClickToLoadMap } from '@/components/provider/ClickToLoadMap'
 import type { EnrichedProvider } from '@/lib/providers'
 import type { CityLink } from '@/lib/seo/anchorHelpers'
 import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
@@ -107,7 +105,6 @@ export default function PremiumProviderPage({
   const primaryCitySlug = provider.city
     ? provider.city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     : null
-  const [leadFormOpen, setLeadFormOpen] = useState(false)
 
   const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || ''
   const isVerified = provider.status === 'VERIFIED'
@@ -174,6 +171,7 @@ export default function PremiumProviderPage({
   const bookingEmail = provider.email
 
   return (
+    <PremiumLeadFormProvider providerId={provider.id} defaultCity={provider.city || ''} defaultState={provider.state || ''}>
     <div className="min-h-screen bg-white">
       {/* ═══════════════════════════════════════════════════════════
           1. HERO SECTION
@@ -240,22 +238,22 @@ export default function PremiumProviderPage({
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button
-                onClick={() => setLeadFormOpen(true)}
+              <BookNowButton
                 className="bg-white text-teal-700 hover:bg-teal-50 font-bold text-lg px-10 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 inline-flex items-center gap-2"
               >
                 <Calendar size={22} />
                 Book Now
-              </button>
+              </BookNowButton>
               {bookingPhone && (
-                <a
-                  href={`tel:${bookingPhone}`}
-                  onClick={() => trackPhoneClick({ providerId: provider.id, source: 'premium_provider_call' })}
+                <TrackedPhoneLink
+                  phone={bookingPhone}
+                  providerId={provider.id}
+                  source="premium_provider_call"
                   className="bg-teal-800/60 hover:bg-teal-800/80 backdrop-blur-sm border border-white/30 text-white font-semibold text-lg px-10 py-4 rounded-lg transition-all duration-200 inline-flex items-center gap-2"
                 >
                   <Phone size={20} />
                   Call {bookingPhoneFormatted}
-                </a>
+                </TrackedPhoneLink>
               )}
             </div>
           </div>
@@ -400,13 +398,12 @@ export default function PremiumProviderPage({
                     ? `We travel up to ${provider.serviceRadius} from our primary location.`
                     : `We serve patients throughout ${location} and surrounding communities.`}
                 </p>
-                <button
-                  onClick={() => setLeadFormOpen(true)}
+                <BookNowButton
                   className="inline-flex items-center gap-2 text-teal-700 font-semibold hover:text-teal-800 transition-colors"
                 >
                   Check if we serve your ZIP code
                   <ChevronRight size={18} />
-                </button>
+                </BookNowButton>
               </div>
 
               {zipList.length > 0 && (
@@ -431,37 +428,14 @@ export default function PremiumProviderPage({
               )}
             </div>
 
-            {/* Google Maps embed — prefers lat/lng from server-side ZIP
-                lookup (q=LAT,LNG is the most reliable embed format without
-                an API key). Falls back to text geocoding when coords
-                aren't available. */}
-            {(() => {
-              let mapSrc: string | null = null
-              if (mapCoords) {
-                mapSrc = `https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=12&output=embed`
-              } else {
-                const primaryZip = provider.zipCodes?.split(',')[0]?.trim()
-                const parts = [provider.city, provider.state, primaryZip].filter(Boolean)
-                if (parts.length > 0) {
-                  const locationQuery = parts.join(' ')
-                  mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&z=12&output=embed`
-                }
-              }
-              if (!mapSrc) return null
-              return (
-                <div className="mt-8 rounded-xl overflow-hidden border border-teal-100 shadow-md bg-white">
-                  <iframe
-                    title={`${provider.name} service area map`}
-                    src={mapSrc}
-                    width="100%"
-                    height="380"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              )
-            })()}
+            {/* Map loads on request (see ClickToLoadMap). Coordinates come from
+                the server-side primary-ZIP lookup; falls back to a text query. */}
+            <ClickToLoadMap
+              providerName={provider.name}
+              label={location || provider.name}
+              coords={mapCoords}
+              query={[provider.city, provider.state, provider.zipCodes?.split(',')[0]?.trim()].filter(Boolean).join(' ') || undefined}
+            />
           </div>
         </div>
       </section>
@@ -571,8 +545,10 @@ export default function PremiumProviderPage({
 
                 <div className="space-y-4 mb-8">
                   {bookingPhone && (
-                    <a
-                      href={`tel:${bookingPhone}`}
+                    <TrackedPhoneLink
+                      phone={bookingPhone}
+                      providerId={provider.id}
+                      source="premium_provider_contact"
                       className="flex items-center gap-4 p-4 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors group"
                     >
                       <div className="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center flex-shrink-0">
@@ -582,7 +558,7 @@ export default function PremiumProviderPage({
                         <div className="text-sm text-gray-500">Call us</div>
                         <div className="font-bold text-gray-900 text-lg">{bookingPhoneFormatted}</div>
                       </div>
-                    </a>
+                    </TrackedPhoneLink>
                   )}
 
                   {bookingEmail && (
@@ -635,13 +611,12 @@ export default function PremiumProviderPage({
                   </div>
                 )}
 
-                <button
-                  onClick={() => setLeadFormOpen(true)}
+                <BookNowButton
                   className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold text-lg py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center justify-center gap-2"
                 >
                   <Calendar size={22} />
                   Request Appointment
-                </button>
+                </BookNowButton>
               </div>
 
               {(provider as any).heroPoster ? (
@@ -730,16 +705,7 @@ export default function PremiumProviderPage({
         </div>
       </footer>
 
-      {/* Lead form modal — always attribute to the provider whose premium page generated the click */}
-      <LeadFormModal
-        isOpen={leadFormOpen}
-        onClose={() => setLeadFormOpen(false)}
-        defaultCity={provider.city || ''}
-        defaultState={provider.state || ''}
-        defaultZip=""
-        preferredProviderId={provider.id}
-        source="premium_provider_page"
-      />
     </div>
+    </PremiumLeadFormProvider>
   )
 }
