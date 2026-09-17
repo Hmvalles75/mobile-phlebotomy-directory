@@ -7,6 +7,7 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
+import { PremiumProviderSchema } from '@/components/seo/PremiumProviderSchema'
 import { STATE_DATA } from '@/data/states-full'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
@@ -80,6 +81,32 @@ export const revalidate = 3600
  * advance. Paying providers keep instant first loads because placement is what
  * they bought.
  */
+/**
+ * Canonical breadcrumb trail (Home > State > City > Provider). Shared by both
+ * templates so the premium page carries the same BreadcrumbList as a free
+ * listing. Resolves the state slug whether provider.state is an abbr (CA) or
+ * a full name (California).
+ */
+function buildBreadcrumbItems(provider: { name: string; slug: string; city?: string; state?: string }): Array<{ name: string; url: string }> {
+  const items: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
+  if (provider.state) {
+    const raw = provider.state.trim()
+    const stateEntry = Object.entries(STATE_DATA).find(
+      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
+    )
+    if (stateEntry) {
+      const [stateSlug, stateInfo] = stateEntry
+      items.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
+      if (provider.city) {
+        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
+        items.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
+      }
+    }
+  }
+  items.push({ name: provider.name, url: `/provider/${provider.slug}` })
+  return items
+}
+
 export async function generateStaticParams() {
   const providers = await getAllProviders()
   return providers
@@ -188,14 +215,26 @@ export default async function ProviderDetailPage({ params }: PageProps) {
     const zipCodes = provider.zipCodes
       ? provider.zipCodes.split(',').map(z => z.trim()).filter(Boolean)
       : []
+    const premiumBreadcrumbs = buildBreadcrumbItems(provider)
     return (
-      <PremiumProviderPage
-        provider={provider}
-        mapCoords={mapCoords}
-        serviceAreaCities={serviceAreas.cities}
-        serviceAreaZips={zipCodes}
-        serviceAreaStateAbbr={serviceAreas.stateAbbr}
-      />
+      <>
+        <PremiumProviderSchema
+          provider={provider}
+          zips={zipCodes.filter(z => /^\d{5}$/.test(z))}
+          geo={mapCoords}
+          services={provider.services || []}
+          tagline={buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, provider.city ? `${provider.city}, ${provider.state}` : provider.state || 'USA')}
+        />
+        <BreadcrumbSchema items={premiumBreadcrumbs} />
+        <PremiumProviderPage
+          provider={provider}
+          mapCoords={mapCoords}
+          serviceAreaCities={serviceAreas.cities}
+          serviceAreaZips={zipCodes}
+          serviceAreaStateAbbr={serviceAreas.stateAbbr}
+          breadcrumbs={premiumBreadcrumbs}
+        />
+      </>
     )
   }
 
@@ -242,24 +281,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   const isVerified = provider.status === 'VERIFIED'
   const isFeatured = provider.isFeatured === true
 
-  // Build canonical breadcrumb items (Home > State > City > Provider).
-  // Resolves state slug from STATE_DATA whether provider.state is an abbr (CA) or full name (California).
-  const breadcrumbItems: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
-  if (provider.state) {
-    const raw = provider.state.trim()
-    const stateEntry = Object.entries(STATE_DATA).find(
-      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
-    )
-    if (stateEntry) {
-      const [stateSlug, stateInfo] = stateEntry
-      breadcrumbItems.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
-      if (provider.city) {
-        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
-        breadcrumbItems.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
-      }
-    }
-  }
-  breadcrumbItems.push({ name: provider.name, url: `/provider/${provider.slug}` })
+  const breadcrumbItems = buildBreadcrumbItems(provider)
 
   // Resolve canonical state abbreviation (provider.state may be either an
   // abbr like "CA" or a full name like "California") for the SEO link

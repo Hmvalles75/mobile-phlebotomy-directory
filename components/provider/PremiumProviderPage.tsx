@@ -24,6 +24,9 @@ interface PremiumProviderPageProps {
   serviceAreaCities?: CityLink[]
   serviceAreaZips?: string[]
   serviceAreaStateAbbr?: string | null
+  // Visible trail (Home > State > City > Provider). The matching
+  // BreadcrumbList JSON-LD is emitted by the page route.
+  breadcrumbs?: Array<{ name: string; url: string }>
 }
 
 // Social profiles supported on premium pages. Order here is the render order.
@@ -98,6 +101,7 @@ export default function PremiumProviderPage({
   serviceAreaCities = [],
   serviceAreaZips = [],
   serviceAreaStateAbbr = null,
+  breadcrumbs = [],
 }: PremiumProviderPageProps) {
   // Derive primaryCitySlug for the outward city link
   const primaryCitySlug = provider.city
@@ -185,6 +189,20 @@ export default function PremiumProviderPage({
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
 
         <div className="relative container mx-auto px-4 py-20 md:py-32">
+          {breadcrumbs.length > 1 && (
+            <nav aria-label="Breadcrumb" className="max-w-4xl mx-auto mb-6 -mt-10 md:-mt-20 text-sm text-teal-50/90">
+              <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                {breadcrumbs.map((item, i) => (
+                  <li key={item.url} className="flex items-center gap-x-2">
+                    {i > 0 && <span aria-hidden="true" className="text-teal-100/60">&rsaquo;</span>}
+                    {i === breadcrumbs.length - 1
+                      ? <span aria-current="page" className="font-medium text-white">{item.name}</span>
+                      : <Link href={item.url} className="hover:text-white underline-offset-2 hover:underline">{item.name}</Link>}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
           <div className="max-w-4xl mx-auto text-center">
             {/* Business logo — shown on the teal hero background (works well for
                 light/white logos). Conditional so providers without a logo are
