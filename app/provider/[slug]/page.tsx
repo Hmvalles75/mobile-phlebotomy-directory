@@ -156,7 +156,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: `/provider/${params.slug}`
-    }
+    },
+    // Fixed facilities (hospital outpatient labs, blood banks) are not mobile
+    // providers. They were removed from city pages on 2026-08-21; as of
+    // 2026-09-17 their pages are also noindex and out of the sitemap. The
+    // page still resolves so existing links don't 404 and follow is kept.
+    ...(provider.isFixedSite ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
