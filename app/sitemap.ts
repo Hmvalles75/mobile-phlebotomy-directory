@@ -18,8 +18,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // errors. Seven were in here, including `test-provider`, a test record being
   // advertised to search engines. Soft removal is the only removal we do, so
   // this is the filter that makes it mean something externally.
+  // isFixedSite filter added 2026-09-17. Hospital outpatient labs and blood
+  // banks were quarantined off city pages on 2026-08-21 but stayed in the
+  // sitemap with "Mobile Phlebotomy Services" titles; two of them drew ~1,600
+  // Search Console impressions at 0.1% CTR on branded facility searches that
+  // can never convert here. Their pages now carry noindex (see the provider
+  // route's generateMetadata) and are no longer advertised.
   const providers = await prisma.provider.findMany({
-    where: { removedAt: null },
+    where: { removedAt: null, isFixedSite: false },
     select: {
       slug: true,
       updatedAt: true,

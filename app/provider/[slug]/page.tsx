@@ -23,6 +23,8 @@ import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
 import NearbyProviders from '@/components/seo/NearbyProviders'
 import { getZipInfo } from '@/lib/zip-geocode'
 import { serviceHighlights } from '@/lib/providerServices'
+import { prisma } from '@/lib/prisma'
+import { buildProviderTitle, buildProviderDescription } from '@/lib/providerMeta'
 
 interface PageProps {
   params: {
@@ -117,40 +119,6 @@ export async function generateStaticParams() {
 }
 
 /**
- * Meta description for a provider page.
- *
- * 317 of 781 live listings had a description under 110 characters and 157
- * were under 70 ("Mobile phlebotomy services."), which Bing Webmaster flagged
- * as too short to give searchers context (2026-09-10). A short or generic
- * description is padded with the provider's name, service and location; an
- * empty one gets the same sentence on its own. Long descriptions are trimmed
- * to a snippet-friendly length at a word boundary.
- */
-const META_DESC_MIN = 110
-const META_DESC_MAX = 300
-const GENERIC_DESC = /^(mobile )?phlebotomy services( in [a-z .,-]+)?\.?$/i
-
-function buildProviderMetaDescription(
-  name: string,
-  bio: string | null | undefined,
-  specialties: string | null | undefined,
-  location: string,
-): string {
-  const clean = (bio || '').replace(/\s+/g, ' ').trim()
-  const spec = specialties ? ` Specialties: ${specialties.replace(/\s+/g, ' ').trim()}.` : ''
-  const base = `${name.trim()} provides mobile phlebotomy and at-home blood draw services in ${location}.${spec}`
-  let out: string
-  if (!clean || GENERIC_DESC.test(clean)) out = `${base} Certified phlebotomists come to your home, office or facility.`
-  else if (clean.length < META_DESC_MIN) out = `${clean.replace(/[.!]?$/, '.')} ${base}`
-  else out = clean
-  if (out.length > META_DESC_MAX) {
-    out = out.slice(0, META_DESC_MAX)
-    out = out.slice(0, Math.max(out.lastIndexOf(' '), 200)).replace(/[,;:\s]+$/, '') + '...'
-  }
-  return out
-}
-
-/**
  * Premium pages: one sentence per provider, under 155 characters, built from
  * the record rather than truncated from the About text. Includes the keyword,
  * the city and the two most distinctive service families. The price anchor
@@ -180,14 +148,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const location = provider.city ? `${provider.city}, ${provider.state}` : provider.state || 'USA'
+  // Title and description are built from the record (lib/providerMeta.ts):
+  // no invented place names, no scraped site chrome, no repeated sentence.
+  // See scripts/audit-provider-meta.ts for the corpus-wide check.
+  const metaInput = {
+    slug: provider.slug, name: provider.name, city: provider.city, state: provider.state, bio: provider.bio,
+    services: provider.services, languages: provider.languages, serviceRadiusMiles: provider.serviceRadiusMiles,
+    status: provider.status, isFixedSite: provider.isFixedSite,
+  }
+  const title = buildProviderTitle(metaInput)
+  // Premium ($199) pages get the shorter service-led sentence; everyone else
+  // gets the record-built description.
   const description = provider.premiumPage
     ? buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])
-    : buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, location)
-  const ogTitle = `${provider.name} - Mobile Phlebotomy Services in ${location}`
+    : buildProviderDescription(metaInput).description
+  const ogTitle = title
+
+  // Records with no city: an unverified listing that has never been sent a
+  // lead is a scraped stub and is noindexed rather than titled with no place.
+  // Anything verified, or ever notified, stays indexed (location omitted from
+  // the title) so a provider expecting leads is never silently deindexed.
+  let stubNoindex = false
+  if (!provider.city && provider.status !== 'VERIFIED' && !provider.isFixedSite) {
+    const sent = await prisma.leadNotification.count({ where: { providerId: provider.id } })
+    stubNoindex = sent === 0
+  }
 
   return {
-    title: ogTitle,
+    title,
     description,
     keywords: [
       provider.name,
@@ -218,7 +206,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: `/provider/${params.slug}`
-    }
+    },
+    // Fixed facilities (hospital outpatient labs, blood banks) are not mobile
+    // providers. They were removed from city pages on 2026-08-21; as of
+    // 2026-09-17 their pages are also noindex and out of the sitemap. The
+    // page still resolves so existing links don't 404 and follow is kept.
+    ...(provider.isFixedSite || stubNoindex ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
@@ -258,7 +251,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
           zips={zipCodes.filter(z => /^\d{5}$/.test(z))}
           geo={mapCoords}
           services={provider.services || []}
-          tagline={buildProviderMetaDescription(provider.name, provider.bio, provider.specialties, provider.city ? `${provider.city}, ${provider.state}` : provider.state || 'USA')}
+          tagline={buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])}
         />
         <BreadcrumbSchema items={premiumBreadcrumbs} />
         <PremiumProviderPage
