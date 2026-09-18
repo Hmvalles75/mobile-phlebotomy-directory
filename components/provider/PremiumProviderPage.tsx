@@ -202,11 +202,14 @@ export default function PremiumProviderPage({
               image card instead of a full-width block below. */}
           <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr,300px] gap-8 md:gap-12 items-center">
             <div className="text-white">
-              {/* Logo on a white card so transparent PNGs read on the teal hero.
-                  Height-constrained (64px desktop / 48px mobile), width auto,
-                  so logos of any aspect ratio render at a legible size. */}
+              {/* Logo card. Translucent, not white: Gentle Trace's logo is white
+                  artwork on a transparent PNG and vanished on a white card
+                  (2026-09-18). A frosted card keeps the teal behind it, so white
+                  logos read as they always did and full-colour logos that carry
+                  their own background still sit in a card. Height-constrained
+                  (64px desktop / 48px mobile), width auto, any aspect ratio. */}
               {provider.logo && (
-                <div className="inline-flex items-center bg-white rounded-xl px-3 py-2 shadow-lg mb-4">
+                <div className="inline-flex items-center bg-white/15 backdrop-blur-sm ring-1 ring-white/30 rounded-xl px-3 py-2 shadow-lg mb-4">
                   <Image
                     src={provider.logo}
                     alt={`${provider.name} logo`}
