@@ -71,16 +71,16 @@ export default function ServiceAreasCovered({ providerSlug, cities, zipCodes, st
         {zipCodes.length > 0 && (
           <div>
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">ZIP code coverage</h3>
-            <div className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-2 list-none p-0 m-0" aria-label="ZIP codes covered">
               {zipCodes.map((zip) => (
-                <span
+                <li
                   key={zip}
                   className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-xs font-mono shadow-sm"
                 >
                   {zip}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
       </div>

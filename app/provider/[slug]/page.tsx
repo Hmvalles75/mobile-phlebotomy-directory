@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getProviderBySlug, getAllProviders, type EnrichedProvider } from '@/lib/providers-db'
@@ -7,6 +8,7 @@ import { ProviderActions } from '@/components/ui/ProviderActions'
 import { RatingBadge } from '@/components/ui/RatingBadge'
 import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
+import { PremiumProviderSchema } from '@/components/seo/PremiumProviderSchema'
 import { STATE_DATA } from '@/data/states-full'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
@@ -20,6 +22,7 @@ import { getNearbyProviders, getServiceAreasCovered } from '@/lib/seo/internalLi
 import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
 import NearbyProviders from '@/components/seo/NearbyProviders'
 import { getZipInfo } from '@/lib/zip-geocode'
+import { serviceHighlights } from '@/lib/providerServices'
 import { prisma } from '@/lib/prisma'
 import { buildProviderTitle, buildProviderDescription } from '@/lib/providerMeta'
 
@@ -82,11 +85,58 @@ export const revalidate = 3600
  * advance. Paying providers keep instant first loads because placement is what
  * they bought.
  */
+/**
+ * Canonical breadcrumb trail (Home > State > City > Provider). Shared by both
+ * templates so the premium page carries the same BreadcrumbList as a free
+ * listing. Resolves the state slug whether provider.state is an abbr (CA) or
+ * a full name (California).
+ */
+function buildBreadcrumbItems(provider: { name: string; slug: string; city?: string; state?: string }): Array<{ name: string; url: string }> {
+  const items: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
+  if (provider.state) {
+    const raw = provider.state.trim()
+    const stateEntry = Object.entries(STATE_DATA).find(
+      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
+    )
+    if (stateEntry) {
+      const [stateSlug, stateInfo] = stateEntry
+      items.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
+      if (provider.city) {
+        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
+        items.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
+      }
+    }
+  }
+  items.push({ name: provider.name, url: `/provider/${provider.slug}` })
+  return items
+}
+
 export async function generateStaticParams() {
   const providers = await getAllProviders()
   return providers
     .filter(p => (p as any).isFeatured)
     .map(provider => ({ slug: provider.slug }))
+}
+
+/**
+ * Premium pages: one sentence per provider, under 155 characters, built from
+ * the record rather than truncated from the About text. Includes the keyword,
+ * the city and the two most distinctive service families. The price anchor
+ * belongs here too once structured pricing exists; nothing is written in its
+ * place until then.
+ */
+function buildPremiumMetaDescription(name: string, city: string | undefined, state: string | undefined, services: string[]): string {
+  const where = city ? `${city}, ${state}` : state || 'your area'
+  const lead = `${name.trim()}: mobile phlebotomy in ${where}.`
+  const highlights = serviceHighlights(services, 3).filter(h => h !== 'at-home blood draws')
+  const tail = ' Licensed, insured, we come to you.'
+  let out = lead
+  for (let n = Math.min(2, highlights.length); n >= 1; n--) {
+    const candidate = `${lead} At-home blood draws, ${highlights.slice(0, n).join(', ')}.${tail}`
+    if (candidate.length <= 155) { out = candidate; break }
+  }
+  if (out === lead) out = `${lead} At-home blood draws.${tail}`.slice(0, 155)
+  return out
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -107,7 +157,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     status: provider.status, isFixedSite: provider.isFixedSite,
   }
   const title = buildProviderTitle(metaInput)
-  const description = buildProviderDescription(metaInput).description
+  // Premium ($199) pages get the shorter service-led sentence; everyone else
+  // gets the record-built description.
+  const description = provider.premiumPage
+    ? buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])
+    : buildProviderDescription(metaInput).description
+  const ogTitle = title
 
   // Records with no city: an unverified listing that has never been sent a
   // lead is a scraped stub and is noindexed rather than titled with no place.
@@ -131,14 +186,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ...(provider.zipCodes ? provider.zipCodes.split(',').map(z => z.trim()) : []),
       ...(provider.specialties ? provider.specialties.split(',').map(s => s.trim()) : [])
     ].filter(Boolean).join(', '),
+    // og:image / twitter:image come from opengraph-image.tsx (1200x630 card
+    // built from the poster or logo). The raw logo used to be the OG image and
+    // rendered as a blank or tiny mark in link previews.
     openGraph: {
-      title: `${provider.name} - Mobile Phlebotomy Services`,
+      title: ogTitle,
       description,
       type: 'website',
-      images: provider.logo ? [{
-        url: provider.logo,
-        alt: `${provider.name} logo`
-      }] : undefined
+      url: `${SITE_URL}/provider/${params.slug}`,
+      siteName: 'MobilePhlebotomy.org',
+    },
+    // Without an explicit twitter block Next merged the sitewide defaults from
+    // app/layout.tsx, so twitter:title read "Mobile Phlebotomy Near You |
+    // At-Home Blood Draw Directory" on every provider page.
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description,
     },
     alternates: {
       canonical: `/provider/${params.slug}`
@@ -179,14 +243,26 @@ export default async function ProviderDetailPage({ params }: PageProps) {
     const zipCodes = provider.zipCodes
       ? provider.zipCodes.split(',').map(z => z.trim()).filter(Boolean)
       : []
+    const premiumBreadcrumbs = buildBreadcrumbItems(provider)
     return (
-      <PremiumProviderPage
-        provider={provider}
-        mapCoords={mapCoords}
-        serviceAreaCities={serviceAreas.cities}
-        serviceAreaZips={zipCodes}
-        serviceAreaStateAbbr={serviceAreas.stateAbbr}
-      />
+      <>
+        <PremiumProviderSchema
+          provider={provider}
+          zips={zipCodes.filter(z => /^\d{5}$/.test(z))}
+          geo={mapCoords}
+          services={provider.services || []}
+          tagline={buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])}
+        />
+        <BreadcrumbSchema items={premiumBreadcrumbs} />
+        <PremiumProviderPage
+          provider={provider}
+          mapCoords={mapCoords}
+          serviceAreaCities={serviceAreas.cities}
+          serviceAreaZips={zipCodes}
+          serviceAreaStateAbbr={serviceAreas.stateAbbr}
+          breadcrumbs={premiumBreadcrumbs}
+        />
+      </>
     )
   }
 
@@ -233,24 +309,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   const isVerified = provider.status === 'VERIFIED'
   const isFeatured = provider.isFeatured === true
 
-  // Build canonical breadcrumb items (Home > State > City > Provider).
-  // Resolves state slug from STATE_DATA whether provider.state is an abbr (CA) or full name (California).
-  const breadcrumbItems: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
-  if (provider.state) {
-    const raw = provider.state.trim()
-    const stateEntry = Object.entries(STATE_DATA).find(
-      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
-    )
-    if (stateEntry) {
-      const [stateSlug, stateInfo] = stateEntry
-      breadcrumbItems.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
-      if (provider.city) {
-        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
-        breadcrumbItems.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
-      }
-    }
-  }
-  breadcrumbItems.push({ name: provider.name, url: `/provider/${provider.slug}` })
+  const breadcrumbItems = buildBreadcrumbItems(provider)
 
   // Resolve canonical state abbreviation (provider.state may be either an
   // abbr like "CA" or a full name like "California") for the SEO link
