@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   MapPin, Phone, Mail, Clock, Shield, CheckCircle, Award, Globe,
   Calendar, Heart, Star, ChevronRight, User, Droplet, Home,
@@ -12,6 +13,8 @@ import type { EnrichedProvider } from '@/lib/providers'
 import type { CityLink } from '@/lib/seo/anchorHelpers'
 import ServiceAreaLinks from '@/components/seo/ServiceAreaLinks'
 import ServiceAreasCovered from '@/components/seo/ServiceAreasCovered'
+import { groupServices, type ServiceFamilyKey } from '@/lib/providerServices'
+import { assessDescription, leadingSentences } from '@/lib/descriptionQuality'
 
 interface PremiumProviderPageProps {
   provider: EnrichedProvider
@@ -48,40 +51,31 @@ const SOCIAL_META: Record<SocialKey, { label: string, icon: (props: { size?: num
   linkedin: { label: 'LinkedIn', icon: ({ size = 20 }) => <Linkedin size={size} /> },
 }
 
-// Map service names to icons and unique descriptions for visual presentation
-function getServiceDetails(service: string): { icon: typeof Droplet, description: string } {
-  const s = service.toLowerCase()
-  if (s.includes('blood') || s.includes('draw') || s.includes('phlebotomy')) {
-    return { icon: Droplet, description: 'Routine and specialty venipuncture for doctor-ordered lab work, done at your home or office.' }
+// One icon per service family (lib/providerServices.ts). The template used to
+// render one card per attached service NAME and map each to one of ten canned
+// sentences by keyword, so Gentle Trace showed 19 cards with five distinct
+// descriptions. Families dedupe that at the source.
+const FAMILY_ICONS: Record<ServiceFamilyKey, typeof Droplet> = {
+  pediatric: Heart, senior: Home, dna: FileCheck, drug: Stethoscope, iv: Activity,
+  corporate: Briefcase, research: Activity, kits: FileCheck, specimen: Stethoscope,
+  lab: Stethoscope, blood: Droplet, other: FileCheck,
+}
+const DEFAULT_SERVICES = ['Mobile Blood Draw', 'Lab Specimen Collection', 'Corporate Health Screenings']
+
+/**
+ * Hero tagline. There is no tagline column yet, so this is the first whole
+ * sentence(s) of the provider's own About text within ~140 characters, with
+ * scraped site chrome stripped. Providers with no usable prose get a
+ * sentence built from their record. When a `tagline` field exists, prefer
+ * it here and keep this as the default.
+ */
+function deriveTagline(provider: EnrichedProvider, location: string): string {
+  const a = assessDescription(provider.description, provider.name)
+  if (a.kind === 'prose' || a.kind === 'thin') {
+    const t = leadingSentences(a.cleaned, 140)
+    if (t.length >= 40 && !t.endsWith('\u2026')) return t
   }
-  if (s.includes('corporate') || s.includes('wellness')) {
-    return { icon: Briefcase, description: 'On-site biometric screenings and wellness panels for employers, HR programs, and company benefits days.' }
-  }
-  if (s.includes('screening')) {
-    return { icon: Briefcase, description: 'Pre-employment, insurance, and health screenings performed at your preferred location.' }
-  }
-  if (s.includes('pediatric')) {
-    return { icon: Heart, description: 'Gentle, child-focused draws performed by phlebotomists trained in pediatric technique.' }
-  }
-  if (s.includes('geriatric') || s.includes('elderly')) {
-    return { icon: Heart, description: 'In-home care for seniors and homebound patients who can\'t easily travel to a lab.' }
-  }
-  if (s.includes('iv') || s.includes('therapy') || s.includes('hydration')) {
-    return { icon: Activity, description: 'Mobile IV infusions and hydration therapy administered by licensed professionals at your location.' }
-  }
-  if (s.includes('diagnostic') || s.includes('monitoring')) {
-    return { icon: Activity, description: 'Ongoing diagnostic testing and health monitoring delivered to your door on a regular schedule.' }
-  }
-  if (s.includes('specimen') || s.includes('collection')) {
-    return { icon: Stethoscope, description: 'Urine, saliva, and other specimen collection following lab chain-of-custody protocols.' }
-  }
-  if (s.includes('lab')) {
-    return { icon: Stethoscope, description: 'Full-service mobile lab collection — we handle pickup and delivery to Quest, Labcorp, or your preferred lab.' }
-  }
-  if (s.includes('home') || s.includes('mobile')) {
-    return { icon: Home, description: 'We come to you — homes, offices, assisted living, or anywhere you need professional draw services.' }
-  }
-  return { icon: FileCheck, description: 'Professional service delivered with care, on your schedule, at the location you choose.' }
+  return `Mobile phlebotomy that comes to you${location ? ` across ${location}` : ''}: doctor-ordered lab work collected at home, at work or in care.`
 }
 
 // Format phone to (XXX) XXX-XXXX
@@ -169,10 +163,11 @@ export default function PremiumProviderPage({
   const bookingPhone = provider.phone
   const bookingPhoneFormatted = formatPhone(provider.phone)
   const bookingEmail = provider.email
+  const tagline = deriveTagline(provider, location)
 
   return (
     <PremiumLeadFormProvider providerId={provider.id} defaultCity={provider.city || ''} defaultState={provider.state || ''}>
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20 md:pb-0">
       {/* ═══════════════════════════════════════════════════════════
           1. HERO SECTION
           ═══════════════════════════════════════════════════════════ */}
@@ -186,9 +181,9 @@ export default function PremiumProviderPage({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
 
-        <div className="relative container mx-auto px-4 py-20 md:py-32">
+        <div className="relative container mx-auto px-4 pt-5 pb-10 md:pt-6 md:pb-12">
           {breadcrumbs.length > 1 && (
-            <nav aria-label="Breadcrumb" className="max-w-4xl mx-auto mb-6 -mt-10 md:-mt-20 text-sm text-teal-50/90">
+            <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto mb-4 text-sm text-teal-50/90">
               <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 {breadcrumbs.map((item, i) => (
                   <li key={item.url} className="flex items-center gap-x-2">
@@ -201,61 +196,106 @@ export default function PremiumProviderPage({
               </ol>
             </nav>
           )}
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Business logo — shown on the teal hero background (works well for
-                light/white logos). Conditional so providers without a logo are
-                unaffected. */}
-            {provider.logo && (
-              <div className="flex justify-center mb-6">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={provider.logo}
-                  alt={`${provider.name} logo`}
-                  className="h-24 md:h-28 w-auto object-contain drop-shadow-lg"
+
+          {/* Capped hero: ~400px desktop / ~340px mobile so the About, services
+              and coverage content starts before 600px. Text beside a constrained
+              image card instead of a full-width block below. */}
+          <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr,300px] gap-8 md:gap-12 items-center">
+            <div className="text-white">
+              {/* Logo on a white card so transparent PNGs read on the teal hero.
+                  Height-constrained (64px desktop / 48px mobile), width auto,
+                  so logos of any aspect ratio render at a legible size. */}
+              {provider.logo && (
+                <div className="inline-flex items-center bg-white rounded-xl px-3 py-2 shadow-lg mb-4">
+                  <Image
+                    src={provider.logo}
+                    alt={`${provider.name} logo`}
+                    width={240}
+                    height={64}
+                    sizes="240px"
+                    quality={90}
+                    priority
+                    className="h-12 md:h-16 w-auto max-w-[240px] object-contain"
+                  />
+                </div>
+              )}
+
+              {/* Eyebrow: verification, license, languages, availability as chips */}
+              <ul className="flex flex-wrap gap-2 mb-4 list-none p-0 m-0" aria-label="Credentials">
+                {isVerified && (
+                  <li className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1 text-xs font-medium">
+                    <CheckCircle size={14} /> Platform Verified
+                  </li>
+                )}
+                <li className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1 text-xs font-medium">
+                  <Shield size={14} /> Licensed &amp; Insured
+                </li>
+                {languages.length > 0 && (
+                  <li className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1 text-xs font-medium">
+                    <Globe size={14} /> {languages.join(' · ')}
+                  </li>
+                )}
+                {(provider.availability || []).map(a => (
+                  <li key={a} className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1 text-xs font-medium">
+                    <Clock size={14} /> {a}
+                  </li>
+                ))}
+              </ul>
+
+              {/* H1 carries the keyword and the city, matching the title tag. */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 tracking-tight leading-tight">
+                {location ? <>Mobile Phlebotomy in {location} &mdash; {provider.name}</> : <>Mobile Phlebotomy &mdash; {provider.name}</>}
+              </h1>
+
+              <p className="text-lg md:text-xl text-teal-50 mb-5 max-w-2xl leading-relaxed">
+                {tagline}
+              </p>
+
+              {/* Price anchor renders here once structured pricing exists. */}
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                <BookNowButton
+                  className="bg-white text-teal-700 hover:bg-teal-50 font-bold text-base md:text-lg px-8 py-3.5 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 inline-flex items-center justify-center gap-2"
+                >
+                  <Calendar size={20} />
+                  Book Now
+                </BookNowButton>
+                {bookingPhone && (
+                  <TrackedPhoneLink
+                    phone={bookingPhone}
+                    providerId={provider.id}
+                    source="premium_provider_call"
+                    className="bg-teal-800/60 hover:bg-teal-800/80 backdrop-blur-sm border border-white/30 text-white font-semibold text-base md:text-lg px-8 py-3.5 rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2"
+                  >
+                    <Phone size={18} />
+                    Call {bookingPhoneFormatted}
+                  </TrackedPhoneLink>
+                )}
+              </div>
+              <div className="inline-flex items-center gap-2 text-white/90 mt-4 text-sm md:text-base">
+                <MapPin size={16} />
+                <span>
+                  Serving {location || 'your area'}
+                  {provider.serviceRadiusMiles ? ` and up to ${provider.serviceRadiusMiles} miles out` : ''}
+                </span>
+              </div>
+            </div>
+
+            {/* Hero image: poster, else profile photo. Constrained card, priority
+                (it is the LCP element), explicit box so nothing shifts. Hidden on
+                phones to keep the hero inside ~340px there. */}
+            {(provider.heroPoster || provider.profileImage) && (
+              <div className="hidden md:block relative w-[300px] h-[340px] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/30 bg-white/10 justify-self-end">
+                <Image
+                  src={provider.heroPoster || provider.profileImage || ''}
+                  alt={`${provider.name} — mobile phlebotomy in ${location || 'your area'}`}
+                  fill
+                  sizes="300px"
+                  priority
+                  className="object-cover"
                 />
               </div>
             )}
-
-            {/* Verified badge */}
-            {isVerified && (
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-4 py-1.5 mb-6 text-white text-sm font-medium">
-                <CheckCircle size={16} />
-                Platform Verified Provider
-              </div>
-            )}
-
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-              {provider.name}
-            </h1>
-
-            <p className="text-xl md:text-2xl text-teal-50 mb-4 max-w-2xl mx-auto leading-relaxed">
-              Professional mobile phlebotomy services — licensed, insured, and ready to come to you.
-            </p>
-
-            <div className="inline-flex items-center gap-2 text-white/90 mb-10">
-              <MapPin size={20} />
-              <span className="text-lg font-medium">Serving {location}</span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <BookNowButton
-                className="bg-white text-teal-700 hover:bg-teal-50 font-bold text-lg px-10 py-4 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 inline-flex items-center gap-2"
-              >
-                <Calendar size={22} />
-                Book Now
-              </BookNowButton>
-              {bookingPhone && (
-                <TrackedPhoneLink
-                  phone={bookingPhone}
-                  providerId={provider.id}
-                  source="premium_provider_call"
-                  className="bg-teal-800/60 hover:bg-teal-800/80 backdrop-blur-sm border border-white/30 text-white font-semibold text-lg px-10 py-4 rounded-lg transition-all duration-200 inline-flex items-center gap-2"
-                >
-                  <Phone size={20} />
-                  Call {bookingPhoneFormatted}
-                </TrackedPhoneLink>
-              )}
-            </div>
           </div>
         </div>
 
@@ -278,8 +318,7 @@ export default function PremiumProviderPage({
               <div className="relative">
                 <div className="w-56 h-56 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center border-8 border-white shadow-2xl overflow-hidden">
                   {(provider.profileImage || provider.logo) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={provider.profileImage || provider.logo || ''} alt={provider.name} className="w-full h-full object-cover" />
+                    <Image src={provider.profileImage || provider.logo || ''} alt={provider.name} fill sizes="224px" className="object-cover" />
                   ) : (
                     <User className="w-24 h-24 text-teal-400" strokeWidth={1.5} />
                   )}
@@ -343,25 +382,26 @@ export default function PremiumProviderPage({
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(provider.services && provider.services.length > 0 ? provider.services : [
-              'Mobile Blood Draw',
-              'Lab Specimen Collection',
-              'Wellness Testing',
-              'Corporate Health Screenings',
-              'Home Health Services',
-              'Clinical Trials Support',
-            ]).map((service) => {
-              const { icon: Icon, description } = getServiceDetails(service)
+            {groupServices(provider.services && provider.services.length > 0 ? provider.services : DEFAULT_SERVICES).map((family) => {
+              const Icon = FAMILY_ICONS[family.key]
+              const extras = family.members.filter(m => m.toLowerCase() !== family.label.toLowerCase())
               return (
                 <div
-                  key={service}
+                  key={`${family.key}-${family.label}`}
                   className="bg-white rounded-xl p-8 shadow-sm hover:shadow-xl transition-shadow duration-200 border border-gray-100"
                 >
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center mb-5 shadow-md">
                     <Icon className="text-white" size={28} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{service}</h3>
-                  <p className="text-gray-600 leading-relaxed">{description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{family.label}</h3>
+                  <p className="text-gray-600 leading-relaxed">{family.description}</p>
+                  {extras.length > 0 && (
+                    <ul className="flex flex-wrap gap-1.5 mt-4 list-none p-0 m-0" aria-label={`${family.label} includes`}>
+                      {extras.map(m => (
+                        <li key={m} className="text-xs bg-teal-50 text-teal-800 border border-teal-100 rounded-full px-2.5 py-1">{m}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )
             })}
@@ -506,26 +546,7 @@ export default function PremiumProviderPage({
             </div>
           </div>
         </section>
-      ) : (
-        <section className="py-20 md:py-24 bg-white">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <div className="text-center">
-              <div className="text-sm font-bold text-teal-600 tracking-wider uppercase mb-3">Patient Reviews</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Reviews coming soon
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-                We&apos;re collecting patient feedback. If you&apos;ve worked with {provider.name}, we&apos;d love to hear about your experience.
-              </p>
-              <div className="flex justify-center gap-1 opacity-30">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="text-amber-400 fill-amber-400" size={28} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      ) : null}
 
       {/* ═══════════════════════════════════════════════════════════
           7. CONTACT / BOOKING SECTION
@@ -619,17 +640,19 @@ export default function PremiumProviderPage({
                 </BookNowButton>
               </div>
 
-              {(provider as any).heroPoster ? (
+              {provider.heroPoster ? (
                 // Provider-supplied promotional poster (overrides the generic
                 // Compassionate-care card). object-contain + padding so the
                 // full poster is visible without cropping, regardless of
                 // the aspect ratio difference vs the booking card's height.
                 <div className="hidden md:flex relative bg-gradient-to-br from-teal-50 to-cyan-50 items-center justify-center p-6">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={(provider as any).heroPoster}
+                  <Image
+                    src={provider.heroPoster || ''}
                     alt={`${provider.name} — mobile phlebotomy`}
-                    className="max-w-full max-h-full object-contain rounded-lg shadow-md"
+                    width={480}
+                    height={600}
+                    sizes="(max-width: 1024px) 45vw, 480px"
+                    className="w-full h-auto max-h-[600px] object-contain rounded-lg shadow-md"
                   />
                 </div>
               ) : (
@@ -705,6 +728,24 @@ export default function PremiumProviderPage({
         </div>
       </footer>
 
+      {/* Sticky call bar on phones: the number stays one tap away while
+          scrolling. Hidden on desktop where the hero CTAs are in view. */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] px-4 py-3 flex gap-3">
+        {bookingPhone && (
+          <TrackedPhoneLink
+            phone={bookingPhone}
+            providerId={provider.id}
+            source="premium_provider_sticky_call"
+            className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-3 rounded-lg"
+            ariaLabel={`Call ${provider.name} at ${bookingPhoneFormatted}`}
+          >
+            <Phone size={18} /> Call
+          </TrackedPhoneLink>
+        )}
+        <BookNowButton className="flex-1 inline-flex items-center justify-center gap-2 border border-teal-600 text-teal-700 font-semibold py-3 rounded-lg bg-white">
+          <Calendar size={18} /> Book
+        </BookNowButton>
+      </div>
     </div>
     </PremiumLeadFormProvider>
   )
