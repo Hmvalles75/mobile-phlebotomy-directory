@@ -20,7 +20,7 @@
  * shared predicate yet — see project memory on the schema/routing audit).
  */
 import { prisma } from './prisma'
-import { isLeadInServiceRadius } from './zip-geocode'
+import { providerServesLead } from './providerCoverage'
 import { topMetroAreas, type MetroArea } from '../data/top-metros'
 
 const DEFAULT_RADIUS_MILES = 25
@@ -37,6 +37,8 @@ export interface CoverageProvider {
   email: string | null
   zipCodes: string | null
   serviceRadiusMiles: number | null
+  excludedZipCodes: string | null
+  excludedStates: string | null
   primaryState: string | null
   priorityRouting: boolean
   featuredTier: string | null
@@ -58,34 +60,14 @@ export interface MetroCoverage {
   topProviders: { name: string; paying: boolean }[]
 }
 
-/** Does a provider's ZIP config reach `targetZip` (radius from primary OR explicit match)? */
-function zipReaches(p: CoverageProvider, targetZip: string): boolean {
-  if (!p.zipCodes) return false
-  const serviceZips = p.zipCodes.split(',').map(z => z.trim()).filter(z => z.length >= 5)
-  if (serviceZips.length === 0) return false
-
-  const primaryZip = serviceZips[0]
-  const radius = p.serviceRadiusMiles || DEFAULT_RADIUS_MILES
-  if (isLeadInServiceRadius(primaryZip, targetZip, radius)) return true
-
-  // Explicit ZIP matches (exact / wildcard / range) — mirrors leadNotifications.ts
-  return serviceZips.some(serviceZip => {
-    if (serviceZip === targetZip) return true
-    if (serviceZip.includes('*')) {
-      const prefix = serviceZip.replace('*', '')
-      return targetZip.startsWith(prefix)
-    }
-    if (serviceZip.includes('-') && !serviceZip.startsWith('-')) {
-      const [start, end] = serviceZip.split('-').map(z => z.trim())
-      if (start.length >= 5 && end.length >= 5) return targetZip >= start && targetZip <= end
-    }
-    return false
-  })
+/** Does a provider serve `targetZip` in `stateAbbr`? Same rule as the router. */
+function zipReaches(p: CoverageProvider, targetZip: string, stateAbbr: string): boolean {
+  return providerServesLead(p, targetZip, stateAbbr).serves
 }
 
 /** A provider "covers" a metro if they reach ANY of the metro's representative ZIPs. */
 export function reachesMetro(p: CoverageProvider, metro: MetroArea): boolean {
-  return metro.zipCodes.some(z => zipReaches(p, z))
+  return metro.zipCodes.some(z => zipReaches(p, z, metro.stateAbbr))
 }
 
 /**
@@ -141,7 +123,7 @@ export async function getCoverageMap(): Promise<{
       id: true, name: true,
       notifyEnabled: true, isFeatured: true, eligibleForLeads: true, status: true,
       notificationEmail: true, claimEmail: true, email: true,
-      zipCodes: true, serviceRadiusMiles: true, primaryState: true,
+      zipCodes: true, serviceRadiusMiles: true, excludedZipCodes: true, excludedStates: true, primaryState: true,
       priorityRouting: true, featuredTier: true, listingTier: true,
       smsOptInAt: true, smsOptOutAt: true, onboardingStatus: true, phonePublic: true,
       coverage: { select: { state: { select: { abbr: true } } } },

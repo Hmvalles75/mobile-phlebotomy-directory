@@ -45,6 +45,14 @@ model Provider {
   isFeaturedCity        Boolean                @default(false)
   listingTier           ListingTier            @default(BASIC)
   serviceZipCodes       String?
+  // Carve-outs (2026-09-18). Routing was inclusion-only: a radius or ZIP list
+  // could add areas but nothing could remove one, so a Long Island provider
+  // whose 70-mile radius reaches Brooklyn got Brooklyn leads she declines, and
+  // a Maryland provider with a 100-mile radius claimed a Delaware patient and
+  // then said they don't serve Delaware. Exclusions win over radius, ZIP list
+  // and the fan-out floor. See lib/providerCoverage.ts.
+  excludedZipCodes      String?                // Same token grammar as zipCodes: 5-digit, prefix "112*", range "10000-10499"
+  excludedStates        String?                // Comma-separated state abbreviations, e.g. "DE,VA"
   stripePaymentMethodId String?
   eligibleForLeads      Boolean                @default(false)
   trialExpiresAt        DateTime?

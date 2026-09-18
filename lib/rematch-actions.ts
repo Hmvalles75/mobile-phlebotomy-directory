@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { SITE_URL } from './seo'
 import { prisma } from './prisma'
 import { verifyAdminSession } from './admin-auth'
-import { isLeadInServiceRadius } from './zip-geocode'
+import { providerServesLead } from './providerCoverage'
 import { canNotify, NOTIFY_GUARD_SELECT } from './canNotify'
 import sg from '@sendgrid/mail'
 
@@ -59,7 +59,7 @@ export async function findOpenLeadsInProviderRadius(
     where: { id: providerId },
     select: {
       id: true, zipCodes: true, serviceZipCodes: true,
-      serviceRadiusMiles: true,
+      serviceRadiusMiles: true, excludedZipCodes: true, excludedStates: true,
     },
   })
   if (!provider) return []
@@ -88,7 +88,7 @@ export async function findOpenLeadsInProviderRadius(
   const matches: OpenLeadMatch[] = []
   for (const lead of candidates) {
     if (!lead.zip) continue
-    if (!isLeadInServiceRadius(primaryZip, lead.zip, radius)) continue
+    if (!providerServesLead(provider, lead.zip, lead.state).serves) continue
     const daysWaiting = Math.floor((Date.now() - lead.createdAt.getTime()) / 86400000)
     matches.push({
       id: lead.id,
