@@ -27,6 +27,8 @@ async function __GET(req: NextRequest) {
         description: true,
         zipCodes: true,
         serviceZipCodes: true,
+        excludedZipCodes: true,
+        excludedStates: true,
         languages: true,
         primaryCity: true,
         services: {
@@ -61,6 +63,8 @@ async function __GET(req: NextRequest) {
         website: provider.website || '',
         description: provider.description || '',
         zipCodes: provider.zipCodes || provider.serviceZipCodes || '',
+        excludedZipCodes: provider.excludedZipCodes || '',
+        excludedStates: provider.excludedStates || '',
         languages: provider.languages || '',
         primaryCity: provider.primaryCity || '',
       },
@@ -90,7 +94,21 @@ async function __POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages, primaryCity } = body
+    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages, primaryCity, excludedZipCodes, excludedStates } = body
+    // Carve-outs (lib/providerCoverage.ts). Same token grammar as the ZIP list;
+    // reject anything that would silently match nothing.
+    const badZipToken = typeof excludedZipCodes === 'string'
+      ? excludedZipCodes.split(/[,\n;]+/).map((t: string) => t.trim()).filter(Boolean).find((t: string) => !/^(\d{5}|\d{3,4}\*?|\d{5}\s*-\s*\d{5})$/.test(t))
+      : undefined
+    if (badZipToken) {
+      return NextResponse.json({ ok: false, error: `"${badZipToken}" is not a ZIP code, a prefix like 112*, or a range like 10000-10499` }, { status: 400 })
+    }
+    const badState = typeof excludedStates === 'string'
+      ? excludedStates.split(/[,\s;]+/).map((t: string) => t.trim()).filter(Boolean).find((t: string) => !/^[A-Za-z]{2}$/.test(t))
+      : undefined
+    if (badState) {
+      return NextResponse.json({ ok: false, error: `"${badState}" is not a two-letter state code` }, { status: 400 })
+    }
 
     // Validate required fields
     if (!businessName || businessName.trim().length === 0) {
@@ -134,6 +152,7 @@ async function __POST(req: NextRequest) {
     const updateData: {
       name: string; phone: string | null; notificationEmail: string | null;
       website: string | null; description: string | null; zipCodes: string | null;
+      excludedZipCodes: string | null; excludedStates: string | null;
       languages: string | null; primaryCity?: string | null; primaryCitySlug?: string | null;
     } = {
       name: businessName.trim(),
@@ -142,6 +161,8 @@ async function __POST(req: NextRequest) {
       website: website?.trim() || null,
       description: description?.trim() || null,
       zipCodes: zipCodes?.trim() || null,
+      excludedZipCodes: typeof excludedZipCodes === 'string' && excludedZipCodes.trim() ? excludedZipCodes.split(/[,\n;]+/).map((t: string) => t.trim()).filter(Boolean).join(', ') : null,
+      excludedStates: typeof excludedStates === 'string' && excludedStates.trim() ? excludedStates.split(/[,\s;]+/).map((t: string) => t.trim().toUpperCase()).filter(Boolean).join(',') : null,
       languages: languages?.trim() || null,
     }
 

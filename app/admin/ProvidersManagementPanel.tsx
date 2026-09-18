@@ -12,6 +12,10 @@ interface Provider {
   city: string
   state: string
   eligibleForLeads: boolean
+  zipCodes?: string | null
+  serviceRadiusMiles?: number | null
+  excludedZipCodes?: string | null
+  excludedStates?: string | null
   createdAt: string
   removedAt: string | null
   removedReason: string | null
@@ -82,6 +86,37 @@ export function ProvidersManagementPanel() {
       console.error('Failed to fetch providers:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Coverage editor. Four prompts, then one PATCH. Until 2026-09-18 ZIP
+  // lists, radius and (new) carve-outs could only be changed by the provider
+  // or by a script; three providers in a row needed an admin-side fix.
+  const editCoverage = async (provider: Provider) => {
+    const zipCodes = window.prompt(`${provider.businessName}\n\nZIP codes served (comma-separated; first is the home ZIP; prefixes like 112* and ranges like 21200-21299 allowed):`, provider.zipCodes || '')
+    if (zipCodes === null) return
+    const radiusStr = window.prompt('Service radius in miles (1-200). 10 or less = ZIP list only, never widened:', String(provider.serviceRadiusMiles ?? 25))
+    if (radiusStr === null) return
+    const excludedZipCodes = window.prompt('ZIP codes NOT served (optional; same grammar). Leave empty for none:', provider.excludedZipCodes || '')
+    if (excludedZipCodes === null) return
+    const excludedStates = window.prompt('States NOT served (optional; two-letter codes, e.g. DE, VA). Leave empty for none:', provider.excludedStates || '')
+    if (excludedStates === null) return
+    setUpdating(provider.id)
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/providers/${provider.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ zipCodes, serviceRadiusMiles: Number(radiusStr), excludedZipCodes, excludedStates }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) { window.alert(data.error || 'Update failed'); return }
+      setProviders(prev => prev.map(p => p.id === provider.id ? { ...p, zipCodes: data.provider.zipCodes, serviceRadiusMiles: data.provider.serviceRadiusMiles, excludedZipCodes: data.provider.excludedZipCodes, excludedStates: data.provider.excludedStates } : p))
+      window.alert(`Saved. Radius ${data.provider.serviceRadiusMiles} mi; excluded ZIPs: ${data.provider.excludedZipCodes || 'none'}; excluded states: ${data.provider.excludedStates || 'none'}`)
+    } catch (error) {
+      console.error('Failed to update coverage:', error)
+    } finally {
+      setUpdating(null)
     }
   }
 
@@ -377,6 +412,14 @@ export function ProvidersManagementPanel() {
                           } disabled:opacity-50`}
                         >
                           {updating === provider.id ? '...' : provider.eligibleForLeads ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => editCoverage(provider)}
+                          disabled={updating === provider.id}
+                          className="text-xs text-teal-700 hover:underline whitespace-nowrap disabled:opacity-50"
+                          title={`ZIPs: ${provider.zipCodes || '-'} | radius ${provider.serviceRadiusMiles ?? 25} mi | excluded ZIPs: ${provider.excludedZipCodes || 'none'} | excluded states: ${provider.excludedStates || 'none'}`}
+                        >
+                          Coverage{provider.excludedZipCodes || provider.excludedStates ? ' *' : ''}
                         </button>
                         {!provider.eligibleForLeads && (
                           <button
