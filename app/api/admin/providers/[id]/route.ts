@@ -44,7 +44,12 @@ async function __PATCH(
     for (const f of ['zipCodes', 'excludedZipCodes'] as const) {
       if (f in updateData) {
         const tokens = String(updateData[f] ?? '').split(/[,\n;]+/).map(t => t.trim()).filter(Boolean)
-        const bad = tokens.find(t => !/^(\d{5}|\d{3,4}\*?|\d{5}\s*-\s*\d{5})$/.test(t))
+        // The include list needs the star on a prefix ("112*"); bare 3-4 digit
+        // fragments there are typos or phone numbers. Exclusions accept either.
+        const grammar = f === 'zipCodes'
+          ? /^(\d{5}(-\d{4})?|\d{3,4}\*|\d{5}\s*-\s*\d{5})$/
+          : /^(\d{5}(-\d{4})?|\d{3,4}\*?|\d{5}\s*-\s*\d{5})$/
+        const bad = tokens.find(t => !grammar.test(t))
         if (bad) return NextResponse.json({ ok: false, error: `${f}: "${bad}" is not a ZIP, a prefix like 112*, or a range like 10000-10499` }, { status: 400 })
         updateData[f] = tokens.length ? tokens.join(', ') : null
       }

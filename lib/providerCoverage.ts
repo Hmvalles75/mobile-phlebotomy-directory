@@ -48,26 +48,52 @@ export interface CoverageVerdict {
   distance: number | null
 }
 
+/**
+ * Tokenise a ZIP list. Separators are commas, semicolons, newlines and plain
+ * whitespace ("20646 20745"). A range may be written with spaces around the
+ * dash. ZIP+4 ("20853-9458") is read as its first five digits: four records
+ * store their only ZIP that way, and treating it as unparseable dropped them
+ * from routing entirely (20 lost matches in the 90-day comparison).
+ */
 export function parseZipTokens(raw: string | null | undefined): string[] {
-  return (raw || '').split(/[,\n;]+/).map(z => z.trim()).filter(z => z.length >= 3)
+  return (raw || '')
+    .replace(/(\d{5})\s*-\s*(\d{5})(?!\d)/g, '$1-$2') // "10000 - 10499" -> one token
+    .split(/[,;\s]+/)
+    .map(z => z.trim())
+    .filter(z => z.length >= 3)
+    .map(z => (/^\d{5}-\d{4}$/.test(z) ? z.slice(0, 5) : z)) // ZIP+4 -> ZIP
 }
 
 export function parseStates(raw: string | null | undefined): string[] {
   return (raw || '').split(/[,\s;]+/).map(s => s.trim().toUpperCase()).filter(s => /^[A-Z]{2}$/.test(s))
 }
 
-/** The provider's home ZIP: the first 5-digit token in the list. */
+/**
+ * The provider's home ZIP: the first five digits of the first token that is
+ * at least five characters long. That mirrors what routing has always done
+ * (a record whose first token is a range is anchored at the range start), so
+ * no provider's anchor moves with this refactor.
+ */
 export function primaryZipOf(record: Pick<CoverageRecord, 'zipCodes'>): string | null {
-  return parseZipTokens(record.zipCodes).find(z => /^\d{5}$/.test(z)) || null
+  const first = parseZipTokens(record.zipCodes).find(z => z.length >= 5)
+  const digits = first ? first.replace(/\D/g, '').slice(0, 5) : ''
+  return digits.length === 5 ? digits : null
 }
 
-/** Exact, prefix ("112*" or a bare 3-digit prefix) or range ("10000-10499"). */
-export function zipMatchesToken(zip: string, token: string): boolean {
+/**
+ * Exact, prefix or range ("10000-10499"). A prefix needs its star ("112*")
+ * on the INCLUDE list: six live records hold bare 3-4 digit fragments of a
+ * phone number or a mistyped ZIP there, and reading "313" as "every ZIP
+ * starting 313" would route leads nobody asked for. Exclusion lists accept a
+ * bare prefix too (`allowBarePrefix`), because over-excluding is harmless.
+ */
+export function zipMatchesToken(zip: string, token: string, allowBarePrefix = false): boolean {
   const z = zip.replace(/\D/g, '').slice(0, 5)
   if (z.length !== 5) return false
   const t = token.trim()
   if (/^\d{5}$/.test(t)) return z === t
-  if (/^\d{3,4}\*?$/.test(t)) return z.startsWith(t.replace('*', ''))
+  if (/^\d{3,4}\*$/.test(t)) return z.startsWith(t.replace('*', ''))
+  if (allowBarePrefix && /^\d{3,4}$/.test(t)) return z.startsWith(t)
   if (/^\d{5}\s*-\s*\d{5}$/.test(t)) {
     const [start, end] = t.split('-').map(x => x.trim())
     return z >= start && z <= end
@@ -77,7 +103,7 @@ export function zipMatchesToken(zip: string, token: string): boolean {
 
 export function isExcluded(record: CoverageRecord, zip: string, state?: string | null): CoverageReason | null {
   if (state && parseStates(record.excludedStates).includes(state.toUpperCase())) return 'excluded_state'
-  if (parseZipTokens(record.excludedZipCodes).some(t => zipMatchesToken(zip, t))) return 'excluded_zip'
+  if (parseZipTokens(record.excludedZipCodes).some(t => zipMatchesToken(zip, t, true))) return 'excluded_zip'
   return null
 }
 
