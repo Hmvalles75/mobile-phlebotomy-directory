@@ -31,6 +31,17 @@ const FIRST_SEND_AFTER_APPOINTMENT_MS = 24 * 60 * 60 * 1000
 const REMINDER_AFTER_REQUEST_MS = 72 * 60 * 60 * 1000
 
 /**
+ * Never ask about a request claimed longer ago than this. The job shipped with
+ * no upper bound and then sat switched off for weeks; by 2026-09-21 the first
+ * live run would have emailed 276 patients, 223 of them about a request
+ * claimed more than 30 days earlier, the oldest from March. A patient asked
+ * "did your draw happen?" months late cannot answer usefully and reads it as
+ * spam. Fourteen days keeps the answer fresh and bounds the first run to the
+ * recent backlog. Leads that age out are simply never asked.
+ */
+const MAX_FIRST_SEND_AGE_MS = 14 * 24 * 60 * 60 * 1000
+
+/**
  * Leads whose lead is over and was never worked. A patient whose request
  * expired or had no coverage was never promised a draw, so asking them how it
  * went is a confusing question about something that did not happen.
@@ -71,7 +82,11 @@ export async function GET(req: NextRequest) {
     // nullable column, so the window is widened here and narrowed in code.
     const firstCandidates = await prisma.lead.findMany({
       where: {
-        claimedAt: { not: null, lte: new Date(now.getTime() - FIRST_SEND_AFTER_APPOINTMENT_MS) },
+        claimedAt: {
+          not: null,
+          lte: new Date(now.getTime() - FIRST_SEND_AFTER_APPOINTMENT_MS),
+          gte: new Date(now.getTime() - MAX_FIRST_SEND_AGE_MS),
+        },
         outcomeRequestSentAt: null,
         status: { notIn: TERMINAL_NEGATIVE as unknown as any },
       },
@@ -124,6 +139,12 @@ export async function GET(req: NextRequest) {
     const reminderCandidates = await prisma.lead.findMany({
       where: {
         outcomeRequestSentAt: { not: null, lte: new Date(now.getTime() - REMINDER_AFTER_REQUEST_MS) },
+        // The reminder inherits the age limit. A first send only ever goes to a
+        // claim at most MAX_FIRST_SEND_AGE old, so a legitimate reminder is at
+        // most that plus the 72h wait. Anything older (a row stamped by hand, a
+        // test-harness lead, a later change to the first-send rule) is never
+        // reminded.
+        claimedAt: { gte: new Date(now.getTime() - MAX_FIRST_SEND_AGE_MS - REMINDER_AFTER_REQUEST_MS) },
         outcomeReminderSentAt: null,
         patientOutcome: null,
         patientOutcomeToken: { not: null },
