@@ -810,6 +810,15 @@ export async function notifyFeaturedProvidersForLeadDryRun(leadId: string): Prom
 // A provider is not reminded about the same lead more often than this.
 export const MIN_RENOTIFY_HOURS = 12
 
+// How many times one provider is emailed about one lead by the automatic
+// paths (first send + reminders + release re-offers). A lead that is claimed
+// and let lapse four times re-offered itself to the same 14 inboxes four times
+// (Matthews, NC, 2026-09-10 to 09-19), which is how one patient became 18
+// emails and an opt-out. Two is the first send and one reminder: a provider
+// who ignored it twice is not going to take it on the third. The admin
+// "Send reminder" button is a deliberate act and passes ignoreCap.
+export const MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD = 2
+
 export interface RenotifyResult {
   leadId: string
   dryRun: boolean
@@ -835,7 +844,7 @@ export interface RenotifyResult {
  */
 export async function renotifyOpenLead(
   leadId: string,
-  opts: { includeNew?: boolean; dryRun?: boolean; excludeProviderIds?: string[] } = {},
+  opts: { includeNew?: boolean; dryRun?: boolean; excludeProviderIds?: string[]; ignoreCap?: boolean } = {},
 ): Promise<RenotifyResult> {
   const lead = await prisma.lead.findUnique({
     where: { id: leadId },
@@ -855,9 +864,11 @@ export async function renotifyOpenLead(
 
   const sentTo = new Set(lead.leadNotifications.filter(n => n.status === 'SENT').map(n => n.providerId))
   const lastRowAt = new Map<string, Date>()
+  const sentCount = new Map<string, number>()
   for (const n of lead.leadNotifications) {
     const prev = lastRowAt.get(n.providerId)
     if (!prev || n.createdAt > prev) lastRowAt.set(n.providerId, n.createdAt)
+    if (n.status === 'SENT') sentCount.set(n.providerId, (sentCount.get(n.providerId) || 0) + 1)
   }
 
   // Everyone the matcher would notify today, then narrow to already-sent
@@ -871,6 +882,13 @@ export async function renotifyOpenLead(
   for (const p of targets) {
     const email = p.notificationEmail || p.claimEmail || p.email
     const row = { providerId: p.id, name: p.name.trim(), email, alreadyNotified: sentTo.has(p.id), sent: false as boolean, skipped: undefined as string | undefined }
+    const already = sentCount.get(p.id) || 0
+    if (!opts.ignoreCap && already >= MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD) {
+      row.skipped = `already emailed ${already} times about this lead (max ${MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD})`
+      base.skipped++
+      base.recipients.push(row)
+      continue
+    }
     const last = lastRowAt.get(p.id)
     if (last && last.getTime() > cutoff) {
       row.skipped = `notified ${Math.round((Date.now() - last.getTime()) / 3600000)}h ago (min ${MIN_RENOTIFY_HOURS}h)`

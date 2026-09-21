@@ -854,6 +854,13 @@ model LeadNotification {
   // True when the fan-out floor sent this lead to a provider outside their
   // own service radius (2026-09-07). Excluded from dormant-sweep counts.
   outsideRadius Boolean            @default(false)
+  // When the "this request was just claimed" courtesy email went to this
+  // provider for this lead (2026-09-21). Stamped on every row the provider
+  // holds for the lead, so the notice is sent once per provider per lead and
+  // never repeated when a lead is released and claimed again. Before this the
+  // notice went out once per ROW: a provider re-notified four times got four
+  // identical emails on every claim (Neal Premier, 18 emails for one patient).
+  claimedNoticeSentAt DateTime?
   lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
   provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
   emailEvents  EmailEvent[]
