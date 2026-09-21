@@ -146,6 +146,8 @@ function DashboardContent() {
     website: '',
     description: '',
     zipCodes: '',
+    excludedZipCodes: '',
+    excludedStates: '',
     languages: '',
     primaryCity: '',
   })
@@ -242,6 +244,8 @@ function DashboardContent() {
             website: result.profile.website || '',
             description: result.profile.description || '',
             zipCodes: result.profile.zipCodes || '',
+            excludedZipCodes: result.profile.excludedZipCodes || '',
+            excludedStates: result.profile.excludedStates || '',
             languages: result.profile.languages || '',
             primaryCity: result.profile.primaryCity || '',
           })
@@ -824,6 +828,31 @@ function DashboardContent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">Comma-separated ZIP codes you serve</p>
+              </div>
+
+              {/* Carve-outs: areas inside the radius the provider will not go to.
+                  Requests matching these never reach them. */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">ZIP codes you do NOT serve</label>
+                <input
+                  type="text"
+                  value={profileData.excludedZipCodes}
+                  onChange={(e) => setProfileData({ ...profileData, excludedZipCodes: e.target.value })}
+                  placeholder="e.g. 112*, 10001, 10000-10499"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Optional. Areas inside your radius you don&apos;t cover. A prefix like 112* means every ZIP starting 112 (Brooklyn). Requests there won&apos;t be sent to you.</p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">States you do NOT serve</label>
+                <input
+                  type="text"
+                  value={profileData.excludedStates}
+                  onChange={(e) => setProfileData({ ...profileData, excludedStates: e.target.value })}
+                  placeholder="e.g. DE, VA"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Optional. Two-letter codes for states your radius reaches but you don&apos;t cross into.</p>
               </div>
 
               {/* Languages */}

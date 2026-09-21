@@ -10,6 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isExcluded } from '@/lib/providerCoverage'
 import { prisma } from '@/lib/prisma'
 import sg from '@sendgrid/mail'
 import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from '@/lib/canNotify'
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest) {
         claimEmail: true,
         notificationEmail: true,
         zipCodes: true,
+        excludedZipCodes: true,
+        excludedStates: true,
         ...NOTIFY_GUARD_SELECT,
         coverage: {
           select: {
@@ -81,6 +84,8 @@ export async function POST(req: NextRequest) {
       const matchingProviders = featuredProviders.filter(provider => {
         // Suppression before geography — never re-notify a removed provider.
         if (!canNotify(provider)) return false
+        // Carve-outs win over state and ZIP coverage (lib/providerCoverage.ts).
+        if (isExcluded(provider, lead.zip, lead.state)) return false
         // Check state coverage
         const coverageStates = provider.coverage.map(c => c.state.abbr)
         if (coverageStates.includes(lead.state)) {

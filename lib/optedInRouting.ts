@@ -17,7 +17,8 @@
 import { prisma } from './prisma'
 import twilio from 'twilio'
 import { LeadStatus, OnboardingStatus, DispatchTaskReason } from '@prisma/client'
-import { isLeadInServiceRadius, getDistanceBetweenZips } from './zip-geocode'
+import { getDistanceBetweenZips } from './zip-geocode'
+import { providerServesLead } from './providerCoverage'
 import { notifyPatientProviderAssigned, notifyPatientNeedsCoverage } from './patientSmsFlow'
 import { canNotify, NOTIFIABLE_WHERE, NOTIFY_GUARD_SELECT } from './canNotify'
 
@@ -68,6 +69,8 @@ async function findOptedInProviders(leadZip: string): Promise<EligibleProvider[]
       phonePublic: true,
       zipCodes: true,
       serviceRadiusMiles: true,
+      excludedZipCodes: true,
+      excludedStates: true,
       ...NOTIFY_GUARD_SELECT
     }
   })
@@ -88,7 +91,8 @@ async function findOptedInProviders(leadZip: string): Promise<EligibleProvider[]
     const primaryZip = serviceZips[0]
     const radius = provider.serviceRadiusMiles || 25
 
-    if (isLeadInServiceRadius(primaryZip, leadZip, radius)) {
+    // Lead state is not known on this path; ZIP carve-outs still apply.
+    if (providerServesLead(provider, leadZip).serves) {
       const distance = getDistanceBetweenZips(primaryZip, leadZip)
       eligibleProviders.push({
         ...provider,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { providerServesLead } from '@/lib/providerCoverage'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { PAID_HEAD_START_SECONDS } from '@/lib/leadNotifications'
@@ -40,6 +41,8 @@ export async function GET(req: NextRequest) {
         operatingHoursStart: true,
         operatingHoursEnd: true,
         serviceRadiusMiles: true,
+        excludedZipCodes: true,
+        excludedStates: true,
         eligibleForLeads: true,
         dormantWarnedAt: true,
         leadsPausedAt: true
@@ -196,10 +199,10 @@ export async function GET(req: NextRequest) {
 
       // Filter leads by radius if provider has a ZIP code
       if (primaryZip) {
-        const { isLeadInServiceRadius } = await import('@/lib/zip-geocode')
-
+        // Same rule as the router (lib/providerCoverage.ts), so a lead the
+        // provider was not emailed never shows here either.
         availableLeads = allOpenLeads.filter(lead =>
-          isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius)
+          providerServesLead(provider, lead.zip, lead.state).serves
         ).slice(0, 20) // Limit to 20 leads
 
         // Leads someone else took, kept visible for 7 days.
@@ -223,7 +226,7 @@ export async function GET(req: NextRequest) {
           },
         })
         recentlyClaimedLeads = claimedElsewhere
-          .filter(lead => isLeadInServiceRadius(primaryZip, lead.zip, serviceRadius))
+          .filter(lead => providerServesLead(provider, lead.zip, lead.state).serves)
           .slice(0, 20)
       } else {
         // No ZIP code set, show no leads

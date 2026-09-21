@@ -98,6 +98,7 @@ export async function getProviderRoster(): Promise<{
         eligibleForLeads: true, notifyEnabled: true, status: true, onboardingStatus: true,
         claimVerifiedAt: true,
         primaryCity: true, primaryState: true, zipCodes: true, serviceRadiusMiles: true,
+        excludedZipCodes: true, excludedStates: true,
         smsOptInAt: true, smsOptOutAt: true,
         staleReleaseCount: true, createdAt: true,
         coverage: { select: { state: { select: { abbr: true } } } },

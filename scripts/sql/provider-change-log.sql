@@ -15,7 +15,7 @@ DECLARE
   newv text;
   tracked text[] := ARRAY[
     'eligibleForLeads','notifyEnabled','isFeatured','priorityRouting','featuredTier','listingTier','status',
-    'serviceRadiusMiles','zipCodes','primaryCity','primaryState',
+    'serviceRadiusMiles','zipCodes','excludedZipCodes','excludedStates','primaryCity','primaryState',
     'email','notificationEmail','claimEmail','phonePublic',
     'removedAt','removedReason','leadsPausedAt','dormantWarnedAt','leadsResumedAt',
     'stripeCustomerId','onboardingStatus'
