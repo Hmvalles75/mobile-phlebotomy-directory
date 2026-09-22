@@ -46,7 +46,9 @@ const MAX_FIRST_SEND_AGE_MS = 14 * 24 * 60 * 60 * 1000
  * expired or had no coverage was never promised a draw, so asking them how it
  * went is a confusing question about something that did not happen.
  */
-const TERMINAL_NEGATIVE = ['EXPIRED_NO_RESPONSE', 'NEEDS_COVERAGE', 'CLOSED_DUPLICATE', 'REFUNDED'] as const
+// CLOSED_DECLINED: the patient told the provider no; asking them how the draw
+// went would be a question about something they turned down.
+const TERMINAL_NEGATIVE = ['EXPIRED_NO_RESPONSE', 'NEEDS_COVERAGE', 'CLOSED_DUPLICATE', 'REFUNDED', 'CLOSED_DECLINED'] as const
 
 /** Send time: appointment + 24h when one exists, otherwise claim + 48h. */
 function dueAt(claimedAt: Date, appointmentDate: Date | null): number {
