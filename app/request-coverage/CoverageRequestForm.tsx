@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { captureFirstTouchAttribution } from '@/lib/attribution'
 
 const COVERAGE_TYPES = [
@@ -43,6 +44,12 @@ export function CoverageRequestForm() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  // Who the request is for. This form is for organizations, but it sits one
+  // click from patient-facing pages and individual patients land in it ("I
+  // have 2 Drs that need blood drawn... Do u do that?", 2026-09-21). A patient
+  // logged here goes into the institutional pipeline and is never routed to a
+  // phlebotomist. Ask first; send patients to the request form.
+  const [audience, setAudience] = useState<'unknown' | 'patient' | 'organization'>('unknown')
 
   const setField = <K extends keyof FormState>(k: K, v: FormState[K]) => {
     setData(prev => ({ ...prev, [k]: v }))
@@ -122,6 +129,46 @@ export function CoverageRequestForm() {
           the timeline.
         </p>
         <p className="text-sm text-gray-400 mt-4">— MobilePhlebotomy.org</p>
+      </div>
+    )
+  }
+
+  if (audience !== 'organization') {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">Who is this request for?</h2>
+        <p className="text-sm text-gray-600 mb-6">Two different paths, so we can get you to the right people quickly.</p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setAudience('patient')}
+            className={`text-left rounded-lg border-2 p-5 transition-colors ${audience === 'patient' ? 'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-primary-400'}`}
+          >
+            <div className="text-lg font-semibold text-gray-900">A patient</div>
+            <div className="text-sm text-gray-600 mt-1">Me, or someone I care for. I have a doctor&apos;s order or lab requisition and need a blood draw at home.</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAudience('organization')}
+            className="text-left rounded-lg border-2 border-gray-200 hover:border-primary-400 p-5 transition-colors"
+          >
+            <div className="text-lg font-semibold text-gray-900">An organization</div>
+            <div className="text-sm text-gray-600 mt-1">A clinic, research site, lab, employer, senior community or agency arranging draws for other people.</div>
+          </button>
+        </div>
+        {audience === 'patient' && (
+          <div className="mt-6 rounded-lg bg-primary-50 border border-primary-200 p-5">
+            <p className="text-gray-800 mb-4">
+              For an individual draw, use the patient request form. It takes two minutes and goes straight to the certified phlebotomists who cover your ZIP code, who then call you to schedule. You pay the phlebotomist directly at their rate.
+            </p>
+            <Link
+              href="/request-blood-draw"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-md"
+            >
+              Go to the patient request form
+            </Link>
+          </div>
+        )}
       </div>
     )
   }
