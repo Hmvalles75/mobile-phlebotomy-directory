@@ -35,7 +35,9 @@ export async function POST(req: NextRequest, { params }: { params: { leadId: str
     } catch {
       // no body is fine
     }
-    const result = await renotifyOpenLead(params.leadId, { includeNew, dryRun })
+    // A deliberate admin action is not subject to the automatic per-provider
+    // cap (MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD); the 12-hour minimum still applies.
+    const result = await renotifyOpenLead(params.leadId, { includeNew, dryRun, ignoreCap: true })
     const status = result.reason ? 409 : 200
     return NextResponse.json({ ok: !result.reason, ...result }, { status })
   } catch (err: any) {

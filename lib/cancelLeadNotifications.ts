@@ -94,6 +94,7 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
         id: true,
         providerId: true,
         createdAt: true,
+        claimedNoticeSentAt: true,
         provider: {
           select: {
             name: true, priorityRouting: true, primaryState: true,
@@ -108,7 +109,8 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
 
     // The delay depends on whether a paying provider was in the batch, which
     // is judged across ALL notified providers including the claimer.
-    const payingInBatch = notifications.filter(n => n.provider.priorityRouting).length
+    // Counted per provider, not per row: a re-notified provider holds several rows.
+    const payingInBatch = new Set(notifications.filter(n => n.provider.priorityRouting).map(n => n.providerId)).size
     const claimedAt = Date.now()
 
     const delivered = notifications.filter(n => {
@@ -162,10 +164,31 @@ export async function cancelLeadNotifications(leadId: string, claimingProviderId
     // must count the batch as it was actually sent, including providers who
     // have since opted out, or the reconstructed delay would be wrong for
     // everyone else.
-    const notifiable = delivered.filter(n => canNotify(n.provider))
-    const optedOut = delivered.length - notifiable.length
+    const allowed = delivered.filter(n => canNotify(n.provider))
+    const optedOut = delivered.length - allowed.length
     if (optedOut > 0) {
       console.log(`[CancelNotifications] Suppressed ${optedOut} courtesy email(s) — provider removed or notifications off`)
+    }
+
+    // One notice per PROVIDER per LEAD, ever. This loop used to run per
+    // notification row. Every reminder and every release re-offer adds a row
+    // for the same provider, so a lead that cycled claim -> stale release ->
+    // re-claim four times sent each provider four identical "was just claimed"
+    // emails on every claim. Tanya Neal (Neal Premier Drug Testing) received 18
+    // emails in nine days about one Matthews, NC patient and asked to be removed
+    // (2026-09-21); 76 providers were hit in 30 days, the worst burst six copies.
+    // A second notice after a release tells the provider nothing new, so anyone
+    // already told about this lead is skipped as well.
+    const alreadyTold = new Set(notifications.filter(n => n.claimedNoticeSentAt).map(n => n.providerId))
+    const seen = new Set<string>()
+    const notifiable = allowed.filter(n => {
+      if (alreadyTold.has(n.providerId) || seen.has(n.providerId)) return false
+      seen.add(n.providerId)
+      return true
+    })
+    const collapsed = allowed.length - notifiable.length
+    if (collapsed > 0) {
+      console.log(`[CancelNotifications] Collapsed ${collapsed} duplicate or repeat courtesy email(s) — one notice per provider per lead`)
     }
 
     const suppressed = notifications.length - delivered.length - 1  // -1 = claimer
@@ -255,6 +278,12 @@ ${upgradeHtml}
           html,
         })
         sent++
+        // Stamp every row this provider holds for the lead, so a later claim
+        // (after a release) finds them already told whichever row it looks at.
+        await prisma.leadNotification.updateMany({
+          where: { leadId: lead.id, providerId: n.providerId },
+          data: { claimedNoticeSentAt: new Date() },
+        })
       } catch (err: any) {
         console.warn(`[CancelNotifications] Courtesy email failed for ${n.provider.name}:`, err.message || err)
       }
