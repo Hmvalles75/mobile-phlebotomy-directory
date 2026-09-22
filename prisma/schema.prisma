@@ -391,6 +391,23 @@ model Lead {
   // Pre-SLA claim reminder (2026-09-10): set when the one-tap reminder email
   // was sent to the claimer, one per claim. See lib/claimReminder.ts.
   claimReminderSentAt  DateTime?
+  // ── Soft-outcome nudges (2026-09-22) ─────────────────────────────────────
+  // A soft outcome (TEXT_SENT, NO_ANSWER, VOICEMAIL, EMAIL_SENT, WORKING_IT,
+  // SCHEDULED_CALLBACK) stops the stale-claim clock and nothing restarts it:
+  // 85 leads in 90 days sat on one of those forever, never won, lost or
+  // re-offered. Two days after the soft outcome, one nudge to the provider
+  // (working / booked / hand it back) and one check-in to the patient (has the
+  // provider reached you?). Each fires once. Auto-release deliberately not
+  // built until the patient survey says how often "text sent" becomes a draw.
+  outcomeUpdatedAt       DateTime?           // when `outcome` last changed; null on rows older than this column (claimedAt is the fallback)
+  softNudgeSentAt        DateTime?           // provider nudge, at most once per claim
+  patientCheckinSentAt   DateTime?           // patient check-in, at most once per claim
+  // No @unique: db push treats a new unique index as a data-loss risk and
+  // refuses without --accept-data-loss. The token is a nanoid(32) minted at
+  // send time and looked up with findFirst; collisions are ~1 in 10^57.
+  patientCheckinToken    String?             // /api/checkin/[token]
+  patientCheckinAnswer   String?             // 'in_touch' | 'no_contact'
+  patientCheckinAnsweredAt DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases
   // a CLAIMED lead because the provider didn't log an outcome within the
   // SLA (STAT 2h, STANDARD 6h). Lead flips status back to OPEN and these

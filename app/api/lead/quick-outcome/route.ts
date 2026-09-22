@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { handBackLead } from '@/lib/handBackLead'
 
 /**
  * One-tap outcome from the pre-SLA reminder email (lib/claimReminder.ts).
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
   const leadId = req.nextUrl.searchParams.get('lead')
   const providerId = req.nextUrl.searchParams.get('provider')
   const action = req.nextUrl.searchParams.get('do')
-  if (!leadId || !providerId || (action !== 'working' && action !== 'booked')) {
+  if (!leadId || !providerId || (action !== 'working' && action !== 'booked' && action !== 'handback')) {
     return page('Something is missing from that link', 'Open your dashboard and you can update the request from there.', '#dc2626')
   }
 
@@ -46,8 +47,18 @@ export async function GET(req: NextRequest) {
     return page('Already closed', `This request is ${lead.status.toLowerCase().replace(/_/g, ' ')}. Nothing to update.`, '#6b7280')
   }
 
+  if (action === 'handback') {
+    // From the soft-outcome nudge (lib/softOutcomeNudge.ts): the provider has
+    // stopped working this one. Release and re-offer at once, same path as the
+    // "Can't serve this area" button. No mark against the provider.
+    const ok = await handBackLead({ leadId, providerId, reason: 'provider_handback', note: 'Handed back by the provider from the day-2 nudge' })
+    if (!ok) return page('Already moved on', 'This request is no longer on your account. Nothing to do.', '#6b7280')
+    console.log(`[quick-outcome] ${providerId} handed back ${leadId} via email link`)
+    return page('Handed back, thank you', `${lead.fullName} in ${lead.city}, ${lead.state} has been released and offered to other providers. You no longer have access to their details.`, '#b45309')
+  }
+
   if (action === 'booked') {
-    await prisma.lead.update({ where: { id: leadId }, data: { outcome: 'APPOINTMENT_BOOKED', firstContactAt: new Date() } })
+    await prisma.lead.update({ where: { id: leadId }, data: { outcome: 'APPOINTMENT_BOOKED', outcomeUpdatedAt: new Date(), firstContactAt: new Date() } })
     console.log(`[quick-outcome] ${providerId} marked ${leadId} APPOINTMENT_BOOKED via email link`)
     return page('Marked as booked', `${lead.fullName} in ${lead.city}, ${lead.state} stays with you. When the draw is done, mark it completed from your dashboard.`, '#16a34a')
   }
