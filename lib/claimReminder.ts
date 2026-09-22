@@ -84,7 +84,7 @@ export async function findClaimReminderCandidates(now: Date = new Date()): Promi
   })
 }
 
-export function quickOutcomeUrl(leadId: string, providerId: string, action: 'working' | 'booked'): string {
+export function quickOutcomeUrl(leadId: string, providerId: string, action: 'working' | 'booked' | 'handback'): string {
   return `${SITE_URL}/api/lead/quick-outcome?lead=${leadId}&provider=${providerId}&do=${action}`
 }
 

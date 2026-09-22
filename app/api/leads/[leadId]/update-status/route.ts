@@ -91,6 +91,8 @@ export async function POST(
       case 'update_outcome':
         if (outcome && Object.values(LeadOutcome).includes(outcome)) {
           updateData.outcome = outcome
+          // The soft-outcome nudge (lib/softOutcomeNudge.ts) counts from here.
+          if (outcome !== lead.outcome) updateData.outcomeUpdatedAt = new Date()
         }
         if (outcomeNotes) {
           updateData.outcomeNotes = outcomeNotes
