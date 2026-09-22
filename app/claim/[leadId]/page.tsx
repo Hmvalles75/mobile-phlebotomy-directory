@@ -99,7 +99,11 @@ export default function ClaimLeadPage() {
         }),
       })
       const data = await response.json()
-      if (data.success) {
+      if (data.success && data.released) {
+        // Cannot-serve outcomes hand the request back and re-offer it; show
+        // the same released screen the Release button shows.
+        setReleased(true)
+      } else if (data.success) {
         setOutcomeSaved(label)
       } else {
         setOutcomeError(data.error || 'Failed to save outcome')
@@ -611,7 +615,29 @@ export default function ClaimLeadPage() {
                 >
                   🔀 Wrong service
                 </button>
+                {/* "Can't serve": the patient is fine, this provider is not the
+                    one (out of area, no availability). Releases and re-offers
+                    at once instead of freezing the request on this account. */}
+                <button
+                  onClick={() => handleOutcome('OUTSIDE_SERVICE_AREA', "Can't serve this area", false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-900 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                  title="Hands the request back and sends it to other providers right away. You lose access to this patient."
+                >
+                  📍 Can&apos;t serve this area
+                </button>
+                <button
+                  onClick={() => handleOutcome('NO_AVAILABILITY', 'No availability', false)}
+                  disabled={outcomeSaving}
+                  className="px-3 py-2 border-2 border-amber-300 text-amber-900 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm disabled:opacity-50"
+                  title="Hands the request back and sends it to other providers right away. You lose access to this patient."
+                >
+                  📅 No availability
+                </button>
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Won&apos;t pay and Not interested close the request; nobody else is sent it. Can&apos;t serve, No availability and Wrong service hand it back and offer it to other providers right away.
+              </p>
             </div>
 
             {/* Release this lead — secondary action */}

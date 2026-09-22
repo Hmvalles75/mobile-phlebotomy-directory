@@ -981,6 +981,7 @@ enum LeadStatus {
   CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
   CLOSED_DUPLICATE      // Older submission from a patient who re-submitted; canonical row is the most recent submission
   INSTITUTIONAL_REVIEW  // High-value / B2B request held for the admin's written proposal (2026-09-09). Never routed to providers, never claimable, never auto-expired. Admin can release it to OPEN if it is an ordinary patient. See lib/institutionalIntake.ts.
+  CLOSED_DECLINED       // Provider reached the patient and the patient declined (price, changed mind). Closed, not re-offered: the same patient would decline the next provider too. Claim history kept on routedToId. (2026-09-22)
   EXPIRED_NO_RESPONSE   // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
 }
 
