@@ -13,6 +13,8 @@ import { sendLeadConfirmationToPatient } from '@/lib/leadConfirmation'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
+import { isAssignedUSNumber, UNASSIGNED_NUMBER_MESSAGE } from '@/lib/phoneAreaCode'
+import { emailAdmin } from '@/lib/adminEmail'
 import { getZipInfo, resolveZipForRouting } from '@/lib/zip-geocode'
 import { US_STATES } from '@/lib/states'
 
@@ -306,12 +308,32 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Area code / exchange must exist in the North American plan. Catches a
+    // real patient who dropped a digit ((180) 878-2649, (191) 731-9147: both
+    // uncallable, one logged WRONG_NUMBER) while the form is still in front of
+    // them. See lib/phoneAreaCode.ts for the replay.
+    if (!isAssignedUSNumber(payload.phone)) {
+      console.warn(`[lead/submit] Rejected phone ${payload.phone} (area code / exchange not assigned)`)
+      return NextResponse.json(
+        { ok: false, error: 'INVALID_PHONE', message: UNASSIGNED_NUMBER_MESSAGE },
+        { status: 400 }
+      )
+    }
+
     // Rate-limit by IP — mirrors the corporate-request route. Sheds bots /
     // form-hammering before we do any DB writes or provider blasts.
     const ipAddress =
       req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
       req.headers.get('x-real-ip') ||
       null
+    // Vercel resolves the connecting IP's country at the edge. A US address
+    // submitted from outside the US is held for review rather than routed:
+    // the 2026-08/09 "victor reeves" trio (Islamabad IP, plus-code address,
+    // 20+ draws claimed) reached the admin as $1,500 high-value leads. A US
+    // patient on a VPN lands here too; the admin releases those with the
+    // existing button. Header absent (local dev) means no hold.
+    const ipCountry = (req.headers.get('x-vercel-ip-country') || '').trim().toUpperCase() || null
+    const foreignHold = !!ipCountry && ipCountry !== 'US'
     if (ipAddress) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
       const recentFromIp = await prisma.lead.count({
@@ -383,7 +405,12 @@ export async function POST(req: NextRequest) {
         priceCents,
         // Institutional requests are held for the admin's written proposal and
         // never enter the provider race. See lib/institutionalIntake.ts.
-        status: isHighValue ? 'INSTITUTIONAL_REVIEW' : 'OPEN',
+        // A foreign-IP submission is parked in the same held state so the
+        // admin's "Release to providers" button covers both.
+        status: isHighValue || foreignHold ? 'INSTITUTIONAL_REVIEW' : 'OPEN',
+        outcomeNotes: foreignHold
+          ? `Held at intake ${new Date().toISOString().slice(0, 10)}: submitted from ${ipCountry}${ipAddress ? ` (IP ${ipAddress})` : ''} with a ${payload.state.toUpperCase()} address. Release to providers if it is a genuine request.`
+          : undefined,
         drawCount,
         requestType,
         isHighValue,
@@ -460,6 +487,26 @@ export async function POST(req: NextRequest) {
     // consulted smsOptInAt, so had the campaign ever been approved it would
     // have texted providers who never opted in. lib/smsBlast.ts is left in
     // place but is no longer wired to any path.
+    // Foreign-IP hold. The lead is already INSTITUTIONAL_REVIEW; tell the
+    // admin why and stop. The requester sees the ordinary success message:
+    // a genuine patient loses nothing (the admin releases it), a junk sender
+    // learns nothing. A high-value lead from abroad falls through to the
+    // institutional branch below, which already alerts the admin; the country
+    // is on the lead's notes either way.
+    if (foreignHold && !isHighValue) {
+      await emailAdmin(
+        `Lead held at intake: ${lead.fullName}, ${lead.city} ${lead.state} (submitted from ${ipCountry})`,
+        `A patient request was held because the connection came from ${ipCountry}, not the US.\n\n` +
+        `Name: ${lead.fullName}\nPhone: ${lead.phone}\nEmail: ${lead.email || '(none)'}\n` +
+        `Address: ${lead.address1}, ${lead.city}, ${lead.state} ${lead.zip}\nIP: ${ipAddress || '(unknown)'}\n` +
+        `Notes: ${lead.notes || '(none)'}\n\n` +
+        `No provider has been notified. If it is genuine (a traveler, a VPN, family submitting from abroad), release it here:\n` +
+        `${SITE_URL}/admin/lead-diagnostic/${lead.id}`
+      )
+      console.log(`[Lead ${lead.id}] HELD - submitted from ${ipCountry}, not routed`)
+      return NextResponse.json({ ok: true, leadId: lead.id })
+    }
+
     // Institutional gate. The high-value email above already went to the admin;
     // add an SMS, acknowledge the requester, and stop here. No fan-out, no
     // 'expect a call from a phlebotomist' email, no coverage-gap parking.

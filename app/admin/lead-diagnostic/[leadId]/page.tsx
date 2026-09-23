@@ -152,7 +152,7 @@ export default async function LeadDiagnosticPage({ params }: Props) {
         </div>
 
         {lead.status === 'INSTITUTIONAL_REVIEW' && (
-          <ReleaseToProvidersButton leadId={lead.id} />
+          <ReleaseToProvidersButton leadId={lead.id} holdNote={!lead.isHighValue && lead.outcomeNotes?.startsWith('Held at intake') ? lead.outcomeNotes : null} />
         )}
 
         {lead.status === 'OPEN' && (
