@@ -224,9 +224,15 @@ export async function emailProviderApprovedWithLeadChoice(
   contactName: string,
   leadOptIn: string | null | undefined,
   contactMethods: string | null | undefined,
-  hasWebsite: boolean = true
+  hasWebsite: boolean = true,
+  slug?: string | null
 ) {
   const firstName = contactName.split(' ')[0]
+  // Providers replied to this email asking for "login credentials" (PHLEXA,
+  // 2026-09-16): it said the listing was live and never said how to sign in.
+  const dashboardBlock = `🔑 YOUR DASHBOARD (no password to remember):
+Go to https://www.mobilephlebotomy.org/dashboard/login, enter ${to}, and we email you a secure sign-in link. From the dashboard you can upload your logo, edit your description and website, set your ZIP codes and service radius, set your pricing, and see every request you've claimed.
+${slug ? `\nYour public listing: https://www.mobilephlebotomy.org/provider/${slug}\nIt can take a few minutes to appear on city pages after approval.\n` : ''}`
 
   // Parse contact methods
   const methods = contactMethods?.split(',').map(m => m.trim()) || []
@@ -261,16 +267,17 @@ You'll receive the patient's:
 • Urgency level
 • Any special notes
 
+${dashboardBlock}
 📱 HOW TO RESPOND:
-Simply contact the patient directly to schedule their appointment. The faster you respond, the better your chances of booking the visit.
+Click "Claim This Patient" in the email, then contact the patient directly to schedule. The faster you respond, the better your chances of booking the visit.
 
 ⏱️ AFTER YOU CALL THE PATIENT:
 Tap an outcome button on the claim page after each call attempt (No answer, Booked, Voicemail left, Found other, Not interested, etc.). Our system uses outcome logging as a "proof of life" signal — leads with no logged outcome within 6 hours auto-release back to the pool so they don't sit frozen.
 
-Takes 2 seconds, but missing it can release a lead you actually worked. The button is the only way the system knows you've engaged.
+Takes 2 seconds, but missing it can release a lead you actually worked. The button is the only way the system knows you've engaged. An hour before a release we email you a one-tap reminder, so you won't lose one you're working.
 
 💰 PRICING:
-During our beta phase, all leads are FREE. We're working with a small group of providers to refine the system before introducing pricing.
+No referral fee. You bill the patient directly at your own rate; we don't charge you for requests or take a commission.
 
 📬 IMPORTANT:
 Our emails can land in spam at first. Please check your spam folder and mark us as "Not Spam" so you don't miss patient requests.
@@ -304,6 +311,7 @@ Your listing for ${businessName} is now live on MobilePhlebotomy.org.
 
 Patients searching for mobile phlebotomy in your area can now find your business in our directory.
 
+${dashboardBlock}
 📋 DIRECTORY ONLY:
 As you requested, we won't send you patient leads. Your listing will remain visible to patients who can contact you directly through the information on your profile.
 

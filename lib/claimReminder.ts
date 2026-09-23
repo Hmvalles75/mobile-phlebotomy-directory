@@ -84,7 +84,7 @@ export async function findClaimReminderCandidates(now: Date = new Date()): Promi
   })
 }
 
-export function quickOutcomeUrl(leadId: string, providerId: string, action: 'working' | 'booked' | 'handback'): string {
+export function quickOutcomeUrl(leadId: string, providerId: string, action: 'working' | 'booked' | 'handback' | 'unreachable'): string {
   return `${SITE_URL}/api/lead/quick-outcome?lead=${leadId}&provider=${providerId}&do=${action}`
 }
 
@@ -94,6 +94,9 @@ async function sendClaimReminderEmail(c: ReminderCandidate): Promise<void> {
   sg.setApiKey(process.env.SENDGRID_API_KEY)
   const working = quickOutcomeUrl(c.id, c.providerId, 'working')
   const booked = quickOutcomeUrl(c.id, c.providerId, 'booked')
+  // Magnus Precision (2026-09-11) called and emailed a fake contact, then let
+  // the lead release because the email offered nowhere to say so.
+  const unreachable = quickOutcomeUrl(c.id, c.providerId, 'unreachable')
   const mins = Math.round(c.minutesLeft)
   const subject = `${c.fullName} (${c.city}, ${c.state}): still yours? One tap keeps the claim`
 
@@ -103,8 +106,9 @@ You claimed ${c.fullName} in ${c.city}, ${c.state} about ${Math.round(c.claimedM
 
 If you're on it, one tap keeps it yours. No login needed:
 
-  Still working it:   ${working}
-  Appointment booked: ${booked}
+  Still working it:         ${working}
+  Appointment booked:       ${booked}
+  Couldn't reach the patient: ${unreachable}
 
 If you did reach the patient and it didn't go anywhere, log the outcome from your dashboard instead: ${SITE_URL}/dashboard
 
@@ -121,7 +125,7 @@ MobilePhlebotomy.org`
 <p>Hi ${c.providerName},</p>
 <p>You claimed <strong>${c.fullName}</strong> in ${c.city}, ${c.state} about ${Math.round(c.claimedMinutesAgo / 60 * 10) / 10} hours ago and nothing has been logged on it yet. In about <strong>${mins} minutes</strong> the system will assume the request was abandoned and release it to other providers.</p>
 <p>If you're on it, one tap keeps it yours. No login needed:</p>
-<p>${btn(working, "I'm still working it", '#2563eb')} ${btn(booked, 'Appointment booked', '#16a34a')}</p>
+<p>${btn(working, "I'm still working it", '#2563eb')} ${btn(booked, 'Appointment booked', '#16a34a')} ${btn(unreachable, "Couldn't reach the patient", '#b45309')}</p>
 <p style="color:#4b5563;">If you reached the patient and it didn't go anywhere, log that outcome from your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a>. If you've moved on from this one, do nothing and it releases on schedule.</p>
 <p style="color:#9ca3af;font-size:12px;">Lead ID: ${c.id}</p>
 <p>Hector Valles<br>MobilePhlebotomy.org</p>

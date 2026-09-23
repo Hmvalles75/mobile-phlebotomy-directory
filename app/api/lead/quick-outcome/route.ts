@@ -1,17 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { handBackLead } from '@/lib/handBackLead'
+import { emailAdmin } from '@/lib/adminEmail'
 
 /**
  * One-tap outcome from the pre-SLA reminder email (lib/claimReminder.ts).
  *
- * GET ?lead=&provider=&do=working|booked. Same shape as the pass link: a
+ * GET ?lead=&provider=&do=working|booked|unreachable. Same shape as the pass link: a
  * person in an email client, no login. The URL carries no secret, so it can
  * only do what the claiming provider could already do from their dashboard,
  * and only on a lead they currently hold (routedToId must match). Logging
- * WORKING_IT or APPOINTMENT_BOOKED is what stops the stale-claim release.
+ * WORKING_IT, APPOINTMENT_BOOKED or UNABLE_TO_REACH is what stops the
+ * stale-claim release. 'unreachable' exists because a provider who dialled a
+ * fake number and got a bounced email had no way to say so from the reminder
+ * and let the lead release (Magnus Precision, 2026-09-11); it keeps the claim,
+ * records the attempt, and alerts the admin so a junk lead can be closed.
  */
 export const dynamic = 'force-dynamic'
+
+async function alertAdminUnreachable(lead: { id: string; fullName: string; city: string; state: string }, providerId: string) {
+  const p = await prisma.provider.findUnique({ where: { id: providerId }, select: { name: true } })
+  const full = await prisma.lead.findUnique({ where: { id: lead.id }, select: { phone: true, email: true, createdAt: true, callAttempts: true } })
+  await emailAdmin(
+    `Provider couldn't reach ${lead.fullName} (${lead.city}, ${lead.state})`,
+    `${p?.name || providerId} tapped "Couldn't reach the patient" on the pre-release reminder.\n\n` +
+    `Lead ${lead.id}\nName: ${lead.fullName}\nPhone: ${full?.phone || '-'}\nEmail: ${full?.email || '-'}\nSubmitted: ${full?.createdAt?.toISOString() || '-'}\nAttempts logged: ${full?.callAttempts ?? '-'}\n\n` +
+    `The claim is kept and will not auto-release. If the contact details are fake, close the lead; if they look real, nothing to do.\n` +
+    `https://www.mobilephlebotomy.org/admin`
+  )
+}
 
 function page(title: string, body: string, accent: string) {
   return new NextResponse(
@@ -31,7 +48,7 @@ export async function GET(req: NextRequest) {
   const leadId = req.nextUrl.searchParams.get('lead')
   const providerId = req.nextUrl.searchParams.get('provider')
   const action = req.nextUrl.searchParams.get('do')
-  if (!leadId || !providerId || (action !== 'working' && action !== 'booked' && action !== 'handback')) {
+  if (!leadId || !providerId || (action !== 'working' && action !== 'booked' && action !== 'handback' && action !== 'unreachable')) {
     return page('Something is missing from that link', 'Open your dashboard and you can update the request from there.', '#dc2626')
   }
 
@@ -61,6 +78,16 @@ export async function GET(req: NextRequest) {
     await prisma.lead.update({ where: { id: leadId }, data: { outcome: 'APPOINTMENT_BOOKED', outcomeUpdatedAt: new Date(), firstContactAt: new Date() } })
     console.log(`[quick-outcome] ${providerId} marked ${leadId} APPOINTMENT_BOOKED via email link`)
     return page('Marked as booked', `${lead.fullName} in ${lead.city}, ${lead.state} stays with you. When the draw is done, mark it completed from your dashboard.`, '#16a34a')
+  }
+
+  if (action === 'unreachable') {
+    if (lead.outcome && lead.outcome !== 'WORKING_IT' && lead.outcome !== 'UNABLE_TO_REACH') {
+      return page('Already logged', `This request already has an outcome recorded (${lead.outcome.toLowerCase().replace(/_/g, ' ')}), so it will not be released. Nothing else needed.`, '#16a34a')
+    }
+    await prisma.lead.update({ where: { id: leadId }, data: { outcome: 'UNABLE_TO_REACH', callAttempts: { increment: 1 } } })
+    console.log(`[quick-outcome] ${providerId} marked ${leadId} UNABLE_TO_REACH via email link`)
+    alertAdminUnreachable(lead, providerId).catch(err => console.error('[quick-outcome] admin alert failed:', err?.message || err))
+    return page('Logged: couldn\'t reach the patient', `${lead.fullName} in ${lead.city}, ${lead.state} stays with you and will not be released. Hector has been told so the contact details can be checked. If they turn out to be fake, the request will be closed; if the patient calls back, log the outcome from your dashboard.`, '#b45309')
   }
 
   // working: never overwrite a real outcome that is already there
