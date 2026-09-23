@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { LeadOutcome } from '@prisma/client'
-import { notifyFeaturedProvidersForLead, renotifyOpenLead } from '@/lib/leadNotifications'
+import { notifyFeaturedProvidersForLead, recordProviderDecline, renotifyOpenLead } from '@/lib/leadNotifications'
 
 /**
  * Outcomes that end the provider's involvement (2026-09-22).
@@ -118,6 +118,7 @@ export async function POST(
           if (released.count === 0) {
             return NextResponse.json({ success: false, error: 'Lead is no longer claimed by this provider' }, { status: 409 })
           }
+          await recordProviderDecline(leadId, providerId)
           console.log(`[update-status] ${providerId} cannot serve ${leadId} (${updateData.outcome}); released and re-offering`)
           // Awaited: Next 14 on Vercel has no waitUntil, so a fire-and-forget
           // send can be cut off when the response returns. Same pair as the

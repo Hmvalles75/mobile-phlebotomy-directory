@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { notifyFeaturedProvidersForLead, renotifyOpenLead } from '@/lib/leadNotifications'
+import { notifyFeaturedProvidersForLead, recordProviderDecline, renotifyOpenLead } from '@/lib/leadNotifications'
 
 /**
  * Release a claimed lead back to the pool.
@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await recordProviderDecline(leadId, providerId)
     console.log(`[LeadRelease] Lead ${leadId} released back to pool by provider ${providerId} (reason: ${reason})`)
 
     // Re-offer the lead. Awaited: Next 14 on Vercel has no waitUntil, so a
