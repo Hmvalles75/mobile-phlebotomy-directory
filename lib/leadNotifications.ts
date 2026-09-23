@@ -818,6 +818,23 @@ export const MIN_RENOTIFY_HOURS = 12
 // who ignored it twice is not going to take it on the third. The admin
 // "Send reminder" button is a deliberate act and passes ignoreCap.
 export const MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD = 2
+/** releaseReason values that mean the provider chose to let the lead go. */
+export const PROVIDER_DECLINE_REASONS = new Set(['provider_released', 'provider_cannot_serve', 'provider_handback'])
+
+/**
+ * Record that a provider chose not to take this lead. Lead.releasedFromProviderId
+ * is a single column and the next release overwrites it, so the durable record
+ * is LeadNotification.passedAt on the provider's rows for the lead: one slot per
+ * (lead, provider), already written by the paid head-start "pass" link with the
+ * same meaning. Every voluntary release (dashboard release, can't-serve,
+ * hand-back) calls this; renotifyOpenLead reads it.
+ */
+export async function recordProviderDecline(leadId: string, providerId: string): Promise<void> {
+  await prisma.leadNotification.updateMany({
+    where: { leadId, providerId, passedAt: null },
+    data: { passedAt: new Date() },
+  })
+}
 
 export interface RenotifyResult {
   leadId: string
@@ -851,9 +868,10 @@ export async function renotifyOpenLead(
     select: {
       id: true, createdAt: true, status: true, city: true, state: true, zip: true,
       labPreference: true, urgency: true, notes: true,
+      releasedFromProviderId: true, releaseReason: true,
       // CANCELLED rows never reached the provider; they neither count as sent
       // nor start the 12-hour reminder clock.
-      leadNotifications: { where: { status: { not: 'CANCELLED' } }, select: { providerId: true, status: true, createdAt: true } },
+      leadNotifications: { where: { status: { not: 'CANCELLED' } }, select: { providerId: true, status: true, createdAt: true, passedAt: true } },
     },
   })
   const base: RenotifyResult = { leadId, dryRun: !!opts.dryRun, hoursOpen: 0, recipients: [], sent: 0, skipped: 0 }
@@ -876,12 +894,26 @@ export async function renotifyOpenLead(
   // been removed or opted out is not reminded.
   const matched = await findFeaturedProvidersForNotification(lead.zip, lead.state)
   const excluded = new Set(opts.excludeProviderIds || [])
+  // A provider who let this lead go on purpose is not asked again, whichever
+  // path calls this: passed it during the head start, released it from the
+  // dashboard, marked can't-serve, or handed it back (all stamp passedAt, see
+  // recordProviderDecline). The Lead column is a fallback for rows released
+  // before the stamp existed. A stale-claim release is not a decision, so it
+  // does not count. Listed as a skipped row so the admin preview shows why.
+  const declined = new Set(lead.leadNotifications.filter(n => n.passedAt).map(n => n.providerId))
+  if (lead.releasedFromProviderId && PROVIDER_DECLINE_REASONS.has(lead.releaseReason || '')) declined.add(lead.releasedFromProviderId)
   const targets = matched.filter(p => !excluded.has(p.id) && (sentTo.has(p.id) || opts.includeNew))
   const cutoff = Date.now() - MIN_RENOTIFY_HOURS * 3600000
 
   for (const p of targets) {
     const email = p.notificationEmail || p.claimEmail || p.email
     const row = { providerId: p.id, name: p.name.trim(), email, alreadyNotified: sentTo.has(p.id), sent: false as boolean, skipped: undefined as string | undefined }
+    if (declined.has(p.id)) {
+      row.skipped = 'passed on or released this lead themselves'
+      base.skipped++
+      base.recipients.push(row)
+      continue
+    }
     const already = sentCount.get(p.id) || 0
     if (!opts.ignoreCap && already >= MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD) {
       row.skipped = `already emailed ${already} times about this lead (max ${MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD})`

@@ -1,5 +1,5 @@
 import { prisma } from './prisma'
-import { notifyFeaturedProvidersForLead, renotifyOpenLead } from './leadNotifications'
+import { notifyFeaturedProvidersForLead, recordProviderDecline, renotifyOpenLead } from './leadNotifications'
 
 /**
  * A claimer hands a lead back: release it atomically and re-offer it at once.
@@ -32,6 +32,7 @@ export async function handBackLead(input: {
     },
   })
   if (released.count === 0) return false
+  await recordProviderDecline(input.leadId, input.providerId)
   console.log(`[handBackLead] ${input.providerId} handed back ${input.leadId} (${input.reason}); re-offering`)
   try {
     await notifyFeaturedProvidersForLead(input.leadId, { onlyNewProviders: true })

@@ -77,6 +77,9 @@ export default async function LeadDiagnosticPage({ params }: Props) {
 
     let outcome: { label: string; color: 'green' | 'red' | 'amber' | 'gray' | 'blue' } = { label: 'No engagement', color: 'gray' }
     if (isClaimer && claimedAt) outcome = { label: 'CLAIMED', color: 'green' }
+    // A head-start send pulled back because the lead was claimed first: SendGrid
+    // reports the batch cancel as "dropped", which is not a delivery failure.
+    else if (n.status === 'CANCELLED') outcome = { label: 'Cancelled: claimed before send', color: 'gray' }
     else if (bounce) outcome = { label: `Bounced (${bounce.event})`, color: 'red' }
     else if (spam) outcome = { label: 'Marked spam', color: 'red' }
     else if (firstClick) outcome = { label: 'Clicked, no claim', color: 'amber' }
@@ -97,7 +100,7 @@ export default async function LeadDiagnosticPage({ params }: Props) {
   const totalClaimed = rows.filter(r => r.isClaimer).length
   const totalOpened = rows.filter(r => r.firstOpen).length
   const totalClicked = rows.filter(r => r.firstClick).length
-  const totalBounced = rows.filter(r => r.bounce).length
+  const totalBounced = rows.filter(r => r.bounce && r.n.status !== 'CANCELLED').length
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">

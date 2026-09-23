@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { notifyFeaturedProvidersForLead, renotifyOpenLead } from '@/lib/leadNotifications'
+import { notifyFeaturedProvidersForLead, recordProviderDecline, renotifyOpenLead } from '@/lib/leadNotifications'
 
 /**
  * Release a claimed lead back to the pool.
@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
         callAttempts: 0,
         outcome: null,
         outcomeNotes: reason,  // Capture release reason in outcomeNotes for audit
+        // Stamp who let go so the re-offer does not go straight back to them
+        // (Dynamic Stix, 2026-09-21: released from the dashboard, then got the
+        // admin "still unclaimed" reminder for the same lead).
+        releasedFromProviderId: providerId,
+        releasedAt: new Date(),
+        releaseReason: 'provider_released',
       },
     })
 
@@ -73,6 +79,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await recordProviderDecline(leadId, providerId)
     console.log(`[LeadRelease] Lead ${leadId} released back to pool by provider ${providerId} (reason: ${reason})`)
 
     // Re-offer the lead. Awaited: Next 14 on Vercel has no waitUntil, so a
