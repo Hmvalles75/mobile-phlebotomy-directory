@@ -314,6 +314,11 @@ function RequestBloodDrawForm() {
                     <strong>Heads up:</strong> most mobile phlebotomists require a physician&apos;s order. You may still submit this request — a provider will follow up and can discuss options with you.
                   </div>
                 )}
+                {formData.hasDoctorOrder === 'yes' && (
+                  <p className="mt-3 text-sm text-gray-600">
+                    The phlebotomist delivers your sample to the lab named on the order, so check that lab (Quest, Labcorp, or a hospital lab) has a drop-off location near you. Providers have been sent orders for labs with no site in the area.
+                  </p>
+                )}
               </div>
 
               {/* Step 3 — Payment readiness (required, pricing disclosure on "not_sure") */}
