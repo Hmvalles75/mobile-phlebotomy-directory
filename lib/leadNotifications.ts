@@ -818,6 +818,8 @@ export const MIN_RENOTIFY_HOURS = 12
 // who ignored it twice is not going to take it on the third. The admin
 // "Send reminder" button is a deliberate act and passes ignoreCap.
 export const MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD = 2
+/** releaseReason values that mean the provider chose to let the lead go. */
+export const PROVIDER_DECLINE_REASONS = new Set(['provider_released', 'provider_cannot_serve', 'provider_handback'])
 
 export interface RenotifyResult {
   leadId: string
@@ -851,6 +853,7 @@ export async function renotifyOpenLead(
     select: {
       id: true, createdAt: true, status: true, city: true, state: true, zip: true,
       labPreference: true, urgency: true, notes: true,
+      releasedFromProviderId: true, releaseReason: true,
       // CANCELLED rows never reached the provider; they neither count as sent
       // nor start the 12-hour reminder clock.
       leadNotifications: { where: { status: { not: 'CANCELLED' } }, select: { providerId: true, status: true, createdAt: true } },
@@ -876,12 +879,22 @@ export async function renotifyOpenLead(
   // been removed or opted out is not reminded.
   const matched = await findFeaturedProvidersForNotification(lead.zip, lead.state)
   const excluded = new Set(opts.excludeProviderIds || [])
+  // A provider who let this lead go on purpose is not asked again, whichever
+  // path calls this. A stale-claim release is not a decision, so it does not
+  // count. Listed as a skipped row so the admin preview shows why.
+  const declinedBy = lead.releasedFromProviderId && PROVIDER_DECLINE_REASONS.has(lead.releaseReason || '') ? lead.releasedFromProviderId : null
   const targets = matched.filter(p => !excluded.has(p.id) && (sentTo.has(p.id) || opts.includeNew))
   const cutoff = Date.now() - MIN_RENOTIFY_HOURS * 3600000
 
   for (const p of targets) {
     const email = p.notificationEmail || p.claimEmail || p.email
     const row = { providerId: p.id, name: p.name.trim(), email, alreadyNotified: sentTo.has(p.id), sent: false as boolean, skipped: undefined as string | undefined }
+    if (p.id === declinedBy) {
+      row.skipped = `released this lead themselves (${lead.releaseReason})`
+      base.skipped++
+      base.recipients.push(row)
+      continue
+    }
     const already = sentCount.get(p.id) || 0
     if (!opts.ignoreCap && already >= MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD) {
       row.skipped = `already emailed ${already} times about this lead (max ${MAX_NOTIFICATIONS_PER_PROVIDER_PER_LEAD})`

@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
         callAttempts: 0,
         outcome: null,
         outcomeNotes: reason,  // Capture release reason in outcomeNotes for audit
+        // Stamp who let go so the re-offer does not go straight back to them
+        // (Dynamic Stix, 2026-09-21: released from the dashboard, then got the
+        // admin "still unclaimed" reminder for the same lead).
+        releasedFromProviderId: providerId,
+        releasedAt: new Date(),
+        releaseReason: 'provider_released',
       },
     })
 
