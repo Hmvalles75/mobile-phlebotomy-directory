@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import RenotifyButton from './RenotifyButton'
 import ReleaseToProvidersButton from './ReleaseToProvidersButton'
+import CloseLeadButton from './CloseLeadButton'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
@@ -8,6 +9,8 @@ import { verifyAdminSession } from '@/lib/admin-auth'
 export const dynamic = 'force-dynamic'
 
 interface Props { params: { leadId: string } }
+
+const CLOSED_STATUSES = new Set(['COMPLETED', 'CLOSED_DUPLICATE', 'CLOSED_DECLINED', 'CLOSED_PRICING_ONLY', 'CLOSED_UNCONFIRMED', 'EXPIRED_NO_RESPONSE'])
 
 function fmtDateTime(d: Date | null | undefined): string {
   if (!d) return '—'
@@ -160,6 +163,10 @@ export default async function LeadDiagnosticPage({ params }: Props) {
 
         {lead.status === 'OPEN' && (
           <RenotifyButton leadId={lead.id} hoursOpen={Math.round((Date.now() - lead.createdAt.getTime()) / 3600000)} notified={totalNotified} />
+        )}
+
+        {!CLOSED_STATUSES.has(lead.status) && (
+          <CloseLeadButton leadId={lead.id} currentStatus={lead.status} />
         )}
 
         {/* Funnel summary */}
