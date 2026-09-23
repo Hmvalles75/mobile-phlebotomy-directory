@@ -251,7 +251,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
           zips={zipCodes.filter(z => /^\d{5}$/.test(z))}
           geo={mapCoords}
           services={provider.services || []}
-          tagline={buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])}
+          tagline={(provider.tagline || '').trim().length >= 20 ? (provider.tagline as string).trim() : buildPremiumMetaDescription(provider.name, provider.city, provider.state, provider.services || [])}
         />
         <BreadcrumbSchema items={premiumBreadcrumbs} />
         <PremiumProviderPage

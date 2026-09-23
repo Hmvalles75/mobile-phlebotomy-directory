@@ -18,6 +18,7 @@ model Provider {
   website               String?
   bookingUrl            String?
   description           String?
+  tagline               String?                // One line under the premium H1 and the JSON-LD description; provider-editable (<=160). Null falls back to a derived line. (2026-09-23)
   rating                Float?
   reviewsCount          Int?
   featured              Boolean                @default(false)

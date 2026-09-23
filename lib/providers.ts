@@ -65,6 +65,7 @@ export interface EnrichedProvider {
   // Schema fields for compatibility
   slug: string
   description?: string
+  tagline?: string
   services: string[]
   coverage: {
     states: string[]
