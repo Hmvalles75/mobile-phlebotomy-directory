@@ -1,4 +1,4 @@
-// Backfill the nine premium pages' taglines and tell each provider.
+// Backfill the ten premium pages' taglines and tell each provider.
 //
 // Dry run (default) prints before/after and the email that would go out.
 //   npx tsx scripts/backfill-premium-taglines.ts
@@ -31,6 +31,7 @@ const TAGLINES: Record<string, string> = {
   'fdp-phlebotomy-llc': 'A fully mobile specimen collection service for North San Diego County: doctor-ordered lab work drawn where you are.',
   'ponce-mobile-phlebotomy': 'Certified phlebotomists for at-home blood draws across Los Angeles County, with same-day and next-day appointments.',
   'bayford-mobile-medical-services': 'White-glove mobile lab draws across Northern California, with in-office and after-hours appointments in South San Francisco.',
+  'sheppard-secured-services': 'Mobile blood draws, specialty kit collections and concierge lab services across the Bay Area, backed by 13+ years of clinical experience.',
 }
 
 function buildEmail(name: string, tagline: string, slug: string) {
