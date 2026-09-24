@@ -17,6 +17,23 @@ interface Lead {
   labPreference: string
   urgency: 'STANDARD' | 'STAT'
   notes?: string | null
+  hasDoctorOrder?: string | null   // 'yes' | 'no' | 'need_help'
+  paymentMethod?: string | null    // 'insurance' | 'out_of_pocket' | 'not_sure'
+}
+
+// What the patient told the intake form, in the provider's terms. Providers
+// never saw these until 2026-09-24; insurance leads book at half the rate of
+// out-of-pocket ones, mostly over the visit fee, so say it up front.
+const ORDER_LABEL: Record<string, string> = { yes: 'Yes', no: 'No', need_help: 'No, needs help getting one' }
+const PAYMENT_LABEL: Record<string, string> = { insurance: 'Insurance (expects the lab to bill; visit fee not discussed)', out_of_pocket: 'Out of pocket', not_sure: 'Not sure (has seen the $75-$150 range)' }
+function intakeLines(lead: Lead): { text: string; html: string } {
+  const parts: [string, string][] = []
+  if (lead.hasDoctorOrder) parts.push(["Doctor's order", ORDER_LABEL[lead.hasDoctorOrder] || lead.hasDoctorOrder])
+  if (lead.paymentMethod) parts.push(['Paying by', PAYMENT_LABEL[lead.paymentMethod] || lead.paymentMethod])
+  return {
+    text: parts.map(([k, v]) => `${k}: ${v}`).join('\n'),
+    html: parts.map(([k, v]) => `<div class="detail-row"><span class="detail-label">${k}:</span> ${v}</div>`).join('\n        '),
+  }
 }
 
 interface Provider {
@@ -105,6 +122,7 @@ async function sendProviderLeadNotificationEmail(
     ? `Patient request ${milesOut} mi from you in ${lead.city}, ${lead.state} - can you travel?`
     : `New request in ${lead.city}, ${lead.state} - Reply ASAP`
 
+  const intake = intakeLines(lead)
   // Plain text email body
   const textBody = `Hi ${provider.name},
 
@@ -113,7 +131,7 @@ ${intro}
 Location: ${lead.city}, ${lead.state} ${lead.zip}
 Lab preference: ${lead.labPreference}${labNote ? '\n' + labNote : ''}
 Request type: ${leadType}
-Urgency: ${lead.urgency}
+Urgency: ${lead.urgency}${intake.text ? '\n' + intake.text : ''}
 Notes: ${notesShort}${lead.notes && lead.notes.length > 200 ? '...' : ''}
 
 Click below to claim this patient and see their full contact info:
@@ -176,6 +194,7 @@ Subscribe: https://thedrawreport.beehiiv.com/subscribe`
         <div class="detail-row">
           <span class="detail-label">Request type:</span> ${leadType}
         </div>
+        ${intake.html}
         <div class="detail-row">
           <span class="detail-label">Urgency:</span> <strong style="color: ${lead.urgency === 'STAT' ? '#dc3545' : '#0066cc'};">${lead.urgency === 'STAT' ? 'STAT (Urgent)' : 'Standard'}</strong>
         </div>
@@ -566,7 +585,9 @@ export async function notifyFeaturedProvidersForLead(
         zip: true,
         labPreference: true,
         urgency: true,
-        notes: true
+        notes: true,
+        hasDoctorOrder: true,
+        paymentMethod: true,
       }
     })
 
@@ -781,7 +802,9 @@ export async function notifyFeaturedProvidersForLeadDryRun(leadId: string): Prom
         zip: true,
         labPreference: true,
         urgency: true,
-        notes: true
+        notes: true,
+        hasDoctorOrder: true,
+        paymentMethod: true,
       }
     })
 
@@ -867,7 +890,7 @@ export async function renotifyOpenLead(
     where: { id: leadId },
     select: {
       id: true, createdAt: true, status: true, city: true, state: true, zip: true,
-      labPreference: true, urgency: true, notes: true,
+      labPreference: true, urgency: true, notes: true, hasDoctorOrder: true, paymentMethod: true,
       releasedFromProviderId: true, releaseReason: true,
       // CANCELLED rows never reached the provider; they neither count as sent
       // nor start the 12-hour reminder clock.
@@ -1006,7 +1029,7 @@ export async function retryFailedNotifications(): Promise<RetryResult> {
       leadId: true,
       providerId: true,
       lead: {
-        select: { id: true, city: true, state: true, zip: true, labPreference: true, urgency: true, notes: true },
+        select: { id: true, city: true, state: true, zip: true, labPreference: true, urgency: true, notes: true, hasDoctorOrder: true, paymentMethod: true },
       },
       provider: {
         select: {
