@@ -145,6 +145,7 @@ function DashboardContent() {
     notificationEmail: '',
     website: '',
     description: '',
+    tagline: '',
     zipCodes: '',
     excludedZipCodes: '',
     excludedStates: '',
@@ -243,6 +244,7 @@ function DashboardContent() {
             notificationEmail: result.profile.notificationEmail || '',
             website: result.profile.website || '',
             description: result.profile.description || '',
+            tagline: result.profile.tagline || '',
             zipCodes: result.profile.zipCodes || '',
             excludedZipCodes: result.profile.excludedZipCodes || '',
             excludedStates: result.profile.excludedStates || '',
@@ -789,6 +791,20 @@ function DashboardContent() {
                   placeholder="https://www.example.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
+              </div>
+
+              {/* Tagline: one line under the public page headline */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Tagline</label>
+                <input
+                  type="text"
+                  maxLength={160}
+                  value={profileData.tagline}
+                  onChange={(e) => setProfileData({ ...profileData, tagline: e.target.value })}
+                  placeholder="One plain sentence about who you serve and where, e.g. At-home blood draws across Sarasota and Charlotte counties."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">{profileData.tagline.length}/160 characters. Shown under the headline of your premium page and used as its search description. Leave blank and we write one from your description.</p>
               </div>
 
               {/* Description */}

@@ -28,7 +28,7 @@ async function __PATCH(
     // Only allow updating specific fields. Coverage fields added 2026-09-18 so
     // carve-outs, ZIP lists and radius can be set from the admin panel instead
     // of a script; writes go through the change-log trigger as 'admin'.
-    const allowedFields = ['eligibleForLeads', 'zipCodes', 'serviceRadiusMiles', 'excludedZipCodes', 'excludedStates']
+    const allowedFields = ['eligibleForLeads', 'zipCodes', 'serviceRadiusMiles', 'excludedZipCodes', 'excludedStates', 'tagline']
     const updateData: Record<string, any> = {}
 
     for (const field of allowedFields) {
@@ -60,6 +60,11 @@ async function __PATCH(
       if (bad) return NextResponse.json({ ok: false, error: `excludedStates: "${bad}" is not a two-letter state code` }, { status: 400 })
       updateData.excludedStates = tokens.length ? tokens.join(',') : null
     }
+    if ('tagline' in updateData) {
+      const t = String(updateData.tagline ?? '').replace(/\s+/g, ' ').trim()
+      if (t.length > 160) return NextResponse.json({ ok: false, error: 'tagline must be 160 characters or fewer' }, { status: 400 })
+      updateData.tagline = t || null
+    }
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
@@ -80,6 +85,7 @@ async function __PATCH(
         serviceRadiusMiles: true,
         excludedZipCodes: true,
         excludedStates: true,
+        tagline: true,
       }
     })
 

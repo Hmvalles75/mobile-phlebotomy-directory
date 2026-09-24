@@ -70,6 +70,10 @@ const DEFAULT_SERVICES = ['Mobile Blood Draw', 'Lab Specimen Collection', 'Corpo
  * it here and keep this as the default.
  */
 function deriveTagline(provider: EnrichedProvider, location: string): string {
+  // A stored tagline (provider- or admin-written) wins; the derivation below
+  // is the fallback for pages that have none yet.
+  const stored = (provider.tagline || '').trim()
+  if (stored.length >= 20) return stored
   const a = assessDescription(provider.description, provider.name)
   if (a.kind === 'prose' || a.kind === 'thin') {
     const t = leadingSentences(a.cleaned, 140)

@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
         serviceRadiusMiles: true,
         excludedZipCodes: true,
         excludedStates: true,
+        tagline: true,
+        listingTier: true,
         stripeCustomerId: true,
         stripePaymentMethodId: true,
         trialStatus: true,

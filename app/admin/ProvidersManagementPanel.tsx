@@ -16,6 +16,8 @@ interface Provider {
   serviceRadiusMiles?: number | null
   excludedZipCodes?: string | null
   excludedStates?: string | null
+  tagline?: string | null
+  listingTier?: string | null
   createdAt: string
   removedAt: string | null
   removedReason: string | null
@@ -92,6 +94,30 @@ export function ProvidersManagementPanel() {
   // Coverage editor. Four prompts, then one PATCH. Until 2026-09-18 ZIP
   // lists, radius and (new) carve-outs could only be changed by the provider
   // or by a script; three providers in a row needed an admin-side fix.
+  const editTagline = async (provider: Provider) => {
+    const tagline = window.prompt(`${provider.businessName}
+
+Tagline (one plain sentence, 160 characters max; shown under the premium page headline and used as its search description). Empty = fall back to the derived line:`, provider.tagline || '')
+    if (tagline === null) return
+    setUpdating(provider.id)
+    try {
+      const token = localStorage.getItem('admin_token')
+      const res = await fetch(`/api/admin/providers/${provider.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tagline }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) { window.alert(data.error || 'Update failed'); return }
+      setProviders(prev => prev.map(p => p.id === provider.id ? { ...p, tagline: data.provider.tagline } : p))
+    } catch (error) {
+      console.error('Failed to update tagline:', error)
+      window.alert('Update failed')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
   const editCoverage = async (provider: Provider) => {
     const zipCodes = window.prompt(`${provider.businessName}\n\nZIP codes served (comma-separated; first is the home ZIP; prefixes like 112* and ranges like 21200-21299 allowed):`, provider.zipCodes || '')
     if (zipCodes === null) return
@@ -421,6 +447,16 @@ export function ProvidersManagementPanel() {
                         >
                           Coverage{provider.excludedZipCodes || provider.excludedStates ? ' *' : ''}
                         </button>
+                        {provider.listingTier === 'PREMIUM' && (
+                          <button
+                            onClick={() => editTagline(provider)}
+                            disabled={updating === provider.id}
+                            className="text-xs text-teal-700 hover:underline whitespace-nowrap disabled:opacity-50"
+                            title={provider.tagline ? `Tagline: ${provider.tagline}` : 'No tagline set; the page shows a line derived from the description'}
+                          >
+                            Tagline{provider.tagline ? ' *' : ''}
+                          </button>
+                        )}
                         {!provider.eligibleForLeads && (
                           <button
                             onClick={() => sendInvite(provider)}

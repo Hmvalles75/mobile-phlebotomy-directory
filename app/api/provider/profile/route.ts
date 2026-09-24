@@ -3,6 +3,11 @@ import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { normalizeCityName, citySlug } from '@/lib/city-normalize'
 import { runAsActor } from '@/lib/providerAudit'
+import { emailAdmin } from '@/lib/adminEmail'
+import { SITE_URL } from '@/lib/seo'
+
+/** Public one-liner under the premium H1; also the JSON-LD description. */
+const TAGLINE_MAX = 160
 
 // GET - Fetch provider profile for editing
 async function __GET(req: NextRequest) {
@@ -25,6 +30,7 @@ async function __GET(req: NextRequest) {
         notificationEmail: true,
         website: true,
         description: true,
+        tagline: true,
         zipCodes: true,
         serviceZipCodes: true,
         excludedZipCodes: true,
@@ -62,6 +68,7 @@ async function __GET(req: NextRequest) {
         notificationEmail: provider.notificationEmail || '',
         website: provider.website || '',
         description: provider.description || '',
+        tagline: provider.tagline || '',
         zipCodes: provider.zipCodes || provider.serviceZipCodes || '',
         excludedZipCodes: provider.excludedZipCodes || '',
         excludedStates: provider.excludedStates || '',
@@ -94,7 +101,7 @@ async function __POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { businessName, phone, notificationEmail, website, description, zipCodes, serviceIds, languages, primaryCity, excludedZipCodes, excludedStates } = body
+    const { businessName, phone, notificationEmail, website, description, tagline, zipCodes, serviceIds, languages, primaryCity, excludedZipCodes, excludedStates } = body
     // Carve-outs (lib/providerCoverage.ts). Same token grammar as the ZIP list;
     // reject anything that would silently match nothing.
     const badZipToken = typeof excludedZipCodes === 'string'
@@ -133,6 +140,15 @@ async function __POST(req: NextRequest) {
       )
     }
 
+    // Tagline: one plain line under the public H1 and the JSON-LD description.
+    if (tagline !== undefined && tagline !== null && typeof tagline !== 'string') {
+      return NextResponse.json({ ok: false, error: 'Tagline must be text' }, { status: 400 })
+    }
+    const taglineClean = typeof tagline === 'string' ? tagline.replace(/\s+/g, ' ').trim() : undefined
+    if (taglineClean && taglineClean.length > TAGLINE_MAX) {
+      return NextResponse.json({ ok: false, error: `Tagline must be ${TAGLINE_MAX} characters or fewer` }, { status: 400 })
+    }
+
     // Validate description length
     if (description && description.length > 2000) {
       return NextResponse.json(
@@ -151,7 +167,7 @@ async function __POST(req: NextRequest) {
     // Update provider profile
     const updateData: {
       name: string; phone: string | null; notificationEmail: string | null;
-      website: string | null; description: string | null; zipCodes: string | null;
+      website: string | null; description: string | null; tagline?: string | null; zipCodes: string | null;
       excludedZipCodes: string | null; excludedStates: string | null;
       languages: string | null; primaryCity?: string | null; primaryCitySlug?: string | null;
     } = {
@@ -160,6 +176,7 @@ async function __POST(req: NextRequest) {
       notificationEmail: notificationEmail?.trim() || null,
       website: website?.trim() || null,
       description: description?.trim() || null,
+      ...(taglineClean !== undefined ? { tagline: taglineClean || null } : {}),
       zipCodes: zipCodes?.trim() || null,
       excludedZipCodes: typeof excludedZipCodes === 'string' && excludedZipCodes.trim() ? excludedZipCodes.split(/[,\n;]+/).map((t: string) => t.trim()).filter(Boolean).join(', ') : null,
       excludedStates: typeof excludedStates === 'string' && excludedStates.trim() ? excludedStates.split(/[,\s;]+/).map((t: string) => t.trim().toUpperCase()).filter(Boolean).join(',') : null,
@@ -176,10 +193,28 @@ async function __POST(req: NextRequest) {
       updateData.primaryCitySlug = citySlug(normalizedCity)
     }
 
+    // The tagline is public copy that carries the site's JSON-LD, so a change
+    // is worth a glance: nine premium pages, no moderation queue, one email.
+    const before = taglineClean !== undefined
+      ? await prisma.provider.findUnique({ where: { id: session.providerId }, select: { tagline: true, slug: true, name: true } })
+      : null
+
     await prisma.provider.update({
       where: { id: session.providerId },
       data: updateData,
     })
+
+    if (before && (before.tagline || '') !== (taglineClean || '')) {
+      emailAdmin(
+        `Tagline changed: ${before.name.trim()}`,
+        `${before.name.trim()} edited the tagline on their public page.
+
+Before: ${before.tagline || '(none)'}
+After:  ${taglineClean || '(cleared; the derived line shows instead)'}
+
+${SITE_URL}/provider/${before.slug}`
+      ).catch(err => console.error('[provider/profile] tagline notice failed:', err?.message || err))
+    }
 
     // Update services if provided
     if (Array.isArray(serviceIds)) {
