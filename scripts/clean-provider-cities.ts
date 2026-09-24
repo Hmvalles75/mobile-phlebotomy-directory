@@ -24,9 +24,17 @@ const apply = process.argv.includes('--apply')
 
 /** Known typos: slug of provider -> corrected city. */
 const KNOWN_FIXES: Record<string, string> = {
-  // Arfm llc / Any Lab Test Now
-  'lovespark|IL': 'Loves Park',
+  // Applied 2026-09-24 (batch 2)
+  'lovespark|IL': 'Loves Park',          // Arfm llc / Any Lab Test Now
   'kearynsville|WV': 'Kearneysville',
+  // Applied 2026-09-24 (follow-up, from the review list)
+  'gaitherburg|MD': 'Gaithersburg',
+  'creve couer|MO': 'Creve Coeur',
+  'addsion|TX': 'Addison',
+  'sugarland|TX': 'Sugar Land',
+  'lamarque|TX': 'La Marque',
+  'richmond hts|OH': 'Richmond Heights',
+  'burlington nc|NC': 'Burlington',
 }
 
 const SMALL = new Set(['of', 'the', 'and', 'on', 'at', 'de', 'la', 'del'])
