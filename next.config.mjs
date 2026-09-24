@@ -1,3 +1,24 @@
+import { readFileSync } from 'node:fs'
+
+// Redirect lists derived from typed data (data/states-full.ts, top-metros.ts,
+// metroCanonical.ts). This file cannot import TypeScript, so
+// scripts/emit-url-redirects.ts writes them to JSON; `--check` in CI-style use
+// flags drift. Regenerate after touching STATE_DATA, topMetroAreas or
+// METRO_ONLY_SLUGS.
+const URL_REDIRECTS = JSON.parse(readFileSync(new URL('./data/url-redirects.json', import.meta.url), 'utf-8'))
+
+// Legacy /{city}-{st}/{slug} pages: the final four, retired 2026-09-24 after
+// their prose was ported into data/city-longform.ts (rendered by the dynamic
+// city layout). Variants enumerated from disk like the earlier batches.
+const LEGACY_CITY_REDIRECTS = [
+  ['columbus-oh', '/us/ohio/columbus'],
+  ['charlotte-nc', '/us/north-carolina/charlotte'],
+  ['worcester-ma', '/us/massachusetts/worcester'],
+  ['lowell-ma', '/us/massachusetts/lowell'],
+].flatMap(([dir, destination]) =>
+  ['mobile-phlebotomy', 'in-home-blood-draw', 'blood-draw-at-home'].map(v => ({ source: `/${dir}/${v}`, destination, permanent: true }))
+)
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -162,9 +183,8 @@ const nextConfig = {
       // now carry the ported long-form copy. Intent-variant P3 pages
       // (/san-diego-ca/in-home-blood-draw etc.) are a different keyword and
       // are intentionally left in place.
-      { source: '/us/metro/phoenix', destination: '/us/arizona/phoenix', permanent: true },
-      { source: '/us/metro/san-antonio', destination: '/us/texas/san-antonio', permanent: true },
-      { source: '/us/metro/san-diego', destination: '/us/california/san-diego', permanent: true },
+      // (The /us/metro/* entries for these three moved into the generated
+      // metro list below on 2026-09-24.)
       { source: '/san-diego-ca/mobile-phlebotomy', destination: '/us/california/san-diego', permanent: true },
 
       // ── Consolidation batch 1: Chicago (2026-08-07) ────────────────────
@@ -186,7 +206,6 @@ const nextConfig = {
       // from a suffix list — variants are inconsistent per city
       // (lab-draw-at-home and mobile-phlebotomist each appear only a handful
       // of times) and a hardcoded list would miss them.
-      { source: '/us/metro/chicago', destination: '/us/illinois/chicago', permanent: true },
       { source: '/chicago-il/blood-draw-at-home', destination: '/us/illinois/chicago', permanent: true },
       { source: '/chicago-il/in-home-blood-draw', destination: '/us/illinois/chicago', permanent: true },
       { source: '/chicago-il/mobile-phlebotomy', destination: '/us/illinois/chicago', permanent: true },
@@ -313,6 +332,24 @@ const nextConfig = {
       { source: '/west-hollywood-ca/blood-draw-at-home', destination: '/us/california/los-angeles', permanent: true },
       { source: '/west-hollywood-ca/in-home-blood-draw', destination: '/us/california/los-angeles', permanent: true },
       { source: '/west-hollywood-ca/mobile-phlebotomy', destination: '/us/california/los-angeles', permanent: true },
+
+      // ── URL consolidation batch 1 (2026-09-24) ─────────────────────────────
+      // Ahrefs still showed rankings under /kentucky, /Ohio, /us/metro/houston
+      // and the last four legacy city dirs. One canonical scheme from here:
+      // /us/[state], /us/[state]/[city], /provider/[slug].
+      //
+      // Root state names: /ohio, /Ohio, /KENTUCKY -> /us/ohio in one hop.
+      // Source matching is case-insensitive and the destination is a literal
+      // lowercase string, so no second hop through the middleware lowercaser.
+      // Single-segment only: /ohio/gentle-trace-mobile-phlebotomy (above) and
+      // /maryland/carewithluvs-... keep their own rules.
+      ...URL_REDIRECTS.states.map(slug => ({ source: `/${slug}`, destination: `/us/${slug}`, permanent: true })),
+      // Metros whose canonical is a city page: 48 of 50 (metroHref()). They
+      // cross-canonicalled but still served 200 and still ranked; the 308
+      // finishes the job. new-york-city and washington-dc are not listed.
+      ...URL_REDIRECTS.metros.map(r => ({ ...r, permanent: true })),
+      // The last 12 legacy city URLs.
+      ...LEGACY_CITY_REDIRECTS,
     ]
   },
 }

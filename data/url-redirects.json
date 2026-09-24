@@ -1,0 +1,242 @@
+{
+  "generatedBy": "scripts/emit-url-redirects.ts",
+  "states": [
+    "alabama",
+    "alaska",
+    "arizona",
+    "arkansas",
+    "california",
+    "colorado",
+    "connecticut",
+    "delaware",
+    "florida",
+    "georgia",
+    "hawaii",
+    "idaho",
+    "illinois",
+    "indiana",
+    "iowa",
+    "kansas",
+    "kentucky",
+    "louisiana",
+    "maine",
+    "maryland",
+    "massachusetts",
+    "michigan",
+    "minnesota",
+    "mississippi",
+    "missouri",
+    "montana",
+    "nebraska",
+    "nevada",
+    "new-hampshire",
+    "new-jersey",
+    "new-mexico",
+    "new-york",
+    "north-carolina",
+    "north-dakota",
+    "ohio",
+    "oklahoma",
+    "oregon",
+    "pennsylvania",
+    "rhode-island",
+    "south-carolina",
+    "south-dakota",
+    "tennessee",
+    "texas",
+    "utah",
+    "vermont",
+    "virginia",
+    "washington",
+    "washington-dc",
+    "west-virginia",
+    "wisconsin",
+    "wyoming"
+  ],
+  "metros": [
+    {
+      "source": "/us/metro/albuquerque",
+      "destination": "/us/new-mexico/albuquerque"
+    },
+    {
+      "source": "/us/metro/arlington",
+      "destination": "/us/texas/arlington"
+    },
+    {
+      "source": "/us/metro/atlanta",
+      "destination": "/us/georgia/atlanta"
+    },
+    {
+      "source": "/us/metro/austin",
+      "destination": "/us/texas/austin"
+    },
+    {
+      "source": "/us/metro/baltimore",
+      "destination": "/us/maryland/baltimore"
+    },
+    {
+      "source": "/us/metro/boston",
+      "destination": "/us/massachusetts/boston"
+    },
+    {
+      "source": "/us/metro/charlotte",
+      "destination": "/us/north-carolina/charlotte"
+    },
+    {
+      "source": "/us/metro/chicago",
+      "destination": "/us/illinois/chicago"
+    },
+    {
+      "source": "/us/metro/cleveland",
+      "destination": "/us/ohio/cleveland"
+    },
+    {
+      "source": "/us/metro/colorado-springs",
+      "destination": "/us/colorado/colorado-springs"
+    },
+    {
+      "source": "/us/metro/columbus",
+      "destination": "/us/ohio/columbus"
+    },
+    {
+      "source": "/us/metro/dallas",
+      "destination": "/us/texas/dallas"
+    },
+    {
+      "source": "/us/metro/denver",
+      "destination": "/us/colorado/denver"
+    },
+    {
+      "source": "/us/metro/detroit",
+      "destination": "/us/michigan/detroit"
+    },
+    {
+      "source": "/us/metro/el-paso",
+      "destination": "/us/texas/el-paso"
+    },
+    {
+      "source": "/us/metro/fort-worth",
+      "destination": "/us/texas/fort-worth"
+    },
+    {
+      "source": "/us/metro/fresno",
+      "destination": "/us/california/fresno"
+    },
+    {
+      "source": "/us/metro/houston",
+      "destination": "/us/texas/houston"
+    },
+    {
+      "source": "/us/metro/indianapolis",
+      "destination": "/us/indiana/indianapolis"
+    },
+    {
+      "source": "/us/metro/jacksonville",
+      "destination": "/us/florida/jacksonville"
+    },
+    {
+      "source": "/us/metro/kansas-city",
+      "destination": "/us/missouri/kansas-city"
+    },
+    {
+      "source": "/us/metro/las-vegas",
+      "destination": "/us/nevada/las-vegas"
+    },
+    {
+      "source": "/us/metro/long-beach",
+      "destination": "/us/california/long-beach"
+    },
+    {
+      "source": "/us/metro/los-angeles",
+      "destination": "/us/california/los-angeles"
+    },
+    {
+      "source": "/us/metro/louisville",
+      "destination": "/us/kentucky/louisville"
+    },
+    {
+      "source": "/us/metro/mesa",
+      "destination": "/us/arizona/mesa"
+    },
+    {
+      "source": "/us/metro/miami",
+      "destination": "/us/florida/miami"
+    },
+    {
+      "source": "/us/metro/milwaukee",
+      "destination": "/us/wisconsin/milwaukee"
+    },
+    {
+      "source": "/us/metro/minneapolis",
+      "destination": "/us/minnesota/minneapolis"
+    },
+    {
+      "source": "/us/metro/nashville",
+      "destination": "/us/tennessee/nashville"
+    },
+    {
+      "source": "/us/metro/new-orleans",
+      "destination": "/us/louisiana/new-orleans"
+    },
+    {
+      "source": "/us/metro/oakland",
+      "destination": "/us/california/oakland"
+    },
+    {
+      "source": "/us/metro/oklahoma-city",
+      "destination": "/us/oklahoma/oklahoma-city"
+    },
+    {
+      "source": "/us/metro/omaha",
+      "destination": "/us/nebraska/omaha"
+    },
+    {
+      "source": "/us/metro/phoenix",
+      "destination": "/us/arizona/phoenix"
+    },
+    {
+      "source": "/us/metro/portland",
+      "destination": "/us/oregon/portland"
+    },
+    {
+      "source": "/us/metro/raleigh",
+      "destination": "/us/north-carolina/raleigh"
+    },
+    {
+      "source": "/us/metro/sacramento",
+      "destination": "/us/california/sacramento"
+    },
+    {
+      "source": "/us/metro/san-antonio",
+      "destination": "/us/texas/san-antonio"
+    },
+    {
+      "source": "/us/metro/san-diego",
+      "destination": "/us/california/san-diego"
+    },
+    {
+      "source": "/us/metro/san-francisco",
+      "destination": "/us/california/san-francisco"
+    },
+    {
+      "source": "/us/metro/seattle",
+      "destination": "/us/washington/seattle"
+    },
+    {
+      "source": "/us/metro/tucson",
+      "destination": "/us/arizona/tucson"
+    },
+    {
+      "source": "/us/metro/tulsa",
+      "destination": "/us/oklahoma/tulsa"
+    },
+    {
+      "source": "/us/metro/virginia-beach",
+      "destination": "/us/virginia/virginia-beach"
+    },
+    {
+      "source": "/us/metro/wichita",
+      "destination": "/us/kansas/wichita"
+    }
+  ]
+}

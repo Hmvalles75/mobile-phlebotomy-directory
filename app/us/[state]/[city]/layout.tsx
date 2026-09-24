@@ -5,6 +5,7 @@ import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
+import { CITY_LONGFORM } from '@/data/city-longform'
 
 interface CityLayoutProps {
   children: React.ReactNode
@@ -81,7 +82,11 @@ export async function generateMetadata({ params }: { params: { state: string, ci
 // still hydrates), but Google now sees a populated link graph regardless
 // of whether the client island fetches successfully.
 export default async function CityLayout({ children, params }: CityLayoutProps) {
-  const { citySlug, cityName, stateAbbr, stateName } = resolveCityState(params.state, params.city)
+  const { citySlug, cityName, stateAbbr, stateName, stateSlug } = resolveCityState(params.state, params.city)
+  // Long-form local copy ported from a legacy page before its 308. The 18
+  // static override pages render their own copy of this and never reach this
+  // layout, so nothing is shown twice.
+  const longform = CITY_LONGFORM[`${stateSlug}/${citySlug}`]
 
   const [providers, nearbyCities] = await Promise.all([
     getProvidersForCity(citySlug, stateAbbr),
@@ -91,6 +96,14 @@ export default async function CityLayout({ children, params }: CityLayoutProps) 
   return (
     <>
       {children}
+      {longform && (
+        <section className="container mx-auto px-4 pt-8 max-w-4xl">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Mobile Phlebotomy in {cityName}: A Local Guide</h2>
+          <div className="prose max-w-none text-gray-700 space-y-4">
+            {longform.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
+        </section>
+      )}
       <div className="bg-gray-50">
         <div className="container mx-auto px-4 pb-12">
           <ProvidersInCity providers={providers} cityName={cityName} stateAbbr={stateAbbr} />

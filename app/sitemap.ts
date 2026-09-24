@@ -270,81 +270,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  // Add custom metro area pages (Detroit, NYC, LA)
-  const customPages = [
-    // (Maryland/CAREWITHLUVS hardcoded landing removed 2026-04-24 —
-    // consolidated to the canonical /provider/carewithluvs-llc URL,
-    // which renders the same rich template via the premiumPage flag.)
-
-    // DETROIT METRO
-    // Main hub
-    // Suburbs
-    // Intent variants
-
-    // NYC METRO
-    // Main hub
-    // Five Boroughs
-    // Northern NJ
-    // Intent variants
-
-    // LA METRO
-    // Main hub
-    // Suburbs
-    // Intent variants
-
-    // HOUSTON METRO
-
-    // CHICAGO METRO
-    // All three Chicago legacy variants removed 2026-08-07 — each now 308s to
-    // /us/illinois/chicago, which the city loop above already submits.
-    // Submitting a redirected URL wastes crawl budget and muddies the
-    // consolidation signal.
-
-    // SAN DIEGO METRO
-    // (san-diego-ca/mobile-phlebotomy removed 2026-07-24 — 301'd to the
-    // canonical /us/california/san-diego during the URL consolidation pilot.)
-
-    // COLUMBUS METRO
-    { slug: 'columbus-oh/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'columbus-oh/in-home-blood-draw', priority: 0.7 },
-    { slug: 'columbus-oh/blood-draw-at-home', priority: 0.7 },
-
-    // CHARLOTTE METRO
-    { slug: 'charlotte-nc/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'charlotte-nc/in-home-blood-draw', priority: 0.7 },
-    { slug: 'charlotte-nc/blood-draw-at-home', priority: 0.7 },
-
-    // BOSTON METRO (MA)
-
-    // WORCESTER METRO (MA)
-    // ── Legacy P3 tier removed 2026-08-21 ──────────────────────────────────
-    // 90 legacy /{city}-{st}/{slug} URLs were dropped when they gained 308s in
-    // next.config.mjs. Submitting a URL that redirects wastes crawl budget and
-    // muddies the consolidation signal — the same reasoning as the Chicago and
-    // San Diego notes that preceded this.
-    //
-    // The 12 entries below are the exception: worcester-ma, lowell-ma,
-    // charlotte-nc and columbus-oh still serve 200 because their city-specific
-    // prose has nowhere to render yet (CITY_LONGFORM only renders through a
-    // generated static override, and none of those four has one). They stay in
-    // the sitemap until they are redirected.
-    { slug: 'worcester-ma/mobile-phlebotomy', priority: 0.85 },
-    { slug: 'worcester-ma/in-home-blood-draw', priority: 0.7 },
-    { slug: 'worcester-ma/blood-draw-at-home', priority: 0.7 },
-
-    // LOWELL / MERRIMACK VALLEY (MA)
-    { slug: 'lowell-ma/mobile-phlebotomy', priority: 0.8 },
-    { slug: 'lowell-ma/in-home-blood-draw', priority: 0.7 },
-    { slug: 'lowell-ma/blood-draw-at-home', priority: 0.7 },
-
-    // MIAMI METRO (FL)
-
-    // DALLAS METRO (TX)
-
-    // INTENT VARIANTS — added 2026-04-18 for 21 cities that previously
-    // only had /mobile-phlebotomy. New variants are in-home-blood-draw
-    // and blood-draw-at-home for each.
-  ]
+  // ── Legacy /{city}-{st}/{slug} tier: fully retired ─────────────────────
+  // All 106 legacy URLs now 308 to their /us/{state}/{city} page (the last
+  // 12 — columbus-oh, charlotte-nc, worcester-ma, lowell-ma — on 2026-09-24,
+  // once their prose was ported into data/city-longform.ts and rendered by
+  // the dynamic city layout). Submitting a redirected URL wastes crawl budget
+  // and muddies the consolidation signal, so nothing is listed here.
+  const customPages: { slug: string; priority: number }[] = []
 
   customPages.forEach((page) => {
     routes.push({
