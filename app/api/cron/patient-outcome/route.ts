@@ -48,7 +48,7 @@ const MAX_FIRST_SEND_AGE_MS = 14 * 24 * 60 * 60 * 1000
  */
 // CLOSED_DECLINED: the patient told the provider no; asking them how the draw
 // went would be a question about something they turned down.
-const TERMINAL_NEGATIVE = ['EXPIRED_NO_RESPONSE', 'NEEDS_COVERAGE', 'CLOSED_DUPLICATE', 'REFUNDED', 'CLOSED_DECLINED'] as const
+const TERMINAL_NEGATIVE = ['EXPIRED_NO_RESPONSE', 'NEEDS_COVERAGE', 'CLOSED_DUPLICATE', 'REFUNDED', 'CLOSED_DECLINED', 'CLOSED_UNCONFIRMED', 'CLOSED_PRICING_ONLY'] as const
 
 /** Send time: appointment + 24h when one exists, otherwise claim + 48h. */
 function dueAt(claimedAt: Date, appointmentDate: Date | null): number {

@@ -36,7 +36,7 @@ export default function CloseLeadButton({ leadId, currentStatus }: { leadId: str
       })
       const json = await res.json()
       if (json.ok) {
-        setMsg(`Closed (${json.from} → ${json.status}).`)
+        setMsg(`Closed (${json.from} → ${json.status})${json.providerTold ? '; the claiming provider was emailed' : ''}.`)
         setTimeout(() => window.location.reload(), 1000)
       } else setMsg(json.error || 'Failed')
     } catch (e: any) {

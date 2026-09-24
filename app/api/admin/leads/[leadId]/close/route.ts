@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSessionFromCookies } from '@/lib/admin-auth'
+import { sendTransactionalEmail } from '@/lib/sendTransactionalEmail'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,6 +21,14 @@ export const dynamic = 'force-dynamic'
 const CLOSE_STATUSES = ['CLOSED_DUPLICATE', 'CLOSED_DECLINED', 'CLOSED_PRICING_ONLY', 'CLOSED_UNCONFIRMED', 'EXPIRED_NO_RESPONSE'] as const
 type CloseStatus = typeof CLOSE_STATUSES[number]
 const TERMINAL = new Set<string>([...CLOSE_STATUSES, 'COMPLETED'])
+/** What the claiming provider is told; the admin's note stays internal. */
+const PROVIDER_REASON: Record<CloseStatus, string> = {
+  CLOSED_DUPLICATE: 'It was a duplicate of another request or not a genuine patient.',
+  CLOSED_DECLINED: 'The patient has decided not to go ahead.',
+  CLOSED_PRICING_ONLY: 'The patient only wanted a price and is not booking.',
+  CLOSED_UNCONFIRMED: 'The patient has not responded to anyone and I am not going to keep it open.',
+  EXPIRED_NO_RESPONSE: 'The request has aged out.',
+}
 
 export async function POST(req: NextRequest, { params }: { params: { leadId: string } }) {
   const authHeader = req.headers.get('authorization')
@@ -39,7 +48,13 @@ export async function POST(req: NextRequest, { params }: { params: { leadId: str
       return NextResponse.json({ ok: false, error: 'A note is required' }, { status: 400 })
     }
 
-    const lead = await prisma.lead.findUnique({ where: { id: params.leadId }, select: { status: true, outcomeNotes: true } })
+    const lead = await prisma.lead.findUnique({
+      where: { id: params.leadId },
+      select: {
+        status: true, outcomeNotes: true, fullName: true, city: true, state: true,
+        provider: { select: { name: true, notificationEmail: true, claimEmail: true, email: true, notifyEnabled: true } },
+      },
+    })
     if (!lead) return NextResponse.json({ ok: false, error: 'Lead not found' }, { status: 404 })
     if (TERMINAL.has(lead.status)) {
       return NextResponse.json({ ok: false, error: `Lead is already ${lead.status}` }, { status: 409 })
@@ -56,7 +71,30 @@ export async function POST(req: NextRequest, { params }: { params: { leadId: str
       },
     })
     console.log(`[admin/close] lead ${params.leadId}: ${lead.status} -> ${status}${junk ? ' (junk)' : ''}`)
-    return NextResponse.json({ ok: true, from: lead.status, status })
+
+    // A CLAIMED lead disappears from the claimer's dashboard queue the moment
+    // it closes; tell them so they stop working it. The crons and one-tap
+    // links already ignore non-CLAIMED leads, so this is the only loose end.
+    let providerTold = false
+    const to = lead.provider?.notificationEmail || lead.provider?.claimEmail || lead.provider?.email
+    if (lead.status === 'CLAIMED' && to && lead.provider?.notifyEnabled !== false) {
+      const why = PROVIDER_REASON[status]
+      const text = `Hi ${lead.provider!.name.trim()},
+
+I've closed the request from ${lead.fullName} in ${lead.city}, ${lead.state} that you accepted. ${why} No action needed on your end, and nothing is held against you for it.
+
+Hector Valles
+MobilePhlebotomy.org`
+      const err = await sendTransactionalEmail({
+        to,
+        subject: `Closed: ${lead.fullName} (${lead.city}, ${lead.state}) — no action needed`,
+        text,
+        html: `<p>${text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}</p>`,
+      })
+      providerTold = !err
+      if (err) console.error(`[admin/close] provider notice failed for ${params.leadId}: ${err}`)
+    }
+    return NextResponse.json({ ok: true, from: lead.status, status, providerTold })
   } catch (err: any) {
     console.error('[admin/close] Error:', err)
     return NextResponse.json({ ok: false, error: err.message || 'Close failed' }, { status: 500 })
