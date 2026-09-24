@@ -56,6 +56,8 @@ export interface ProviderLink {
  */
 const ACTIVE_FILTER = {
   status: 'VERIFIED' as const,
+  // Soft-removed rows kept VERIFIED and were still being linked (2026-09-24).
+  removedAt: null,
 }
 
 // Local stable hash — duplicated rather than re-imported so this file
@@ -122,6 +124,27 @@ export const getProvidersForCity = unstable_cache(
     return providers
   },
   ['providers-for-city'],
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
+)
+
+// ────────────────────────────────────────────────────────────────────
+// Every active provider in a state, for the server-rendered block on
+// /us/[state]. Until 2026-09-24 the state page's provider grid was fetched
+// client-side after hydration, so the only crawlable provider links on the
+// site were the city blocks: 212 of 361 active providers (7 of 10 paying)
+// had no server-rendered link from any listing page. Not capped: the largest
+// state is ~50 providers. Eligible-for-leads rather than VERIFIED-only, so a
+// new listing is reachable from the day it goes live.
+// ────────────────────────────────────────────────────────────────────
+export const getProvidersInState = unstable_cache(
+  async (stateAbbr: string): Promise<ProviderLink[]> => {
+    return prisma.provider.findMany({
+      where: { removedAt: null, eligibleForLeads: true, isFixedSite: false, primaryState: stateAbbr },
+      select: { id: true, slug: true, name: true, primaryCity: true, primaryState: true, description: true },
+      orderBy: [{ isFeatured: 'desc' }, { primaryCity: 'asc' }, { name: 'asc' }],
+    })
+  },
+  ['providers-in-state'],
   { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] }
 )
 

@@ -9,6 +9,9 @@
  *  - app/sitemap.ts                    (URL generation; skips noProviders)
  *  - lib/seo/internalLinks.ts, anchorHelpers.ts, components/seo/ServiceAreaLinks.tsx
  *
+ * 2026-09-24: 13 cities with >=2 active providers added by hand (URL
+ * consolidation batch 2, see docs/findings/unmapped-provider-cities-2026-09-24.csv).
+ *
  * `noProviders: true` marks cities with zero matching providers (verified against
  * the coverage DB). They still render but are excluded from the sitemap so we
  * don't advertise thin pages. Regenerate with scripts/unify-cities-full.ts.
@@ -38,6 +41,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "arizona/fountain-hills": { name: "Fountain Hills", state: "AZ", citySlug: "fountain-hills", stateSlug: "arizona" },
   "arizona/gilbert": { name: "Gilbert", state: "AZ", citySlug: "gilbert", stateSlug: "arizona" },
   "arizona/glendale": { name: "Glendale", state: "AZ", citySlug: "glendale", stateSlug: "arizona" },
+  "arizona/lake-havasu-city": { name: "Lake Havasu City", state: "AZ", citySlug: "lake-havasu-city", stateSlug: "arizona" },
   "arizona/mesa": { name: "Mesa", state: "AZ", citySlug: "mesa", stateSlug: "arizona" },
   "arizona/peoria": { name: "Peoria", state: "AZ", citySlug: "peoria", stateSlug: "arizona" },
   "arizona/phoenix": { name: "Phoenix", state: "AZ", citySlug: "phoenix", stateSlug: "arizona" },
@@ -185,6 +189,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "florida/jupiter": { name: "Jupiter", state: "FL", citySlug: "jupiter", stateSlug: "florida" },
   "florida/key-largo": { name: "Key Largo", state: "FL", citySlug: "key-largo", stateSlug: "florida" },
   "florida/key-west": { name: "Key West", state: "FL", citySlug: "key-west", stateSlug: "florida" },
+  "florida/lake-city": { name: "Lake City", state: "FL", citySlug: "lake-city", stateSlug: "florida" },
   "florida/lakeland": { name: "Lakeland", state: "FL", citySlug: "lakeland", stateSlug: "florida" },
   "florida/lauderhill": { name: "Lauderhill", state: "FL", citySlug: "lauderhill", stateSlug: "florida" },
   "florida/lehigh-acres": { name: "Lehigh Acres", state: "FL", citySlug: "lehigh-acres", stateSlug: "florida" },
@@ -206,6 +211,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "florida/pembroke-pines": { name: "Pembroke Pines", state: "FL", citySlug: "pembroke-pines", stateSlug: "florida" },
   "florida/pompano-beach": { name: "Pompano Beach", state: "FL", citySlug: "pompano-beach", stateSlug: "florida" },
   "florida/port-charlotte": { name: "Port Charlotte", state: "FL", citySlug: "port-charlotte", stateSlug: "florida" },
+  "florida/port-saint-lucie": { name: "Port Saint Lucie", state: "FL", citySlug: "port-saint-lucie", stateSlug: "florida" },
   "florida/port-st-lucie": { name: "Port St. Lucie", state: "FL", citySlug: "port-st-lucie", stateSlug: "florida" },
   "florida/royal-palm-beach": { name: "Royal Palm Beach", state: "FL", citySlug: "royal-palm-beach", stateSlug: "florida" },
   "florida/saint-petersburg": { name: "Saint Petersburg", state: "FL", citySlug: "saint-petersburg", stateSlug: "florida" },
@@ -217,9 +223,12 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "florida/venice": { name: "Venice", state: "FL", citySlug: "venice", stateSlug: "florida" },
   "florida/west-palm-beach": { name: "West Palm Beach", state: "FL", citySlug: "west-palm-beach", stateSlug: "florida" },
   "florida/weston": { name: "Weston", state: "FL", citySlug: "weston", stateSlug: "florida" },
+  "georgia/albany": { name: "Albany", state: "GA", citySlug: "albany", stateSlug: "georgia" },
   "georgia/athens": { name: "Athens", state: "GA", citySlug: "athens", stateSlug: "georgia" },
   "georgia/atlanta": { name: "Atlanta", state: "GA", citySlug: "atlanta", stateSlug: "georgia" },
   "georgia/augusta": { name: "Augusta", state: "GA", citySlug: "augusta", stateSlug: "georgia" },
+  "georgia/conyers": { name: "Conyers", state: "GA", citySlug: "conyers", stateSlug: "georgia" },
+  "georgia/decatur": { name: "Decatur", state: "GA", citySlug: "decatur", stateSlug: "georgia" },
   "georgia/savannah": { name: "Savannah", state: "GA", citySlug: "savannah", stateSlug: "georgia" },
   "georgia/valdosta": { name: "Valdosta", state: "GA", citySlug: "valdosta", stateSlug: "georgia" },
   "hawaii/honolulu": { name: "Honolulu", state: "HI", citySlug: "honolulu", stateSlug: "hawaii", noProviders: true },
@@ -264,6 +273,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "louisiana/baton-rouge": { name: "Baton Rouge", state: "LA", citySlug: "baton-rouge", stateSlug: "louisiana" },
   "louisiana/chalmette": { name: "Chalmette", state: "LA", citySlug: "chalmette", stateSlug: "louisiana" },
   "louisiana/covington": { name: "Covington", state: "LA", citySlug: "covington", stateSlug: "louisiana" },
+  "louisiana/gonzales": { name: "Gonzales", state: "LA", citySlug: "gonzales", stateSlug: "louisiana" },
   "louisiana/harvey": { name: "Harvey", state: "LA", citySlug: "harvey", stateSlug: "louisiana" },
   "louisiana/houma": { name: "Houma", state: "LA", citySlug: "houma", stateSlug: "louisiana" },
   "louisiana/lafayette": { name: "Lafayette", state: "LA", citySlug: "lafayette", stateSlug: "louisiana" },
@@ -283,6 +293,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "maryland/laurel": { name: "Laurel", state: "MD", citySlug: "laurel", stateSlug: "maryland" },
   "maryland/leonardtown": { name: "Leonardtown", state: "MD", citySlug: "leonardtown", stateSlug: "maryland" },
   "maryland/owings-mills": { name: "Owings Mills", state: "MD", citySlug: "owings-mills", stateSlug: "maryland" },
+  "maryland/rockville": { name: "Rockville", state: "MD", citySlug: "rockville", stateSlug: "maryland" },
   "maryland/rosedale": { name: "Rosedale", state: "MD", citySlug: "rosedale", stateSlug: "maryland" },
   "maryland/towson": { name: "Towson", state: "MD", citySlug: "towson", stateSlug: "maryland" },
   "maryland/woodlawn": { name: "Woodlawn", state: "MD", citySlug: "woodlawn", stateSlug: "maryland" },
@@ -309,6 +320,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "michigan/grand-rapids": { name: "Grand Rapids", state: "MI", citySlug: "grand-rapids", stateSlug: "michigan" },
   "michigan/grosse-pointe": { name: "Grosse Pointe", state: "MI", citySlug: "grosse-pointe", stateSlug: "michigan" },
   "michigan/lansing": { name: "Lansing", state: "MI", citySlug: "lansing", stateSlug: "michigan" },
+  "michigan/livonia": { name: "Livonia", state: "MI", citySlug: "livonia", stateSlug: "michigan" },
   "michigan/merrill": { name: "Merrill", state: "MI", citySlug: "merrill", stateSlug: "michigan" },
   "michigan/orion-township": { name: "Orion Township", state: "MI", citySlug: "orion-township", stateSlug: "michigan" },
   "michigan/royal-oak": { name: "Royal Oak", state: "MI", citySlug: "royal-oak", stateSlug: "michigan" },
@@ -414,6 +426,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "north-carolina/durham": { name: "Durham", state: "NC", citySlug: "durham", stateSlug: "north-carolina" },
   "north-carolina/fayetteville": { name: "Fayetteville", state: "NC", citySlug: "fayetteville", stateSlug: "north-carolina" },
   "north-carolina/greensboro": { name: "Greensboro", state: "NC", citySlug: "greensboro", stateSlug: "north-carolina" },
+  "north-carolina/greenville": { name: "Greenville", state: "NC", citySlug: "greenville", stateSlug: "north-carolina" },
   "north-carolina/raleigh": { name: "Raleigh", state: "NC", citySlug: "raleigh", stateSlug: "north-carolina" },
   "north-carolina/wilmington": { name: "Wilmington", state: "NC", citySlug: "wilmington", stateSlug: "north-carolina" },
   "north-carolina/winston-salem": { name: "Winston-Salem", state: "NC", citySlug: "winston-salem", stateSlug: "north-carolina" },
@@ -480,6 +493,7 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "south-carolina/charleston": { name: "Charleston", state: "SC", citySlug: "charleston", stateSlug: "south-carolina" },
   "south-carolina/columbia": { name: "Columbia", state: "SC", citySlug: "columbia", stateSlug: "south-carolina" },
   "south-carolina/lake-wylie": { name: "Lake Wylie", state: "SC", citySlug: "lake-wylie", stateSlug: "south-carolina" },
+  "south-carolina/laurens": { name: "Laurens", state: "SC", citySlug: "laurens", stateSlug: "south-carolina" },
   "south-dakota/sioux-falls": { name: "Sioux Falls", state: "SD", citySlug: "sioux-falls", stateSlug: "south-dakota", noProviders: true },
   "tennessee/chattanooga": { name: "Chattanooga", state: "TN", citySlug: "chattanooga", stateSlug: "tennessee" },
   "tennessee/franklin": { name: "Franklin", state: "TN", citySlug: "franklin", stateSlug: "tennessee" },
@@ -540,9 +554,11 @@ export const CITY_MAPPING: Record<string, CityInfo> = {
   "virginia/richmond": { name: "Richmond", state: "VA", citySlug: "richmond", stateSlug: "virginia" },
   "virginia/roanoke": { name: "Roanoke", state: "VA", citySlug: "roanoke", stateSlug: "virginia" },
   "virginia/virginia-beach": { name: "Virginia Beach", state: "VA", citySlug: "virginia-beach", stateSlug: "virginia" },
+  "virginia/woodbridge": { name: "Woodbridge", state: "VA", citySlug: "woodbridge", stateSlug: "virginia" },
   "washington-dc/washington": { name: "Washington", state: "DC", citySlug: "washington", stateSlug: "washington-dc", noProviders: true },
   "washington/bellevue": { name: "Bellevue", state: "WA", citySlug: "bellevue", stateSlug: "washington" },
   "washington/kent": { name: "Kent", state: "WA", citySlug: "kent", stateSlug: "washington" },
+  "washington/lacey": { name: "Lacey", state: "WA", citySlug: "lacey", stateSlug: "washington" },
   "washington/lakewood": { name: "Lakewood", state: "WA", citySlug: "lakewood", stateSlug: "washington" },
   "washington/moses-lake": { name: "Moses Lake", state: "WA", citySlug: "moses-lake", stateSlug: "washington" },
   "washington/seattle": { name: "Seattle", state: "WA", citySlug: "seattle", stateSlug: "washington" },

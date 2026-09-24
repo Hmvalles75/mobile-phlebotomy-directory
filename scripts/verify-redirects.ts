@@ -28,7 +28,20 @@ const DEFAULT_PATHS = [
   '/us/metro/new-york-city',
   '/lowell-ma/blood-draw-at-home',
   '/us/florida/miami?ref=test',
+  // batch 2
+  '/us/north-carolina/greenville',    // newly mapped city: 200
+  '/us/florida/not-a-real-city',      // unmapped city: 308 to the state page
+  '/us/alaska/anchorage',             // noProviders city: 200 with noindex
+  '/us/notastate/miami',              // unknown state: 404
 ]
+
+// Per-path expectations that override the generic judge.
+const EXPECT: Record<string, { status: number; hops?: number; final?: string; noindex?: boolean }> = {
+  '/us/north-carolina/greenville': { status: 200, hops: 0 },
+  '/us/florida/not-a-real-city': { status: 200, hops: 1, final: '/us/florida' },
+  '/us/alaska/anchorage': { status: 200, hops: 0, noindex: true },
+  '/us/notastate/miami': { status: 404, hops: 0 },
+}
 
 const MAX_HOPS = 5
 
@@ -45,12 +58,21 @@ async function follow(path: string) {
       url = new URL(loc, url).toString()
       continue
     }
-    break
+    const body = status === 200 && EXPECT[path]?.noindex !== undefined ? await res.text() : ''
+    return { path, status, final: url.replace(BASE, ''), hops, noindex: /<meta name="robots" content="[^"]*noindex/i.test(body) }
   }
-  return { path, status, final: url.replace(BASE, ''), hops }
+  return { path, status, final: url.replace(BASE, ''), hops, noindex: false }
 }
 
-function judge(r: { path: string; status: number; final: string; hops: string[] }): string {
+function judge(r: { path: string; status: number; final: string; hops: string[]; noindex: boolean }): string {
+  const e = EXPECT[r.path]
+  if (e) {
+    if (r.status !== e.status) return `FAIL status ${r.status}, expected ${e.status}`
+    if (e.hops !== undefined && r.hops.length !== e.hops) return `FAIL ${r.hops.length} hops, expected ${e.hops}`
+    if (e.final && r.final.split('?')[0] !== e.final) return `FAIL final ${r.final}, expected ${e.final}`
+    if (e.noindex && !r.noindex) return 'FAIL no noindex meta'
+    return `OK ${e.status}${e.noindex ? ' noindex' : ''}${e.hops ? ` ${e.hops} hop -> ${e.final}` : ''}`
+  }
   const isAsset = /\.[a-z0-9]{1,8}$/i.test(r.path.split('?')[0])
   if (isAsset) return r.status === 200 && r.hops.length === 0 ? 'OK asset served, no redirect' : 'FAIL asset'
   if (r.path.startsWith('/provider/') && r.path === r.path.toLowerCase()) {

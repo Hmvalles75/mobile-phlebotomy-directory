@@ -1,0 +1,181 @@
+key,city,state,active,verified,featured,fixedSite
+north-carolina/greenville,"Greenville",NC,4,4,0,0
+arizona/lake-havasu-city,"Lake Havasu City",AZ,3,3,0,0
+florida/lake-city,"Lake City",FL,3,3,0,0
+georgia/albany,"Albany",GA,3,3,0,0
+florida/port-saint-lucie,"Port Saint Lucie",FL,2,2,0,0
+georgia/conyers,"Conyers",GA,2,2,0,0
+georgia/decatur,"Decatur",GA,2,2,0,0
+louisiana/gonzales,"Gonzales",LA,2,2,0,0
+maryland/rockville,"Rockville",MD,2,2,0,0
+michigan/livonia,"Livonia",MI,2,2,0,0
+south-carolina/laurens,"Laurens",SC,2,2,0,0
+virginia/woodbridge,"Woodbridge",VA,2,2,0,0
+washington/lacey,"Lacey",WA,2,2,0,0
+alabama/bay-minette,"Bay Minette",AL,1,1,0,0
+alabama/moulton,"Moulton",AL,1,1,0,0
+alabama/tuscaloosa,"Tuscaloosa",AL,1,1,0,0
+arizona/maricopa,"Maricopa",AZ,1,1,0,0
+arkansas/fayetteville,"Fayetteville",AR,1,1,0,0
+arkansas/hot-springs-village,"Hot Springs Village",AR,1,1,0,0
+arkansas/west-memphis,"West Memphis",AR,1,1,0,0
+california/beverly-hills,"Beverly Hills",CA,1,1,0,0
+california/calabasas,"Calabasas",CA,1,1,0,0
+california/canoga-park,"Canoga Park",CA,1,1,0,0
+california/carmichael,"Carmichael",CA,1,1,0,0
+california/cerritos,"Cerritos",CA,1,1,0,0
+california/el-cajon,"El Cajon",CA,1,1,0,0
+california/fallbrook,"Fallbrook",CA,1,1,1,0
+california/jamestown,"Jamestown",CA,1,1,0,0
+california/la-crescenta,"La Crescenta",CA,1,0,0,0
+california/manhattan-beach,"Manhattan Beach",CA,1,1,0,0
+california/milpitas,"Milpitas",CA,1,1,0,0
+california/murrieta,"Murrieta",CA,1,1,0,0
+california/santa-paula,"Santa Paula",CA,1,1,0,0
+california/south-san-francisco,"South San Francisco",CA,1,1,1,0
+california/temecula,"Temecula",CA,1,1,0,0
+california/valencia,"Valencia",CA,1,1,0,0
+california/west-hollywood,"West Hollywood",CA,1,1,0,0
+colorado/longmont,"Longmont",CO,1,1,0,0
+connecticut/vernon,"Vernon",CT,1,1,0,0
+delaware/dover,"Dover",DE,1,1,0,0
+delaware/wilmington,"Wilmington",DE,1,1,0,0
+florida/alva,"Alva",FL,1,1,0,0
+florida/apopka,"Apopka",FL,1,1,0,0
+florida/aventura,"Aventura",FL,1,1,0,0
+florida/babcock-ranch,"Babcock Ranch",FL,1,0,0,0
+florida/cocoa,"Cocoa",FL,1,1,0,0
+florida/cutler-bay,"Cutler Bay",FL,1,1,0,0
+florida/daytona-beach,"Daytona Beach",FL,1,0,0,0
+florida/fort-pierce,"Fort Pierce",FL,1,1,0,0
+florida/jasper,"Jasper",FL,1,1,0,0
+florida/lake-worth,"Lake Worth",FL,1,1,0,0
+florida/nokomis,"Nokomis",FL,1,1,1,0
+florida/oakland-park,"Oakland Park",FL,1,1,0,0
+florida/ormond-beach,"Ormond Beach",FL,1,1,0,0
+florida/palm-beach,"Palm Beach",FL,1,1,0,0
+florida/quincy,"Quincy",FL,1,1,0,0
+florida/riverview,"Riverview",FL,1,1,0,0
+florida/saint-cloud,"Saint Cloud",FL,1,1,0,0
+florida/saint-johns,"Saint Johns",FL,1,1,0,0
+georgia/buford,"Buford",GA,1,1,0,0
+georgia/carrollton,"Carrollton",GA,1,1,0,0
+georgia/college-park,"College Park",GA,1,1,0,0
+georgia/douglasville,"Douglasville",GA,1,1,0,0
+georgia/griffin,"Griffin",GA,1,1,0,0
+georgia/lawrenceville,"Lawrenceville",GA,1,1,0,0
+georgia/locust-grove,"Locust Grove",GA,1,1,0,0
+georgia/macon,"Macon",GA,1,1,0,0
+georgia/marietta,"Marietta",GA,1,1,0,0
+georgia/nicholls,"Nicholls",GA,1,1,0,0
+georgia/snellville,"SNELLVILLE",GA,1,1,0,0
+georgia/tucker,"Tucker",GA,1,1,0,0
+georgia/warner-robins,"Warner Robins",GA,1,1,0,0
+georgia/woodstock,"Woodstock",GA,1,1,0,0
+illinois/lovespark,"Lovespark",IL,1,1,0,0
+illinois/lynwood,"Lynwood",IL,1,1,0,0
+illinois/montgomery,"Montgomery",IL,1,1,0,0
+illinois/south-holland,"South Holland",IL,1,1,0,0
+illinois/university-park,"University Park",IL,1,1,0,0
+indiana/danville,"Danville",IN,1,1,0,0
+indiana/elkhart,"Elkhart",IN,1,1,0,0
+iowa/davenport,"Davenport",IA,1,1,0,0
+iowa/marion,"Marion",IA,1,1,0,0
+kentucky/ashland,"Ashland",KY,1,1,0,0
+louisiana/baker,"Baker",LA,1,1,0,0
+louisiana/bossier-city,"Bossier City",LA,1,1,0,0
+louisiana/carencro,"Carencro",LA,1,1,0,0
+louisiana/hammond,"Hammond",LA,1,1,0,0
+louisiana/monroe,"Monroe",LA,1,1,0,0
+louisiana/saint-francisville,"Saint Francisville",LA,1,1,0,0
+louisiana/terrytown,"Terrytown",LA,1,1,0,0
+maine/york,"York",ME,1,1,0,0
+maryland/cambridge,"Cambridge",MD,1,1,0,0
+maryland/chester,"Chester",MD,1,1,0,0
+maryland/clarksburg,"Clarksburg",MD,1,1,0,0
+maryland/fort-washington,"Fort Washington",MD,1,1,1,0
+maryland/gaitherburg,"Gaitherburg",MD,1,1,0,0
+maryland/pasadena,"Pasadena",MD,1,1,0,0
+maryland/statewide,"Statewide",MD,1,1,1,0
+maryland/timonium,"Timonium",MD,1,1,0,0
+maryland/waldorf,"Waldorf",MD,1,1,0,0
+maryland/washington-dc,"Washington DC",MD,1,1,1,0
+massachusetts/charlestown,"Charlestown",MA,1,1,1,0
+massachusetts/fitchburg,"Fitchburg",MA,1,1,0,0
+massachusetts/lawrence,"Lawrence",MA,1,1,0,0
+massachusetts/tewksbury,"Tewksbury",MA,1,1,0,0
+massachusetts/westwood,"Westwood",MA,1,1,0,0
+michigan/flint,"Flint",MI,1,1,0,0
+michigan/roseville,"Roseville",MI,1,1,0,0
+michigan/southfield,"Southfield",MI,1,1,0,0
+michigan/walker,"Walker",MI,1,1,0,0
+minnesota/hopkins,"Hopkins",MN,1,1,0,0
+mississippi/southaven,"Southaven",MS,1,1,0,0
+missouri/creve-couer,"Creve Couer",MO,1,1,0,0
+missouri/ferguson,"Ferguson",MO,1,1,0,0
+missouri/kewanee,"Kewanee",MO,1,1,0,0
+missouri/o-fallon,"O Fallon",MO,1,1,0,0
+new-jersey/camden,"Camden",NJ,1,1,0,0
+new-jersey/ewing,"Ewing",NJ,1,1,0,0
+new-jersey/hackensack,"Hackensack",NJ,1,1,0,0
+new-jersey/maplewood,"Maplewood",NJ,1,1,0,0
+new-jersey/princeton,"Princeton",NJ,1,1,0,0
+new-jersey/willingboro,"Willingboro",NJ,1,1,0,0
+new-york/far-rockaway,"Far Rockaway",NY,1,1,0,0
+new-york/mamaroneck,"Mamaroneck",NY,1,1,0,0
+new-york/moriches,"Moriches",NY,1,1,0,0
+new-york/newburgh,"Newburgh",NY,1,1,0,0
+new-york/niagara-falls,"Niagara Falls",NY,1,1,0,0
+north-carolina/burlington-nc,"Burlington NC",NC,1,1,0,0
+north-carolina/concord,"Concord",NC,1,1,0,0
+north-carolina/gastonia,"Gastonia",NC,1,1,0,0
+north-carolina/hickory,"Hickory",NC,1,1,0,0
+north-carolina/jacksonville,"Jacksonville",NC,1,1,0,0
+ohio/avon,"Avon",OH,1,1,0,0
+ohio/lima,"Lima",OH,1,1,0,0
+ohio/northfield,"NORTHFIELD",OH,1,1,0,0
+ohio/richmond-hts,"Richmond Hts",OH,1,1,0,0
+ohio/vandalia,"Vandalia",OH,1,1,0,0
+oklahoma/broken-arrow,"Broken Arrow",OK,1,1,0,0
+pennsylvania/brodheadsville,"Brodheadsville",PA,1,1,0,0
+pennsylvania/easton,"Easton",PA,1,1,0,0
+pennsylvania/effort,"Effort",PA,1,1,0,0
+pennsylvania/harrisburg,"Harrisburg",PA,1,1,0,0
+pennsylvania/homestead,"Homestead",PA,1,1,0,0
+pennsylvania/hustontown,"Hustontown",PA,1,1,0,0
+pennsylvania/lancaster,"Lancaster",PA,1,1,0,0
+pennsylvania/new-castle,"New Castle",PA,1,1,0,0
+pennsylvania/newtown-square,"Newtown Square",PA,1,1,0,0
+south-carolina/blythewood,"Blythewood",SC,1,1,0,0
+south-carolina/dillon,"Dillon",SC,1,1,0,0
+south-carolina/fort-mill,"Fort Mill",SC,1,1,0,0
+south-carolina/georgetown,"Georgetown",SC,1,1,0,0
+south-carolina/mauldin,"Mauldin",SC,1,1,0,0
+south-carolina/myrtle-beach,"Myrtle Beach",SC,1,1,0,0
+south-carolina/newberry,"Newberry",SC,1,1,0,0
+south-carolina/north-charleston,"North Charleston",SC,1,1,0,0
+south-carolina/pawleys-island,"Pawleys Island",SC,1,1,0,0
+south-carolina/saint-matthews,"Saint Matthews",SC,1,1,0,0
+south-carolina/simpsonville,"Simpsonville",SC,1,1,0,0
+tennessee/madison,"Madison",TN,1,1,0,0
+texas/addsion,"Addsion",TX,1,1,0,0
+texas/alvarado,"Alvarado",TX,1,1,0,0
+texas/bedford,"Bedford",TX,1,1,0,0
+texas/bellaire,"Bellaire",TX,1,1,0,0
+texas/crosby,"Crosby",TX,1,1,0,0
+texas/lamarque,"LaMarque",TX,1,1,0,0
+texas/mansfield,"Mansfield",TX,1,1,0,0
+texas/mission,"Mission",TX,1,1,0,0
+texas/orange,"Orange",TX,1,1,0,0
+texas/richmond,"Richmond",TX,1,1,0,0
+texas/sugarland,"Sugarland",TX,1,1,0,0
+texas/tomball,"Tomball",TX,1,1,0,0
+texas/uvalde,"Uvalde",TX,1,1,0,0
+utah/american-fork,"American Fork",UT,1,1,0,0
+vermont/stowe,"Stowe",VT,1,1,0,0
+virginia/glen-allen,"Glen Allen",VA,1,1,0,0
+virginia/halifax,"Halifax",VA,1,1,0,0
+virginia/midlothian,"Midlothian",VA,1,1,0,0
+washington/everett,"EVERETT",WA,1,1,0,0
+washington/granite-falls,"Granite Falls",WA,1,1,0,0
+west-virginia/kearynsville,"Kearynsville",WV,1,1,0,0

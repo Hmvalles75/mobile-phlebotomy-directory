@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation'
 import StatePageClient from './StatePageClient'
 import { SITE_URL } from '@/lib/seo'
 import { STATE_DATA as stateData } from '@/data/states-full'
-import { getCitiesInState } from '@/lib/seo/internalLinks'
+import { getCitiesInState, getProvidersInState } from '@/lib/seo/internalLinks'
 import CitiesInState from '@/components/seo/CitiesInState'
+import ProvidersInState from '@/components/seo/ProvidersInState'
 
 type Props = {
   params: { state: string }
@@ -125,7 +126,10 @@ export default async function StatePage({ params }: Props) {
 
   // Server-rendered city directory — visible in initial HTML to Googlebot
   // even though StatePageClient hydrates its provider grid client-side.
-  const cities = await getCitiesInState(stateInfo.abbr)
+  const [cities, stateProviders] = await Promise.all([
+    getCitiesInState(stateInfo.abbr),
+    getProvidersInState(stateInfo.abbr),
+  ])
   const faqSchema = buildStateFaqSchema(stateInfo.name)
 
   return (
@@ -138,6 +142,7 @@ export default async function StatePage({ params }: Props) {
       <div className="bg-gray-50">
         <div className="container mx-auto px-4 pb-12">
           <CitiesInState cities={cities} stateSlug={stateSlug} stateName={stateInfo.name} />
+          <ProvidersInState providers={stateProviders} stateName={stateInfo.name} stateAbbr={stateInfo.abbr} />
         </div>
       </div>
     </>
