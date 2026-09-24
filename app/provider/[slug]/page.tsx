@@ -10,6 +10,7 @@ import { ProviderSchema } from '@/components/seo/ProviderSchema'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 import { PremiumProviderSchema } from '@/components/seo/PremiumProviderSchema'
 import { STATE_DATA } from '@/data/states-full'
+import { cityByStateCity } from '@/data/cities-full'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
 import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
@@ -106,12 +107,22 @@ function citySlugOf(city: string | undefined | null): string | null {
   return s || null
 }
 
+/**
+ * City link target, or null when the city has no page. Unmapped cities 308 to
+ * the state page since 2026-09-24, so linking them would put every provider in
+ * one of ~170 single-provider towns behind a redirect; those link to the state.
+ */
+function mappedCitySlug(stateSlug: string, city: string | undefined | null): string | null {
+  const slug = citySlugOf(city)
+  return slug && cityByStateCity(stateSlug, slug) ? slug : null
+}
+
 function buildBreadcrumbItems(provider: { name: string; slug: string; city?: string; state?: string }): Array<{ name: string; url: string }> {
   const items: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
   const st = resolveState(provider.state)
   if (st) {
     items.push({ name: st.name, url: `/us/${st.slug}` })
-    const citySlug = citySlugOf(provider.city)
+    const citySlug = mappedCitySlug(st.slug, provider.city)
     if (provider.city && citySlug) {
       items.push({ name: provider.city, url: `/us/${st.slug}/${citySlug}` })
     }
@@ -331,6 +342,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   // that hop three times each (2026-09-24).
   const resolvedStateSlug: string | null = resolvedState?.slug || null
   const primaryCitySlug = citySlugOf(provider.city)
+  const linkedCitySlug = resolvedStateSlug ? mappedCitySlug(resolvedStateSlug, provider.city) : null
   const nearbyProviders = resolvedStateAbbr
     ? await getNearbyProviders(provider.id, primaryCitySlug, resolvedStateAbbr, 5)
     : []
@@ -358,10 +370,10 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   <span className="mx-2">/</span>
                 </>
               )}
-              {resolvedStateSlug && provider.city && primaryCitySlug && (
+              {resolvedStateSlug && provider.city && linkedCitySlug && (
                 <>
                   <Link
-                    href={`/us/${resolvedStateSlug}/${primaryCitySlug}`}
+                    href={`/us/${resolvedStateSlug}/${linkedCitySlug}`}
                     className="hover:text-primary-600"
                   >
                     {provider.city}

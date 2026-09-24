@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { SITE_URL } from '@/lib/seo'
 import { cityByStateCity } from '@/data/cities-full'
 import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
@@ -48,20 +49,9 @@ export async function generateMetadata({ params }: { params: { state: string, ci
   // anchor since users searching "mobile phlebotomy [city]" want concrete
   // info up front. Description tightens parallel.
 
-  // For cities not in mapping, conversion-optimized SEO with same shape
-  if (!cityInfo) {
-    const title = `Mobile Phlebotomy ${cityName}, ${stateAbbr}: At-Home Blood Draws From $75`
-    const description = `${cityName}, ${stateAbbr} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75. Submit a request — fast, free, no obligation.`
-
-    return {
-      title,
-      description,
-      keywords: `mobile phlebotomy ${cityName}, at-home blood draw ${cityName} ${stateAbbr}, phlebotomist ${cityName}, mobile lab services ${stateAbbr}`,
-      alternates: { canonical },
-      openGraph: { title, description, url: canonical, type: 'website' },
-      twitter: { title, description, card: 'summary_large_image' },
-    }
-  }
+  // Unmapped cities no longer render (the layout below 308s them to the state
+  // page, or 404s an unknown state), so there is no metadata to build.
+  if (!cityInfo) return {}
 
   const title = `Mobile Phlebotomy ${cityInfo.name}, ${cityInfo.state}: At-Home Blood Draws From $75`
   const description = `${cityInfo.name} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75 per visit. Medicare-friendly. Book a draw today.`
@@ -71,6 +61,10 @@ export async function generateMetadata({ params }: { params: { state: string, ci
     description,
     keywords: `mobile phlebotomy ${cityInfo.name}, at-home blood draw ${cityInfo.name} ${cityInfo.state}, phlebotomist ${cityInfo.name}, mobile lab ${cityInfo.name}, home blood test ${cityInfo.name}`,
     alternates: { canonical },
+    // noProviders cities were only ever kept out of the sitemap; they still
+    // indexed as thin self-canonical pages. Keep the URL, drop it from the
+    // index until a provider lands there (2026-09-24).
+    ...(cityInfo.noProviders ? { robots: { index: false, follow: true } } : {}),
     openGraph: { title, description, url: canonical, type: 'website' },
     twitter: { title, description, card: 'summary_large_image' },
   }
@@ -82,7 +76,19 @@ export async function generateMetadata({ params }: { params: { state: string, ci
 // still hydrates), but Google now sees a populated link graph regardless
 // of whether the client island fetches successfully.
 export default async function CityLayout({ children, params }: CityLayoutProps) {
-  const { citySlug, cityName, stateAbbr, stateName, stateSlug } = resolveCityState(params.state, params.city)
+  const { citySlug, cityName, stateAbbr, stateName, stateSlug, cityInfo } = resolveCityState(params.state, params.city)
+
+  // URL consolidation batch 2 (2026-09-24). This route used to render ANY
+  // /us/{anything}/{anything} as a real page with a self-canonical: an
+  // unbounded duplicate surface, fed by 800 provider breadcrumbs pointing at
+  // ~180 cities that were never in CITY_MAPPING. Unknown state: 404. Known
+  // state, unmapped city: 308 to the state page, which links every active
+  // provider in the state. Cities with providers get mapped instead (see
+  // scripts/list-unmapped-provider-cities.ts).
+  if (!cityInfo) {
+    if (!STATE_DATA[stateSlug]) notFound()
+    permanentRedirect(`/us/${stateSlug}`)
+  }
   // Long-form local copy ported from a legacy page before its 308. The 18
   // static override pages render their own copy of this and never reach this
   // layout, so nothing is shown twice.
