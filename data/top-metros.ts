@@ -361,21 +361,6 @@ export const topMetroAreas: MetroArea[] = [
     }
   },
   {
-    rank: 23,
-    slug: 'detroit',
-    city: 'Detroit',
-    state: 'Michigan',
-    stateAbbr: 'MI',
-    zipCodes: ['48201', '48202', '48203', '48204', '48205', '48206', '48207', '48208', '48209', '48210'],
-    neighborhoods: ['Downtown', 'Midtown', 'Corktown', 'Eastern Market', 'Rivertown', 'New Center'],
-    majorHospitals: ['Henry Ford Health', 'Detroit Medical Center', 'Beaumont', 'St. John Providence'],
-    localInfo: {
-      avgCost: '$60-120',
-      typicalWaitTime: '24-48 hours',
-      majorEmployers: ['General Motors', 'Ford', 'Stellantis', 'Quicken Loans', 'Blue Cross Blue Shield']
-    }
-  },
-  {
     rank: 24,
     slug: 'nashville',
     city: 'Nashville',
@@ -642,20 +627,6 @@ export const topMetroAreas: MetroArea[] = [
     localInfo: {
       avgCost: '$55-110',
       typicalWaitTime: '24-48 hours'
-    }
-  },
-  {
-    rank: 43,
-    slug: 'miami',
-    city: 'Miami',
-    state: 'Florida',
-    stateAbbr: 'FL',
-    zipCodes: ['33101', '33125', '33126', '33127', '33128', '33129', '33130', '33131', '33132', '33133'],
-    neighborhoods: ['Downtown', 'Brickell', 'Wynwood', 'Design District', 'Coconut Grove', 'Coral Gables'],
-    majorHospitals: ['Jackson Health', 'Baptist Health', 'Mount Sinai', 'University of Miami'],
-    localInfo: {
-      avgCost: '$70-140',
-      typicalWaitTime: '24 hours'
     }
   },
   {

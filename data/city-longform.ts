@@ -93,4 +93,44 @@ export const CITY_LONGFORM: Record<string, CityLongform> = {
       "Miami-area mobile phlebotomy typically costs $75–$140. Florida doesn't require a separate state phlebotomy license, but all providers on our platform carry national certifications (ASCP, NHA, or AMT) and work under CLIA-approved lab supervision.",
     ],
   },
+  // Ported verbatim from the legacy /columbus-oh/mobile-phlebotomy page ahead of its
+  // 308 (2026-09-24). Entities converted to real characters; the price band is
+  // the legacy page's own figure.
+  'ohio/columbus': {
+    paragraphs: [
+      "Columbus is Ohio's largest city and one of the fastest-growing metros in the Midwest. With major employers like Ohio State University, Nationwide, and OhioHealth driving demand, mobile phlebotomy fills a gap for patients who can't make it to lab locations across the sprawling Franklin County area.",
+      "Columbus-area phlebotomists handle routine lab draws for OhioHealth and Mount Carmel orders, corporate drug testing for warehouse and logistics companies along I-70, home health collections for post-surgical patients, and FRAT testing kit collections.",
+      "Pricing in Columbus is typically $60–$110 per visit — below the national average. Ohio Medicaid covers mobile phlebotomy for homebound patients with proper documentation from a referring physician.",
+    ],
+  },
+  // Ported verbatim from the legacy /charlotte-nc/mobile-phlebotomy page ahead of its
+  // 308 (2026-09-24). Entities converted to real characters; the price band is
+  // the legacy page's own figure.
+  'north-carolina/charlotte': {
+    paragraphs: [
+      "Charlotte is the largest city in North Carolina and a major financial hub — Bank of America, Wells Fargo, and Truist are all headquartered here. The city's rapid growth has pushed residents into suburbs like Concord, Huntersville, and Mooresville, where lab access can be limited. Mobile phlebotomy bridges that gap.",
+      "Common services in the Charlotte metro include routine venipuncture for Atrium Health and Novant Health lab orders, corporate wellness screenings for Uptown offices, pre-employment and DOT drug testing for distribution centers along I-85, and home health draws for agencies serving Mecklenburg County.",
+      "Charlotte-area mobile phlebotomy visits typically cost $60–$120. North Carolina does not require a separate phlebotomy license, but all providers on our platform carry relevant clinical certifications.",
+    ],
+  },
+  // Ported verbatim from the legacy /worcester-ma/mobile-phlebotomy page ahead of its
+  // 308 (2026-09-24). Entities converted to real characters; the price band is
+  // the legacy page's own figure.
+  'massachusetts/worcester': {
+    paragraphs: [
+      "Worcester is the second-largest city in Massachusetts and the heart of central MA — home to UMass Memorial Medical Center, Saint Vincent Hospital, and a growing biotech corridor. The city's spread-out geography across Worcester County makes mobile phlebotomy particularly useful for patients in outlying towns like Auburn, Millbury, Shrewsbury, and Leominster.",
+      "Mobile phlebotomists in the Worcester area handle routine venipuncture for UMass Memorial and Reliant Medical Group orders, pre-employment drug testing for the region's many manufacturing employers, home health draws for post-surgical patients, and bilingual services for Worcester's diverse Latino and Vietnamese communities.",
+      "Expect to pay $75–$145 per visit in Worcester. Massachusetts requires phlebotomists to work under CLIA-certified lab supervision, and MassHealth covers mobile draws for homebound patients with proper physician documentation.",
+    ],
+  },
+  // Ported verbatim from the legacy /lowell-ma/mobile-phlebotomy page ahead of its
+  // 308 (2026-09-24). Entities converted to real characters; the price band is
+  // the legacy page's own figure.
+  'massachusetts/lowell': {
+    paragraphs: [
+      "Lowell sits at the heart of the Merrimack Valley, 30 miles northwest of Boston and 40 miles south of New Hampshire. The city's large immigrant communities — particularly Cambodian, Brazilian, and Puerto Rican — make bilingual mobile phlebotomy services especially valuable for patients who prefer to receive care at home.",
+      "Local providers serve Lowell General Hospital and Circle Health lab orders, UMass Lowell student and faculty health draws, home health collections throughout the Merrimack Valley, and corporate wellness for the biotech and defense contractors along Route 3. Coverage typically extends to Chelmsford, Dracut, Tewksbury, Billerica, Andover, and Lawrence.",
+      "Mobile phlebotomy visits in the Lowell area run $75–$145. Massachusetts phlebotomists operate under CLIA-certified lab oversight, and MassHealth covers home draws for homebound patients with a physician's order documenting medical necessity.",
+    ],
+  },
 }

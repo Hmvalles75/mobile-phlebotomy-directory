@@ -91,20 +91,29 @@ export const revalidate = 3600
  * listing. Resolves the state slug whether provider.state is an abbr (CA) or
  * a full name (California).
  */
+/** provider.state may be an abbr ("CA"), a full name ("California") or a slug. */
+function resolveState(raw: string | undefined | null): { slug: string; abbr: string; name: string } | null {
+  if (!raw) return null
+  const v = raw.trim().toLowerCase()
+  const entry = Object.entries(STATE_DATA).find(([slug, info]) => info.abbr.toLowerCase() === v || info.name.toLowerCase() === v || slug === v)
+  return entry ? { slug: entry[0], abbr: entry[1].abbr, name: entry[1].name } : null
+}
+
+/** Same shape the middleware normalises to, so links land in one hop. */
+function citySlugOf(city: string | undefined | null): string | null {
+  if (!city) return null
+  const s = city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  return s || null
+}
+
 function buildBreadcrumbItems(provider: { name: string; slug: string; city?: string; state?: string }): Array<{ name: string; url: string }> {
   const items: Array<{ name: string; url: string }> = [{ name: 'Home', url: '/' }]
-  if (provider.state) {
-    const raw = provider.state.trim()
-    const stateEntry = Object.entries(STATE_DATA).find(
-      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
-    )
-    if (stateEntry) {
-      const [stateSlug, stateInfo] = stateEntry
-      items.push({ name: stateInfo.name, url: `/us/${stateSlug}` })
-      if (provider.city) {
-        const citySlug = provider.city.toLowerCase().replace(/\s+/g, '-')
-        items.push({ name: provider.city, url: `/us/${stateSlug}/${citySlug}` })
-      }
+  const st = resolveState(provider.state)
+  if (st) {
+    items.push({ name: st.name, url: `/us/${st.slug}` })
+    const citySlug = citySlugOf(provider.city)
+    if (provider.city && citySlug) {
+      items.push({ name: provider.city, url: `/us/${st.slug}/${citySlug}` })
     }
   }
   items.push({ name: provider.name, url: `/provider/${provider.slug}` })
@@ -315,17 +324,13 @@ export default async function ProviderDetailPage({ params }: PageProps) {
   // abbr like "CA" or a full name like "California") for the SEO link
   // sections. Falls through to null if we can't resolve, in which case
   // the link sections render conservatively or skip.
-  const resolvedStateAbbr: string | null = (() => {
-    if (!provider.state) return null
-    const raw = provider.state.trim()
-    const entry = Object.entries(STATE_DATA).find(
-      ([slug, info]) => info.abbr.toLowerCase() === raw.toLowerCase() || info.name.toLowerCase() === raw.toLowerCase() || slug === raw.toLowerCase()
-    )
-    return entry?.[1].abbr || null
-  })()
-  const primaryCitySlug = provider.city
-    ? provider.city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-    : null
+  const resolvedState = resolveState(provider.state)
+  const resolvedStateAbbr: string | null = resolvedState?.abbr || null
+  // Links below use the state SLUG, not the abbreviation: /us/oh/columbus
+  // 301'd to /us/ohio/columbus, and 800 provider pages were linking through
+  // that hop three times each (2026-09-24).
+  const resolvedStateSlug: string | null = resolvedState?.slug || null
+  const primaryCitySlug = citySlugOf(provider.city)
   const nearbyProviders = resolvedStateAbbr
     ? await getNearbyProviders(provider.id, primaryCitySlug, resolvedStateAbbr, 5)
     : []
@@ -345,18 +350,18 @@ export default async function ProviderDetailPage({ params }: PageProps) {
               <span className="mx-2">/</span>
               <Link href="/search" className="hover:text-primary-600">Search</Link>
               <span className="mx-2">/</span>
-              {provider.state && (
+              {resolvedStateSlug && (
                 <>
-                  <Link href={`/us/${provider.state.toLowerCase()}`} className="hover:text-primary-600">
+                  <Link href={`/us/${resolvedStateSlug}`} className="hover:text-primary-600">
                     {provider.state}
                   </Link>
                   <span className="mx-2">/</span>
                 </>
               )}
-              {provider.city && (
+              {resolvedStateSlug && provider.city && primaryCitySlug && (
                 <>
                   <Link
-                    href={`/us/${provider.state?.toLowerCase()}/${provider.city.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={`/us/${resolvedStateSlug}/${primaryCitySlug}`}
                     className="hover:text-primary-600"
                   >
                     {provider.city}
@@ -368,10 +373,10 @@ export default async function ProviderDetailPage({ params }: PageProps) {
             </nav>
 
             {/* Backlink to State Page */}
-            {provider.state && (
+            {resolvedStateSlug && (
               <div className="mb-4">
                 <Link
-                  href={`/us/${provider.state.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`/us/${resolvedStateSlug}`}
                   className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 hover:underline"
                 >
                   ← Back to mobile phlebotomists in {provider.state}

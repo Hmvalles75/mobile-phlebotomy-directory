@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getMetroBySlug } from '@/data/top-metros'
+import { metroHref } from '@/lib/seo/metroCanonical'
 
 // Simple in-memory rate limiting (for production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>()
@@ -27,6 +29,18 @@ const stateAbbrToSlug: Record<string, string> = {
 // (captured by Google before the rename), values are the current slug.
 const METRO_REMAP: Record<string, string> = {
   'new-york-metro': 'new-york-city',
+}
+
+// Page routes are lowercase by construction (state/city slugs, provider slugs:
+// zero uppercase slugs in the DB as of 2026-09-24). Next matches static
+// segments case-insensitively, so /US/ohio and /PROVIDER/x served 200 twins of
+// the lowercase page; dynamic params are looked up as-is, so /us/Ohio 404'd.
+// One 301 to the lowercase path closes both. Assets, API and Next internals
+// are left alone: their names are case-sensitive on disk.
+function isPageRoute(pathname: string): boolean {
+  if (pathname.startsWith('/_next') || pathname.startsWith('/api')) return false
+  if (/\.[a-z0-9]{1,8}$/i.test(pathname)) return false   // anything with a file extension
+  return true
 }
 
 // Placeholder provider slug pattern — /provider/provider-123 etc. These were
@@ -109,26 +123,38 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301)
   }
 
-  // /us/metro/{slug}-metro → /us/metro/{slug}  (the -metro suffix was dropped)
-  // Also handles explicit renames (new-york-metro → new-york-city).
-  if (pathname.startsWith('/us/metro/')) {
-    const slug = pathname.replace('/us/metro/', '').replace(/\/$/, '')
+  // Every path normalisation below works on one candidate and redirects once,
+  // so /us/OH/Columbus resolves to /us/ohio/columbus in a single hop instead
+  // of lowercase -> abbreviation -> city as three.
+  let needsRedirect = false
+  let working = pathname
+  if (isPageRoute(pathname) && pathname !== pathname.toLowerCase()) {
+    working = pathname.toLowerCase()
+    needsRedirect = true
+  }
+
+  // /us/metro/{slug}-metro and explicit renames (new-york-metro -> new-york-city).
+  // Resolve straight to the metro's canonical page via metroHref(): for 46 of
+  // 48 that is the city page, so /us/metro/houston-metro lands on
+  // /us/texas/houston in one hop rather than bouncing off /us/metro/houston
+  // (which next.config now 308s).
+  if (working.startsWith('/us/metro/')) {
+    const slug = working.replace('/us/metro/', '').replace(/\/$/, '')
     let newSlug: string | null = METRO_REMAP[slug] || null
     if (!newSlug && slug.endsWith('-metro')) {
       newSlug = slug.slice(0, -'-metro'.length)
     }
     if (newSlug && newSlug !== slug) {
-      const url = request.nextUrl.clone()
-      url.pathname = `/us/metro/${newSlug}`
-      return NextResponse.redirect(url, 301)
+      const metro = getMetroBySlug(newSlug)
+      working = metro ? metroHref(metro) : `/us/metro/${newSlug}`
+      needsRedirect = true
     }
   }
 
   // Handle state/city URL redirects
-  if (pathname.startsWith('/us/')) {
-    const parts = pathname.split('/')
-    let needsRedirect = false
-    let newPathname = pathname
+  if (working.startsWith('/us/') && !working.startsWith('/us/metro/')) {
+    const parts = working.split('/')
+    let newPathname = working
 
     // Handle state abbreviations or spaces in state names (e.g., /us/tx or /us/new%20york)
     if (parts.length >= 3) {
@@ -169,12 +195,17 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    if (needsRedirect) {
-      newPathname = parts.join('/')
-      const url = request.nextUrl.clone()
-      url.pathname = newPathname
-      return NextResponse.redirect(url, 301)  // Permanent redirect
+    newPathname = parts.join('/')
+    if (newPathname !== working) {
+      working = newPathname
+      needsRedirect = true
     }
+  }
+
+  if (needsRedirect && working !== pathname) {
+    const url = request.nextUrl.clone()   // keeps the query string
+    url.pathname = working
+    return NextResponse.redirect(url, 301)  // Permanent redirect
   }
 
   const response = NextResponse.next()
