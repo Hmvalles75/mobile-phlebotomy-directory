@@ -1,4 +1,4 @@
-== 42 not a known city for that state (REVIEW ONLY, not changed) ==
+== 37 not a known city for that state (REVIEW ONLY, not changed) ==
   CT  Vernon                       active  Klarity Testing and Wellness  /provider/klarity-testing-and-wellness
   FL  Aventura                     active  Pink Mobile Labs & Diagnostics  /provider/pink-mobile-labs-diagnostics
   FL  Babcock Ranch                active  Rooted Care Mobile Phlebotomy  /provider/rooted-care-mobile-phlebotomy
@@ -12,18 +12,16 @@
   IN  Read More Close              inactive XtreamVein Mobile Phlebotomy  /provider/xtreamvein-mobile-phlebotomy
   LA  Terrytown                    active  AmeriTest  /provider/ameritest
   MD  Baltimore National Pike Catonsville inactive Mindful Practice Phlebotomy  /provider/mindful-practice-phlebotomy
-  MD  Gaitherburg                  active  Resolute Mobile lab  /provider/resolute-mobile-lab
   MD  Statewide                    active  Skilled Labs Diagnostics LLC  /provider/skilled-labs-diagnostics-llc
   MD  Timonium                     active  Mom Vic’s Mobile Phlebotomy, LLC  /provider/mom-vics-mobile-phlebotomy-llc-
   MD  Washington DC                active  Proknostix Mobile Services  /provider/proknostix-mobile-services
   MI  Central                      inactive MPCM Services, Mobile Phlebotomy of Central Michigan  /provider/mpcm-services-mobile-phlebotomy-of-central-michigan
   MI  Farmington Hills             inactive Pinnacle Mobile Phlebotomy  /provider/pinnacle-mobile-phlebotomy
   MI  Walker                       active  Well Veins Mobile Phlebotomy  /provider/well-veins-mobile-phlebotomy-
-  MO  Creve Couer                  active  Precision Mobile Labs LLC  /provider/precision-mobile-labs-llc
+  MO  Creve Coeur                  active  Precision Mobile Labs LLC  /provider/precision-mobile-labs-llc
   MO  Ferguson                     active  Precision Health & Diagnostic  /provider/precision-health-diagnostic-
   MO  Louis                        inactive Massey Mobile Phlebotomy Service LLC.  /provider/massey-mobile-phlebotomy-service-llc
   MO  Raytown                      inactive Needles On The Go Mobile Phlebotomy  /provider/needles-on-the-go-mobile-phlebotomy
-  NC  Burlington NC                active  Vein Voyagers Mobile Lab LLC  /provider/vein-voyagers-mobile-lab-llc
   NC  Phlebotomists                inactive Serenity Mobile Phlebotomy, LLC  /provider/serenity-mobile-phlebotomy-llc
   NJ  Ewing                        active  Precision Mobile Lab Services LLC  /provider/precision-mobile-lab-services-llc
   NJ  Long Island                  inactive Mama Love's Mobile Phlebotomy & EKG Services LLC  /provider/mama-love-s-mobile-phlebotomy-ekg-services-llc
@@ -33,13 +31,10 @@
   OH  Central                      inactive OhioHealth Laboratory Services - Marion Medical Campus  /provider/ohiohealth-laboratory-services-marion-medical-campus
   OH  Garfield Heights             inactive Moody Mobile Lab Services LLC  /provider/moody-mobile-lab-services-llc
   OH  Huber Heights                inactive Essential Life Diagnostics  /provider/essential-life-diagnostics
-  OH  Richmond Hts                 active  Phleb Lab LLC  /provider/phleb-lab-llc
+  OH  Richmond Heights             active  Phleb Lab LLC  /provider/phleb-lab-llc
   SC  Lake Wylie                   active  Gentle Sticks Mobile Phlebotomy, LLC  /provider/gentle-sticks-mobile-phlebotomy-llc
-  TN  Vanderbilt Health Nashville  inactive Vanderbilt Laboratory Services  /provider/vanderbilt-laboratory-services
   TN  Vanderbilt Health Nashville  inactive Vanderbilt Laboratory Services Central One Hundred Oaks  /provider/vanderbilt-laboratory-services-central-one-hundred-oaks
-  TX  Addsion                      active  Order of Draw LLC-Mobile Lab & Specimen Collection  /provider/order-of-draw-llc-mobile-lab-specimen-collection
-  TX  LaMarque                     active  Prestige Mobile Labs & Wellness  /provider/prestige-mobile-labs-wellness
-  TX  Sugarland                    active  A Truly Unique Touch CPR and Diagnostics  /provider/a-truly-unique-touch-cpr-and-diagnostics
+  TN  Vanderbilt Health Nashville  inactive Vanderbilt Laboratory Services  /provider/vanderbilt-laboratory-services
   TX  Yazji                        inactive Dr. Monzer H. Yazji, MD  /provider/dr-monzer-h-yazji-md
 
 dry run; --apply writes the 0 fixes above
