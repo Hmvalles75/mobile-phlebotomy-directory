@@ -31,6 +31,7 @@ function RequestBloodDrawForm() {
 
   const showDoctorOrderWarning = formData.hasDoctorOrder === 'no'
   const showPricingNote = formData.paymentMethod === 'not_sure'
+  const showInsuranceNote = formData.paymentMethod === 'insurance'
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -352,6 +353,11 @@ function RequestBloodDrawForm() {
                 {showPricingNote && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
                     Rates typically range from <strong>$75–$150 per visit</strong>. The provider will confirm exact pricing when they contact you.
+                  </div>
+                )}
+                {showInsuranceNote && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
+                    <strong>How insurance usually works here:</strong> the lab bills your insurance for the tests, as it would for any draw. The phlebotomist&apos;s visit fee (typically <strong>$75–$150</strong>) is separate, and most mobile phlebotomists collect it directly rather than billing insurance. The provider will confirm their fee when they contact you.
                   </div>
                 )}
               </div>
