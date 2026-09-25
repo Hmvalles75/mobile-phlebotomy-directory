@@ -151,7 +151,8 @@ export function generateLocalBusinessSchema(
   const schema: MedicalBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'MedicalBusiness',
-    '@id': `${baseUrl}/provider/${provider.id}`,
+    // Slug, not id: Google fetches @id values as URLs and /provider/<cuid> 404s (~520 in GSC, 2026-09).
+    '@id': `${baseUrl}/provider/${provider.slug}#provider`,
     name: provider.name,
     description: provider.description || `Mobile phlebotomy services by ${provider.name}`,
     medicalSpecialty: ['Phlebotomy', 'Laboratory Medicine', 'Diagnostic Services'],
@@ -413,7 +414,7 @@ export function generateProviderListSchema(
       position: index + 1,
       item: {
         '@type': 'MedicalBusiness',
-        '@id': `${SITE_URL}/provider/${provider.id}`,
+        '@id': `${SITE_URL}/provider/${provider.slug}#provider`,
         name: provider.name,
         description: provider.description,
         telephone: provider.phone,

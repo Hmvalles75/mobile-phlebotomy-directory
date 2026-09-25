@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/seo'
 import { PROVIDERS_PER_PAGE } from '@/lib/seo/providersIndex'
 import { topMetroAreas } from '@/data/top-metros'
 import { metroHref } from '@/lib/seo/metroCanonical'
+import { isStubNoindex } from '@/lib/providerIndexing'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL
@@ -24,13 +25,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Search Console impressions at 0.1% CTR on branded facility searches that
   // can never convert here. Their pages now carry noindex (see the provider
   // route's generateMetadata) and are no longer advertised.
-  const providers = await prisma.provider.findMany({
+  // Stub rule (lib/providerIndexing.ts) added 2026-09-25: a noindexed page
+  // must not be advertised either. Same predicate the page uses.
+  const providerRows = await prisma.provider.findMany({
     where: { removedAt: null, isFixedSite: false },
     select: {
       slug: true,
       updatedAt: true,
+      status: true,
+      description: true,
+      primaryCity: true,
+      _count: { select: { leadNotifications: true } },
     },
   })
+  const providers = providerRows.filter(p => !isStubNoindex({ status: p.status, description: p.description, primaryCity: p.primaryCity, notifiedCount: p._count.leadNotifications }))
 
   // Count of active providers drives /providers index pagination URLs.
   const activeProviderCount = await prisma.provider.count({
@@ -222,6 +230,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     })
   })
+
+  routes.push({ url: `${baseUrl}/us`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 })
 
   // Add all 51 state pages (50 states + DC)
   for (const stateSlug of Object.keys(STATE_DATA)) {

@@ -350,6 +350,13 @@ const nextConfig = {
       ...URL_REDIRECTS.metros.map(r => ({ ...r, permanent: true })),
       // The last 12 legacy city URLs.
       ...LEGACY_CITY_REDIRECTS,
+      // Pre-2026 numbered provider slugs still in Google's index (GSC 404
+      // report, last crawled Oct 2025 - Jan 2026); each has a clean twin.
+      { source: '/provider/travalab-32', destination: '/provider/travalab', permanent: true },
+      { source: '/provider/dr-monzer-h-yazji-md-451', destination: '/provider/dr-monzer-h-yazji-md', permanent: true },
+      { source: '/provider/bio-care-services-inc-311', destination: '/provider/bio-care-services-inc', permanent: true },
+      { source: '/provider/tender-touch-mobile-labs-656', destination: '/provider/tender-touch-mobile-labs', permanent: true },
+      { source: '/provider/nr-mobile-labs-546', destination: '/provider/nr-mobile-labs', permanent: true },
     ]
   },
 }
