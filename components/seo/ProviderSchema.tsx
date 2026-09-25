@@ -84,7 +84,7 @@ export function ProviderListSchema({
       position: index + 1,
       item: {
         '@type': 'MedicalBusiness',
-        '@id': `${SITE_URL}/provider/${provider.id}`,
+        '@id': `${SITE_URL}/provider/${provider.slug}#provider`,
         name: provider.name,
         description: provider.description || `Mobile phlebotomy services by ${provider.name}`,
         telephone: provider.phone,

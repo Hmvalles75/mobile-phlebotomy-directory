@@ -11,6 +11,7 @@ import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 import { PremiumProviderSchema } from '@/components/seo/PremiumProviderSchema'
 import { STATE_DATA } from '@/data/states-full'
 import { cityByStateCity } from '@/data/cities-full'
+import { isProviderNoindex } from '@/lib/providerIndexing'
 import { ProviderImage } from '@/components/ui/ProviderImage'
 import { ClaimBusinessButton } from '@/components/ui/ClaimBusinessButton'
 import { ProviderCTASection } from '@/components/ui/ProviderCTASection'
@@ -184,14 +185,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : buildProviderDescription(metaInput).description
   const ogTitle = title
 
-  // Records with no city: an unverified listing that has never been sent a
-  // lead is a scraped stub and is noindexed rather than titled with no place.
-  // Anything verified, or ever notified, stays indexed (location omitted from
-  // the title) so a provider expecting leads is never silently deindexed.
-  let stubNoindex = false
-  if (!provider.city && provider.status !== 'VERIFIED' && !provider.isFixedSite) {
-    const sent = await prisma.leadNotification.count({ where: { providerId: provider.id } })
-    stubNoindex = sent === 0
+  // Scraped-stub rule, shared with the sitemap: see lib/providerIndexing.ts.
+  // Verified providers and anything with a real description stay indexed; the
+  // notification count is fetched only when the cheaper checks have not
+  // already decided.
+  let noindex = !!provider.isFixedSite
+  if (!noindex && provider.status !== 'VERIFIED' && (provider.description || '').trim().length < 100) {
+    const sent = provider.city ? await prisma.leadNotification.count({ where: { providerId: provider.id } }) : 0
+    noindex = isProviderNoindex({ status: provider.status, description: provider.description, primaryCity: provider.city, isFixedSite: provider.isFixedSite, notifiedCount: sent })
   }
 
   return {
@@ -231,7 +232,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // providers. They were removed from city pages on 2026-08-21; as of
     // 2026-09-17 their pages are also noindex and out of the sitemap. The
     // page still resolves so existing links don't 404 and follow is kept.
-    ...(provider.isFixedSite || stubNoindex ? { robots: { index: false, follow: true } } : {}),
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
   }
 }
 

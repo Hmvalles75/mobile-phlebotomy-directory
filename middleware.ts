@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getMetroBySlug } from '@/data/top-metros'
 import { metroHref } from '@/lib/seo/metroCanonical'
+import { CITY_MAPPING } from '@/data/cities-full'
 
 // Simple in-memory rate limiting (for production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>()
@@ -24,6 +25,8 @@ const stateAbbrToSlug: Record<string, string> = {
   'vt': 'vermont', 'va': 'virginia', 'wa': 'washington', 'wv': 'west-virginia',
   'wi': 'wisconsin', 'wy': 'wyoming', 'dc': 'washington-dc'
 }
+
+const STATE_SLUGS = new Set(Object.values(stateAbbrToSlug))
 
 // Metro slug remaps — metros that were renamed. Keys are the OLD URL slug
 // (captured by Google before the rename), values are the current slug.
@@ -117,9 +120,13 @@ export function middleware(request: NextRequest) {
   // /providers/claim?id=* — drop the legacy id query param.
   // Google indexed these under the old routing; the current claim flow uses
   // the path alone with no query params.
-  if (pathname === '/providers/claim' && request.nextUrl.searchParams.has('id')) {
+  // (2026-09-25) The legacy claim route no longer exists, so stripping ?id and
+  // staying on /providers/claim sent ~40 indexed URLs into a 404. Send them to
+  // the current listing flow.
+  if (pathname === '/providers/claim') {
     const url = request.nextUrl.clone()
-    url.searchParams.delete('id')
+    url.pathname = '/add-provider'
+    url.search = ''
     return NextResponse.redirect(url, 301)
   }
 
@@ -193,6 +200,13 @@ export function middleware(request: NextRequest) {
         parts[3] = normalizedCity
         needsRedirect = true
       }
+    }
+
+    // A city the route would 308 to the state anyway (not in CITY_MAPPING)
+    // resolves here, so /us/nj/maplewood is one hop to /us/new-jersey rather
+    // than abbreviation -> unmapped city -> state.
+    if (parts.length === 4 && STATE_SLUGS.has(parts[2]) && !(CITY_MAPPING as Record<string, unknown>)[`${parts[2]}/${parts[3]}`]) {
+      parts.length = 3
     }
 
     newPathname = parts.join('/')

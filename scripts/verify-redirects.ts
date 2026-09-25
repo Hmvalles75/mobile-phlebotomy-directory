@@ -33,14 +33,28 @@ const DEFAULT_PATHS = [
   '/us/florida/not-a-real-city',      // unmapped city: 308 to the state page
   '/us/alaska/anchorage',             // noProviders city: 200 with noindex
   '/us/notastate/miami',              // unknown state: 404
+  // batch 3
+  '/us',                              // state index: 200 (was a 404 linked from every breadcrumb)
+  '/providers/claim?id=cmit1gqec007mg0m0si1rudp6',   // legacy claim: 1 hop to /add-provider
+  '/los-angeles/request?providerId=cmlqtfy070000l404n15zf5c3',   // lead form: 200 + noindex
+  '/provider/travalab-32',            // old numbered slug: 1 hop to clean twin
+  '/us/nj/maplewood',                 // abbr + unmapped city: ONE hop to the state
+  '/provider/gentle-trace-mobile',    // JSON-LD @id must be the slug URL, never the cuid
 ]
 
 // Per-path expectations that override the generic judge.
-const EXPECT: Record<string, { status: number; hops?: number; final?: string; noindex?: boolean }> = {
+const EXPECT: Record<string, { status: number; hops?: number; final?: string; noindex?: boolean; jsonLdId?: string }> = {
   '/us/north-carolina/greenville': { status: 200, hops: 0 },
   '/us/florida/not-a-real-city': { status: 200, hops: 1, final: '/us/florida' },
   '/us/alaska/anchorage': { status: 200, hops: 0, noindex: true },
   '/us/notastate/miami': { status: 404, hops: 0 },
+  '/us': { status: 200, hops: 0 },
+  '/providers/claim?id=cmit1gqec007mg0m0si1rudp6': { status: 200, hops: 1, final: '/add-provider' },
+  '/los-angeles/request?providerId=cmlqtfy070000l404n15zf5c3': { status: 200, hops: 0, noindex: true },
+  '/provider/travalab-32': { status: 200, hops: 1, final: '/provider/travalab' },
+  '/us/nj/maplewood': { status: 200, hops: 1, final: '/us/new-jersey' },
+  '/provider/gentle-trace-mobile': { status: 200, hops: 0, jsonLdId: '/provider/gentle-trace-mobile#' },   // premium template
+  '/provider/tru-blu-diagnostic-lab': { status: 200, hops: 0, jsonLdId: '/provider/tru-blu-diagnostic-lab#' },   // generic template
 }
 
 const MAX_HOPS = 5
@@ -58,19 +72,27 @@ async function follow(path: string) {
       url = new URL(loc, url).toString()
       continue
     }
-    const body = status === 200 && EXPECT[path]?.noindex !== undefined ? await res.text() : ''
-    return { path, status, final: url.replace(BASE, ''), hops, noindex: /<meta name="robots" content="[^"]*noindex/i.test(body) }
+    const e = EXPECT[path]
+    const body = status === 200 && e && (e.noindex !== undefined || e.jsonLdId) ? await res.text() : ''
+    // @id values are absolute against SITE_URL, which differs from BASE on a local run.
+    const ids = [...body.matchAll(/"@id"\s*:\s*"([^"]+)"/g)].map(m => m[1].replace(/^https?:\/\/[^/]+/, ''))
+    return { path, status, final: url.replace(BASE, ''), hops, noindex: /<meta name="robots" content="[^"]*noindex/i.test(body), ids }
   }
-  return { path, status, final: url.replace(BASE, ''), hops, noindex: false }
+  return { path, status, final: url.replace(BASE, ''), hops, noindex: false, ids: [] as string[] }
 }
 
-function judge(r: { path: string; status: number; final: string; hops: string[]; noindex: boolean }): string {
+function judge(r: { path: string; status: number; final: string; hops: string[]; noindex: boolean; ids: string[] }): string {
   const e = EXPECT[r.path]
   if (e) {
     if (r.status !== e.status) return `FAIL status ${r.status}, expected ${e.status}`
     if (e.hops !== undefined && r.hops.length !== e.hops) return `FAIL ${r.hops.length} hops, expected ${e.hops}`
     if (e.final && r.final.split('?')[0] !== e.final) return `FAIL final ${r.final}, expected ${e.final}`
     if (e.noindex && !r.noindex) return 'FAIL no noindex meta'
+    if (e.jsonLdId) {
+      if (!r.ids.some(i => i.startsWith(e.jsonLdId!))) return `FAIL @id ${e.jsonLdId}… not found (saw ${r.ids.slice(0, 3).join(', ') || 'none'})`
+      if (r.ids.some(i => /\/provider\/c[a-z0-9]{24}$/.test(i))) return 'FAIL a cuid @id is still emitted'
+      return `OK @id = ${r.ids.find(i => i.startsWith(e.jsonLdId!))}`
+    }
     return `OK ${e.status}${e.noindex ? ' noindex' : ''}${e.hops ? ` ${e.hops} hop -> ${e.final}` : ''}`
   }
   const isAsset = /\.[a-z0-9]{1,8}$/i.test(r.path.split('?')[0])
