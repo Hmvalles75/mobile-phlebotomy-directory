@@ -1,0 +1,16 @@
+Subject: {{leads_received}} requests reached you in {{city}} — none booked
+
+Hi {{first_name}},
+
+In the last 90 days, {{leads_received}} patient requests in and around {{city}} were sent to {{business}}. As far as the directory can see, none of them turned into a booked draw. That usually isn't about the requests; it's about timing. Each request goes to every provider covering the area at the same moment, and the first one to claim it gets the patient's details. Everyone else gets a "just claimed" note.
+
+Paid listings get every standard request 10 minutes before the free listings do (urgent STAT requests go to everyone at once), and the listing is marked Featured and sorted above the free listings on the {{city}} page. In a race that's usually decided in the first few minutes, that's the whole race. It's $79 a month, we don't charge per lead or take a commission, and you can cancel any time from your dashboard.
+
+The {{city}} page showed up in {{impressions}} Google searches in the last 90 days, so the requests will keep coming. Here's the link if you want the head start:
+
+{{signup_link}}
+
+If the requests you've been getting were the wrong kind (too far, wrong service, no order), reply and tell me; I'd rather fix your coverage than sell you anything.
+
+Hector Valles
+MobilePhlebotomy.org
