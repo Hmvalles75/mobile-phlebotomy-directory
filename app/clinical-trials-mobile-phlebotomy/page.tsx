@@ -4,8 +4,9 @@ import { SITE_URL } from '@/lib/seo'
 import { ClinicalTrialIntakeForm } from './ClinicalTrialIntakeForm'
 
 export const metadata: Metadata = {
-  title: 'Clinical Trial Mobile Phlebotomy Services | MobilePhlebotomy.org',
-  description: 'Nationwide coordination of certified mobile phlebotomists for clinical research: protocol-driven collection at volume, single-site or decentralized, with the same collector every session. Recent project: 120 draws in 16 days.',
+  // Root layout appends the site suffix; do not repeat it here (it was doubled).
+  title: 'Nationwide Clinical Trial Phlebotomy | Mobile Blood Draws for Research Studies',
+  description: 'Coordinated mobile phlebotomy for clinical trials, research organizations, and multi-site studies. One point of contact, vetted providers nationwide, insured. Recent study: 120 draws in 16 days.',
   alternates: {
     canonical: `${SITE_URL}/clinical-trials-mobile-phlebotomy`,
   },

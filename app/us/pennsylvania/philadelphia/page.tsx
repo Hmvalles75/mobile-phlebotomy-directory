@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Pennsylvania"
 const PRICE_RANGE = "$65–$125"
 const CITY_SPECIFIC_COUNT = 17
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Philadelphia: 17 Providers (2026)",
-  description: "Find mobile phlebotomy in Philadelphia, PA. 17 providers serving the Philadelphia area — at-home blood draw, specimen collection, lab routing. Typical service fee $65–$125 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy philadelphia, mobile phlebotomist philadelphia, philadelphia mobile blood draw, at home blood draw philadelphia, mobile lab philadelphia, philadelphia pennsylvania phlebotomy, pennsylvania mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/pennsylvania/philadelphia",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Philadelphia: 17 Providers (2026)",
-    description: "Find mobile phlebotomy in Philadelphia, PA. 17 providers serving the Philadelphia area — at-home blood draw, specimen collection, lab routing. Typical service fee $65–$125 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/pennsylvania/philadelphia",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("pennsylvania", "philadelphia")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Philadelphia, PA","description":"Directory of vetted mobile phlebotomists serving Philadelphia, Pennsylvania and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/pennsylvania/philadelphia","areaServed":{"@type":"City","name":"Philadelphia","containedInPlace":{"@type":"State","name":"Pennsylvania"}},"priceRange":"$65–$125","medicalSpecialty":"Phlebotomy"}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Florida"
 const PRICE_RANGE = "$65–$130"
 const CITY_SPECIFIC_COUNT = 12
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Miami: 12 Providers (2026)",
-  description: "Find mobile phlebotomy in Miami, FL. 12 providers serving the Miami area — Blood Draw, Mobile Lab Services, Urinalysis Collection. Typical service fee $65–$130 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy miami, mobile phlebotomist miami, miami mobile blood draw, at home blood draw miami, mobile lab miami, miami florida phlebotomy, florida mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/florida/miami",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Miami: 12 Providers (2026)",
-    description: "Find mobile phlebotomy in Miami, FL. 12 providers serving the Miami area — Blood Draw, Mobile Lab Services, Urinalysis Collection. Typical service fee $65–$130 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/florida/miami",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("florida", "miami")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Miami, FL","description":"Directory of vetted mobile phlebotomists serving Miami, Florida and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/florida/miami","areaServed":{"@type":"City","name":"Miami","containedInPlace":{"@type":"State","name":"Florida"}},"priceRange":"$65–$130","medicalSpecialty":"Phlebotomy"}

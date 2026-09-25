@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "New York"
 const PRICE_RANGE = "$75–$150"
 const CITY_SPECIFIC_COUNT = 18
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy New York: 18 Providers (2026)",
-  description: "Find mobile phlebotomy in New York, NY. 18 providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy new york, mobile phlebotomist new york, new york mobile blood draw, at home blood draw new york, mobile lab new york, new york new-york phlebotomy, new york mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/new-york/new-york",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy New York: 18 Providers (2026)",
-    description: "Find mobile phlebotomy in New York, NY. 18 providers serving the New York area — Corporate Wellness, Blood Draw, Lab Specimen Collection. Typical service fee $75–$150 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/new-york/new-york",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("new-york", "new-york")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in New York, NY","description":"Directory of vetted mobile phlebotomists serving New York, New York and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/new-york/new-york","areaServed":{"@type":"City","name":"New York","containedInPlace":{"@type":"State","name":"New York"}},"priceRange":"$75–$150","medicalSpecialty":"Phlebotomy"}

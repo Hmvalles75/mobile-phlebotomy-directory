@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Texas"
 const PRICE_RANGE = "$60–$120"
 const CITY_SPECIFIC_COUNT = 4
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Austin: 4 Providers (2026)",
-  description: "Find mobile phlebotomy in Austin, TX. 4 providers serving the Austin area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy austin, mobile phlebotomist austin, austin mobile blood draw, at home blood draw austin, mobile lab austin, austin texas phlebotomy, texas mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/texas/austin",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Austin: 4 Providers (2026)",
-    description: "Find mobile phlebotomy in Austin, TX. 4 providers serving the Austin area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/texas/austin",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("texas", "austin")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Austin, TX","description":"Directory of vetted mobile phlebotomists serving Austin, Texas and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/texas/austin","areaServed":{"@type":"City","name":"Austin","containedInPlace":{"@type":"State","name":"Texas"}},"priceRange":"$60–$120","medicalSpecialty":"Phlebotomy"}

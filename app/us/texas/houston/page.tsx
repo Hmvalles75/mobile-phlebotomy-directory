@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Texas"
 const PRICE_RANGE = "$60–$120"
 const CITY_SPECIFIC_COUNT = 32
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Houston: 32 Providers (2026)",
-  description: "Find mobile phlebotomy in Houston, TX. 32 providers serving the Houston area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy houston, mobile phlebotomist houston, houston mobile blood draw, at home blood draw houston, mobile lab houston, houston texas phlebotomy, texas mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/texas/houston",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Houston: 32 Providers (2026)",
-    description: "Find mobile phlebotomy in Houston, TX. 32 providers serving the Houston area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/texas/houston",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("texas", "houston")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Houston, TX","description":"Directory of vetted mobile phlebotomists serving Houston, Texas and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/texas/houston","areaServed":{"@type":"City","name":"Houston","containedInPlace":{"@type":"State","name":"Texas"}},"priceRange":"$60–$120","medicalSpecialty":"Phlebotomy"}

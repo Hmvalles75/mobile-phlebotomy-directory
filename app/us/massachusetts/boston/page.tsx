@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Massachusetts"
 const PRICE_RANGE = "$75–$145"
 const CITY_SPECIFIC_COUNT = 6
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Boston: 6 Providers (2026)",
-  description: "Find mobile phlebotomy in Boston, MA. 6 providers serving the Boston area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $75–$145 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy boston, mobile phlebotomist boston, boston mobile blood draw, at home blood draw boston, mobile lab boston, boston massachusetts phlebotomy, massachusetts mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/massachusetts/boston",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Boston: 6 Providers (2026)",
-    description: "Find mobile phlebotomy in Boston, MA. 6 providers serving the Boston area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $75–$145 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/massachusetts/boston",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("massachusetts", "boston")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Boston, MA","description":"Directory of vetted mobile phlebotomists serving Boston, Massachusetts and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/massachusetts/boston","areaServed":{"@type":"City","name":"Boston","containedInPlace":{"@type":"State","name":"Massachusetts"}},"priceRange":"$75–$145","medicalSpecialty":"Phlebotomy"}

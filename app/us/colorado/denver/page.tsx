@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Colorado"
 const PRICE_RANGE = "$70–$130"
 const CITY_SPECIFIC_COUNT = 2
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Denver, CO: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in Denver, CO. Providers serving the Denver area — at-home blood draw, specimen collection, lab routing. Typical service fee $70–$130 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy denver, mobile phlebotomist denver, denver mobile blood draw, at home blood draw denver, mobile lab denver, denver colorado phlebotomy, colorado mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/colorado/denver",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Denver, CO: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in Denver, CO. Providers serving the Denver area — at-home blood draw, specimen collection, lab routing. Typical service fee $70–$130 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/colorado/denver",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("colorado", "denver")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Denver, CO","description":"Directory of vetted mobile phlebotomists serving Denver, Colorado and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/colorado/denver","areaServed":{"@type":"City","name":"Denver","containedInPlace":{"@type":"State","name":"Colorado"}},"priceRange":"$70–$130","medicalSpecialty":"Phlebotomy"}

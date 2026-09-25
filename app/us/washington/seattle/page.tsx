@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Washington"
 const PRICE_RANGE = "$75–$140"
 const CITY_SPECIFIC_COUNT = 5
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Seattle: 5 Providers (2026)",
-  description: "Find mobile phlebotomy in Seattle, WA. 5 providers serving the Seattle area — Blood Draw, Corporate Wellness, DNA Testing. Typical service fee $75–$140 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy seattle, mobile phlebotomist seattle, seattle mobile blood draw, at home blood draw seattle, mobile lab seattle, seattle washington phlebotomy, washington mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/washington/seattle",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Seattle: 5 Providers (2026)",
-    description: "Find mobile phlebotomy in Seattle, WA. 5 providers serving the Seattle area — Blood Draw, Corporate Wellness, DNA Testing. Typical service fee $75–$140 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/washington/seattle",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("washington", "seattle")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Seattle, WA","description":"Directory of vetted mobile phlebotomists serving Seattle, Washington and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/washington/seattle","areaServed":{"@type":"City","name":"Seattle","containedInPlace":{"@type":"State","name":"Washington"}},"priceRange":"$75–$140","medicalSpecialty":"Phlebotomy"}

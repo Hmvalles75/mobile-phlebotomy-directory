@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "California"
 const PRICE_RANGE = "$80–$160"
 const CITY_SPECIFIC_COUNT = 2
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy San Francisco, CA: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in San Francisco, CA. Providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy san francisco, mobile phlebotomist san francisco, san francisco mobile blood draw, at home blood draw san francisco, mobile lab san francisco, san francisco california phlebotomy, california mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/california/san-francisco",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy San Francisco, CA: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in San Francisco, CA. Providers serving the San Francisco area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/california/san-francisco",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("california", "san-francisco")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in San Francisco, CA","description":"Directory of vetted mobile phlebotomists serving San Francisco, California and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/california/san-francisco","areaServed":{"@type":"City","name":"San Francisco","containedInPlace":{"@type":"State","name":"California"}},"priceRange":"$80–$160","medicalSpecialty":"Phlebotomy"}

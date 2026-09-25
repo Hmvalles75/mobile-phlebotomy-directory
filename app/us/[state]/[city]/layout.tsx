@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { SITE_URL } from '@/lib/seo'
 import { cityByStateCity } from '@/data/cities-full'
 import { STATE_DATA, ABBR_TO_SLUG } from '@/data/states-full'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 
 interface CityLayoutProps {
   children: React.ReactNode
@@ -31,43 +31,10 @@ function resolveCityState(stateSlug: string, citySlugRaw: string) {
 }
 
 export async function generateMetadata({ params }: { params: { state: string, city: string } }): Promise<Metadata> {
-  const { citySlug, cityName, stateAbbr, stateSlug, cityInfo } = resolveCityState(params.state, params.city)
-
-  // Self-canonical. Without this the page inherits app/layout.tsx's
-  // `alternates: { canonical: '/' }` and every dynamic city page tells Google
-  // it is a duplicate of the homepage — 512 of the 530 city pages were doing
-  // exactly that, which is why legacy /{city}-{st}/ URLs outranked their /us/
-  // twins in nearly every pair: the legacy pages self-canonicalise correctly
-  // and these disclaimed themselves. The 18 generated static overrides set
-  // their own canonical and take precedence over this route entirely.
-  const canonical = `${SITE_URL}/us/${stateSlug}/${citySlug}`
-
-  // CTR-optimized 2026-04-30. Old title format was generic and was getting
-  // 0.27-0.9% CTR on high-impression city pages (Seattle 4,114 imp at
-  // page-1 position 6.76 with only 0.27% CTR — the strongest signal that
-  // the snippet wasn't compelling). New format leads with city + price
-  // anchor since users searching "mobile phlebotomy [city]" want concrete
-  // info up front. Description tightens parallel.
-
-  // Unmapped cities no longer render (the layout below 308s them to the state
-  // page, or 404s an unknown state), so there is no metadata to build.
-  if (!cityInfo) return {}
-
-  const title = `Mobile Phlebotomy ${cityInfo.name}, ${cityInfo.state}: At-Home Blood Draws From $75`
-  const description = `${cityInfo.name} mobile phlebotomy: licensed providers, same-day & next-day at-home blood draws starting at $75 per visit. Medicare-friendly. Book a draw today.`
-
-  return {
-    title,
-    description,
-    keywords: `mobile phlebotomy ${cityInfo.name}, at-home blood draw ${cityInfo.name} ${cityInfo.state}, phlebotomist ${cityInfo.name}, mobile lab ${cityInfo.name}, home blood test ${cityInfo.name}`,
-    alternates: { canonical },
-    // noProviders cities were only ever kept out of the sitemap; they still
-    // indexed as thin self-canonical pages. Keep the URL, drop it from the
-    // index until a provider lands there (2026-09-24).
-    ...(cityInfo.noProviders ? { robots: { index: false, follow: true } } : {}),
-    openGraph: { title, description, url: canonical, type: 'website' },
-    twitter: { title, description, card: 'summary_large_image' },
-  }
+  // Self-canonical with a live provider count; one builder shared with the 18
+  // static overrides (lib/seo/locationMeta.ts). Unmapped cities 308 below.
+  const { stateSlug, citySlug } = resolveCityState(params.state, params.city)
+  return buildCityMetadata(stateSlug, citySlug)
 }
 
 // Layout is a server component, so the link sections it renders below

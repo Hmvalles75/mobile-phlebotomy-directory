@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Georgia"
 const PRICE_RANGE = "$65–$125"
 const CITY_SPECIFIC_COUNT = 11
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Atlanta: 11 Providers (2026)",
-  description: "Find mobile phlebotomy in Atlanta, GA. 11 providers serving the Atlanta area — Blood Draw, Mobile Lab Services, NON-DOT Drug Testing. Typical service fee $65–$125 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy atlanta, mobile phlebotomist atlanta, atlanta mobile blood draw, at home blood draw atlanta, mobile lab atlanta, atlanta georgia phlebotomy, georgia mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/georgia/atlanta",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Atlanta: 11 Providers (2026)",
-    description: "Find mobile phlebotomy in Atlanta, GA. 11 providers serving the Atlanta area — Blood Draw, Mobile Lab Services, NON-DOT Drug Testing. Typical service fee $65–$125 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/georgia/atlanta",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("georgia", "atlanta")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Atlanta, GA","description":"Directory of vetted mobile phlebotomists serving Atlanta, Georgia and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/georgia/atlanta","areaServed":{"@type":"City","name":"Atlanta","containedInPlace":{"@type":"State","name":"Georgia"}},"priceRange":"$65–$125","medicalSpecialty":"Phlebotomy"}

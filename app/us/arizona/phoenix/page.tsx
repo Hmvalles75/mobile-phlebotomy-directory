@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Arizona"
 const PRICE_RANGE = "$60–$120"
 const CITY_SPECIFIC_COUNT = 6
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Phoenix: 6 Providers (2026)",
-  description: "Find mobile phlebotomy in Phoenix, AZ. 6 providers serving the Phoenix area — DNA Testing, Gender Reveal DNA Testing, Lab Specimen Collection. Typical service fee $60–$120 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy phoenix, mobile phlebotomist phoenix, phoenix mobile blood draw, at home blood draw phoenix, mobile lab phoenix, phoenix arizona phlebotomy, arizona mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/arizona/phoenix",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Phoenix: 6 Providers (2026)",
-    description: "Find mobile phlebotomy in Phoenix, AZ. 6 providers serving the Phoenix area — DNA Testing, Gender Reveal DNA Testing, Lab Specimen Collection. Typical service fee $60–$120 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/arizona/phoenix",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("arizona", "phoenix")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Phoenix, AZ","description":"Directory of vetted mobile phlebotomists serving Phoenix, Arizona and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/arizona/phoenix","areaServed":{"@type":"City","name":"Phoenix","containedInPlace":{"@type":"State","name":"Arizona"}},"priceRange":"$60–$120","medicalSpecialty":"Phlebotomy"}
