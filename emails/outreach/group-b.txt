@@ -1,0 +1,14 @@
+Subject: You booked {{leads_booked}} of {{leads_received}} {{city}} requests — here's how to get the rest first
+
+Hi {{first_name}},
+
+You've booked {{leads_booked}} of the {{leads_received}} patient requests the directory sent {{business}} in the last 90 days. That puts you ahead of most providers in {{city}}. The ones you didn't book were mostly claimed by another provider before you got to them; each request goes to everyone covering the area at once, and the first to claim it gets the patient.
+
+Paid listings get every standard request 10 minutes before the free listings do (urgent STAT requests go to everyone at once), and the listing is marked Featured and sorted above the free listings on the {{city}} page, which showed up in {{impressions}} Google searches in the last 90 days. For someone who already converts, the head start is the part that matters. It's $79 a month, we don't charge per lead or take a commission, and you can cancel any time from your dashboard.
+
+{{signup_link}}
+
+No pressure either way. If you'd rather keep going as you are, nothing changes; you'll keep getting the same requests.
+
+Hector Valles
+MobilePhlebotomy.org

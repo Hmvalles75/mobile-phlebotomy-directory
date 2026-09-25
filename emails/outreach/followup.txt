@@ -1,0 +1,14 @@
+Subject: Re: {{city}} requests
+
+Hi {{first_name}},
+
+Quick follow-up on my note last week about the paid listing. The {{city}} requests keep going out, and the paid listings keep seeing each standard one 10 minutes before everyone else.
+
+If the $79 head start isn't right for {{business}} right now, no problem at all; this is the last time I'll bring it up. If it is, the link is the same:
+
+{{signup_link}}
+
+And if there's something about the requests themselves that isn't working, reply and tell me; that I can fix for free.
+
+Hector Valles
+MobilePhlebotomy.org

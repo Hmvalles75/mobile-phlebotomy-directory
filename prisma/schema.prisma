@@ -18,7 +18,10 @@ model Provider {
   website               String?
   bookingUrl            String?
   description           String?
-  tagline               String?                // One line under the premium H1 and the JSON-LD description; provider-editable (<=160). Null falls back to a derived line. (2026-09-23)
+  outreachOptOutAt      DateTime? // provider clicked the unsubscribe link in an outreach email; scripts/outreach-send.ts skips them for good (2026-09-25)
+  outreachRepliedAt     DateTime? // set by `outreach-send.ts --replied <id>`; stops follow-ups
+  outreachLogs          OutreachLog[]
+  tagline               String? // One line under the premium H1 and the JSON-LD description; provider-editable (<=160). Null falls back to a derived line. (2026-09-23)
   rating                Float?
   reviewsCount          Int?
   featured              Boolean                @default(false)
@@ -52,8 +55,8 @@ model Provider {
   // a Maryland provider with a 100-mile radius claimed a Delaware patient and
   // then said they don't serve Delaware. Exclusions win over radius, ZIP list
   // and the fan-out floor. See lib/providerCoverage.ts.
-  excludedZipCodes      String?                // Same token grammar as zipCodes: 5-digit, prefix "112*", range "10000-10499"
-  excludedStates        String?                // Comma-separated state abbreviations, e.g. "DE,VA"
+  excludedZipCodes      String? // Same token grammar as zipCodes: 5-digit, prefix "112*", range "10000-10499"
+  excludedStates        String? // Comma-separated state abbreviations, e.g. "DE,VA"
   stripePaymentMethodId String?
   eligibleForLeads      Boolean                @default(false)
   trialExpiresAt        DateTime?
@@ -65,9 +68,9 @@ model Provider {
   serviceRadiusMiles    Int?
   logo                  String?
   profileImage          String?
-  heroPoster            String?                // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
-  socialLinks           String?                // JSON object of provider-supplied social profiles: { instagram, facebook, tiktok, youtube, linkedin }. Values are full https URLs. Rendered as an icon row in the premium page's contact card; omitted entirely when null. Set via scripts/set-provider-socials.ts.
-  testimonials          String?                // JSON array of provider-supplied reviews: [{ quote, author, location, rating }]. Rendered in Patient Reviews section when present; section shows "Reviews coming soon" when null/empty.
+  heroPoster            String? // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
+  socialLinks           String? // JSON object of provider-supplied social profiles: { instagram, facebook, tiktok, youtube, linkedin }. Values are full https URLs. Rendered as an icon row in the premium page's contact card; omitted entirely when null. Set via scripts/set-provider-socials.ts.
+  testimonials          String? // JSON array of provider-supplied reviews: [{ quote, author, location, rating }]. Rendered in Patient Reviews section when present; section shows "Reviews coming soon" when null/empty.
   notificationEmail     String?
   notifyEnabled         Boolean                @default(true)
   primaryCity           String?
@@ -87,8 +90,8 @@ model Provider {
   onboardingInvitedAt   DateTime?
   onboardingCompletedAt DateTime?
   termsAcceptedAt       DateTime?
-  languages             String?                // Comma-separated: "English,Spanish"
-  premiumPage           Boolean                @default(false)  // Renders premium $199 template
+  languages             String? // Comma-separated: "English,Spanish"
+  premiumPage           Boolean                @default(false) // Renders premium $199 template
   // Set true by the junk-detection pass when the description looks like
   // scraped nav-menu junk (e.g. "HOME HOME CONTACT US BOOK ONLINE..."),
   // heavy ALL-CAPS, or repeated phrase patterns. Flagged providers render
@@ -111,7 +114,7 @@ model Provider {
   // We keep the row so Lead.routedToId history stays valid and the unique slug
   // blocks future scrapers from re-inserting under the same name.
   removedAt             DateTime?
-  removedReason         String?                // free-text: "provider request", future "for cause", etc.
+  removedReason         String? // free-text: "provider request", future "for cause", etc.
   // doNotRelist: hard-stop for future seeders/scrapers. Any script that creates
   // providers should refuse to insert when a matching (name + phone) row exists
   // with doNotRelist=true.
@@ -186,14 +189,14 @@ model Provider {
 // the full address, contact info, pricing, or internal notes.
 // ────────────────────────────────────────────────────────────────────
 model InstitutionalClient {
-  id               String   @id @default(cuid())
+  id               String               @id @default(cuid())
   name             String
   contactEmail     String
-  ccEmails         String?  // comma-separated additional recipients
-  notes            String?  @db.Text
-  publicShareToken String   @unique @default(cuid())
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  ccEmails         String? // comma-separated additional recipients
+  notes            String?              @db.Text
+  publicShareToken String               @unique @default(cuid())
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   orders           InstitutionalOrder[]
   users            ClientUser[]
 
@@ -201,37 +204,37 @@ model InstitutionalClient {
 }
 
 model InstitutionalOrder {
-  id                 String   @id @default(cuid())
-  clientId           String
-  client             InstitutionalClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id       String              @id @default(cuid())
+  clientId String
+  client   InstitutionalClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   patientName        String
-  patientContactName String?  // primary contact if different from patient (e.g. caregiver)
+  patientContactName String? // primary contact if different from patient (e.g. caregiver)
   patientPhone       String
   patientEmail       String?
   patientAddress     String
   patientCity        String
   patientState       String
   patientZip         String
-  patientNotes       String?  @db.Text
+  patientNotes       String? @db.Text
 
-  protocolNotes      String?  @db.Text
-  clientRate         Decimal  @db.Decimal(10, 2)
+  protocolNotes String? @db.Text
+  clientRate    Decimal @db.Decimal(10, 2)
 
   assignedProviderId String?
   assignedProvider   Provider? @relation(fields: [assignedProviderId], references: [id])
-  providerRate       Decimal? @db.Decimal(10, 2)
+  providerRate       Decimal?  @db.Decimal(10, 2)
 
-  kitShippedAt       DateTime?
-  kitReceivedAt      DateTime?
-  scheduledAt        DateTime?  // when scheduling was confirmed with patient
-  scheduledFor       DateTime?  // actual appointment date/time
-  drawCompletedAt    DateTime?
-  fedexDroppedAt     DateTime?
-  fedexTrackingNum   String?
+  kitShippedAt     DateTime?
+  kitReceivedAt    DateTime?
+  scheduledAt      DateTime? // when scheduling was confirmed with patient
+  scheduledFor     DateTime? // actual appointment date/time
+  drawCompletedAt  DateTime?
+  fedexDroppedAt   DateTime?
+  fedexTrackingNum String?
 
-  status             OrderStatus @default(PENDING_KIT_RECEIPT)
-  publicShareToken   String   @unique @default(cuid())
+  status           OrderStatus @default(PENDING_KIT_RECEIPT)
+  publicShareToken String      @unique @default(cuid())
 
   // Client-portal submission tracking (2026-07). submittedByClientUserId null =
   // admin-created; set = submitted by a client via the magic-link portal (WHO).
@@ -242,8 +245,8 @@ model InstitutionalOrder {
   submittedByClientUser   ClientUser? @relation(fields: [submittedByClientUserId], references: [id], onDelete: SetNull)
   submittedFromIp         String?
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([clientId])
   @@index([assignedProviderId])
@@ -272,18 +275,18 @@ enum OrderStatus {
 // only (you authorize who can log in). Disable (never hard-delete) to revoke,
 // which preserves the submittedByClientUser audit link on their orders.
 model ClientUser {
-  id                String              @id @default(cuid())
-  clientId          String
-  client            InstitutionalClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  email             String              @unique
-  name              String?
-  disabled          Boolean             @default(false)
-  magicToken          String?           @unique
+  id                  String               @id @default(cuid())
+  clientId            String
+  client              InstitutionalClient  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  email               String               @unique
+  name                String?
+  disabled            Boolean              @default(false)
+  magicToken          String?              @unique
   magicTokenExpiresAt DateTime?
   lastLoginAt         DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  submittedOrders   InstitutionalOrder[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  submittedOrders     InstitutionalOrder[]
 
   @@index([clientId])
   @@map("client_users")
@@ -295,7 +298,7 @@ model ClientAuthEvent {
   id           String   @id @default(cuid())
   clientUserId String?
   email        String?
-  event        String   // link_requested | link_verified | link_failed | order_submitted
+  event        String // link_requested | link_verified | link_failed | order_submitted
   ip           String?
   userAgent    String?  @db.Text
   createdAt    DateTime @default(now())
@@ -305,32 +308,32 @@ model ClientAuthEvent {
 }
 
 model Lead {
-  id                String             @id @default(cuid())
-  createdAt         DateTime           @default(now())
-  fullName          String
-  phone             String
-  email             String?
-  address1          String?
-  city              String
-  state             String
-  zip               String
-  urgency           Urgency
-  notes             String?
-  source            String
-  gclid             String?
-  routedToId        String?
-  routedAt          DateTime?
-  priceCents        Int
-  status            LeadStatus         @default(NEW)
-  labPreference     String             @default("Other/Unsure")
-  claimedAt         DateTime?
-  firstContactAt    DateTime?
-  callAttempts      Int                @default(0)
-  outcome           LeadOutcome?
-  outcomeNotes      String?
-  appointmentDate   DateTime?
-  completedAt       DateTime?
-  providerNotes     String?
+  id              String       @id @default(cuid())
+  createdAt       DateTime     @default(now())
+  fullName        String
+  phone           String
+  email           String?
+  address1        String?
+  city            String
+  state           String
+  zip             String
+  urgency         Urgency
+  notes           String?
+  source          String
+  gclid           String?
+  routedToId      String?
+  routedAt        DateTime?
+  priceCents      Int
+  status          LeadStatus   @default(NEW)
+  labPreference   String       @default("Other/Unsure")
+  claimedAt       DateTime?
+  firstContactAt  DateTime?
+  callAttempts    Int          @default(0)
+  outcome         LeadOutcome?
+  outcomeNotes    String?
+  appointmentDate DateTime?
+  completedAt     DateTime?
+  providerNotes   String?
 
   // Patient-side completion confirmation (2026-09-03).
   //
@@ -348,50 +351,50 @@ model Lead {
   // Read-only with respect to the rest of the lead: nothing here feeds routing,
   // status transitions, or anything provider-facing.
   // See docs/findings/patient-confirmation.md.
-  patientOutcome        PatientOutcome?   // null = not yet answered
-  patientOutcomeReason  String?           // free text, only set alongside NOT_COMPLETED
-  patientOutcomeAt      DateTime?
-  patientOutcomeToken   String?  @unique  // nanoid(32), minted at send time
-  outcomeRequestSentAt  DateTime?         // first email
-  outcomeReminderSentAt DateTime?         // second email; at most one, ever
+  patientOutcome           PatientOutcome? // null = not yet answered
+  patientOutcomeReason     String? // free text, only set alongside NOT_COMPLETED
+  patientOutcomeAt         DateTime?
+  patientOutcomeToken      String?            @unique // nanoid(32), minted at send time
+  outcomeRequestSentAt     DateTime? // first email
+  outcomeReminderSentAt    DateTime? // second email; at most one, ever
   // New fields for patient SMS qualification flow
-  timeWindow        String?            // e.g. "tomorrow 9-12"
-  patientNotes      String?            // Notes from patient SMS
-  confirmedAt       DateTime?          // When patient confirmed intent
-  qualifiedAt       DateTime?          // When lead became fully qualified
-  lastPatientSmsAt  DateTime?          // Track last SMS to patient
-  patientSmsCount   Int                @default(0)
-  routedProviderIds    String[]         // Array of providers we attempted to route to
-  preferredProviderId  String?          // Provider the patient came from (e.g. clicked from provider page)
+  timeWindow               String? // e.g. "tomorrow 9-12"
+  patientNotes             String? // Notes from patient SMS
+  confirmedAt              DateTime? // When patient confirmed intent
+  qualifiedAt              DateTime? // When lead became fully qualified
+  lastPatientSmsAt         DateTime? // Track last SMS to patient
+  patientSmsCount          Int                @default(0)
+  routedProviderIds        String[] // Array of providers we attempted to route to
+  preferredProviderId      String? // Provider the patient came from (e.g. clicked from provider page)
   // Attribution tracking (2026-04-22) — which page did this lead come from?
-  attributionSource    String?          // Normalized: 'facebook' | 'google' | 'direct' | 'organic' | ...
-  utmSource            String?          // Raw utm_source param
-  utmMedium            String?          // Raw utm_medium param
-  utmCampaign          String?          // Raw utm_campaign param
-  referrer             String?          // document.referrer at submission time
-  landingPage          String?          // First page they landed on in the session
-  ipAddress            String?          // submitter IP (x-forwarded-for) — used for intake rate-limiting; mirrors CoverageRequest
+  attributionSource        String? // Normalized: 'facebook' | 'google' | 'direct' | 'organic' | ...
+  utmSource                String? // Raw utm_source param
+  utmMedium                String? // Raw utm_medium param
+  utmCampaign              String? // Raw utm_campaign param
+  referrer                 String? // document.referrer at submission time
+  landingPage              String? // First page they landed on in the session
+  ipAddress                String? // submitter IP (x-forwarded-for) — used for intake rate-limiting; mirrors CoverageRequest
   // Lead screening (2026-04-20, refined 2026-04-22) — routes unqualified leads out before they hit providers
-  drawCount            String?          // "1-3" | "4-19" | "20+"
-  requestType          String?          // "individual" | "organization" | "business" (legacy field, still captured)
-  hasDoctorOrder       String?          // "yes" | "no" | "need_help"
-  paymentMethod        String?          // "insurance" | "out_of_pocket" | "not_sure"
-  isHighValue          Boolean          @default(false)  // drawCount = "20+" OR requestType in (organization, business)
-  estimatedValueCents  Int              @default(0)      // draws × $75 (bucket midpoint × 7500)
-  organizationName     String?
-  timeframe            String?
+  drawCount                String? // "1-3" | "4-19" | "20+"
+  requestType              String? // "individual" | "organization" | "business" (legacy field, still captured)
+  hasDoctorOrder           String? // "yes" | "no" | "need_help"
+  paymentMethod            String? // "insurance" | "out_of_pocket" | "not_sure"
+  isHighValue              Boolean            @default(false) // drawCount = "20+" OR requestType in (organization, business)
+  estimatedValueCents      Int                @default(0) // draws × $75 (bucket midpoint × 7500)
+  organizationName         String?
+  timeframe                String?
   // SendGrid batch ID for the wave of notification emails sent for this lead.
   // Used to cancel scheduled (delayed) Wave 2/3 sends when the lead gets
   // claimed before they fire — see lib/cancelLeadNotifications.ts.
-  notificationBatchId  String?
+  notificationBatchId      String?
   // Set by the STAT-escalation cron the first time it alerts the admin
   // about a STAT lead sitting unclaimed past the threshold. Prevents
   // re-alerting on the same lead on every subsequent cron tick. Null on
   // STANDARD leads and on STAT leads that get claimed in time.
-  statEscalatedAt      DateTime?
+  statEscalatedAt          DateTime?
   // Pre-SLA claim reminder (2026-09-10): set when the one-tap reminder email
   // was sent to the claimer, one per claim. See lib/claimReminder.ts.
-  claimReminderSentAt  DateTime?
+  claimReminderSentAt      DateTime?
   // ── Soft-outcome nudges (2026-09-22) ─────────────────────────────────────
   // A soft outcome (TEXT_SENT, NO_ANSWER, VOICEMAIL, EMAIL_SENT, WORKING_IT,
   // SCHEDULED_CALLBACK) stops the stale-claim clock and nothing restarts it:
@@ -400,14 +403,14 @@ model Lead {
   // (working / booked / hand it back) and one check-in to the patient (has the
   // provider reached you?). Each fires once. Auto-release deliberately not
   // built until the patient survey says how often "text sent" becomes a draw.
-  outcomeUpdatedAt       DateTime?           // when `outcome` last changed; null on rows older than this column (claimedAt is the fallback)
-  softNudgeSentAt        DateTime?           // provider nudge, at most once per claim
-  patientCheckinSentAt   DateTime?           // patient check-in, at most once per claim
+  outcomeUpdatedAt         DateTime? // when `outcome` last changed; null on rows older than this column (claimedAt is the fallback)
+  softNudgeSentAt          DateTime? // provider nudge, at most once per claim
+  patientCheckinSentAt     DateTime? // patient check-in, at most once per claim
   // No @unique: db push treats a new unique index as a data-loss risk and
   // refuses without --accept-data-loss. The token is a nanoid(32) minted at
   // send time and looked up with findFirst; collisions are ~1 in 10^57.
-  patientCheckinToken    String?             // /api/checkin/[token]
-  patientCheckinAnswer   String?             // 'in_touch' | 'no_contact'
+  patientCheckinToken      String? // /api/checkin/[token]
+  patientCheckinAnswer     String? // 'in_touch' | 'no_contact'
   patientCheckinAnsweredAt DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases
   // a CLAIMED lead because the provider didn't log an outcome within the
@@ -415,19 +418,19 @@ model Lead {
   // fields preserve who held it and why, so we can audit patterns and
   // exclude the original claimer from re-notification. See
   // lib/staleClaimRelease.ts and app/api/cron/stale-claim-release/route.ts.
-  releasedFromProviderId String?
-  releasedAt             DateTime?
-  releaseReason          String?    // currently only "stale_claim"; future: "manual_admin", etc.
+  releasedFromProviderId   String?
+  releasedAt               DateTime?
+  releaseReason            String? // currently only "stale_claim"; future: "manual_admin", etc.
   // Number of times this lead has been auto-released by the stale-claim cron.
   // Guards the infinite claim->release->re-notify loop an unreachable patient
   // otherwise causes (Pasadena/Ken Yapkowitz 2026-07-09, 8 cycles of provider
   // spam). Once it reaches MAX_STALE_RELEASE_CYCLES the sweep expires the lead
   // terminally instead of re-notifying. See lib/staleClaimRelease.ts.
-  staleReleaseCount      Int        @default(0)
+  staleReleaseCount        Int                @default(0)
   // Relations
-  leadNotifications LeadNotification[]
-  provider          Provider?          @relation(fields: [routedToId], references: [id])
-  dispatchTasks     DispatchTask[]
+  leadNotifications        LeadNotification[]
+  provider                 Provider?          @relation(fields: [routedToId], references: [id])
+  dispatchTasks            DispatchTask[]
 
   @@index([status])
   @@index([phone])
@@ -437,7 +440,6 @@ model Lead {
 
 /**
  * PhoneClickEvent — logs every click on a provider's click-to-call link.
- *
  * Captures INTENT (patient clicked to call), distinct from CallLog which
  * captures Twilio-tracked actual call completions. Provider-page views are
  * tracked in GA4; click events are tracked here so we can join intent with
@@ -466,10 +468,10 @@ model PhoneClickEvent {
   id         String   @id @default(cuid())
   createdAt  DateTime @default(now())
   providerId String
-  source     String   // e.g. 'provider_page_call' | 'featured_provider_call' | 'city_page_call' | 'state_page_call' | 'search_card_call'
-  pagePath   String?  // window.location.pathname at click time
+  source     String // e.g. 'provider_page_call' | 'featured_provider_call' | 'city_page_call' | 'state_page_call' | 'search_card_call'
+  pagePath   String? // window.location.pathname at click time
   userAgent  String?
-  ipAddress  String?  // for rate-limit / bot filtering
+  ipAddress  String? // for rate-limit / bot filtering
 
   @@index([providerId])
   @@index([createdAt])
@@ -671,8 +673,8 @@ model ProviderCorrections {
 }
 
 model BusinessClaim {
-  id                 String             @id @default(cuid())
-  createdAt          DateTime           @default(now())
+  id                 String              @id @default(cuid())
+  createdAt          DateTime            @default(now())
   status             BusinessClaimStatus @default(PENDING)
   providerId         String
   providerName       String
@@ -680,13 +682,13 @@ model BusinessClaim {
   claimantEmail      String
   claimantPhone      String
   requestedUpdates   String
-  isOwnerConfirmed   Boolean            @default(false)
+  isOwnerConfirmed   Boolean             @default(false)
   verifiedAt         DateTime?
   verificationMethod String?
   verificationNotes  String?
   ipAddress          String?
   userAgent          String?
-  provider           Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider           Provider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@index([providerId])
   @@index([status])
@@ -741,14 +743,14 @@ model PendingSubmission {
   leadPhone          String?
   availability       String?
   // Attribution tracking
-  attributionSource  String?          // Normalized source: 'facebook', 'google', 'direct', etc.
-  utmSource          String?          // Raw utm_source param
-  utmMedium          String?          // Raw utm_medium param
-  utmCampaign        String?          // Raw utm_campaign param
-  referrer           String?          // document.referrer value
-  landingPage        String?          // First page they landed on
+  attributionSource  String? // Normalized source: 'facebook', 'google', 'direct', etc.
+  utmSource          String? // Raw utm_source param
+  utmMedium          String? // Raw utm_medium param
+  utmCampaign        String? // Raw utm_campaign param
+  referrer           String? // document.referrer value
+  landingPage        String? // First page they landed on
   // SMS consent capture (TCPA-compliant record of express written consent)
-  smsConsent         Boolean   @default(false)
+  smsConsent         Boolean          @default(false)
   smsConsentAt       DateTime?
 
   @@map("pending_submissions")
@@ -761,44 +763,44 @@ model PendingSubmission {
 // etc.). NOT auto-promoted to InstitutionalClient — admin manually qualifies
 // before promotion to keep the real-client list clean.
 model CoverageRequest {
-  id               String                @id @default(cuid())
-  createdAt        DateTime              @default(now())
-  organizationName String
-  contactName      String
-  email            String
-  phone            String?               // optional on the new /request-coverage form
-  location         String                // free-text "where coverage is needed"
-  statesNeeded     String?               // comma-separated states from the new lean form
-  timeline         String?               // optional: when needed; captured in `details` on the lean form
-  estimatedVolume  String                // dropdown bucket: "1–10/mo", "11–50/mo", "51–200/mo", "200+/mo", "Not sure yet"
-  drawType         String                // "Clinical study/research", "Lab routing", "Healthcare facility", etc.
-  details          String?
-  status           CoverageRequestStatus @default(NEW)
-  ipAddress        String?
-  userAgent        String?
+  id                String                @id @default(cuid())
+  createdAt         DateTime              @default(now())
+  organizationName  String
+  contactName       String
+  email             String
+  phone             String? // optional on the new /request-coverage form
+  location          String // free-text "where coverage is needed"
+  statesNeeded      String? // comma-separated states from the new lean form
+  timeline          String? // optional: when needed; captured in `details` on the lean form
+  estimatedVolume   String // dropdown bucket: "1–10/mo", "11–50/mo", "51–200/mo", "200+/mo", "Not sure yet"
+  drawType          String // "Clinical study/research", "Lab routing", "Healthcare facility", etc.
+  details           String?
+  status            CoverageRequestStatus @default(NEW)
+  ipAddress         String?
+  userAgent         String?
   // Which intake produced this lead: 'clinical-research' | 'coverage' |
   // 'corporate' | 'admin-manual'. Distinct from attributionSource (which
   // channel brought them) — this is which funnel they self-selected into, and
   // it's the reliable buyer signal because drawType is free-text on the legacy
   // form. Null on rows predating 2026-07-25.
-  intakeForm       String?
+  intakeForm        String?
   // Attribution — where this prospect came from. Captured first-touch (see
   // lib/attribution.ts): landingPage is the page they ENTERED the site on, not
   // the form's own path, and the source survives across sessions for 90 days
   // because institutional buyers research for weeks before submitting.
-  attributionSource String?              // Normalized: 'google' | 'bing' | 'newsletter' | 'direct' | ...
-  utmSource        String?
-  utmMedium        String?
-  utmCampaign      String?
-  referrer         String?
-  landingPage      String?
+  attributionSource String? // Normalized: 'google' | 'bing' | 'newsletter' | 'direct' | ...
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  referrer          String?
+  landingPage       String?
 
   // Contact tracking (2026-07-17). Institutional outreach happens from Gmail,
   // outside the app, so status/staleness must key off logged activity rather
   // than createdAt. lastContactedAt is set whenever a ContactAttempt is logged,
   // an email is sent from admin, or the status is moved out of NEW.
-  lastContactedAt  DateTime?
-  contactAttempts  ContactAttempt[]
+  lastContactedAt DateTime?
+  contactAttempts ContactAttempt[]
 
   // Notification outcomes (2026-08-26). Both sends used to be fire-and-forget
   // — `sendAdminNotification(created).catch(console.error)` — and the route
@@ -809,9 +811,9 @@ model CoverageRequest {
   //
   // Null adminNotifiedAt means the submission arrived and nobody was told.
   // Query for it rather than guessing.
-  adminNotifiedAt     DateTime?
-  confirmationSentAt  DateTime?
-  notifyError         String?
+  adminNotifiedAt    DateTime?
+  confirmationSentAt DateTime?
+  notifyError        String?
 
   @@map("coverage_requests")
 }
@@ -846,21 +848,21 @@ model ContactAttempt {
 }
 
 model LeadNotification {
-  id           String             @id @default(cuid())
-  leadId       String
-  providerId   String
-  channel      String             @default("email")
-  status       NotificationStatus @default(QUEUED)
-  errorMessage String?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  sentAt       DateTime?
+  id                  String             @id @default(cuid())
+  leadId              String
+  providerId          String
+  channel             String             @default("email")
+  status              NotificationStatus @default(QUEUED)
+  errorMessage        String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  sentAt              DateTime?
   // SendGrid X-Message-Id from the API response (for correlating with EmailEvents)
-  sgMessageId  String?
+  sgMessageId         String?
   // Times the retry-failed-notifications cron has re-attempted a FAILED send.
   // Capped at MAX_NOTIFICATION_RETRIES so a permanently-bad address doesn't
   // retry forever. See retryFailedNotifications() in lib/leadNotifications.ts.
-  retryCount   Int                @default(0)
+  retryCount          Int                @default(0)
   // Set when a paying provider clicks "pass" on a lead inside their head-start
   // window, instead of letting the clock run out. Releases the lead to free
   // providers immediately — the dashboard gate stops withholding it and the
@@ -868,10 +870,10 @@ model LeadNotification {
   // null everywhere else. Deliberately not folded into `status`, which is a
   // delivery outcome (QUEUED/SENT/FAILED) — a pass says nothing about whether
   // the email was delivered, and FAILED would make the retry cron re-send it.
-  passedAt     DateTime?
+  passedAt            DateTime?
   // True when the fan-out floor sent this lead to a provider outside their
   // own service radius (2026-09-07). Excluded from dormant-sweep counts.
-  outsideRadius Boolean            @default(false)
+  outsideRadius       Boolean            @default(false)
   // When the "this request was just claimed" courtesy email went to this
   // provider for this lead (2026-09-21). Stamped on every row the provider
   // holds for the lead, so the notice is sent once per provider per lead and
@@ -879,9 +881,9 @@ model LeadNotification {
   // notice went out once per ROW: a provider re-notified four times got four
   // identical emails on every claim (Neal Premier, 18 emails for one patient).
   claimedNoticeSentAt DateTime?
-  lead         Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  provider     Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  emailEvents  EmailEvent[]
+  lead                Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  provider            Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  emailEvents         EmailEvent[]
 
   @@index([leadId])
   @@index([providerId])
@@ -895,24 +897,24 @@ model LeadNotification {
 // (leadNotificationId, leadId, providerId). Older sends without customArgs can
 // still be matched best-effort via sgMessageId.
 model EmailEvent {
-  id                 String   @id @default(cuid())
+  id                 String            @id @default(cuid())
   // sg_event_id is unique per event from SendGrid — used as idempotency key
-  sgEventId          String   @unique
+  sgEventId          String            @unique
   // sg_message_id (the SG-internal message ID, not the X-Message-Id header)
   sgMessageId        String?
-  event              String   // delivered, open, click, bounce, dropped, deferred, spamreport, unsubscribe, processed
-  email              String   // recipient email
+  event              String // delivered, open, click, bounce, dropped, deferred, spamreport, unsubscribe, processed
+  email              String // recipient email
   timestamp          DateTime
-  url                String?  // present on click events
-  reason             String?  // present on bounce/dropped/spamreport
+  url                String? // present on click events
+  reason             String? // present on bounce/dropped/spamreport
   ip                 String?
-  userAgent          String?  @db.Text
+  userAgent          String?           @db.Text
   // Linkage via customArgs we attach to outbound sends
   leadNotificationId String?
   leadId             String?
   providerId         String?
-  raw                String?  @db.Text // raw event JSON for debugging / future analysis
-  createdAt          DateTime @default(now())
+  raw                String?           @db.Text // raw event JSON for debugging / future analysis
+  createdAt          DateTime          @default(now())
   leadNotification   LeadNotification? @relation(fields: [leadNotificationId], references: [id], onDelete: SetNull)
 
   @@index([leadNotificationId])
@@ -926,17 +928,17 @@ model EmailEvent {
 
 // Coverage gap task queue for admin follow-up
 model DispatchTask {
-  id          String             @id @default(cuid())
-  leadId      String
-  status      DispatchTaskStatus @default(OPEN)
-  reason      DispatchTaskReason
-  notes       String?
-  assignedTo  String?            // Admin user ID or email
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  resolvedAt  DateTime?
-  resolvedBy  String?
-  lead        Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  id         String             @id @default(cuid())
+  leadId     String
+  status     DispatchTaskStatus @default(OPEN)
+  reason     DispatchTaskReason
+  notes      String?
+  assignedTo String? // Admin user ID or email
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  resolvedAt DateTime?
+  resolvedBy String?
+  lead       Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([leadId])
@@ -945,20 +947,20 @@ model DispatchTask {
 
 // SMS event log for idempotency and audit trail
 model SmsEvent {
-  id          String   @id @default(cuid())
-  twilioSid   String   @unique // Ensures idempotency
-  direction   String   // INBOUND or OUTBOUND
+  id          String    @id @default(cuid())
+  twilioSid   String    @unique // Ensures idempotency
+  direction   String // INBOUND or OUTBOUND
   fromNumber  String
   toNumber    String
   body        String?
-  status      String?  // Twilio status
+  status      String? // Twilio status
   leadId      String?
   providerId  String?
-  eventType   String   // e.g. PATIENT_CONFIRM, PROVIDER_CLAIM, etc.
-  processed   Boolean  @default(false)
+  eventType   String // e.g. PATIENT_CONFIRM, PROVIDER_CLAIM, etc.
+  processed   Boolean   @default(false)
   processedAt DateTime?
   errorMsg    String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([fromNumber])
   @@index([toNumber])
@@ -976,7 +978,7 @@ enum FeaturedTier {
   FOUNDING_PARTNER
   STANDARD_PREMIUM
   HIGH_DENSITY
-  CHARTER_MEMBER  // Grandfathered $49/mo rate for the original pilots (Steve, CMB, Ponce). Internal-only label — never surfaced in sales copy.
+  CHARTER_MEMBER // Grandfathered $49/mo rate for the original pilots (Steve, CMB, Ponce). Internal-only label — never surfaced in sales copy.
 }
 
 enum LeadStatus {
@@ -987,29 +989,27 @@ enum LeadStatus {
   OPEN
   CLAIMED
   // New statuses for patient SMS qualification flow
-  AWAITING_CONFIRM      // Sent confirm SMS, waiting for patient reply
-  CONFIRMED             // Patient confirmed intent (replied 1)
-  COLLECTING_DETAILS    // Collecting ZIP/time from patient
-  QUALIFIED             // Patient fully qualified, ready for routing
-  ROUTING               // Currently being routed to providers
-  SCHEDULED             // Provider confirmed appointment
-  COMPLETED             // Service completed
-  NEEDS_COVERAGE        // No opted-in providers available
-  CLOSED_UNCONFIRMED    // Patient didn't confirm (timed out)
-  CLOSED_PRICING_ONLY   // Patient indicated pricing inquiry only
-  CLOSED_DUPLICATE      // Older submission from a patient who re-submitted; canonical row is the most recent submission
-  INSTITUTIONAL_REVIEW  // High-value / B2B request held for the admin's written proposal (2026-09-09). Never routed to providers, never claimable, never auto-expired. Admin can release it to OPEN if it is an ordinary patient. See lib/institutionalIntake.ts.
-  CLOSED_DECLINED       // Provider reached the patient and the patient declined (price, changed mind). Closed, not re-offered: the same patient would decline the next provider too. Claim history kept on routedToId. (2026-09-22)
-  EXPIRED_NO_RESPONSE   // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
+  AWAITING_CONFIRM // Sent confirm SMS, waiting for patient reply
+  CONFIRMED // Patient confirmed intent (replied 1)
+  COLLECTING_DETAILS // Collecting ZIP/time from patient
+  QUALIFIED // Patient fully qualified, ready for routing
+  ROUTING // Currently being routed to providers
+  SCHEDULED // Provider confirmed appointment
+  COMPLETED // Service completed
+  NEEDS_COVERAGE // No opted-in providers available
+  CLOSED_UNCONFIRMED // Patient didn't confirm (timed out)
+  CLOSED_PRICING_ONLY // Patient indicated pricing inquiry only
+  CLOSED_DUPLICATE // Older submission from a patient who re-submitted; canonical row is the most recent submission
+  INSTITUTIONAL_REVIEW // High-value / B2B request held for the admin's written proposal (2026-09-09). Never routed to providers, never claimable, never auto-expired. Admin can release it to OPEN if it is an ordinary patient. See lib/institutionalIntake.ts.
+  CLOSED_DECLINED // Provider reached the patient and the patient declined (price, changed mind). Closed, not re-offered: the same patient would decline the next provider too. Claim history kept on routedToId. (2026-09-22)
+  EXPIRED_NO_RESPONSE // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
 }
 
 /**
  * The patient's own answer, kept separate from LeadOutcome on purpose.
- *
  * LeadOutcome is what the provider says happened. This is what the patient
  * says happened. Merging them would destroy the only disagreement signal the
  * reconciliation is built to surface.
- *
  * NO_RESPONSE is deliberately absent -- it is derived, not stored:
  * outcomeRequestSentAt set, patientOutcome null, more than 7 days elapsed.
  * Storing it would mean writing a row for silence and having to keep it true.
@@ -1137,29 +1137,29 @@ enum NotificationStatus {
 
 // New enums for provider onboarding and patient SMS flow
 enum ProviderSource {
-  SCRAPED       // Imported from external sources - NOT opted in
-  SELF_SIGNUP   // Provider signed up themselves
+  SCRAPED // Imported from external sources - NOT opted in
+  SELF_SIGNUP // Provider signed up themselves
   ADMIN_CREATED // Manually created by admin
 }
 
 enum OnboardingStatus {
-  NOT_INVITED   // Never sent invite
-  INVITED       // Invite sent, awaiting action
-  STARTED       // Started onboarding but not complete
-  ACTIVE        // Fully onboarded and opted in
+  NOT_INVITED // Never sent invite
+  INVITED // Invite sent, awaiting action
+  STARTED // Started onboarding but not complete
+  ACTIVE // Fully onboarded and opted in
 }
 
 enum DispatchTaskStatus {
-  OPEN          // Needs attention
-  IN_PROGRESS   // Being worked on
-  RESOLVED      // Completed
+  OPEN // Needs attention
+  IN_PROGRESS // Being worked on
+  RESOLVED // Completed
 }
 
 enum DispatchTaskReason {
-  NO_OPTED_IN_PROVIDERS     // No providers with SMS consent in area
-  ALL_PROVIDERS_DECLINED    // All contacted providers declined
-  PATIENT_UNRESPONSIVE      // Patient stopped responding
-  MANUAL_ESCALATION         // Manually escalated by system
+  NO_OPTED_IN_PROVIDERS // No providers with SMS consent in area
+  ALL_PROVIDERS_DECLINED // All contacted providers declined
+  PATIENT_UNRESPONSIVE // Patient stopped responding
+  MANUAL_ESCALATION // Manually escalated by system
 }
 
 /// Messages from the public /contact form.
@@ -1179,7 +1179,7 @@ enum DispatchTaskReason {
 model ContactMessage {
   id          String               @id @default(cuid())
   createdAt   DateTime             @default(now())
-  userType    String               // patient | provider | business | media | other
+  userType    String // patient | provider | business | media | other
   name        String
   email       String
   subject     String
@@ -1204,4 +1204,22 @@ enum ContactMessageStatus {
   /// Honeypot hits. Recorded rather than dropped: after this form, "no record"
   /// can no longer be allowed to mean two different things.
   SPAM
+}
+
+/// One row per outreach email actually handed to SendGrid, so nobody is
+/// emailed twice by scripts/outreach-send.ts. template is the file name in
+/// emails/outreach/ (group-a, group-b, followup).
+model OutreachLog {
+  id          String   @id @default(cuid())
+  providerId  String
+  campaign    String
+  template    String
+  sentAt      DateTime @default(now())
+  sgMessageId String?
+  toEmail     String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([campaign, template])
+  @@map("outreach_log")
 }
