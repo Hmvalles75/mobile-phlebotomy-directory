@@ -19,38 +19,41 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { CITY_MAPPING, type CityInfo } from '../data/cities-full'
 import { ABBR_TO_SLUG } from '../data/states-full'
+import { getAllProviders } from '../lib/providers-db'
+import { bucketProvidersForCity } from '../lib/cityGeography'
 
 const prisma = new PrismaClient()
 const root = process.cwd()
 const dryRun = process.argv.includes('--dry-run')
 
 async function main() {
-  console.log('Reading provider coverage from DB...')
-  const providers = await prisma.provider.findMany({
-    where: { eligibleForLeads: true, removedAt: null },
-    select: {
-      primaryState: true,
-      coverage: { select: { cityId: true, state: { select: { abbr: true } }, city: { select: { name: true } } } },
-    },
-  })
-  const broadStates = new Set<string>()
-  const citySpecific = new Set<string>()
-  for (const p of providers) {
-    if (p.primaryState) broadStates.add(p.primaryState.toUpperCase())
-    for (const c of p.coverage) {
-      const abbr = c.state?.abbr?.toUpperCase()
-      if (!abbr) continue
-      if (c.cityId == null) broadStates.add(abbr)
-      if (c.city?.name) citySpecific.add(`${abbr}|${c.city.name.toLowerCase()}`)
-    }
+  // The flag must agree with the count the city page renders and puts in its
+  // title (lib/seo/locationMeta.ts): local + regional providers from the same
+  // radius/coverage bucketing. The old rule ("any eligible provider based in
+  // the state, or a coverage row naming the city") disagreed with the page in
+  // both directions (2026-09-25: Anchorage flagged noProviders while listing
+  // 3; 47 cities listing 0 while indexable).
+  console.log('Reading providers and bucketing per city (same rule as the page)...')
+  const all = await getAllProviders()
+  const counts = new Map<string, number>()
+  for (const [key, e] of Object.entries(CITY_MAPPING)) {
+    const g = bucketProvidersForCity(all, e.name, e.state)
+    counts.set(key, g.local.length + g.regional.length)
   }
-  const hasProviders = (e: CityInfo) =>
-    broadStates.has(e.state) || citySpecific.has(`${e.state}|${e.name.toLowerCase()}`)
+  const hasProviders = (e: CityInfo) => (counts.get(`${e.stateSlug}/${e.citySlug}`) || 0) > 0
+  const providers = all
 
   const entries = Object.entries(CITY_MAPPING).sort(([a], [b]) => a.localeCompare(b))
   const excluded = entries.filter(([, e]) => !hasProviders(e))
-  console.log(`eligible providers: ${providers.length}`)
+  console.log(`providers considered: ${providers.length}`)
   console.log(`cities: ${entries.length} | excluded (noProviders): ${excluded.length}`)
+  const nowOn = entries.filter(([, e]) => !e.noProviders && !hasProviders(e))
+  const nowOff = entries.filter(([key, e]) => e.noProviders && hasProviders(e)).map(([key]) => `${key} (${counts.get(key)})`)
+  console.log(`
+FLIPS -> noProviders ON (indexable page listing 0): ${nowOn.length}`)
+  for (const [key] of nowOn) console.log(`   + ${key}`)
+  console.log(`FLIPS -> noProviders OFF (noindexed page that lists providers): ${nowOff.length}`)
+  for (const k of nowOff) console.log(`   - ${k}`)
 
   const lines = entries.map(([key, e]) => {
     const parts = [
@@ -72,9 +75,13 @@ async function main() {
  *  - app/sitemap.ts                    (URL generation; skips noProviders)
  *  - lib/seo/internalLinks.ts, anchorHelpers.ts, components/seo/ServiceAreaLinks.tsx
  *
- * \`noProviders: true\` marks cities with zero matching providers (verified against
- * the coverage DB). They still render but are excluded from the sitemap so we
- * don't advertise thin pages. Regenerate with scripts/unify-cities-full.ts.
+ * 2026-09-24: 13 cities with >=2 active providers added by hand (URL
+ * consolidation batch 2, see docs/findings/unmapped-provider-cities-2026-09-24.csv).
+ *
+ * \`noProviders: true\` marks cities whose page lists zero providers (same
+ * radius/coverage bucketing the page uses). They still render, carry robots
+ * noindex,follow and are excluded from the sitemap. Regenerate with
+ * scripts/unify-cities-full.ts whenever providers are onboarded or removed.
  */
 
 export interface CityInfo {
