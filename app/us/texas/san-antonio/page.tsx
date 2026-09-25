@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Texas"
 const PRICE_RANGE = "$60–$120"
 const CITY_SPECIFIC_COUNT = 5
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy San Antonio: 5 Providers (2026)",
-  description: "Find mobile phlebotomy in San Antonio, TX. 5 providers serving the San Antonio area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy san antonio, mobile phlebotomist san antonio, san antonio mobile blood draw, at home blood draw san antonio, mobile lab san antonio, san antonio texas phlebotomy, texas mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/texas/san-antonio",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy San Antonio: 5 Providers (2026)",
-    description: "Find mobile phlebotomy in San Antonio, TX. 5 providers serving the San Antonio area — Blood Draw, Lab Specimen Collection, Specialty Kit Collections. Typical service fee $60–$120 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/texas/san-antonio",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("texas", "san-antonio")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in San Antonio, TX","description":"Directory of vetted mobile phlebotomists serving San Antonio, Texas and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/texas/san-antonio","areaServed":{"@type":"City","name":"San Antonio","containedInPlace":{"@type":"State","name":"Texas"}},"priceRange":"$60–$120","medicalSpecialty":"Phlebotomy"}

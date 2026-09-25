@@ -26,6 +26,8 @@ export { stateData }
 
 interface StatePageClientProps {
   stateSlug: string
+  /** Server-fetched list; when present the client does not refetch. */
+  initialProviders?: Provider[]
 }
 
 /** States that have a dedicated cost page. Add here when a new one ships. */
@@ -33,9 +35,9 @@ const STATE_COST_GUIDES: Record<string, string> = {
   florida: '/mobile-phlebotomy-cost-florida',
 }
 
-export default function StatePageClient({ stateSlug }: StatePageClientProps) {
-  const [providers, setProviders] = useState<Provider[]>([])
-  const [loading, setLoading] = useState(true)
+export default function StatePageClient({ stateSlug, initialProviders }: StatePageClientProps) {
+  const [providers, setProviders] = useState<Provider[]>(initialProviders ?? [])
+  const [loading, setLoading] = useState(initialProviders === undefined)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [minRating, setMinRating] = useState<number | null>(null)
@@ -49,8 +51,9 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
 
   const { name: stateName, abbr: stateAbbr } = stateInfo
 
-  // Fetch providers for this state
+  // Fetch providers for this state (legacy path; the page passes them in)
   useEffect(() => {
+    if (initialProviders !== undefined) return
     async function fetchProviders() {
       try {
         const response = await fetch(`/api/providers?state=${stateAbbr}`)
@@ -66,7 +69,7 @@ export default function StatePageClient({ stateSlug }: StatePageClientProps) {
     }
 
     fetchProviders()
-  }, [stateAbbr])
+  }, [stateAbbr, initialProviders])
 
   // Available services
   const availableServices = ['At-Home Blood Draw', 'Specimen Pickup', 'Lab Partner']

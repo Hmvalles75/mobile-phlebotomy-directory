@@ -3,6 +3,13 @@ import { metroHref } from '@/lib/seo/metroCanonical'
 import { SITE_URL } from '@/lib/seo'
 import { topMetroAreas } from '@/data/top-metros'
 import { getProvidersByCity } from '@/lib/providers-city'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Mobile Phlebotomy in the 50 Largest US Metro Areas',
+  description: 'At-home blood draw providers in the 50 largest US metro areas, with provider counts and links to each city page.',
+  alternates: { canonical: `${SITE_URL}/metros` },
+}
 
 export default async function MetrosPage() {
   /**

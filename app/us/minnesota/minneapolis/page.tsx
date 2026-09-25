@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Minnesota"
 const PRICE_RANGE = "$70–$135"
 const CITY_SPECIFIC_COUNT = 2
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Minneapolis, MN: At-Home Blood Draws (2026)",
-  description: "Find mobile phlebotomy in Minneapolis, MN. Providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy minneapolis, mobile phlebotomist minneapolis, minneapolis mobile blood draw, at home blood draw minneapolis, mobile lab minneapolis, minneapolis minnesota phlebotomy, minnesota mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/minnesota/minneapolis",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Minneapolis, MN: At-Home Blood Draws (2026)",
-    description: "Find mobile phlebotomy in Minneapolis, MN. Providers serving the Minneapolis area — Lab Specimen Collection, Mobile Lab Services, Specialty Kit Collections. Typical service fee $70–$135 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/minnesota/minneapolis",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("minnesota", "minneapolis")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Minneapolis, MN","description":"Directory of vetted mobile phlebotomists serving Minneapolis, Minnesota and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/minnesota/minneapolis","areaServed":{"@type":"City","name":"Minneapolis","containedInPlace":{"@type":"State","name":"Minnesota"}},"priceRange":"$70–$135","medicalSpecialty":"Phlebotomy"}

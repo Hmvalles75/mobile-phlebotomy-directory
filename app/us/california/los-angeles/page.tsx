@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "California"
 const PRICE_RANGE = "$80–$160"
 const CITY_SPECIFIC_COUNT = 16
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Los Angeles: 16 Providers (2026)",
-  description: "Find mobile phlebotomy in Los Angeles, CA. 16 providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy los angeles, mobile phlebotomist los angeles, los angeles mobile blood draw, at home blood draw los angeles, mobile lab los angeles, los angeles california phlebotomy, california mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/california/los-angeles",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Los Angeles: 16 Providers (2026)",
-    description: "Find mobile phlebotomy in Los Angeles, CA. 16 providers serving the Los Angeles area — Blood Draw, Specimen Pickup, Lab Specimen Collection. Typical service fee $80–$160 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/california/los-angeles",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("california", "los-angeles")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Los Angeles, CA","description":"Directory of vetted mobile phlebotomists serving Los Angeles, California and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/california/los-angeles","areaServed":{"@type":"City","name":"Los Angeles","containedInPlace":{"@type":"State","name":"California"}},"priceRange":"$80–$160","medicalSpecialty":"Phlebotomy"}

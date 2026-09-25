@@ -40,11 +40,23 @@ export type { GroupedCityProviders } from './cityGeography'
 import { bucketProvidersForCity } from './cityGeography'
 import type { GroupedCityProviders } from './cityGeography'
 
-async function computeProvidersByCity(
+/**
+ * One cached copy of the full provider list for every server caller that
+ * buckets it (city pages, state pages, the 18 override metadata calls). At
+ * build time those used to fan out ~70 full-table reads in parallel and Neon
+ * answered with 53200 out-of-memory (2026-09-25).
+ */
+export const getAllProvidersCached = unstable_cache(
+  () => getAllProviders(),
+  ['all-providers'],
+  { revalidate: SEO_CACHE_TTL_SECONDS, tags: ['internal-links'] },
+)
+
+export async function computeProvidersByCity(
   cityName: string,
   stateAbbr: string,
 ): Promise<GroupedCityProviders> {
-  return bucketProvidersForCity(await getAllProviders(), cityName, stateAbbr)
+  return bucketProvidersForCity(await getAllProvidersCached(), cityName, stateAbbr)
 }
 
 /**

@@ -70,7 +70,7 @@ export default function ForNetworksPage() {
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <p className="text-sm text-gray-400 uppercase tracking-wide mb-4">For Draw Networks, Labs & Healthcare Organizations</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Mobile Phlebotomists<br />Where You Need Them
+            Mobile Phlebotomists{' '}<br />Where You Need Them
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
             Need coverage in specific geographies? We connect you with verified mobile phlebotomists in 40+ states. One partnership, nationwide reach.

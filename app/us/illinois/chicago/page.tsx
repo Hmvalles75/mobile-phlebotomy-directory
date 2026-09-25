@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Illinois"
 const PRICE_RANGE = "$70–$130"
 const CITY_SPECIFIC_COUNT = 9
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Chicago: 9 Providers (2026)",
-  description: "Find mobile phlebotomy in Chicago, IL. 9 providers serving the Chicago area — Blood Draw, Lab Specimen Collection, Mobile Lab Services. Typical service fee $70–$130 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy chicago, mobile phlebotomist chicago, chicago mobile blood draw, at home blood draw chicago, mobile lab chicago, chicago illinois phlebotomy, illinois mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/illinois/chicago",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Chicago: 9 Providers (2026)",
-    description: "Find mobile phlebotomy in Chicago, IL. 9 providers serving the Chicago area — Blood Draw, Lab Specimen Collection, Mobile Lab Services. Typical service fee $70–$130 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/illinois/chicago",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("illinois", "chicago")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Chicago, IL","description":"Directory of vetted mobile phlebotomists serving Chicago, Illinois and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/illinois/chicago","areaServed":{"@type":"City","name":"Chicago","containedInPlace":{"@type":"State","name":"Illinois"}},"priceRange":"$70–$130","medicalSpecialty":"Phlebotomy"}

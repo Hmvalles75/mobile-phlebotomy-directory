@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CityPage from '@/app/us/[state]/[city]/page'
 import { CITY_LONGFORM } from '@/data/city-longform'
+import { buildCityMetadata } from '@/lib/seo/locationMeta'
 import { getProvidersForCity, getNearbyCities } from '@/lib/seo/internalLinks'
 import ProvidersInCity from '@/components/seo/ProvidersInCity'
 import NearbyCities from '@/components/seo/NearbyCities'
@@ -21,19 +22,10 @@ const STATE_NAME = "Michigan"
 const PRICE_RANGE = "$60–$115"
 const CITY_SPECIFIC_COUNT = 12
 
-export const metadata: Metadata = {
-  title: "Mobile Phlebotomy Detroit: 12 Providers (2026)",
-  description: "Find mobile phlebotomy in Detroit, MI. 12 providers serving the Detroit area — Lab Specimen Collection, Blood Draw, DNA Testing. Typical service fee $60–$115 per visit. Same-day appointments available.",
-  keywords: "mobile phlebotomy detroit, mobile phlebotomist detroit, detroit mobile blood draw, at home blood draw detroit, mobile lab detroit, detroit michigan phlebotomy, michigan mobile phlebotomy",
-  alternates: {
-    canonical: "https://www.mobilephlebotomy.org/us/michigan/detroit",
-  },
-  openGraph: {
-    title: "Mobile Phlebotomy Detroit: 12 Providers (2026)",
-    description: "Find mobile phlebotomy in Detroit, MI. 12 providers serving the Detroit area — Lab Specimen Collection, Blood Draw, DNA Testing. Typical service fee $60–$115 per visit. Same-day appointments available.",
-    url: "https://www.mobilephlebotomy.org/us/michigan/detroit",
-    type: 'website',
-  },
+// Title/description come from the live provider count (site batch 4,
+// 2026-09-25); the baked-in count and price band drifted from the page.
+export async function generateMetadata(): Promise<Metadata> {
+  return buildCityMetadata("michigan", "detroit")
 }
 
 const localBusinessSchema = {"@context":"https://schema.org","@type":"MedicalBusiness","name":"Mobile Phlebotomy in Detroit, MI","description":"Directory of vetted mobile phlebotomists serving Detroit, Michigan and surrounding areas.","url":"https://www.mobilephlebotomy.org/us/michigan/detroit","areaServed":{"@type":"City","name":"Detroit","containedInPlace":{"@type":"State","name":"Michigan"}},"priceRange":"$60–$115","medicalSpecialty":"Phlebotomy"}
