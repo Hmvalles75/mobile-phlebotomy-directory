@@ -357,6 +357,10 @@ const nextConfig = {
       { source: '/provider/bio-care-services-inc-311', destination: '/provider/bio-care-services-inc', permanent: true },
       { source: '/provider/tender-touch-mobile-labs-656', destination: '/provider/tender-touch-mobile-labs', permanent: true },
       { source: '/provider/nr-mobile-labs-546', destination: '/provider/nr-mobile-labs', permanent: true },
+      // Duplicate provider records merged 2026-09-25 (trailing-hyphen slug was
+      // a second submission of the same business; soft-removed, history kept).
+      { source: '/provider/evergreene-mobile-phlebotomy-', destination: '/provider/evergreene-mobile-phlebotomy', permanent: true },
+      { source: '/provider/precision-mobile-phlebotomy-llc-', destination: '/provider/precision-mobile-phlebotomy-llc', permanent: true },
     ]
   },
 }
