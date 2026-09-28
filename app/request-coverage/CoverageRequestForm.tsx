@@ -4,7 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { captureFirstTouchAttribution } from '@/lib/attribution'
 
+// The first two were added 2026-09-28: a national SNF wound-care buyer needing
+// ~200 bedside draws/month picked "Reference lab routing" because nothing else
+// fit. Facility work is the highest-value request type the form receives.
 const COVERAGE_TYPES = [
+  'Facility / bedside draws (SNF, assisted living, clinics — recurring)',
+  'Point-of-care or treatment-related draws (no lab routing)',
   'Clinical trial / research study draws',
   'Reference lab routing (ongoing volume)',
   'Home health / hospice support',
@@ -27,6 +32,7 @@ interface FormState {
   email: string
   phone: string
   drawType: string
+  facilities: string
   statesNeeded: string
   estimatedVolume: string
   details: string
@@ -37,7 +43,7 @@ interface FormState {
 export function CoverageRequestForm() {
   const [data, setData] = useState<FormState>({
     organizationName: '', contactName: '', email: '', phone: '',
-    drawType: '', statesNeeded: '', estimatedVolume: '', details: '',
+    drawType: '', facilities: '', statesNeeded: '', estimatedVolume: '', details: '',
     website_url: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -87,6 +93,7 @@ export function CoverageRequestForm() {
           email: data.email,
           phone: data.phone,
           drawType: data.drawType,
+          facilities: data.facilities,
           location: data.statesNeeded,         // primary "where" field
           statesNeeded: data.statesNeeded,
           estimatedVolume: data.estimatedVolume,
@@ -290,6 +297,21 @@ export function CoverageRequestForm() {
         </select>
         {errors.estimatedVolume && <p className="text-red-500 text-sm mt-1">{errors.estimatedVolume}</p>}
       </div>
+
+      {(/facility|bedside|point-of-care/i.test(data.drawType) || /51|200\+/.test(data.estimatedVolume)) && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            How many facilities, and where? <span className="text-gray-400 font-normal">(optional, but it is what decides coverage)</span>
+          </label>
+          <textarea
+            value={data.facilities}
+            onChange={e => setField('facilities', e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="e.g. 14 skilled nursing facilities: 6 in Cleveland, 4 in Columbus, 4 in Louisville. Weekly visits, 3–8 patients per visit."
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">

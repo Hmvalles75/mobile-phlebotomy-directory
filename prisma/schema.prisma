@@ -9,28 +9,29 @@ datasource db {
 }
 
 model Provider {
-  id                    String                 @id @default(cuid())
-  name                  String
-  slug                  String                 @unique
-  phone                 String?
-  phonePublic           String?
-  email                 String?
-  website               String?
-  bookingUrl            String?
-  description           String?
-  outreachOptOutAt      DateTime? // provider clicked the unsubscribe link in an outreach email; scripts/outreach-send.ts skips them for good (2026-09-25)
-  outreachRepliedAt     DateTime? // set by `outreach-send.ts --replied <id>`; stops follow-ups
-  outreachLogs          OutreachLog[]
-  tagline               String? // One line under the premium H1 and the JSON-LD description; provider-editable (<=160). Null falls back to a derived line. (2026-09-23)
-  rating                Float?
-  reviewsCount          Int?
-  featured              Boolean                @default(false)
-  status                ProviderStatus         @default(UNVERIFIED)
-  isFeatured            Boolean                @default(false)
-  featuredTier          FeaturedTier?
-  stripeCustomerId      String?
-  claimEmail            String?
-  claimToken            String?
+  id                       String                 @id @default(cuid())
+  name                     String
+  slug                     String                 @unique
+  phone                    String?
+  phonePublic              String?
+  email                    String?
+  website                  String?
+  bookingUrl               String?
+  description              String?
+  networkAgreementSignedAt DateTime? // date the provider signed the network / NCA agreement; set by scripts/set-network-agreement.ts. Coverage checks split "network" vs "directory-only" on this (2026-09-28)
+  outreachOptOutAt         DateTime? // provider clicked the unsubscribe link in an outreach email; scripts/outreach-send.ts skips them for good (2026-09-25)
+  outreachRepliedAt        DateTime? // set by `outreach-send.ts --replied <id>`; stops follow-ups
+  outreachLogs             OutreachLog[]
+  tagline                  String? // One line under the premium H1 and the JSON-LD description; provider-editable (<=160). Null falls back to a derived line. (2026-09-23)
+  rating                   Float?
+  reviewsCount             Int?
+  featured                 Boolean                @default(false)
+  status                   ProviderStatus         @default(UNVERIFIED)
+  isFeatured               Boolean                @default(false)
+  featuredTier             FeaturedTier?
+  stripeCustomerId         String?
+  claimEmail               String?
+  claimToken               String?
   /// When the magic-link token in claimToken stops working.
   ///
   /// lib/auth.ts computed a 15-minute expiry from the start and never stored
@@ -39,73 +40,73 @@ model Provider {
   /// were told a link had "expired" when it had actually been superseded:
   /// requesting a second link silently kills the first, and the error text sent
   /// them to request yet another.
-  claimTokenExpiresAt   DateTime?
-  claimVerifiedAt       DateTime?
-  twilioNumber          String?
-  zipCodes              String?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  affiliateLink         String?
-  isFeaturedCity        Boolean                @default(false)
-  listingTier           ListingTier            @default(BASIC)
-  serviceZipCodes       String?
+  claimTokenExpiresAt      DateTime?
+  claimVerifiedAt          DateTime?
+  twilioNumber             String?
+  zipCodes                 String?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  affiliateLink            String?
+  isFeaturedCity           Boolean                @default(false)
+  listingTier              ListingTier            @default(BASIC)
+  serviceZipCodes          String?
   // Carve-outs (2026-09-18). Routing was inclusion-only: a radius or ZIP list
   // could add areas but nothing could remove one, so a Long Island provider
   // whose 70-mile radius reaches Brooklyn got Brooklyn leads she declines, and
   // a Maryland provider with a 100-mile radius claimed a Delaware patient and
   // then said they don't serve Delaware. Exclusions win over radius, ZIP list
   // and the fan-out floor. See lib/providerCoverage.ts.
-  excludedZipCodes      String? // Same token grammar as zipCodes: 5-digit, prefix "112*", range "10000-10499"
-  excludedStates        String? // Comma-separated state abbreviations, e.g. "DE,VA"
-  stripePaymentMethodId String?
-  eligibleForLeads      Boolean                @default(false)
-  trialExpiresAt        DateTime?
-  trialStartedAt        DateTime?
-  trialStatus           TrialStatus            @default(NONE)
-  operatingDays         String?
-  operatingHoursEnd     String?
-  operatingHoursStart   String?
-  serviceRadiusMiles    Int?
-  logo                  String?
-  profileImage          String?
-  heroPoster            String? // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
-  socialLinks           String? // JSON object of provider-supplied social profiles: { instagram, facebook, tiktok, youtube, linkedin }. Values are full https URLs. Rendered as an icon row in the premium page's contact card; omitted entirely when null. Set via scripts/set-provider-socials.ts.
-  testimonials          String? // JSON array of provider-supplied reviews: [{ quote, author, location, rating }]. Rendered in Patient Reviews section when present; section shows "Reviews coming soon" when null/empty.
-  notificationEmail     String?
-  notifyEnabled         Boolean                @default(true)
-  primaryCity           String?
-  primaryCitySlug       String?
-  primaryMetro          String?
-  primaryState          String?
-  primaryStateName      String?
-  primaryStateSlug      String?
-  lastSMSSentAt         DateTime?
-  smsOptInAt            DateTime?
-  smsOptOutAt           DateTime?
-  smsOptOutReason       String?
+  excludedZipCodes         String? // Same token grammar as zipCodes: 5-digit, prefix "112*", range "10000-10499"
+  excludedStates           String? // Comma-separated state abbreviations, e.g. "DE,VA"
+  stripePaymentMethodId    String?
+  eligibleForLeads         Boolean                @default(false)
+  trialExpiresAt           DateTime?
+  trialStartedAt           DateTime?
+  trialStatus              TrialStatus            @default(NONE)
+  operatingDays            String?
+  operatingHoursEnd        String?
+  operatingHoursStart      String?
+  serviceRadiusMiles       Int?
+  logo                     String?
+  profileImage             String?
+  heroPoster               String? // Optional wide poster image shown in premiumPage booking section (replaces the generic "Compassionate care" card when present)
+  socialLinks              String? // JSON object of provider-supplied social profiles: { instagram, facebook, tiktok, youtube, linkedin }. Values are full https URLs. Rendered as an icon row in the premium page's contact card; omitted entirely when null. Set via scripts/set-provider-socials.ts.
+  testimonials             String? // JSON array of provider-supplied reviews: [{ quote, author, location, rating }]. Rendered in Patient Reviews section when present; section shows "Reviews coming soon" when null/empty.
+  notificationEmail        String?
+  notifyEnabled            Boolean                @default(true)
+  primaryCity              String?
+  primaryCitySlug          String?
+  primaryMetro             String?
+  primaryState             String?
+  primaryStateName         String?
+  primaryStateSlug         String?
+  lastSMSSentAt            DateTime?
+  smsOptInAt               DateTime?
+  smsOptOutAt              DateTime?
+  smsOptOutReason          String?
   // New fields for compliance-aware provider management
-  source                ProviderSource         @default(SCRAPED)
-  onboardingToken       String?                @unique
-  onboardingStatus      OnboardingStatus       @default(NOT_INVITED)
-  onboardingInvitedAt   DateTime?
-  onboardingCompletedAt DateTime?
-  termsAcceptedAt       DateTime?
-  languages             String? // Comma-separated: "English,Spanish"
-  premiumPage           Boolean                @default(false) // Renders premium $199 template
+  source                   ProviderSource         @default(SCRAPED)
+  onboardingToken          String?                @unique
+  onboardingStatus         OnboardingStatus       @default(NOT_INVITED)
+  onboardingInvitedAt      DateTime?
+  onboardingCompletedAt    DateTime?
+  termsAcceptedAt          DateTime?
+  languages                String? // Comma-separated: "English,Spanish"
+  premiumPage              Boolean                @default(false) // Renders premium $199 template
   // Set true by the junk-detection pass when the description looks like
   // scraped nav-menu junk (e.g. "HOME HOME CONTACT US BOOK ONLINE..."),
   // heavy ALL-CAPS, or repeated phrase patterns. Flagged providers render
   // "Contact for details." instead of the description on directory pages.
   // Surfaced in /admin/flagged-descriptions for cleanup. Reset to false
   // after the description is manually rewritten.
-  descriptionFlagged    Boolean                @default(false)
+  descriptionFlagged       Boolean                @default(false)
   // Lead-routing priority flag — set true ONLY for providers who are actively paying
   // (any tier). Drives Wave 1 / Wave 2 split in lib/leadNotifications.ts so paying
   // customers get a real head-start window before free providers see leads in their
   // coverage area. Independent of featuredTier (which mixes paying + grandfathered)
   // and isFeatured (which has 20+ stale legacy entries). Set manually until the
   // Stripe webhook can write back reliably (see project memory: stripeCustomerId bug).
-  priorityRouting       Boolean                @default(false)
+  priorityRouting          Boolean                @default(false)
   // ── Soft-removal at provider request ───────────────────────────────────────
   // removedAt: null = listing is live; timestamp = listing has been removed.
   // Listing queries in lib/providers-db.ts filter by removedAt:null so removed
@@ -113,12 +114,12 @@ model Provider {
   // (which then 404s, with optional 301 in next.config.mjs for canonical slugs).
   // We keep the row so Lead.routedToId history stays valid and the unique slug
   // blocks future scrapers from re-inserting under the same name.
-  removedAt             DateTime?
-  removedReason         String? // free-text: "provider request", future "for cause", etc.
+  removedAt                DateTime?
+  removedReason            String? // free-text: "provider request", future "for cause", etc.
   // doNotRelist: hard-stop for future seeders/scrapers. Any script that creates
   // providers should refuse to insert when a matching (name + phone) row exists
   // with doNotRelist=true.
-  doNotRelist           Boolean                @default(false)
+  doNotRelist              Boolean                @default(false)
   // ── Fixed-site quarantine ──────────────────────────────────────────────────
   // true = this record is a hospital / health-system draw station, reference lab
   // or outpatient collection site, NOT a mobile phlebotomy business. Such records
@@ -132,44 +133,44 @@ model Provider {
   // Enforced in lib/providers-city.ts. This replaces a guard that branched on
   // `is_mobile_phlebotomy`, a legacy JSON-era field the DB mapper never populates
   // — so the guard silently never fired. See that file for the full story.
-  isFixedSite           Boolean                @default(false)
+  isFixedSite              Boolean                @default(false)
   // Stale-claim tracking. Incremented when the stale-claim-release cron
   // yanks a CLAIMED lead from this provider for failing to log an outcome
   // within SLA. Surfaces in admin to spot patterns; high counts can feed
   // into auto-pause logic in future iterations of the pause-non-converter
   // workflow. lastStaleReleaseAt enables cooldown / "third strike" timing.
-  staleReleaseCount     Int                    @default(0)
-  lastStaleReleaseAt    DateTime?
+  staleReleaseCount        Int                    @default(0)
+  lastStaleReleaseAt       DateTime?
   // Dormant-provider sweep (2026-09-07). A free listing that keeps receiving
   // leads and never claims is warned (dormantWarnedAt), then paused
   // (leadsPausedAt + eligibleForLeads=false). Resuming clears both and sets
   // leadsResumedAt, which exempts them from the sweep for a grace period.
   // See lib/dormantProviders.ts.
-  dormantWarnedAt       DateTime?
-  leadsPausedAt         DateTime?
-  leadsPausedReason     String?
-  leadsResumedAt        DateTime?
+  dormantWarnedAt          DateTime?
+  leadsPausedAt            DateTime?
+  leadsPausedReason        String?
+  leadsResumedAt           DateTime?
   // Audit stamp (2026-09-11). Set by the Prisma extension in lib/prisma.ts on
   // every app write; read by the provider_change_log trigger to attribute the
   // change. Not meaningful on its own. See lib/providerAudit.ts.
-  auditActor            String?
-  auditAt               DateTime?
+  auditActor               String?
+  auditAt                  DateTime?
   // Relations
-  callLogs              CallLog[]
-  leadNotifications     LeadNotification[]
-  leads                 Lead[]
-  address               ProviderAddress?
-  availability          ProviderAvailability[]
-  badges                ProviderBadge[]
-  coords                ProviderCoords?
-  businessClaims        BusinessClaim[]
-  corrections           ProviderCorrection[]
-  correctionsQueue      ProviderCorrections[]  @relation("corrections_queue")
-  coverage              ProviderCoverage[]
-  payment               ProviderPayment[]
-  services              ProviderService[]
-  institutionalOrders   InstitutionalOrder[]
-  changeLog             ProviderChangeLog[]
+  callLogs                 CallLog[]
+  leadNotifications        LeadNotification[]
+  leads                    Lead[]
+  address                  ProviderAddress?
+  availability             ProviderAvailability[]
+  badges                   ProviderBadge[]
+  coords                   ProviderCoords?
+  businessClaims           BusinessClaim[]
+  corrections              ProviderCorrection[]
+  correctionsQueue         ProviderCorrections[]  @relation("corrections_queue")
+  coverage                 ProviderCoverage[]
+  payment                  ProviderPayment[]
+  services                 ProviderService[]
+  institutionalOrders      InstitutionalOrder[]
+  changeLog                ProviderChangeLog[]
 
   @@index([primaryState])
   @@index([primaryCity])
@@ -775,6 +776,7 @@ model CoverageRequest {
   estimatedVolume   String // dropdown bucket: "1–10/mo", "11–50/mo", "51–200/mo", "200+/mo", "Not sure yet"
   drawType          String // "Clinical study/research", "Lab routing", "Healthcare facility", etc.
   details           String?
+  facilities        String? // "How many facilities, and where?" — asked for facility/bedside coverage and for 51+ draws/month (2026-09-28, AmeriWound)
   status            CoverageRequestStatus @default(NEW)
   ipAddress         String?
   userAgent         String?
