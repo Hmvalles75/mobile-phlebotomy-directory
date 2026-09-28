@@ -25,6 +25,7 @@ interface CoverageRequest {
   timeline: string
   estimatedVolume: string
   drawType: string
+  facilities?: string | null
   details?: string | null
   status: string
   contactAttempts?: ContactAttempt[]
@@ -609,6 +610,12 @@ export function CorporateInquiriesPanel() {
                       <p className="text-gray-900">{selected.drawType}</p>
                     </div>
                   </div>
+                  {selected.facilities && (
+                    <div className="mt-3">
+                      <label className="text-sm font-medium text-gray-500">Facilities (how many, where)</label>
+                      <p className="text-gray-900 text-sm whitespace-pre-wrap">{selected.facilities}</p>
+                    </div>
+                  )}
                   {selected.details && (
                     <div className="mt-3">
                       <label className="text-sm font-medium text-gray-500">Details</label>

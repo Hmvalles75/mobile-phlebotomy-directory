@@ -40,6 +40,7 @@ const schema = z.object({
   estimatedVolume: z.string().optional(),
   drawType: z.union([z.string(), z.array(z.string())]).optional(),
   details: z.string().optional(),
+  facilities: z.string().optional(),
   // Legacy field aliases (CorporateQuoteForm payload)
   companyName: z.string().optional(),
   eventLocation: z.string().optional(),
@@ -113,6 +114,7 @@ REQUEST
   Type:    ${req.drawType}
   States:  ${req.location}
   Volume:  ${req.estimatedVolume}
+  Facilities: ${req.facilities || '(not given)'}
 
 NOTES
   ${req.details || '(none)'}
@@ -169,6 +171,7 @@ A quick summary of what you submitted:
   Coverage type:    ${req.drawType}
   States / metros:  ${req.location}
   Estimated volume: ${req.estimatedVolume}
+  Facilities:       ${req.facilities || '(not given)'}
 
 If your timeline is tighter than one business day, just reply
 to this email and flag the urgency.
@@ -228,6 +231,7 @@ export async function POST(req: NextRequest) {
     const timeline = payload.timeline || payload.eventDates || null
     const estimatedVolume = payload.estimatedVolume || payload.estimatedDraws || ''
     const details = payload.details || payload.additionalDetails || null
+    const facilities = payload.facilities?.trim() || null
     const drawType = pickDrawType(payload)
 
     if (!organizationName || !location || !estimatedVolume || !drawType) {
@@ -253,6 +257,7 @@ export async function POST(req: NextRequest) {
         estimatedVolume,
         drawType,
         details,
+        facilities,
         ipAddress,
         userAgent,
         // Legacy payloads (the /corporate-phlebotomy shape) predate this field;
