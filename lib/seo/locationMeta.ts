@@ -37,7 +37,9 @@ export function stateMetaText(stateName: string, n: number): { title: string; de
 export function cityMetaText(city: string, st: string, n: number): { title: string; description: string } {
   if (n >= COUNT_THRESHOLD) {
     return {
-      title: `Mobile Phlebotomy in ${city}, ${st} | ${n} Local At-Home Blood Draw Providers`,
+      // "Local" was dropped 2026-09-28: N counts regional providers too (based within 100 miles), and
+      // on metro pages near state lines most of them are (Philadelphia: 62, of which 4 are in the city).
+      title: `Mobile Phlebotomy in ${city}, ${st} | ${n} At-Home Blood Draw Providers`,
       description: `Compare ${n} licensed mobile phlebotomists serving ${city}, ${st}. At-home blood draws for patients, families, and facilities. Request a draw and get matched with a local provider.`,
     }
   }
