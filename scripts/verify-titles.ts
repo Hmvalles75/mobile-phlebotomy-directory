@@ -34,7 +34,7 @@ async function main() {
     if (providerLinks > 0 && zero) problems.push('"0 providers" text with providers listed')
     if (!desc) problems.push('no description')
     // A count in the title must be the count the page body states.
-    const titleN = title.match(/\| (\d+) (?:Local )?At-Home/)?.[1]
+    const titleN = title.match(/\| (\d+) At-Home/)?.[1]
     const bodyN = text(body).match(/(\d+)\s+(?:providers? available|Providers? (?:Available|Found|Serving))/i)?.[1]
     if (titleN && bodyN && titleN !== bodyN) problems.push(`title says ${titleN} providers, page says ${bodyN}`)
     if (problems.length) fails++
