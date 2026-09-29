@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import CancelRequestButton from './CancelRequestButton'
+import NoAnswerButton from './NoAnswerButton'
+import { rerouteEligibility } from '@/lib/patientReroute'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +30,7 @@ export default async function RequestStatusPage({ params }: { params: { token: s
     select: {
       id: true, status: true, outcome: true, fullName: true, city: true, state: true, urgency: true,
       createdAt: true, routedAt: true, claimedAt: true, appointmentDate: true, outcomeUpdatedAt: true, patientCancelledAt: true,
+      routedToId: true, patientRerouteCount: true, patientRerouteAt: true,
       isHighValue: true,
       provider: { select: { name: true, phonePublic: true, phone: true } },
       leadNotifications: { where: { status: { in: ['SENT', 'QUEUED'] } }, select: { createdAt: true }, orderBy: { createdAt: 'asc' }, take: 1 },
@@ -47,6 +50,9 @@ export default async function RequestStatusPage({ params }: { params: { token: s
   const closedOther = ['CLOSED_DECLINED', 'CLOSED_DUPLICATE', 'CLOSED_UNCONFIRMED', 'CLOSED_PRICING_ONLY'].includes(lead.status)
   const live = ['OPEN', 'CLAIMED', 'NEEDS_COVERAGE'].includes(lead.status)
   const providerPhone = lead.provider?.phonePublic || lead.provider?.phone || null
+  const providerName = lead.provider?.name?.trim() || 'the provider'
+  // "I haven't heard from them": shown once the claim is old enough (lib/patientReroute.ts).
+  const reroute = accepted && !dateConfirmed && !visited ? rerouteEligibility(lead) : null
 
   const steps: { title: string; detail: string; done: boolean; when?: string | null }[] = [
     { title: 'Request received', done: true, when: fmt(lead.createdAt), detail: `Mobile blood draw in ${lead.city}, ${lead.state}${lead.urgency === 'STAT' ? ' · marked urgent' : ''}.` },
@@ -96,6 +102,28 @@ export default async function RequestStatusPage({ params }: { params: { token: s
         )}
         {expired && (
           <p className="mt-6 text-sm text-gray-700">None of the providers we asked was able to take this. Reply to the email we sent you with a nearby larger city or a more flexible time and we will send it again.</p>
+        )}
+
+        {!accepted && lead.patientRerouteAt && lead.status === 'OPEN' && (
+          <p className="mt-6 text-sm text-gray-700">You sent this request on to other providers on {fmt(lead.patientRerouteAt)}. We email you the moment one accepts.</p>
+        )}
+
+        {reroute && (reroute.ok || reroute.code === 'too_early' || reroute.code === 'cap') && (
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <h2 className="font-semibold text-gray-900 mb-2">Haven&apos;t heard from {providerName}?</h2>
+            {reroute.ok && (
+              <>
+                <p className="text-sm text-gray-700 mb-3">Most providers call within a few hours of accepting. If you have had no call or text, you can send your request to other providers in your area. {providerName} will be told, and the first provider to accept will contact you.</p>
+                <NoAnswerButton token={params.token} providerName={providerName} />
+              </>
+            )}
+            {!reroute.ok && reroute.code === 'too_early' && (
+              <p className="text-sm text-gray-700">Give them until about {fmt(reroute.availableAt || null)}. If you have had no call or text by then, you will be able to send your request to other providers from this page.</p>
+            )}
+            {!reroute.ok && reroute.code === 'cap' && (
+              <p className="text-sm text-gray-700">This request has already been sent on twice. Hector has been notified and will place it by hand; reply to your confirmation email if you have not heard from him.</p>
+            )}
+          </div>
         )}
 
         {live && (

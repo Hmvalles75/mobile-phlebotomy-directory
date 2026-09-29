@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emailAdmin } from '@/lib/adminEmail'
+import { patientReroute } from '@/lib/patientReroute'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,10 +11,10 @@ export const dynamic = 'force-dynamic'
  * GET /api/checkin/[token]?a=in_touch|no_contact
  *
  * The token is a nanoid(32) minted at send time and stored on the lead; the
- * first answer wins. A "no" emails the admin with the lead and provider so it
- * can be moved by hand. Nothing here changes lead status: the decision to
- * hand a lead back stays with the provider or the admin until the patient
- * survey shows how often "text sent" really becomes a draw.
+ * first answer wins. A "no" releases the claim and re-offers the request at
+ * once (lib/patientReroute.ts, 2026-09-29; before that it only emailed the
+ * admin). If the reroute is not possible (booked, already moved, at the cap)
+ * the admin is emailed as before.
  */
 function page(title: string, body: string, accent: string) {
   return new NextResponse(
@@ -49,12 +50,16 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
     return page('Thanks, that\'s all I needed', `Glad ${lead.provider?.name?.trim() || 'the phlebotomist'} reached you. If anything changes, reply to the email and I'll help.`, '#16a34a')
   }
 
+  const rerouted = await patientReroute({ leadId: lead.id, source: 'checkin' }).catch(err => { console.error('[checkin] reroute failed:', err?.message || err); return { ok: false as const, code: 'race' as const } })
+  if (rerouted.ok) {
+    return page('Got it, your request has been sent to other phlebotomists', `Sorry you've been waiting. ${lead.provider?.name?.trim() || 'The provider'} has been told, and the first phlebotomist to accept will contact you. You'll get an email with their name and number.`, '#b45309')
+  }
   emailAdmin(
     `Patient says NO CONTACT: ${lead.fullName} (${lead.city}, ${lead.state})`,
     `${lead.fullName} answered the day-2 check-in with "nobody has contacted me".\n\n` +
     `Lead ${lead.id}\nPatient: ${lead.fullName}, ${lead.phone}, ${lead.email || '-'}\nLocation: ${lead.city}, ${lead.state} ${lead.zip}\n` +
     `Claimed: ${lead.claimedAt?.toISOString() || '-'} by ${lead.provider?.name?.trim() || '-'} (${lead.provider?.phonePublic || lead.provider?.phone || '-'}, ${lead.provider?.email || '-'})\n` +
-    `Provider's logged outcome: ${lead.outcome || '-'}; status ${lead.status}\n\n` +
+    `Provider's logged outcome: ${lead.outcome || '-'}; status ${lead.status}\nAutomatic reroute not possible: ${rerouted.code}\n\n` +
     `Hand it back and re-offer: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mobilephlebotomy.org'}/admin/lead-diagnostic/${lead.id}\n`
   ).catch(err => console.error('[checkin] admin alert failed:', err?.message || err))
 

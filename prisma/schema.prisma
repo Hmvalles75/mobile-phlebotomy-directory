@@ -416,6 +416,11 @@ model Lead {
   patientCheckinToken      String? // /api/checkin/[token]
   patientToken             String? // /request/[token]: the requester's own status page + cancel (consumer leads only; institutional leads never get one). Not @unique: db push refuses new unique constraints; lookups use findFirst. (2026-09-29)
   patientCancelledAt       DateTime? // requester cancelled from their status page
+  // Requester-triggered reroute (2026-09-29, lib/patientReroute.ts): the patient
+  // said nobody contacted them after a claim, so the claim was released and the
+  // request re-offered. Count caps the loop; At is the last one.
+  patientRerouteCount      Int                @default(0)
+  patientRerouteAt         DateTime?
   patientCheckinAnswer     String? // 'in_touch' | 'no_contact'
   patientCheckinAnsweredAt DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases
