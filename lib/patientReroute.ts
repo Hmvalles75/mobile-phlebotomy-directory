@@ -2,6 +2,7 @@ import sg from '@sendgrid/mail'
 import { prisma } from './prisma'
 import { emailAdmin } from './adminEmail'
 import { notifyFeaturedProvidersForLead, renotifyOpenLead } from './leadNotifications'
+import { stateUtcOffsetHours } from './notificationTiming'
 
 if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -21,14 +22,18 @@ const SITE_URL = (process.env.PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SITE_UR
  * can still re-claim from the dashboard if they really were in touch.
  *
  * Two entry points share this: the "I haven't heard from them" button on
- * /request/[token] (gated on hours since the claim, so a 9 pm claim is not
- * yanked at 11 pm) and the "no_contact" answer to the day-2 check-in (past
- * any gate by definition).
+ * /request/[token] (gated on hours since the claim, counted only between
+ * 8 am and 8 pm in the patient's local time, so a 9 pm claim is not yanked
+ * at 1 am; STAT is a flat hour) and the "no_contact" answer to the day-2
+ * check-in (past any gate by definition).
  *
  * Consumer requests only. Institutional leads never get a patient token and
  * never enter the check-in flow.
  */
 export const REROUTE_AFTER_HOURS = { STAT: 1, STANDARD: 4 } as const
+/** The STANDARD clock only runs between these local hours (patient's state). */
+export const REROUTE_CLOCK_START_HOUR = 8
+export const REROUTE_CLOCK_END_HOUR = 20
 /** After this many patient reroutes the request goes to Hector instead of the pool. */
 export const MAX_PATIENT_REROUTES = 2
 export const PATIENT_REROUTE_REASON = 'patient_no_contact'
@@ -36,6 +41,7 @@ export const PATIENT_REROUTE_REASON = 'patient_no_contact'
 const BOOKED = new Set(['APPOINTMENT_BOOKED', 'APPOINTMENT_COMPLETED'])
 
 export interface RerouteLead {
+  state: string | null
   status: string
   outcome: string | null
   urgency: 'STAT' | 'STANDARD' | string
@@ -62,11 +68,39 @@ export function rerouteEligibility(lead: RerouteLead, opts: { ignoreGate?: boole
   if (lead.appointmentDate || (lead.outcome && BOOKED.has(lead.outcome))) return { ok: false, code: 'booked' }
   if (lead.patientRerouteCount >= MAX_PATIENT_REROUTES) return { ok: false, code: 'cap' }
   if (!opts.ignoreGate) {
-    const hours = lead.urgency === 'STAT' ? REROUTE_AFTER_HOURS.STAT : REROUTE_AFTER_HOURS.STANDARD
-    const availableAt = new Date(lead.claimedAt.getTime() + hours * 3600e3)
+    const availableAt = lead.urgency === 'STAT'
+      ? new Date(lead.claimedAt.getTime() + REROUTE_AFTER_HOURS.STAT * 3600e3)
+      : businessHoursAfter(lead.claimedAt, REROUTE_AFTER_HOURS.STANDARD, lead.state)
     if (now < availableAt) return { ok: false, code: 'too_early', availableAt }
   }
   return { ok: true }
+}
+
+/**
+ * The instant `hours` of clock have elapsed since `from`, counting only
+ * REROUTE_CLOCK_START_HOUR..REROUTE_CLOCK_END_HOUR in the patient's local
+ * time. A 9 pm ET claim starts its clock at 8 am and is reroutable at noon;
+ * a 5 pm claim gets three hours that evening and one the next morning, so
+ * 9 am. Unknown state: flat clock, the pre-2026-09-29 behaviour.
+ */
+export function businessHoursAfter(from: Date, hours: number, state: string | null | undefined): Date {
+  const offset = stateUtcOffsetHours(state, from)
+  if (offset === null) return new Date(from.getTime() + hours * 3600e3)
+  const off = offset * 3600e3
+  let cursor = from.getTime() + off               // local wall-clock as a UTC-shaped timestamp
+  let remaining = hours * 3600e3
+  for (let guard = 0; guard < 14 && remaining > 0; guard++) {
+    const d = new Date(cursor)
+    const dayStart = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    const open = dayStart + REROUTE_CLOCK_START_HOUR * 3600e3
+    const close = dayStart + REROUTE_CLOCK_END_HOUR * 3600e3
+    if (cursor < open) cursor = open
+    else if (cursor >= close) { cursor = dayStart + 86400e3 + REROUTE_CLOCK_START_HOUR * 3600e3; continue }
+    const step = Math.min(remaining, close - cursor)
+    cursor += step
+    remaining -= step
+  }
+  return new Date(cursor - off)
 }
 
 export interface RerouteResult {
@@ -154,7 +188,7 @@ async function sendPatientRerouteEmail(p: { toEmail: string | null; providerName
 
 ${p.leadFullName} in ${p.leadCity}, ${p.leadState} ${p.leadZip} told us nobody has contacted them since you accepted their request ${p.hoursSinceClaim} hours ago. We have released the claim and sent the request to other providers in the area.
 
-If you did reach them, or you were about to, you can take it back from your dashboard: it is open again and you are still eligible to claim it. If you left a voicemail or sent a text they may not have seen, a second attempt from a different number often works.
+If you did reach them, or you were about to, you can take it back from your dashboard if it's still open — you remain eligible to claim it. If you left a voicemail or sent a text they may not have seen, a second attempt from a different number often works.
 
 If you no longer want it, nothing to do.
 
@@ -167,7 +201,7 @@ MobilePhlebotomy.org
   const html = `<!DOCTYPE html><html><body style="font-family: Arial, sans-serif; line-height: 1.7; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 20px;">
 <p>Hi ${p.providerName},</p>
 <p><strong>${p.leadFullName}</strong> in ${p.leadCity}, ${p.leadState} ${p.leadZip} told us nobody has contacted them since you accepted their request ${p.hoursSinceClaim} hours ago. We have released the claim and sent the request to other providers in the area.</p>
-<p>If you did reach them, or you were about to, you can take it back from your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a>: it is open again and you are still eligible to claim it. If you left a voicemail or sent a text they may not have seen, a second attempt from a different number often works.</p>
+<p>If you did reach them, or you were about to, you can take it back from your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a> if it&apos;s still open &mdash; you remain eligible to claim it. If you left a voicemail or sent a text they may not have seen, a second attempt from a different number often works.</p>
 <p>If you no longer want it, nothing to do.</p>
 <p style="color:#6b7280;font-size:13px;">Lead ID: ${p.leadId}</p>
 <p>— Hector<br>MobilePhlebotomy.org</p>

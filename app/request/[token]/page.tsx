@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import CancelRequestButton from './CancelRequestButton'
 import NoAnswerButton from './NoAnswerButton'
 import { rerouteEligibility } from '@/lib/patientReroute'
+import { stateUtcOffsetHours } from '@/lib/notificationTiming'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +40,11 @@ export default async function RequestStatusPage({ params }: { params: { token: s
   })
   if (!lead || lead.isHighValue || lead.status === 'INSTITUTIONAL_REVIEW') notFound()
 
-  const fmt = (d: Date | null) => d ? d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null
+  // Every time on this page is shown in the patient's local time (by state,
+  // same table as quiet hours). Vercel renders in UTC, so without this the
+  // page said "8:12 PM" for a 4:12 PM ET request.
+  const off = stateUtcOffsetHours(lead.state, new Date()) ?? 0
+  const fmt = (d: Date | null) => d ? new Date(d.getTime() + off * 3600e3).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' }) : null
   const first = (lead.fullName || '').trim().split(/\s+/)[0]
   const sentAt = lead.leadNotifications[0]?.createdAt || lead.routedAt || null
   const accepted = !!lead.claimedAt && !['OPEN', 'NEEDS_COVERAGE'].includes(lead.status)
