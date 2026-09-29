@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { CorporateQuoteForm } from './CorporateQuoteForm'
 import { SITE_URL } from '@/lib/seo'
+import RecentWork from '@/components/RecentWork'
 
 export const metadata: Metadata = {
   title: 'Facilities & Group Mobile Phlebotomy Services | MobilePhlebotomy.org',
@@ -249,6 +250,8 @@ export default function CorporatePhlebotomyPage() {
           </div>
         </div>
       </section>
+
+      <RecentWork tone="gray" />
 
       {/* Quote Request Form Section */}
       <section className="py-16 bg-white">

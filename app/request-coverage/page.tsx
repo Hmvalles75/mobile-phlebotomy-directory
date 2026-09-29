@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { SITE_URL } from '@/lib/seo'
 import { CoverageRequestForm } from './CoverageRequestForm'
+import RecentWork from '@/components/RecentWork'
 
 export const metadata: Metadata = {
   title: 'Coverage for labs, studies, and institutional draws — MobilePhlebotomy.org',
@@ -33,6 +34,8 @@ export default function RequestCoveragePage() {
           Used by clinical trial sponsors, decentralized research organizations, reference labs,
           home health groups, and corporate wellness programs.
         </p>
+
+        <RecentWork embedded />
 
         <CoverageRequestForm />
       </div>
