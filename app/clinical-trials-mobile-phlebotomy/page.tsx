@@ -292,7 +292,7 @@ export default function ClinicalTrialsPage() {
               <span className="font-semibold text-gray-900">What we did:</span> Sourced and vetted a local phlebotomist to the protocol, supplied all tubes, and held the same collector on every session so the site never re-onboarded anyone. Schedule changes came in the morning of; coverage was confirmed the same day. A mid-study tube spec change was relayed and in place for the next session.
             </p>
             <p className="text-gray-700 mb-4">
-              <span className="font-semibold text-gray-900">Result:</span> 120 completed draws, zero missed sessions, one point of contact, three invoices. Study fully drawn in under three weeks from approval.
+              <span className="font-semibold text-gray-900">Result:</span> 120 completed draws, zero missed sessions, one point of contact. Study fully drawn in under three weeks from approval.
             </p>
             <blockquote className="border-l-4 border-blue-600 pl-4 italic text-gray-700">
               &ldquo;[Our phlebotomist] was fabulous. Arrived promptly and took care of everything.&rdquo;
