@@ -35,6 +35,7 @@ function RequestBloodDrawForm() {
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [statusUrl, setStatusUrl] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [coverageData, setCoverageData] = useState<{
     providerCount: number
@@ -153,6 +154,7 @@ function RequestBloodDrawForm() {
           zip: formData.zip,
           urgency: formData.urgency,
         })
+        setStatusUrl(data.statusUrl || null)
         setSubmitted(true)
         // Scroll to success message
         setTimeout(() => {
@@ -189,6 +191,12 @@ function RequestBloodDrawForm() {
             <p className="text-gray-700 text-lg mb-6">
               Thank you for your request. We&apos;re connecting you with certified mobile phlebotomists in your area.
             </p>
+            {statusUrl && (
+              <p className="mb-6">
+                <a href={statusUrl} className="inline-block px-4 py-2 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-700">Track your request</a>
+                <span className="block text-sm text-gray-500 mt-2">Bookmark that link: it shows every step, and lets you cancel if plans change. It&apos;s also in your confirmation email.</span>
+              </p>
+            )}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
               <h3 className="font-semibold text-blue-900 mb-2">What Happens Next?</h3>
               <ul className="text-left text-blue-800 space-y-2">

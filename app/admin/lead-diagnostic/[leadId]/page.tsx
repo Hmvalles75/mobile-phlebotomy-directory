@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 interface Props { params: { leadId: string } }
 
-const CLOSED_STATUSES = new Set(['COMPLETED', 'CLOSED_DUPLICATE', 'CLOSED_DECLINED', 'CLOSED_PRICING_ONLY', 'CLOSED_UNCONFIRMED', 'EXPIRED_NO_RESPONSE'])
+const CLOSED_STATUSES = new Set(['COMPLETED', 'CLOSED_DUPLICATE', 'CLOSED_DECLINED', 'CLOSED_PRICING_ONLY', 'CLOSED_UNCONFIRMED', 'EXPIRED_NO_RESPONSE', 'CLOSED_PATIENT_CANCELLED'])
 
 function fmtDateTime(d: Date | null | undefined): string {
   if (!d) return '—'
