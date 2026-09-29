@@ -21,7 +21,7 @@ const ENTRIES: { title: string; detail: string; quote?: { text: string; by: stri
     title: 'Research center, Philadelphia — 120 draws in 16 days, same collector',
     detail:
       'Daily on-site collection that started days after a late IRB approval. One vetted phlebotomist held on every session, 20-draw daily minimum, zero missed sessions.',
-    quote: { text: '“All went well today. [Our phlebotomist] is wonderful.”', by: 'Principal investigator, day one' },
+    quote: { text: '“[Our phlebotomist] was fabulous. Arrived promptly and took care of everything.”', by: 'Principal investigator, day one' },
   },
   {
     title: 'Foundation-funded Alzheimer’s study — recurring participant draws across several states since May 2026',

@@ -295,7 +295,7 @@ export default function ClinicalTrialsPage() {
               <span className="font-semibold text-gray-900">Result:</span> 120 completed draws, zero missed sessions, one point of contact, three invoices. Study fully drawn in under three weeks from approval.
             </p>
             <blockquote className="border-l-4 border-blue-600 pl-4 italic text-gray-700">
-              &ldquo;All went well today. [Our phlebotomist] is wonderful.&rdquo;
+              &ldquo;[Our phlebotomist] was fabulous. Arrived promptly and took care of everything.&rdquo;
               <span className="block not-italic text-sm text-gray-600 mt-2">&mdash; Principal investigator, day one</span>
             </blockquote>
           </div>
