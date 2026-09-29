@@ -18,6 +18,9 @@ model Provider {
   website                  String?
   bookingUrl               String?
   description              String?
+  responseScore            Float? // 0-100, nightly from lib/providerScore.ts (claim rate, speed, bookings, ghosting over 90d); null = fewer than 3 leads sent. Used by the fan-out floor and shown in admin. (2026-09-29)
+  responseScoredAt         DateTime?
+  responseStats            Json? // { windowDays, sent, claimed, booked, staleReleases, medianClaimMinutes, claimRate, bookRate }
   networkAgreementSignedAt DateTime? // date the provider signed the network / NCA agreement; set by scripts/set-network-agreement.ts. Coverage checks split "network" vs "directory-only" on this (2026-09-28)
   outreachOptOutAt         DateTime? // provider clicked the unsubscribe link in an outreach email; scripts/outreach-send.ts skips them for good (2026-09-25)
   outreachRepliedAt        DateTime? // set by `outreach-send.ts --replied <id>`; stops follow-ups

@@ -31,6 +31,8 @@ export async function GET(req: NextRequest) {
         excludedZipCodes: true,
         excludedStates: true,
         tagline: true,
+        responseScore: true,
+        responseStats: true,
         listingTier: true,
         stripeCustomerId: true,
         stripePaymentMethodId: true,

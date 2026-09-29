@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/soft-outcome-nudge",
       "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/provider-score",
+      "schedule": "30 12 * * *"
     }
   ]
 }

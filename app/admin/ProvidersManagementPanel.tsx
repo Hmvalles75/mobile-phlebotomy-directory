@@ -17,6 +17,8 @@ interface Provider {
   excludedZipCodes?: string | null
   excludedStates?: string | null
   tagline?: string | null
+  responseScore?: number | null
+  responseStats?: { sent: number; claimed: number; booked: number; medianClaimMinutes: number | null; staleReleases: number } | null
   listingTier?: string | null
   createdAt: string
   removedAt: string | null
@@ -399,6 +401,16 @@ Tagline (one plain sentence, 160 characters max; shown under the premium page he
                   {provider.phone && <div className="text-sm text-gray-400">{provider.phone}</div>}
                 </td>
                 <td className="px-4 py-3 text-center">
+                  {!provider.removedAt && provider.responseScore != null && (
+                    <div className="mb-1">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${provider.responseScore >= 60 ? 'bg-emerald-100 text-emerald-800' : provider.responseScore >= 35 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}
+                        title={provider.responseStats ? `Response score, last 90d: sent ${provider.responseStats.sent}, claimed ${provider.responseStats.claimed}, booked ${provider.responseStats.booked}, median claim ${provider.responseStats.medianClaimMinutes ?? '–'} min, stale releases ${provider.responseStats.staleReleases}` : 'Response score'}
+                      >
+                        score {provider.responseScore}
+                      </span>
+                    </div>
+                  )}
                   {provider.removedAt ? (
                     <span
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
