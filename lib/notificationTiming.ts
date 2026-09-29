@@ -65,12 +65,23 @@ function isDST(d: Date): boolean {
  * — never guess someone into a six-hour delay.
  */
 export function providerLocalHour(state: string | null | undefined, at: Date): number | null {
+  const offset = stateUtcOffsetHours(state, at)
+  if (offset === null) return null
+  const local = new Date(at.getTime() + offset * 3600_000)
+  return local.getUTCHours()
+}
+
+/**
+ * Hours to add to UTC to get local time for a US state at a given instant
+ * (DST applied), or null for an unknown state. Shared with the patient
+ * reroute gate (lib/patientReroute.ts), which counts business hours in the
+ * patient's zone using the lead's state.
+ */
+export function stateUtcOffsetHours(state: string | null | undefined, at: Date): number | null {
   if (!state) return null
   const base = STATE_UTC_OFFSET[state.toUpperCase()]
   if (base === undefined) return null
-  const offset = NO_DST.has(state.toUpperCase()) ? base : base + (isDST(at) ? 1 : 0)
-  const local = new Date(at.getTime() + offset * 3600_000)
-  return local.getUTCHours()
+  return NO_DST.has(state.toUpperCase()) ? base : base + (isDST(at) ? 1 : 0)
 }
 
 /** Seconds from `at` until the provider's local QUIET_END_HOUR. 0 if not in quiet hours. */
