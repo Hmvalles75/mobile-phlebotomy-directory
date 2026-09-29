@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { SITE_URL } from '@/lib/seo'
 import Link from 'next/link'
+import RecentWork from '@/components/RecentWork'
 
 // Targets the high-intent B2B queries "mobile phlebotomy partnership" (170/mo)
 // and "mobile phlebotomy contract" — both flagged GOLD on the keyword tracker
@@ -354,6 +355,8 @@ export default function MobilePhlebotomyPartnershipPage() {
               ))}
             </div>
           </section>
+
+          <RecentWork embedded />
 
           {/* CTA */}
           <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg p-8 text-center">

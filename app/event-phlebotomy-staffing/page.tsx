@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { SITE_URL } from '@/lib/seo'
+import RecentWork from '@/components/RecentWork'
 import { EventStaffingForm } from './EventStaffingForm'
 
 /**
@@ -222,6 +223,8 @@ export default function EventPhlebotomyStaffingPage() {
           </div>
         </div>
       </section>
+
+      <RecentWork />
 
       {/* Request form */}
       <section className="py-16 bg-gray-50">
