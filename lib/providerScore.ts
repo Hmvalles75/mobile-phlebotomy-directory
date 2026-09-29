@@ -95,13 +95,25 @@ export async function runProviderScoring(opts: { dryRun?: boolean } = {}): Promi
   const stats = await computeProviderStats(now)
   const providers = await prisma.provider.findMany({ where: { removedAt: null }, select: { id: true, name: true, responseScore: true } })
   const r: ScoreRunResult = { dryRun: !!opts.dryRun, providers: providers.length, scored: 0, unknown: 0, cleared: 0, sample: [] }
+  const ids: string[] = [], scores: (number | null)[] = [], statsJson: string[] = []
   for (const p of providers) {
     const s = stats.get(p.id) || { windowDays: WINDOW_DAYS, sent: 0, claimed: 0, booked: 0, staleReleases: 0, medianClaimMinutes: null, claimRate: 0, bookRate: 0 }
     const score = scoreFromStats(s)
     if (score === null) { r.unknown++; if (p.responseScore !== null) r.cleared++ } else r.scored++
     if (r.sample.length < 12 && s.sent >= MIN_SENT) r.sample.push({ name: p.name.trim(), score, stats: s })
-    if (!opts.dryRun) {
-      await prisma.provider.update({ where: { id: p.id }, data: { responseScore: score, responseScoredAt: now, responseStats: s as unknown as object } })
+    ids.push(p.id); scores.push(score); statsJson.push(JSON.stringify(s))
+  }
+  if (!opts.dryRun) {
+    // One statement per BATCH providers instead of one round trip each:
+    // 807 sequential updates took 310 s from a laptop (2026-09-29) against a
+    // 60 s function limit.
+    const BATCH = 200
+    for (let i = 0; i < ids.length; i += BATCH) {
+      await prisma.$executeRaw`
+        UPDATE providers AS p
+        SET "responseScore" = v.score, "responseScoredAt" = ${now}, "responseStats" = v.stats::jsonb
+        FROM unnest(${ids.slice(i, i + BATCH)}::text[], ${scores.slice(i, i + BATCH)}::float8[], ${statsJson.slice(i, i + BATCH)}::text[]) AS v(id, score, stats)
+        WHERE p.id = v.id`
     }
   }
   r.sample.sort((a, b) => (b.score ?? -1) - (a.score ?? -1))
