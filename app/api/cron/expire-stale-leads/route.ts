@@ -1,91 +1,40 @@
 /**
- * Stale Lead Cleanup Cron
+ * Unclaimed-lead expiry cron
  *
- * POST /api/cron/expire-stale-leads
+ * GET  /api/cron/expire-stale-leads          (Vercel cron, daily 13:00 UTC)
+ * GET  /api/cron/expire-stale-leads?dry=1    (report only, nothing written)
+ * POST                                       (manual invocation, same as GET)
  *
- * Closes OPEN leads older than 14 days. Those patients most likely got
- * service elsewhere long ago; keeping them OPEN clutters provider
- * dashboards and misleads admins about current demand.
- *
- * Runs daily at 6am Pacific (13:00 UTC).
+ * OPEN leads older than STALE_DAYS (4, was 14 until 2026-09-29) become
+ * EXPIRED_NO_RESPONSE and the requester is emailed next steps. Logic lives in
+ * lib/expireStaleLeads.ts so it can be dry-run from a script as well.
  *
  * Vercel crons invoke with GET. This file exported only POST from its first
  * commit, so the schedule 405'd every day and the job never ran once: on
  * 2026-09-04 there were 166 OPEN leads with no notification row going back
  * 108 days. GET is the cron entry; POST stays for manual invocation.
  */
-
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { runExpireStaleLeads, STALE_DAYS } from '@/lib/expireStaleLeads'
 
-const STALE_DAYS = 14
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  return POST(req)
-}
-
-export async function POST(req: NextRequest) {
+async function handle(req: NextRequest) {
+  const authHeader = req.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
-    // Verify cron secret
-    const authHeader = req.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const cutoff = new Date(Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000)
-
-    // Find stale OPEN leads (for logging)
-    const staleLeads = await prisma.lead.findMany({
-      where: {
-        status: 'OPEN',
-        createdAt: { lt: cutoff },
-      },
-      select: { id: true, city: true, state: true, zip: true, createdAt: true }
-    })
-
-    if (staleLeads.length === 0) {
-      console.log('[ExpireStaleLeads] No stale leads found')
-      return NextResponse.json({
-        ok: true,
-        closed: 0,
-        message: 'No stale leads to close',
-      })
-    }
-
-    console.log(`[ExpireStaleLeads] Closing ${staleLeads.length} stale OPEN leads (older than ${STALE_DAYS} days):`)
-    for (const l of staleLeads) {
-      const ageDays = Math.floor((Date.now() - l.createdAt.getTime()) / (1000 * 60 * 60 * 24))
-      console.log(`  ${l.id} | ${l.city}, ${l.state} ${l.zip} | ${ageDays} days old`)
-    }
-
-    // Close them all
-    const result = await prisma.lead.updateMany({
-      where: {
-        status: 'OPEN',
-        createdAt: { lt: cutoff },
-      },
-      data: {
-        status: 'CLOSED_UNCONFIRMED',
-        outcomeNotes: `Auto-closed after ${STALE_DAYS} days with no provider claim.`,
-      }
-    })
-
-    console.log(`[ExpireStaleLeads] ✅ Closed ${result.count} stale leads`)
-
-    return NextResponse.json({
-      ok: true,
-      closed: result.count,
-      staleDays: STALE_DAYS,
-      cutoff: cutoff.toISOString(),
-    })
-
+    const dryRun = req.nextUrl.searchParams.get('dry') === '1'
+    const result = await runExpireStaleLeads({ dryRun })
+    return NextResponse.json({ ok: true, staleDays: STALE_DAYS, ...result })
   } catch (error: any) {
     console.error('[ExpireStaleLeads] Error:', error)
-    return NextResponse.json(
-      { ok: false, error: error.message || 'Cleanup failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ ok: false, error: error?.message || 'Failed to expire stale leads' }, { status: 500 })
   }
 }
+
+export async function GET(req: NextRequest) { return handle(req) }
+export async function POST(req: NextRequest) { return handle(req) }
