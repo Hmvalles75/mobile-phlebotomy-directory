@@ -411,6 +411,8 @@ model Lead {
   // refuses without --accept-data-loss. The token is a nanoid(32) minted at
   // send time and looked up with findFirst; collisions are ~1 in 10^57.
   patientCheckinToken      String? // /api/checkin/[token]
+  patientToken             String? // /request/[token]: the requester's own status page + cancel (consumer leads only; institutional leads never get one). Not @unique: db push refuses new unique constraints; lookups use findFirst. (2026-09-29)
+  patientCancelledAt       DateTime? // requester cancelled from their status page
   patientCheckinAnswer     String? // 'in_touch' | 'no_contact'
   patientCheckinAnsweredAt DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases
@@ -1004,6 +1006,7 @@ enum LeadStatus {
   CLOSED_DUPLICATE // Older submission from a patient who re-submitted; canonical row is the most recent submission
   INSTITUTIONAL_REVIEW // High-value / B2B request held for the admin's written proposal (2026-09-09). Never routed to providers, never claimable, never auto-expired. Admin can release it to OPEN if it is an ordinary patient. See lib/institutionalIntake.ts.
   CLOSED_DECLINED // Provider reached the patient and the patient declined (price, changed mind). Closed, not re-offered: the same patient would decline the next provider too. Claim history kept on routedToId. (2026-09-22)
+  CLOSED_PATIENT_CANCELLED // Requester cancelled from /request/[token]; claimer (if any) emailed "no action needed". Terminal. (2026-09-29)
   EXPIRED_NO_RESPONSE // Lead aged out; providers WERE notified but none claimed within the window. Distinct from NEEDS_COVERAGE (which means no providers were available). Used by the unclaimed-lead recovery sweep to separate "providers ignored" from "no coverage existed."
 }
 

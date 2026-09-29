@@ -15,6 +15,8 @@ import { notifyHighValueLead } from '@/lib/notifyHighValueLead'
 import { isValidUSPhone, normalizeUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
 import { isAssignedUSNumber, UNASSIGNED_NUMBER_MESSAGE } from '@/lib/phoneAreaCode'
 import { emailAdmin } from '@/lib/adminEmail'
+import { generateOutcomeToken } from '@/lib/patientOutcomeRequest'
+import { domainAcceptsMail, domainNearMiss } from '@/lib/emailDeliverability'
 import { getZipInfo, resolveZipForRouting } from '@/lib/zip-geocode'
 import { US_STATES } from '@/lib/states'
 
@@ -36,6 +38,7 @@ const DUPLICATE_WINDOW_HOURS = 6
 
 const DRAW_COUNTS = ['1-3', '4-19', '20+', '1', '2-5', '6-20'] as const
 const REQUEST_TYPES = ['individual', 'organization', 'business'] as const
+const COMMON_EMAIL_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'aol.com', 'comcast.net', 'att.net', 'live.com', 'msn.com', 'sbcglobal.net', 'verizon.net', 'me.com', 'protonmail.com', 'ymail.com']
 const DOCTOR_ORDER = ['yes', 'no', 'need_help'] as const
 const PAYMENT_METHOD = ['insurance', 'out_of_pocket', 'not_sure'] as const
 type DrawCount = typeof DRAW_COUNTS[number]
@@ -320,6 +323,25 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Email must reach the patient: the confirmation, the "provider accepted"
+    // note and the status link all go there. A typo'd domain (gmsil.com,
+    // Ann Arbor 2026-09-23) silently loses every one of them. Same checks the
+    // provider signup runs, with the near-miss judged against the common
+    // consumer domains instead of a website.
+    if (payload.email) {
+      const emailDomain = payload.email.split('@')[1]?.toLowerCase() || ''
+      const local = payload.email.split('@')[0]
+      if (emailDomain && !COMMON_EMAIL_DOMAINS.includes(emailDomain)) {
+        const near = COMMON_EMAIL_DOMAINS.map(d => domainNearMiss(emailDomain, d)).find(Boolean)
+        if (near) {
+          return NextResponse.json({ ok: false, error: 'INVALID_EMAIL', message: `Please check your email address — did you mean ${local}@${near}?` }, { status: 400 })
+        }
+        if ((await domainAcceptsMail(emailDomain).catch(() => null)) === false) {
+          return NextResponse.json({ ok: false, error: 'INVALID_EMAIL', message: `The email domain "${emailDomain}" doesn't appear to accept mail. Please check the spelling.` }, { status: 400 })
+        }
+      }
+    }
+
     // Rate-limit by IP — mirrors the corporate-request route. Sheds bots /
     // form-hammering before we do any DB writes or provider blasts.
     const ipAddress =
@@ -387,6 +409,11 @@ export async function POST(req: NextRequest) {
     const { drawCount, requestType, isHighValue, estimatedValueCents, notesB2B } =
       classifyLead(payload.drawCount, payload.requestType, payload.notes)
 
+    // Status-page token (/request/[token]) for consumer requests only. An
+    // institutional lead never gets one: provider identity on those runs
+    // through the admin, and a held (foreign-IP) lead has nothing to show.
+    const patientToken = isHighValue || foreignHold ? null : generateOutcomeToken()
+
     // Create the lead with OPEN status for Race to Claim
     const lead = await prisma.lead.create({
       data: {
@@ -427,9 +454,11 @@ export async function POST(req: NextRequest) {
         referrer: payload.attribution?.referrer || null,
         landingPage: payload.attribution?.landingPage || null,
         ipAddress,
+        patientToken,
       }
     })
 
+    const statusUrl = patientToken ? `${SITE_URL}/request/${patientToken}` : null
     console.log(`✅ Lead created: ${lead.id} - ${lead.city}, ${lead.state} ${lead.zip}${isHighValue ? ' [HIGH VALUE]' : ''}${notesB2B ? ' [B2B-from-notes]' : ''}`)
 
     // High-value leads — immediate admin notification so group/org requests get
@@ -504,7 +533,7 @@ export async function POST(req: NextRequest) {
         `${SITE_URL}/admin/lead-diagnostic/${lead.id}`
       )
       console.log(`[Lead ${lead.id}] HELD - submitted from ${ipCountry}, not routed`)
-      return NextResponse.json({ ok: true, leadId: lead.id })
+      return NextResponse.json({ ok: true, leadId: lead.id, statusUrl })
     }
 
     // Institutional gate. The high-value email above already went to the admin;
@@ -548,6 +577,7 @@ export async function POST(req: NextRequest) {
         city: lead.city,
         state: lead.state,
         urgency: lead.urgency,
+        statusUrl,
       }).catch(err =>
         console.error(`[Lead ${lead.id}] ❌ Patient confirmation FAILED:`, err?.message || err)
       )
@@ -590,6 +620,7 @@ export async function POST(req: NextRequest) {
       ok: true,
       leadId: lead.id,
       status: needsCoverage ? 'needs_coverage' : 'open',
+      statusUrl,
       message: 'Lead created and notifications sent to providers'
     })
   } catch (e: any) {

@@ -34,16 +34,24 @@ const METRO_REMAP: Record<string, string> = {
   'new-york-metro': 'new-york-city',
 }
 
-// Page routes are lowercase by construction (state/city slugs, provider slugs:
-// zero uppercase slugs in the DB as of 2026-09-24). Next matches static
-// segments case-insensitively, so /US/ohio and /PROVIDER/x served 200 twins of
-// the lowercase page; dynamic params are looked up as-is, so /us/Ohio 404'd.
-// One 301 to the lowercase path closes both. Assets, API and Next internals
-// are left alone: their names are case-sensitive on disk.
+// Lowercase redirect: only the public location/provider route families, whose
+// segments are slugs and lowercase by construction (zero uppercase provider
+// slugs in the DB as of 2026-09-24). Next matches static segments
+// case-insensitively, so /US/ohio and /PROVIDER/x served 200 twins of the
+// lowercase page; dynamic params are looked up as-is, so /us/Ohio 404'd.
+//
+// Everything else is left alone. Token-bearing routes (/request, /confirm,
+// /orders, /claim, /onboard, /dashboard, /upgrade) carry case-sensitive
+// identifiers; the first version of this rule (2026-09-24 to 09-29) lowercased
+// those too and 404'd every mixed-case token. Assets, API and Next internals
+// were already excluded.
+const LOWERCASE_PREFIXES = /^\/(us|provider|providers|metros)(\/|$)/i
 function isPageRoute(pathname: string): boolean {
   if (pathname.startsWith('/_next') || pathname.startsWith('/api')) return false
   if (/\.[a-z0-9]{1,8}$/i.test(pathname)) return false   // anything with a file extension
-  return true
+  // Root-level single segments (/Ohio, /Terms) are covered by next.config
+  // redirects or are lowercase static pages; lowercase them too.
+  return LOWERCASE_PREFIXES.test(pathname) || /^\/[^/]+$/.test(pathname)
 }
 
 // Placeholder provider slug pattern — /provider/provider-123 etc. These were

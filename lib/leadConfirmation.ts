@@ -39,6 +39,8 @@ export interface LeadConfirmationInput {
   city: string
   state: string
   urgency: string
+  /** /request/[token] — consumer leads only; absent for institutional. */
+  statusUrl?: string | null
 }
 
 /** STAT leads are priced and routed for same-day; set the timing line accordingly. */
@@ -80,7 +82,7 @@ A few things worth knowing:
   - Have your doctor's order or lab requisition handy if you have one.
 
 If nobody reaches you today, reply to this email and I'll follow up personally.
-
+${lead.statusUrl ? `\nYou can see where your request stands, or cancel it, at any time:\n${lead.statusUrl}\n` : ''}
 Hector Valles
 MobilePhlebotomy.org
 ${SITE}`
@@ -109,6 +111,7 @@ ${SITE}`
 
   <p>If nobody reaches you today, just reply to this email and I'll follow up personally.</p>
 
+  ${lead.statusUrl ? `<p>You can see where your request stands, or cancel it, at any time: <a href="${lead.statusUrl}" style="color:#2563eb;">${lead.statusUrl}</a></p>` : ''}
   <p style="margin-bottom:0;"><strong>Hector Valles</strong><br>
   <a href="${SITE}" style="color:#2563eb;">MobilePhlebotomy.org</a></p>
 </div>`

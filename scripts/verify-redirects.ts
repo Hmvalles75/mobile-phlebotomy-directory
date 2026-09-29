@@ -31,7 +31,7 @@ const DEFAULT_PATHS = [
   // batch 2
   '/us/north-carolina/greenville',    // newly mapped city: 200
   '/us/florida/not-a-real-city',      // unmapped city: 308 to the state page
-  '/us/alaska/anchorage',             // noProviders city: 200 with noindex
+  '/us/florida/doral',                // noProviders city: 200 with noindex (Anchorage lost the flag 2026-09-25: it lists 3)
   '/us/notastate/miami',              // unknown state: 404
   // batch 3
   '/us',                              // state index: 200 (was a 404 linked from every breadcrumb)
@@ -40,13 +40,16 @@ const DEFAULT_PATHS = [
   '/provider/travalab-32',            // old numbered slug: 1 hop to clean twin
   '/us/nj/maplewood',                 // abbr + unmapped city: ONE hop to the state
   '/provider/gentle-trace-mobile',    // JSON-LD @id must be the slug URL, never the cuid
+  // mixed-case tokens must NOT be lowercased (2026-09-29 regression fix)
+  '/confirm/AbCdEfGhIjKlMnOpQrStUvWxYz012345',
+  '/request/AbCdEfGhIjKlMnOpQrStUvWxYz012345',
 ]
 
 // Per-path expectations that override the generic judge.
 const EXPECT: Record<string, { status: number; hops?: number; final?: string; noindex?: boolean; jsonLdId?: string }> = {
   '/us/north-carolina/greenville': { status: 200, hops: 0 },
   '/us/florida/not-a-real-city': { status: 200, hops: 1, final: '/us/florida' },
-  '/us/alaska/anchorage': { status: 200, hops: 0, noindex: true },
+  '/us/florida/doral': { status: 200, hops: 0, noindex: true },
   '/us/notastate/miami': { status: 404, hops: 0 },
   '/us': { status: 200, hops: 0 },
   '/providers/claim?id=cmit1gqec007mg0m0si1rudp6': { status: 200, hops: 1, final: '/add-provider' },
@@ -54,6 +57,8 @@ const EXPECT: Record<string, { status: number; hops?: number; final?: string; no
   '/provider/travalab-32': { status: 200, hops: 1, final: '/provider/travalab' },
   '/us/nj/maplewood': { status: 200, hops: 1, final: '/us/new-jersey' },
   '/provider/gentle-trace-mobile': { status: 200, hops: 0, jsonLdId: '/provider/gentle-trace-mobile#' },   // premium template
+  '/confirm/AbCdEfGhIjKlMnOpQrStUvWxYz012345': { status: 200, hops: 0 },   // the survey page resolves the token client-side; what matters is 0 hops (no lowercase 301)
+  '/request/AbCdEfGhIjKlMnOpQrStUvWxYz012345': { status: 404, hops: 0 },
   '/provider/tru-blu-diagnostic-lab': { status: 200, hops: 0, jsonLdId: '/provider/tru-blu-diagnostic-lab#' },   // generic template
 }
 
