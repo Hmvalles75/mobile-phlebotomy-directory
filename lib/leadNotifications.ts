@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { UNKNOWN_SCORE } from './providerScore'
 import { SITE_URL } from './seo'
 import sg from '@sendgrid/mail'
 import { getDistanceBetweenZips } from './zip-geocode'
@@ -328,6 +329,7 @@ async function findFeaturedProvidersForNotification(
       isFeatured: true,
       priorityRouting: true,
       zipCodes: true,
+      responseScore: true,
       serviceRadiusMiles: true,
       excludedZipCodes: true,
       excludedStates: true,
@@ -427,7 +429,17 @@ async function findFeaturedProvidersForNotification(
       return { p, d }
     })
     .filter(x => x.d !== null && x.d <= WIDEN_MAX_MILES)
-    .sort((a, b) => a.d! - b.d!)
+    // Nearest first within 30 miles; beyond that, the provider's response
+    // score decides before distance does. A floor pull is an invitation
+    // outside someone's own radius, so it should go to the one who answers
+    // (Arfm, 57 mi, claimed and ghosted a Madison lead on 2026-09-15).
+    .sort((a, b) => {
+      const tierA = a.d! <= 30 ? 0 : 1, tierB = b.d! <= 30 ? 0 : 1
+      if (tierA !== tierB) return tierA - tierB
+      const sA = a.p.responseScore ?? UNKNOWN_SCORE, sB = b.p.responseScore ?? UNKNOWN_SCORE
+      if (tierA === 1 && sA !== sB) return sB - sA
+      return a.d! - b.d!
+    })
     .slice(0, MIN_FANOUT - result.length)
   if (nearMisses.length > 0) {
     console.log(`[LeadNotifications] Fan-out floor: ${result.length} in-radius match(es) for ${leadZip}, widening to ${nearMisses.map(x => `${x.p.name.trim()} @${Math.round(x.d!)}mi`).join(', ')}`)
