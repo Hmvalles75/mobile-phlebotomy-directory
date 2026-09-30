@@ -2,6 +2,7 @@ import Link from 'next/link'
 import RenotifyButton from './RenotifyButton'
 import ReleaseToProvidersButton from './ReleaseToProvidersButton'
 import CloseLeadButton from './CloseLeadButton'
+import WaitlistButton from './WaitlistButton'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
@@ -159,6 +160,10 @@ export default async function LeadDiagnosticPage({ params }: Props) {
 
         {lead.status === 'INSTITUTIONAL_REVIEW' && (
           <ReleaseToProvidersButton leadId={lead.id} holdNote={!lead.isHighValue && lead.outcomeNotes?.startsWith('Held at intake') ? lead.outcomeNotes : null} />
+        )}
+
+        {(lead.status === 'NEEDS_COVERAGE' || lead.waitlistedAt) && (
+          <WaitlistButton leadId={lead.id} waitlistedAt={lead.waitlistedAt ? lead.waitlistedAt.toISOString() : null} source={lead.waitlistSource} />
         )}
 
         {lead.status === 'OPEN' && (
