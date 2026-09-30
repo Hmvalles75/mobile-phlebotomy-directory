@@ -184,6 +184,16 @@ export async function rematchForProviderAfterChange(providerId: string, trigger:
   } catch (err: any) {
     console.error(`[Rematch] ${trigger} provider=${providerId} failed:`, err?.message || err)
   }
+  // Waitlisted requesters older than the rematch window get the "a provider
+  // now covers your area" email instead (lib/coverageWaitlist.ts). Dynamic
+  // import: that module imports rematchLead from here.
+  try {
+    const { notifyWaitlistedLeadsWithCoverage } = await import('./coverageWaitlist')
+    const w = await notifyWaitlistedLeadsWithCoverage()
+    if (w.emailed > 0) console.log(`[Waitlist] ${trigger} provider=${providerId}: told ${w.emailed} of ${w.scanned} waitlisted requester(s)`)
+  } catch (err: any) {
+    console.error(`[Waitlist] ${trigger} provider=${providerId} failed:`, err?.message || err)
+  }
 }
 
 export interface CoverageSweepSummary {
