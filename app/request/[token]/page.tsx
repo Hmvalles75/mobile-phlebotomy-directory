@@ -31,7 +31,7 @@ export default async function RequestStatusPage({ params }: { params: { token: s
     select: {
       id: true, status: true, outcome: true, fullName: true, city: true, state: true, urgency: true,
       createdAt: true, routedAt: true, claimedAt: true, appointmentDate: true, outcomeUpdatedAt: true, patientCancelledAt: true,
-      routedToId: true, patientRerouteCount: true, patientRerouteAt: true,
+      routedToId: true, patientRerouteCount: true, patientRerouteAt: true, waitlistedAt: true,
       isHighValue: true,
       provider: { select: { name: true, phonePublic: true, phone: true } },
       leadNotifications: { where: { status: { in: ['SENT', 'QUEUED'] } }, select: { createdAt: true }, orderBy: { createdAt: 'asc' }, take: 1 },
@@ -65,7 +65,11 @@ export default async function RequestStatusPage({ params }: { params: { token: s
       title: 'Sent to providers', done: lead._count.leadNotifications > 0, when: fmt(sentAt),
       detail: lead._count.leadNotifications > 0
         ? `Your request went to ${lead._count.leadNotifications} independent provider${lead._count.leadNotifications === 1 ? '' : 's'} covering your area. The first one to accept it gets your details.`
-        : lead.status === 'NEEDS_COVERAGE' ? "We don't have a provider covering your area yet. Hector has been notified and is looking." : 'Not sent yet.',
+        : lead.status === 'NEEDS_COVERAGE'
+          ? (lead.waitlistedAt
+            ? `We don't have a provider covering your area yet. You're on the list: we email you the moment a provider covers ${lead.city}.`
+            : "We don't have a provider covering your area yet. Hector has been notified and is looking.")
+          : 'Not sent yet.',
     },
     {
       title: 'Provider accepted', done: accepted, when: accepted ? fmt(lead.claimedAt) : null,
