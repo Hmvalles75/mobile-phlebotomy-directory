@@ -231,7 +231,7 @@ export async function emailProviderApprovedWithLeadChoice(
   // Providers replied to this email asking for "login credentials" (PHLEXA,
   // 2026-09-16): it said the listing was live and never said how to sign in.
   const dashboardBlock = `🔑 YOUR DASHBOARD (no password to remember):
-Go to https://www.mobilephlebotomy.org/dashboard/login, enter ${to}, and we email you a secure sign-in link. From the dashboard you can upload your logo, edit your description and website, set your ZIP codes and service radius, set your pricing, and see every request you've claimed.
+Go to https://www.mobilephlebotomy.org/dashboard/login, enter ${to}, and we email you a secure sign-in link. From the dashboard you can edit your description and website, set your ZIP codes and service radius, and see every request you've claimed. To add your logo or your prices to your listing, reply to this email with them and I'll put them up.
 ${slug ? `\nYour public listing: https://www.mobilephlebotomy.org/provider/${slug}\nIt can take a few minutes to appear on city pages after approval.\n` : ''}`
 
   // Parse contact methods
