@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { PER_CLAIM_RESET } from '@/lib/claimReminder'
 import { notifyProviderOfLead } from '@/lib/notifyProvider'
 import { sendPatientClaimNotice } from '@/lib/patientClaimNotice'
 import { cancelLeadNotifications } from '@/lib/cancelLeadNotifications'
@@ -42,7 +43,8 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'CLAIMED',
         routedToId: providerId,
-        claimedAt: new Date()
+        claimedAt: new Date(),
+        ...PER_CLAIM_RESET,
       }
     })
 
