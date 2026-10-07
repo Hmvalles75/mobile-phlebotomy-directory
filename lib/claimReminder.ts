@@ -22,7 +22,8 @@
  */
 import sg from '@sendgrid/mail'
 import { prisma } from './prisma'
-import { SLA_MINUTES_STAT, SLA_MINUTES_STANDARD } from './staleClaimRelease'
+import { SLA_MINUTES_STAT, SLA_MINUTES_STANDARD, claimDeadline } from './staleClaimRelease'
+import { stateUtcOffsetHours } from './notificationTiming'
 
 /**
  * Fields that belong to one claim, not to the lead. Spread into every write
@@ -57,6 +58,8 @@ export interface ReminderCandidate {
   urgency: 'STAT' | 'STANDARD'
   claimedMinutesAgo: number
   minutesLeft: number
+  /** e.g. "8:30 AM" in the provider's zone; null when the zone is unknown. */
+  releaseAtLocal: string | null
   providerId: string
   providerName: string
   providerEmail: string | null
@@ -71,11 +74,10 @@ export interface ReminderSweepResult {
 
 export async function findClaimReminderCandidates(now: Date = new Date()): Promise<ReminderCandidate[]> {
   const nowMs = now.getTime()
-  const win = (sla: number) => ({
-    // Inside the reminder window: past (SLA - lead time), not yet past SLA.
-    lte: new Date(nowMs - (sla - REMINDER_MINUTES_BEFORE_SLA) * 60_000),
-    gt: new Date(nowMs - sla * 60_000),
-  })
+  // Coarse SQL bound (flat clock, the earliest a warning can be due; nights
+  // only push it later), then the exact daytime window per lead:
+  // warn-at <= now < release-at, both from claimDeadline().
+  const earliest = (sla: number) => new Date(nowMs - (sla - REMINDER_MINUTES_BEFORE_SLA) * 60_000)
   const leads = await prisma.lead.findMany({
     where: {
       status: 'CLAIMED',
@@ -83,24 +85,40 @@ export async function findClaimReminderCandidates(now: Date = new Date()): Promi
       appointmentDate: null,
       claimReminderSentAt: null,
       routedToId: { not: null },
+      claimedAt: { gte: new Date(nowMs - 3 * 86400e3) },
       OR: [
-        { urgency: 'STAT', claimedAt: win(SLA_MINUTES_STAT) },
-        { urgency: 'STANDARD', claimedAt: win(SLA_MINUTES_STANDARD) },
+        { urgency: 'STAT', claimedAt: { lte: earliest(SLA_MINUTES_STAT) } },
+        { urgency: 'STANDARD', claimedAt: { lte: earliest(SLA_MINUTES_STANDARD) } },
       ],
     },
-    include: { provider: { select: { id: true, name: true, email: true, claimEmail: true, notificationEmail: true } } },
+    include: { provider: { select: { id: true, name: true, email: true, claimEmail: true, notificationEmail: true, primaryState: true } } },
     orderBy: { claimedAt: 'asc' },
   })
-  return leads.map(l => {
-    const sla = l.urgency === 'STAT' ? SLA_MINUTES_STAT : SLA_MINUTES_STANDARD
-    const ago = l.claimedAt ? Math.round((nowMs - l.claimedAt.getTime()) / 60_000) : 0
+  const due = leads.filter(l => {
+    if (!l.claimedAt) return false
+    const zone = l.provider?.primaryState || l.state
+    const warnAt = claimDeadline(l.claimedAt, l.urgency, zone, REMINDER_MINUTES_BEFORE_SLA).getTime()
+    const releaseAt = claimDeadline(l.claimedAt, l.urgency, zone).getTime()
+    return warnAt <= nowMs && nowMs < releaseAt
+  })
+  return due.map(l => {
+    const zone = l.provider?.primaryState || l.state
+    const releaseAt = claimDeadline(l.claimedAt!, l.urgency, zone)
+    const ago = Math.round((nowMs - l.claimedAt!.getTime()) / 60_000)
     return {
       id: l.id, fullName: l.fullName, city: l.city, state: l.state, zip: l.zip, urgency: l.urgency,
-      claimedMinutesAgo: ago, minutesLeft: Math.max(sla - ago, 0),
+      claimedMinutesAgo: ago, minutesLeft: Math.max(Math.round((releaseAt.getTime() - nowMs) / 60_000), 0),
+      releaseAtLocal: formatLocalTime(releaseAt, zone),
       providerId: l.routedToId!, providerName: l.provider?.name?.trim() || 'there',
       providerEmail: l.provider?.notificationEmail || l.provider?.claimEmail || l.provider?.email || null,
     }
   })
+}
+
+function formatLocalTime(at: Date, state: string | null | undefined): string | null {
+  const off = stateUtcOffsetHours(state, at)
+  if (off === null) return null
+  return new Date(at.getTime() + off * 3600e3).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
 }
 
 export function quickOutcomeUrl(leadId: string, providerId: string, action: 'working' | 'booked' | 'handback' | 'unreachable'): string {
@@ -117,11 +135,14 @@ async function sendClaimReminderEmail(c: ReminderCandidate): Promise<void> {
   // the lead release because the email offered nowhere to say so.
   const unreachable = quickOutcomeUrl(c.id, c.providerId, 'unreachable')
   const mins = Math.round(c.minutesLeft)
+  // Overnight hours don't count, so an evening warning can be 12+ hours out.
+  const when = mins <= 90 || !c.releaseAtLocal ? `In about ${mins} minutes` : `At about ${c.releaseAtLocal} your time`
+  const whenHtml = mins <= 90 || !c.releaseAtLocal ? `In about <strong>${mins} minutes</strong>` : `At about <strong>${c.releaseAtLocal}</strong> your time`
   const subject = `${c.fullName} (${c.city}, ${c.state}): still yours? One tap keeps the claim`
 
   const text = `Hi ${c.providerName},
 
-You claimed ${c.fullName} in ${c.city}, ${c.state} about ${Math.round(c.claimedMinutesAgo / 60 * 10) / 10} hours ago and nothing has been logged on it yet. In about ${mins} minutes the system will assume the request was abandoned and release it to other providers.
+You claimed ${c.fullName} in ${c.city}, ${c.state} about ${Math.round(c.claimedMinutesAgo / 60 * 10) / 10} hours ago and nothing has been logged on it yet. ${when} the system will assume the request was abandoned and release it to other providers.
 
 If you're on it, one tap keeps it yours. No login needed:
 
@@ -142,7 +163,7 @@ MobilePhlebotomy.org`
     `<a href="${href}" style="display:inline-block;background:${color};color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:600;margin:6px 8px 6px 0;">${label}</a>`
   const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;max-width:600px;margin:0 auto;padding:20px;">
 <p>Hi ${c.providerName},</p>
-<p>You claimed <strong>${c.fullName}</strong> in ${c.city}, ${c.state} about ${Math.round(c.claimedMinutesAgo / 60 * 10) / 10} hours ago and nothing has been logged on it yet. In about <strong>${mins} minutes</strong> the system will assume the request was abandoned and release it to other providers.</p>
+<p>You claimed <strong>${c.fullName}</strong> in ${c.city}, ${c.state} about ${Math.round(c.claimedMinutesAgo / 60 * 10) / 10} hours ago and nothing has been logged on it yet. ${whenHtml} the system will assume the request was abandoned and release it to other providers.</p>
 <p>If you're on it, one tap keeps it yours. No login needed:</p>
 <p>${btn(working, "I'm still working it", '#2563eb')} ${btn(booked, 'Appointment booked', '#16a34a')} ${btn(unreachable, "Couldn't reach the patient", '#b45309')}</p>
 <p style="color:#4b5563;">If you reached the patient and it didn't go anywhere, log that outcome from your <a href="${SITE_URL}/dashboard" style="color:#0066cc;">dashboard</a>. If you've moved on from this one, do nothing and it releases on schedule.</p>

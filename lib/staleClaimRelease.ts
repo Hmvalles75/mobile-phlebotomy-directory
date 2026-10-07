@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { renotifyOpenLead } from './leadNotifications'
 import { sendClaimReleasedEmail } from './notifyClaimReleased'
+import { daytimeClockAfter } from './notificationTiming'
 
 // SLA: time from claim before an outcome MUST be logged or the claim
 // auto-releases. Decision 2026-05-22 — moderate tier (option B from the
@@ -14,6 +15,20 @@ import { sendClaimReleasedEmail } from './notifyClaimReleased'
 // who park leads on SCHEDULED_CALLBACK while patiently working them.
 export const SLA_MINUTES_STAT = 120     // 2h
 export const SLA_MINUTES_STANDARD = 360 // 6h
+
+/**
+ * When a claim with no outcome is released (2026-10-07). STAT keeps a flat
+ * 2 hours. STANDARD counts its 6 hours only between 8 am and 8 pm in the
+ * provider's time zone (lead's state when the provider has none), so an
+ * evening claim is not released, or warned about, in the middle of the night:
+ * Seacoast Vital claimed at 9:29 pm ET, got the warning at 2:30 am and lost the
+ * lead at 3:30 am. `minutesBefore` gives the 1-hour warning time on the same
+ * clock, which keeps the warning in waking hours too.
+ */
+export function claimDeadline(claimedAt: Date, urgency: string, state: string | null | undefined, minutesBefore = 0): Date {
+  if (urgency === 'STAT') return new Date(claimedAt.getTime() + (SLA_MINUTES_STAT - minutesBefore) * 60_000)
+  return daytimeClockAfter(claimedAt, SLA_MINUTES_STANDARD - minutesBefore, state)
+}
 
 // Sanity cap: don't auto-release leads claimed more than 30 days ago.
 // Those are dead by other means (DELIVERED via outcome, manually closed,
@@ -77,12 +92,14 @@ export async function findStaleClaimCandidates(now: Date = new Date()): Promise<
       ],
     },
     include: {
-      provider: { select: { id: true, name: true, email: true, claimEmail: true, notificationEmail: true } },
+      provider: { select: { id: true, name: true, email: true, claimEmail: true, notificationEmail: true, primaryState: true } },
     },
     orderBy: { claimedAt: 'asc' },
   })
 
-  return stale.map(l => ({
+  // The SQL bound above is the flat SLA, the earliest a claim can be due;
+  // the daytime deadline decides.
+  return stale.filter(l => l.claimedAt && claimDeadline(l.claimedAt, l.urgency, l.provider?.primaryState || l.state).getTime() <= nowMs).map(l => ({
     id: l.id,
     fullName: l.fullName,
     phone: l.phone,

@@ -152,7 +152,7 @@ export default function ClaimLeadPage() {
       const response = await fetch('/api/lead/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leadId, providerId: pid })
+        body: JSON.stringify({ leadId, providerId: pid, auto: true })
       })
       const data = await response.json()
 
@@ -162,7 +162,11 @@ export default function ClaimLeadPage() {
         setClaimed(true)
         setLeadStatus('claimed')
       } else {
-        if (data.error === 'ALREADY_CLAIMED') {
+        if (data.error === 'YOU_RELEASED') {
+          // Not an error: they let this one go. The Claim button below takes it back.
+          setLeadStatus('open')
+          setError(`You released this request${data.releasedAt ? ` on ${new Date(data.releasedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : ''}, so it was not claimed again. If you want it back, tap Claim below.`)
+        } else if (data.error === 'ALREADY_CLAIMED') {
           setLeadStatus('claimed')
           setError('This patient has already been claimed by another provider.')
         } else {

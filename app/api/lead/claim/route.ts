@@ -9,6 +9,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { leadId, providerId } = body
+    // `auto` is set by the claim page when it claims on load from an email
+    // link. A provider who released or passed on this lead must not be put
+    // back on it just by reopening the link (Doorstep Draw, 2026-10-06:
+    // released it, reopened the email link, was silently re-claimed, then
+    // auto-released 6 hours later). They get a Claim button instead.
+    const auto = body?.auto === true
 
     if (!leadId || !providerId) {
       return NextResponse.json(
@@ -30,6 +36,14 @@ export async function POST(req: NextRequest) {
         { ok: false, error: 'Provider not found' },
         { status: 404 }
       )
+    }
+
+    if (auto) {
+      const prior = await prisma.lead.findUnique({ where: { id: leadId }, select: { releasedFromProviderId: true, releasedAt: true } })
+      const passed = await prisma.leadNotification.findFirst({ where: { leadId, providerId, passedAt: { not: null } }, select: { passedAt: true } })
+      if (prior?.releasedFromProviderId === providerId || passed) {
+        return NextResponse.json({ ok: false, error: 'YOU_RELEASED', releasedAt: prior && prior.releasedFromProviderId === providerId ? prior.releasedAt : passed?.passedAt }, { status: 409 })
+      }
     }
 
     // Atomic claim: only updates if status is still OPEN

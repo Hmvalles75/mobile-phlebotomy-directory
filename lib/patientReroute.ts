@@ -2,7 +2,7 @@ import sg from '@sendgrid/mail'
 import { prisma } from './prisma'
 import { emailAdmin } from './adminEmail'
 import { notifyFeaturedProvidersForLead, renotifyOpenLead } from './leadNotifications'
-import { stateUtcOffsetHours } from './notificationTiming'
+import { daytimeClockAfter } from './notificationTiming'
 
 if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -84,23 +84,7 @@ export function rerouteEligibility(lead: RerouteLead, opts: { ignoreGate?: boole
  * 9 am. Unknown state: flat clock, the pre-2026-09-29 behaviour.
  */
 export function businessHoursAfter(from: Date, hours: number, state: string | null | undefined): Date {
-  const offset = stateUtcOffsetHours(state, from)
-  if (offset === null) return new Date(from.getTime() + hours * 3600e3)
-  const off = offset * 3600e3
-  let cursor = from.getTime() + off               // local wall-clock as a UTC-shaped timestamp
-  let remaining = hours * 3600e3
-  for (let guard = 0; guard < 14 && remaining > 0; guard++) {
-    const d = new Date(cursor)
-    const dayStart = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
-    const open = dayStart + REROUTE_CLOCK_START_HOUR * 3600e3
-    const close = dayStart + REROUTE_CLOCK_END_HOUR * 3600e3
-    if (cursor < open) cursor = open
-    else if (cursor >= close) { cursor = dayStart + 86400e3 + REROUTE_CLOCK_START_HOUR * 3600e3; continue }
-    const step = Math.min(remaining, close - cursor)
-    cursor += step
-    remaining -= step
-  }
-  return new Date(cursor - off)
+  return daytimeClockAfter(from, hours * 60, state, REROUTE_CLOCK_START_HOUR, REROUTE_CLOCK_END_HOUR)
 }
 
 export interface RerouteResult {
