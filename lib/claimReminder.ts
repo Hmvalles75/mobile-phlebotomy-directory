@@ -24,6 +24,25 @@ import sg from '@sendgrid/mail'
 import { prisma } from './prisma'
 import { SLA_MINUTES_STAT, SLA_MINUTES_STANDARD } from './staleClaimRelease'
 
+/**
+ * Fields that belong to one claim, not to the lead. Spread into every write
+ * that claims a lead so the new holder gets their own 1-hour warning and day-2
+ * nudge, and the patient is asked about the provider who holds it now.
+ *
+ * Until 2026-10-07 these were stamped once per lead and never reset: whoever
+ * claimed a lead after a release got no warning and was auto-released
+ * silently at the SLA, then emailed to tap a button they were never sent.
+ * Four providers since 9/10 (Allstar, Superior, Boujee, ClearPath).
+ */
+export const PER_CLAIM_RESET = {
+  claimReminderSentAt: null,
+  softNudgeSentAt: null,
+  patientCheckinSentAt: null,
+  patientCheckinToken: null,
+  patientCheckinAnswer: null,
+  patientCheckinAnsweredAt: null,
+} as const
+
 export const REMINDER_MINUTES_BEFORE_SLA = 60
 
 const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://www.mobilephlebotomy.org').replace(/\/+$/, '')

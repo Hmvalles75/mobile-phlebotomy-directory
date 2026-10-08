@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { PER_CLAIM_RESET } from '@/lib/claimReminder'
 import { prisma } from '@/lib/prisma'
 import { LeadOutcome } from '@prisma/client'
 import twilio from 'twilio'
@@ -182,6 +183,7 @@ export async function POST(request: NextRequest) {
         if (!lead.claimedAt) {
           updateData.claimedAt = new Date()
           updateData.status = 'CLAIMED'
+          Object.assign(updateData, PER_CLAIM_RESET)
         }
         updateData.callAttempts = (lead.callAttempts || 0) + 1
         updateData.providerNotes = notes
@@ -203,6 +205,7 @@ export async function POST(request: NextRequest) {
         if (!lead.claimedAt) {
           updateData.claimedAt = new Date()
           updateData.status = 'CLAIMED'
+          Object.assign(updateData, PER_CLAIM_RESET)
         }
         break
 

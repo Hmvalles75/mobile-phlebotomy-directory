@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { LeadOutcome } from '@prisma/client'
+import { PER_CLAIM_RESET } from '@/lib/claimReminder'
 import { notifyFeaturedProvidersForLead, recordProviderDecline, renotifyOpenLead } from '@/lib/leadNotifications'
 
 /**
@@ -78,6 +79,7 @@ export async function POST(
       case 'claim':
         updateData.claimedAt = new Date()
         updateData.status = 'CLAIMED'
+        Object.assign(updateData, PER_CLAIM_RESET)
         updateData.callAttempts = (lead.callAttempts || 0) + 1
         break
 
