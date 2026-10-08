@@ -17,7 +17,7 @@ export const VISIT_FEE_RANGE = '$75–$150'
 export function SelfPayDisclosure({ compact = false }: { compact?: boolean }) {
   return (
     <p className={compact ? 'text-xs text-gray-600 mb-2' : 'text-sm text-gray-700 mb-3'}>
-      <strong>Home blood draws are almost always self-pay.</strong> Your lab bills your insurance for the tests, but the
+      <strong>Home blood draws are almost always self-pay.</strong> Your lab may bill your insurance for the tests, but the
       phlebotomist&apos;s visit fee, usually {VISIT_FEE_RANGE}, is paid to them directly. Few mobile phlebotomists bill insurance.
     </p>
   )
