@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runCoverageSweep } from '@/lib/leadRematch'
+import { notifyWaitlistedLeadsWithCoverage } from '@/lib/coverageWaitlist'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,7 +31,10 @@ export async function GET(req: NextRequest) {
     const dryRun = req.nextUrl.searchParams.get('dryRun') === '1'
     const result = await runCoverageSweep({ dryRun })
     console.log(`[coverage-sweep] dryRun=${dryRun} scanned=${result.scanned} rematched=${result.rematched} sent=${result.notificationsSent} parked=${result.parked} errors=${result.errors.length}`)
-    return NextResponse.json({ ok: true, ...result })
+    // Waitlisted requesters whose area is now covered (lib/coverageWaitlist.ts).
+    const waitlist = await notifyWaitlistedLeadsWithCoverage({ dryRun })
+    console.log(`[coverage-sweep] waitlist: scanned=${waitlist.scanned} covered=${waitlist.covered} emailed=${waitlist.emailed}`)
+    return NextResponse.json({ ok: true, ...result, waitlist })
   } catch (err: any) {
     console.error('[coverage-sweep] Handler error:', err)
     return NextResponse.json({ ok: false, error: err.message || 'Unknown error' }, { status: 500 })
