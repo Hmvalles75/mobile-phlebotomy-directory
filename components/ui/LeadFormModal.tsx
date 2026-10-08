@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { ga4 } from '@/lib/ga4'
 import { captureAttribution } from '@/lib/attribution'
 import { isValidUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
+import { SelfPayDisclosure, InsuranceOnlyNote } from '@/components/SelfPayDisclosure'
 
 interface LeadFormModalProps {
   isOpen: boolean
@@ -476,6 +477,7 @@ export function LeadFormModal({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Are you OK paying out-of-pocket if insurance doesn't cover? <span className="text-red-500">*</span>
                   </label>
+                  <SelfPayDisclosure compact />
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[
                       { value: 'out_of_pocket', label: 'Yes, I\'m OK with that' },
@@ -507,9 +509,7 @@ export function LeadFormModal({
                   {errors.paymentMethod && (
                     <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Most insurance does NOT cover mobile phlebotomy. Out-of-pocket draws typically run $50–$100 depending on location.
-                  </p>
+                  {formData.paymentMethod === 'insurance' && <InsuranceOnlyNote compact />}
                 </div>
 
                 {/* Urgency */}

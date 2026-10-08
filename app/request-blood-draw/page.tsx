@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { captureAttribution } from '@/lib/attribution'
 import { ga4 } from '@/lib/ga4'
+import { SelfPayDisclosure, InsuranceOnlyNote } from '@/components/SelfPayDisclosure'
 
 function RequestBloodDrawForm() {
   const router = useRouter()
@@ -335,10 +336,11 @@ function RequestBloodDrawForm() {
                 <label className="block text-lg font-semibold text-gray-900 mb-3">
                   How will you be paying? <span className="text-red-500">*</span>
                 </label>
+                <SelfPayDisclosure />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { value: 'insurance',     label: 'Insurance' },
                     { value: 'out_of_pocket', label: 'Out of pocket' },
+                    { value: 'insurance',     label: 'Only if insurance covers it' },
                     { value: 'not_sure',      label: 'Not sure' },
                   ].map(opt => (
                     <button
@@ -363,11 +365,7 @@ function RequestBloodDrawForm() {
                     Rates typically range from <strong>$75–$150 per visit</strong>. The provider will confirm exact pricing when they contact you.
                   </div>
                 )}
-                {showInsuranceNote && (
-                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
-                    <strong>How insurance usually works here:</strong> the lab bills your insurance for the tests, as it would for any draw. The phlebotomist&apos;s visit fee (typically <strong>$75–$150</strong>) is separate, and most mobile phlebotomists collect it directly rather than billing insurance. The provider will confirm their fee when they contact you.
-                  </div>
-                )}
+                {showInsuranceNote && <InsuranceOnlyNote />}
               </div>
 
               {/* Contact Information */}
