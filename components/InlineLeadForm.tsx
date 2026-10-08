@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { captureAttribution } from '@/lib/attribution'
 import { ga4 } from '@/lib/ga4'
 import { isValidUSPhone, PHONE_VALIDATION_MESSAGE } from '@/lib/phoneValidation'
+import { SelfPayDisclosure, InsuranceOnlyNote } from '@/components/SelfPayDisclosure'
 
 interface InlineLeadFormProps {
   city: string
@@ -280,6 +281,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Are you OK paying out-of-pocket if insurance doesn't cover? <span className="text-red-500">*</span>
           </label>
+          <SelfPayDisclosure compact />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[
               { value: 'out_of_pocket', label: "Yes, I'm OK with that" },
@@ -306,9 +308,7 @@ export default function InlineLeadForm({ city, state, variant = 'card' }: Inline
               </label>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Most insurance does NOT cover mobile phlebotomy. Out-of-pocket draws typically run $50–$100.
-          </p>
+          {formData.paymentMethod === 'insurance' && <InsuranceOnlyNote compact />}
         </div>
 
         <div>
