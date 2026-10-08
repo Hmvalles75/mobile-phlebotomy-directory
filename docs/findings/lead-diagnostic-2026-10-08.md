@@ -98,14 +98,23 @@ Home-page leads by source:
 | Direct | 7 | 6 | 8 | 0 |
 | Google | 3 | 2 | 3 | 0 |
 
-What this shows:
+Bing alone, split by where the visitor landed:
 
-- **July was inflated by one week.** The week of 7/12 alone had 53 leads. August and September are the real level, about 3.3 a day.
-- **The biggest single loss is Bing-family search to the home page.** DuckDuckGo and Yahoo serve Bing's results, so the three move together. They sent 39 home-page leads in July, 19 in August, 4 in September. That is most of the August-to-September home-page drop.
-- **State pages lost about half their leads since July; city pages tripled.** Some of this shift is the 9/24 URL consolidation sending old city aliases to /us/[state]/[city] pages, so treat state plus city together: 93 in July, 62 in August, 72 in September.
-- **Google halved from July to August and then held** at 30 a month.
+| Bing requests | Total | Home page | State or city page | Other |
+|---|---|---|---|---|
+| July | 44 | 24 | 15 | 5 |
+| August | 21 | 10 | 6 | 5 |
+| September | 21 | 2 | 17 | 2 |
 
-Worth checking next: the home page's Bing ranking and indexing in Bing Webmaster Tools, since the drop is concentrated there.
+What this shows (corrected 2026-10-08; an earlier version of this section called the home page the biggest single loss):
+
+- **July was inflated by one week.** The week of 7/12 alone had 53 leads, about 15 more than an ordinary week, almost all Bing, DuckDuckGo and Yahoo visitors landing on the home page. Claims and bookings that week matched an ordinary week.
+- **The home-page decline from August to September is a shift between pages, not a loss.** Bing Webmaster Tools shows site-wide Bing clicks flat (607, 588, 577 for July to September), and Bing-sourced requests were flat from August to September at 21. Those visitors now land on state and city pages instead of the home page. The 9/24 URL consolidation is the likely cause. DuckDuckGo did fall from 20 to 12.
+- **The real drop is July to August, and it hit Google and Bing equally.** Google went from 60 to 30, Bing from 44 to 21. Against Bing's click counts that is 7.2 requests per 100 clicks in July and 3.6 in August and September. The 7/12 week explains only part of it, and requests fell on every page type, not one.
+- **Not a recording artifact.** Source and landing page are captured on the visitor's first page view and sent with the request; patient forms have used the same capture since 7/27. Requests recorded as direct stayed at 20 to 22 a month, none lack a source, and none record the form page as the landing page. No change to the home page, its ZIP form or the request page since July 1 sends visitors elsewhere before they submit. The request page's coverage banner was made more cautious on 8/25, but weekly counts show no step change after it.
+- **State and city pages together:** 93 in July, 62 in August, 72 in September.
+
+Worth checking next: Bing Webmaster Tools' Pages report, to confirm home-page clicks fell as state and city pages rose; and Google Search Console clicks for July against August. If Google clicks held flat while Google requests halved, the July-to-August drop is in how many visitors request a draw, not in traffic.
 
 ## Recommendations
 
