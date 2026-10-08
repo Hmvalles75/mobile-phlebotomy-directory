@@ -608,7 +608,8 @@ export async function POST(req: NextRequest) {
         fullName: payload.fullName,
         email: payload.email,
         city,
-        state: payload.state
+        state: payload.state,
+        waitlistUrl: patientToken ? `${SITE_URL}/api/waitlist/${patientToken}` : null,
       }).catch(console.error)
 
       // Still notify admin about unserved lead

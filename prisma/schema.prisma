@@ -421,6 +421,14 @@ model Lead {
   // request re-offered. Count caps the loop; At is the last one.
   patientRerouteCount      Int                @default(0)
   patientRerouteAt         DateTime?
+  // Coverage waitlist (2026-09-30). A requester with no provider in range
+  // asked to be told when service arrives: one-tap link in the "We're
+  // Expanding" email (/api/waitlist/[patientToken]) or the admin button.
+  // coverageAvailableNotifiedAt: the "a provider now covers your area" email
+  // went out (lib/coverageWaitlist.ts); sent at most once per lead.
+  waitlistedAt                DateTime?
+  waitlistSource              String? // 'link' | 'admin'
+  coverageAvailableNotifiedAt DateTime?
   patientCheckinAnswer     String? // 'in_touch' | 'no_contact'
   patientCheckinAnsweredAt DateTime?
   // Stale-claim auto-release audit trail. Set when the cron auto-releases

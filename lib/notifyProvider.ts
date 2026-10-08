@@ -374,6 +374,8 @@ export async function sendExpansionEmailToLead(lead: {
   email?: string | null
   city: string
   state: string
+  /** /api/waitlist/[patientToken]; null for leads without a token (institutional). */
+  waitlistUrl?: string | null
 }): Promise<boolean> {
   if (!lead.email) {
     console.log(`[Lead ${lead.id}] No email - cannot send expansion notification`)
@@ -395,7 +397,12 @@ Thanks for submitting your mobile phlebotomy request in ${lead.city}.
 
 We're currently expanding into your area and building provider coverage. While we don't have an active provider there just yet, your request helps us prioritize new markets.
 
-If you'd like to be notified when service becomes available, just reply "YES" and I'll make sure you're first to know.
+${lead.waitlistUrl
+    ? `If you'd like to be told when a provider covers ${lead.city}, tap this link and you're on the list:
+${lead.waitlistUrl}
+
+Or just reply "YES" and I'll add you myself.`
+    : `If you'd like to be notified when service becomes available, just reply "YES" and I'll make sure you're first to know.`}
 
 Thank you for your patience,
 Hector
@@ -409,9 +416,15 @@ MobilePhlebotomy.org`
 
   <p>We're currently expanding into your area and building provider coverage. While we don't have an active provider there just yet, <strong>your request helps us prioritize new markets</strong>.</p>
 
-  <p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+  ${lead.waitlistUrl
+    ? `<p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+    If you'd like to be told when a provider covers ${lead.city}, one tap puts you on the list:<br><br>
+    <a href="${lead.waitlistUrl}" style="background: #d97706; color: white; padding: 10px 18px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Tell me when service is available</a><br><br>
+    Or just <strong>reply "YES"</strong> and I'll add you myself.
+  </p>`
+    : `<p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
     If you'd like to be notified when service becomes available, just <strong>reply "YES"</strong> and I'll make sure you're first to know.
-  </p>
+  </p>`}
 
   <p>Thank you for your patience,</p>
 
