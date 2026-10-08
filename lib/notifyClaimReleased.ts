@@ -41,7 +41,7 @@ export async function sendClaimReleasedEmail(p: ClaimReleasedParams): Promise<vo
 
   const text = `Hi ${p.providerName},
 
-A lead you claimed has been auto-released back to the available pool because no outcome was logged within ${slaHours} hours of claiming it.
+A lead you claimed has been auto-released back to the available pool because no outcome was logged within ${slaHours} hours of claiming it${p.slaMinutes > 120 ? ' (8 PM to 8 AM your time does not count)' : ''}.
 
   Patient:   ${p.leadFullName}
   Location:  ${p.leadCity}, ${p.leadState} ${p.leadZip}
@@ -68,7 +68,7 @@ MobilePhlebotomy.org
   const html = `<!DOCTYPE html><html><body style="font-family: Arial, sans-serif; line-height: 1.7; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 20px;">
 <p>Hi ${p.providerName},</p>
 
-<p>A lead you claimed has been auto-released back to the available pool because no outcome was logged within ${slaHours} hours of claiming it.</p>
+<p>A lead you claimed has been auto-released back to the available pool because no outcome was logged within ${slaHours} hours of claiming it${p.slaMinutes > 120 ? ' (8 PM to 8 AM your time does not count)' : ''}.</p>
 
 <pre style="background:#f3f4f6; border:1px solid #e5e7eb; padding:12px 16px; border-radius:6px; font-family:Menlo,Monaco,Consolas,monospace; font-size:13px; color:#1f2937; white-space:pre-wrap;">  Patient:   ${p.leadFullName}
   Location:  ${p.leadCity}, ${p.leadState} ${p.leadZip}

@@ -148,3 +148,30 @@ export function notificationDelaySeconds(input: DelayInput): number {
   // re-apply the head start on top of a quiet-hours release.
   return quiet > 0 ? quiet + headStart : headStart
 }
+
+/**
+ * The instant `minutes` of daytime clock have elapsed since `from`, counting
+ * only startHour..endHour local time in the given state (2026-10-07). Night
+ * hours are skipped: a 9 pm claim with 6 hours to run starts counting at 8 am.
+ * Unknown state: a flat clock. Shared by the stale-claim release / 1-hour
+ * warning (lib/staleClaimRelease.ts) and the patient reroute gate.
+ */
+export function daytimeClockAfter(from: Date, minutes: number, state: string | null | undefined, startHour = 8, endHour = 20): Date {
+  const offset = stateUtcOffsetHours(state, from)
+  if (offset === null) return new Date(from.getTime() + minutes * 60e3)
+  const off = offset * 3600e3
+  let cursor = from.getTime() + off               // local wall-clock as a UTC-shaped timestamp
+  let remaining = minutes * 60e3
+  for (let guard = 0; guard < 14 && remaining > 0; guard++) {
+    const d = new Date(cursor)
+    const dayStart = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    const open = dayStart + startHour * 3600e3
+    const close = dayStart + endHour * 3600e3
+    if (cursor < open) cursor = open
+    else if (cursor >= close) { cursor = dayStart + 86400e3 + startHour * 3600e3; continue }
+    const step = Math.min(remaining, close - cursor)
+    cursor += step
+    remaining -= step
+  }
+  return new Date(cursor - off)
+}
