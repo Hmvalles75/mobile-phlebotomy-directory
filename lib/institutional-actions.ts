@@ -35,11 +35,22 @@ export async function createClient(formData: FormData) {
   const notes = String(formData.get('notes') || '').trim() || null
   if (!name || !contactEmail) throw new Error('name and contactEmail are required')
 
+  const clientShipsKit = String(formData.get('clientShipsKit') || '') === 'on'
+
   const client = await prisma.institutionalClient.create({
-    data: { name, contactEmail, ccEmails, notes },
+    data: { name, contactEmail, ccEmails, notes, clientShipsKit },
   })
   revalidatePath('/admin/institutional/clients')
   redirect(`/admin/institutional/clients/${client.id}`)
+}
+
+export async function setClientShipsKit(formData: FormData) {
+  await requireAdmin()
+  const clientId = String(formData.get('clientId') || '')
+  const clientShipsKit = String(formData.get('clientShipsKit') || '') === 'true'
+  if (!clientId) throw new Error('clientId required')
+  await prisma.institutionalClient.update({ where: { id: clientId }, data: { clientShipsKit } })
+  revalidatePath(`/admin/institutional/clients/${clientId}`)
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -82,6 +93,7 @@ export async function updateOrder(orderId: string, formData: FormData) {
     'patientName', 'patientContactName', 'patientPhone', 'patientEmail',
     'patientAddress', 'patientCity', 'patientState', 'patientZip',
     'patientNotes', 'protocolNotes',
+    'caregiverName', 'caregiverPhone', 'accommodations',
     'clientRate', 'providerRate',
     'assignedProviderId',
     'status',

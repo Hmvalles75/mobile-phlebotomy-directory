@@ -43,6 +43,7 @@ export default async function SubmitOrderPage({ searchParams }: Props) {
               {client.name} · signed in as {session.email}
             </p>
           </div>
+          <a href="/orders/logout" className="text-sm text-gray-600 hover:text-gray-900 underline">Sign out</a>
         </div>
 
         {submitted ? (
@@ -54,7 +55,7 @@ export default async function SubmitOrderPage({ searchParams }: Props) {
             </div>
             <h2 className="text-lg font-semibold text-gray-900">Order received</h2>
             <p className="text-sm text-gray-600">
-              Thanks — your order is with our team for review. We’ll confirm scheduling shortly.
+              Thanks — your order is with our team. We’ll confirm the appointment details by email, and a confirmation is on its way to your inbox.
             </p>
             <div className="flex flex-wrap justify-center gap-3 pt-2">
               {trackHref && (

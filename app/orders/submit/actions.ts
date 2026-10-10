@@ -7,6 +7,7 @@ import { getClientSessionFromCookieStore, logClientAuthEvent } from '@/lib/clien
 import { isValidUSPhone, normalizeUSPhone } from '@/lib/phoneValidation'
 import { normalizeCity } from '@/lib/normalizeCity'
 import { getZipInfo } from '@/lib/zip-geocode'
+import { sendNewOrderAdminEmail, sendOrderReceivedEmail } from '@/lib/orderEmails'
 
 // Institutional users may legitimately submit a burst, but a runaway
 // script/bug shouldn't flood the review queue. Cap per portal user per hour.
@@ -28,6 +29,7 @@ const CAP = {
   zip: 10,
   window: 200,
   notes: 2000,
+  accommodations: 1000,
 }
 
 function clean(v: FormDataEntryValue | null, cap: number): string {
@@ -85,6 +87,9 @@ export async function submitClientOrder(_prev: SubmitState, formData: FormData):
   const patientZip = clean(formData.get('patientZip'), CAP.zip)
   const requestedWindow = clean(formData.get('requestedWindow'), CAP.window) || null
   const patientNotes = clean(formData.get('patientNotes'), CAP.notes) || null
+  const caregiverName = clean(formData.get('caregiverName'), CAP.contact) || null
+  const caregiverPhoneRaw = clean(formData.get('caregiverPhone'), 40)
+  const accommodations = clean(formData.get('accommodations'), CAP.accommodations) || null
 
   if (patientName.length < 2) return { ok: false, error: 'Please enter the patient’s name.' }
   if (!patientAddress) return { ok: false, error: 'Please enter the patient’s street address.' }
@@ -99,6 +104,14 @@ export async function submitClientOrder(_prev: SubmitState, formData: FormData):
     return { ok: false, error: 'Please enter a valid 10-digit US phone number for the patient.' }
   }
   const patientPhone = normalizeUSPhone(patientPhoneRaw)
+
+  let caregiverPhone: string | null = null
+  if (caregiverPhoneRaw) {
+    if (!isValidUSPhone(caregiverPhoneRaw)) {
+      return { ok: false, error: 'The caregiver phone doesn’t look like a 10-digit US number. Leave it blank if you don’t have one.' }
+    }
+    caregiverPhone = normalizeUSPhone(caregiverPhoneRaw)
+  }
 
   // Reject obvious fake/placeholder 555-exchange numbers (mirrors lead intake).
   const phoneDigits = patientPhone.replace(/\D/g, '').slice(-10)
@@ -131,12 +144,15 @@ export async function submitClientOrder(_prev: SubmitState, formData: FormData):
       patientZip,
       requestedWindow,
       patientNotes,
+      caregiverName,
+      caregiverPhone,
+      accommodations,
       status: 'PENDING_REVIEW',
       clientRate: '0',
       submittedByClientUserId: session.clientUserId,
       submittedFromIp: ip,
     },
-    select: { publicShareToken: true }, // never read back the full object
+    select: { id: true, publicShareToken: true, client: { select: { name: true } } }, // never read back the full object
   })
 
   await logClientAuthEvent('order_submitted', {
@@ -145,6 +161,20 @@ export async function submitClientOrder(_prev: SubmitState, formData: FormData):
     ip,
     userAgent,
   })
+
+  // Notify Hector and confirm to the submitter. The order row already exists;
+  // a failed send is recorded in the audit table and never fails the request.
+  const emailInput = {
+    orderId: order.id, publicShareToken: order.publicShareToken, clientName: order.client.name,
+    participantName: patientName, city: patientCity, state: patientState, requestedWindow, submitterEmail: session.email,
+  }
+  for (const [label, send] of [['admin', sendNewOrderAdminEmail], ['confirmation', sendOrderReceivedEmail]] as const) {
+    const err = await send(emailInput).catch((e: any) => e?.message || 'send threw')
+    if (err) {
+      console.error(`[orders/submit] ${label} email failed for ${order.id}: ${err}`)
+      await logClientAuthEvent('email_failed', { clientUserId: session.clientUserId, email: session.email, ip, userAgent: `${label} email for order ${order.id}: ${String(err).slice(0, 200)}` })
+    }
+  }
 
   // Response carries only the public tracking token — never the order object.
   redirect(`/orders/submit?ok=1&ref=${encodeURIComponent(order.publicShareToken)}`)
