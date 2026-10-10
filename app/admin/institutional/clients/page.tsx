@@ -59,6 +59,10 @@ export default async function InstitutionalClientsPage() {
               <span className="block text-sm font-medium text-gray-700 mb-1">Notes</span>
               <textarea name="notes" rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </label>
+            <label className="flex items-center gap-2 sm:col-span-2 text-sm text-gray-700">
+              <input type="checkbox" name="clientShipsKit" className="h-4 w-4" />
+              Client ships the kit directly to the participant (we only draw)
+            </label>
             <div className="sm:col-span-2">
               <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                 Create Client

@@ -39,7 +39,7 @@ export default function OrderSubmitForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label className="block sm:col-span-2">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Patient name <span className="text-red-500">*</span></span>
+          <span className="block text-sm font-medium text-gray-700 mb-1">Participant name <span className="text-red-500">*</span></span>
           <input name="patientName" required maxLength={120} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
         </label>
         <label className="block">
@@ -73,17 +73,29 @@ export default function OrderSubmitForm() {
           <input name="patientZip" required maxLength={10} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Requested date/time window <span className="text-gray-400 font-normal">(optional)</span></span>
-          <input name="requestedWindow" maxLength={200} placeholder="e.g. Mon–Wed mornings" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+          <span className="block text-sm font-medium text-gray-700 mb-1">Preferred days and times (2-3 options) <span className="text-gray-400 font-normal">(optional)</span></span>
+          <input name="requestedWindow" maxLength={200} placeholder="e.g. Tue 10/21 morning, Thu 10/23 after 2, any Fri" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+        </label>
+        <label className="block">
+          <span className="block text-sm font-medium text-gray-700 mb-1">Caregiver or alternate contact name <span className="text-gray-400 font-normal">(optional)</span></span>
+          <input name="caregiverName" maxLength={120} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+        </label>
+        <label className="block">
+          <span className="block text-sm font-medium text-gray-700 mb-1">Caregiver phone <span className="text-gray-400 font-normal">(optional)</span></span>
+          <input name="caregiverPhone" type="tel" maxLength={40} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
         </label>
         <label className="block sm:col-span-2">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Notes <span className="text-gray-400 font-normal">(anything the phlebotomist should know)</span></span>
-          <textarea name="patientNotes" rows={3} maxLength={2000} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+          <span className="block text-sm font-medium text-gray-700 mb-1">Accommodations or things the phlebotomist should know <span className="text-gray-400 font-normal">(optional)</span></span>
+          <textarea name="accommodations" rows={3} maxLength={1000} placeholder="e.g. hard stick, uses a wheelchair, prefers a caregiver present, dog in the home" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="block text-sm font-medium text-gray-700 mb-1">Notes <span className="text-gray-400 font-normal">(optional)</span></span>
+          <textarea name="patientNotes" rows={2} maxLength={2000} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
         </label>
       </div>
 
       <p className="text-xs text-gray-500">
-        Your order goes to our team for review before scheduling — you’ll get a tracking link once it’s submitted. Pricing and provider assignment are handled by our team.
+        Your order goes to our team for review before scheduling — you’ll get a tracking link and a confirmation email once it’s submitted. Pricing and provider assignment are handled by our team.
       </p>
       <SubmitButton />
     </form>

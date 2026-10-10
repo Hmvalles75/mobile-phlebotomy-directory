@@ -4,8 +4,13 @@ import { safeNext } from '@/lib/client-portal'
 
 export const dynamic = 'force-dynamic'
 
+export const metadata = {
+  title: 'Order Portal | MobilePhlebotomy.org',
+  robots: { index: false, follow: false },
+}
+
 interface Props {
-  searchParams: { next?: string; sent?: string; error?: string }
+  searchParams: { next?: string; sent?: string; error?: string; out?: string }
 }
 
 export default function OrderPortalLoginPage({ searchParams }: Props) {
@@ -43,6 +48,11 @@ export default function OrderPortalLoginPage({ searchParams }: Props) {
           ) : (
             <form action={requestClientLogin} className="space-y-4">
               {next ? <input type="hidden" name="next" value={next} /> : null}
+              {searchParams.out === '1' && (
+                <div className="rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                  You&rsquo;re signed out.
+                </div>
+              )}
               {error === 'invalid' && (
                 <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-800">
                   That login link is invalid or has expired. Enter your email to get a new one.
