@@ -43,7 +43,6 @@ const tiers: PricingTier[] = [
     features: [
       'Everything in Founding Partner, plus:',
       'Top spot on your city page — the #1 listing patients see',
-      'Option to be the exclusive featured sponsor for your city',
     ],
   },
 ]

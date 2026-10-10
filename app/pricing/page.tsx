@@ -27,13 +27,12 @@ const tiers = [
     name: 'Metro Pro',
     price: 149,
     roi: '6 leads pays for itself',
-    description: 'Maximum visibility in major metro markets with city-exclusive options.',
+    description: 'Maximum visibility in major metro markets.',
     icon: TrendingUp,
     features: [
       'Top placement in major metros',
       'Featured badge on your listing',
       'Priority routing: a 10-minute head start on every request in your area',
-      'City-exclusive featured sponsor option',
     ],
   },
 ]
