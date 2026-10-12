@@ -1,4 +1,7 @@
 import { sendTransactionalEmail, VERIFIED_SENDER } from './sendTransactionalEmail'
+
+/** From name on every Order Portal email, including the login link. */
+export const ORDERS_FROM_NAME = 'MobilePhlebotomy.org Orders'
 import { SITE_URL } from './seo'
 
 /**
@@ -49,6 +52,8 @@ ${adminUrl}
     to: ADMIN_ORDER_INBOX,
     subject: `New order: ${o.clientName}, ${first} in ${o.city}, ${o.state}`,
     text,
+    fromName: ORDERS_FROM_NAME,
+    noTracking: true,
   })
 }
 
@@ -76,5 +81,7 @@ ${VERIFIED_SENDER}
     subject: `Order received: ${first} in ${o.city}, ${o.state}`,
     text,
     html,
+    fromName: ORDERS_FROM_NAME,
+    noTracking: true,
   })
 }

@@ -47,7 +47,22 @@ export interface TransactionalEmail {
    * have to reimplement that and then keep it in step.
    */
   html?: string
+  /** Display name on the From line; defaults to SENDER_NAME. */
+  fromName?: string
+  /**
+   * Turn off SendGrid click and open tracking for this message, so links are
+   * delivered as plain https://www.mobilephlebotomy.org/... URLs. Used by the
+   * client Order Portal (2026-10-12): institutional recipients and their mail
+   * filters distrust rewritten tracking links.
+   */
+  noTracking?: boolean
 }
+
+/** Per-message SendGrid setting that disables click and open tracking. */
+export const NO_TRACKING = {
+  clickTracking: { enable: false, enableText: false },
+  openTracking: { enable: false },
+} as const
 
 export async function sendTransactionalEmail(
   message: TransactionalEmail
@@ -59,11 +74,12 @@ export async function sendTransactionalEmail(
     sg.setApiKey(key)
     await sg.send({
       to: message.to,
-      from: { email: VERIFIED_SENDER, name: SENDER_NAME },
+      from: { email: VERIFIED_SENDER, name: message.fromName || SENDER_NAME },
       replyTo: message.replyTo || VERIFIED_SENDER,
       subject: message.subject,
       text: message.text,
       ...(message.html ? { html: message.html } : {}),
+      ...(message.noTracking ? { trackingSettings: NO_TRACKING } : {}),
     })
     return null
   } catch (error: any) {
