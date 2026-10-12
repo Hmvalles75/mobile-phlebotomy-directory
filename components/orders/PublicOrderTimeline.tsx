@@ -9,6 +9,11 @@ interface Props {
   >
   // Compact mode is used in the all-orders view; full mode on the single-order view.
   compact?: boolean
+  // InstitutionalClient.clientShipsKit (2026-10-12): the client ships the kit
+  // straight to the participant, so no step may mention us receiving one.
+  // Wording set by Hector: Request received / Appointment scheduled / Draw
+  // completed / Sample shipped (only once a tracking number is entered).
+  clientShipsKit?: boolean
 }
 
 // Status → display label + color. Public-friendly wording (no internal jargon).
@@ -60,15 +65,22 @@ export function patientPublicLabel(patientName: string, city: string, state: str
   return `${first} (${city}, ${state})`
 }
 
-export default function PublicOrderTimeline({ order, compact = false }: Props) {
-  const steps: Array<{ key: string; label: string; at: Date | null | undefined }> = [
-    { key: 'created', label: 'Order created', at: order.createdAt },
-    { key: 'kitShipped', label: 'Kit shipped to patient', at: order.kitShippedAt },
-    { key: 'kitReceived', label: 'Kit received by patient', at: order.kitReceivedAt },
-    { key: 'scheduled', label: 'Appointment scheduled', at: order.scheduledAt },
-    { key: 'drawCompleted', label: 'Blood draw completed', at: order.drawCompletedAt },
-    { key: 'fedexDropped', label: 'Sample shipped to lab', at: order.fedexDroppedAt },
-  ]
+export default function PublicOrderTimeline({ order, compact = false, clientShipsKit = false }: Props) {
+  const steps: Array<{ key: string; label: string; at: Date | null | undefined }> = clientShipsKit
+    ? [
+        { key: 'created', label: 'Request received', at: order.createdAt },
+        { key: 'scheduled', label: 'Appointment scheduled', at: order.scheduledAt },
+        { key: 'drawCompleted', label: 'Draw completed', at: order.drawCompletedAt },
+        ...(order.fedexTrackingNum ? [{ key: 'fedexDropped', label: 'Sample shipped', at: order.fedexDroppedAt }] : []),
+      ]
+    : [
+        { key: 'created', label: 'Order created', at: order.createdAt },
+        { key: 'kitShipped', label: 'Kit shipped to patient', at: order.kitShippedAt },
+        { key: 'kitReceived', label: 'Kit received by patient', at: order.kitReceivedAt },
+        { key: 'scheduled', label: 'Appointment scheduled', at: order.scheduledAt },
+        { key: 'drawCompleted', label: 'Blood draw completed', at: order.drawCompletedAt },
+        { key: 'fedexDropped', label: 'Sample shipped to lab', at: order.fedexDroppedAt },
+      ]
 
   if (compact) {
     return (

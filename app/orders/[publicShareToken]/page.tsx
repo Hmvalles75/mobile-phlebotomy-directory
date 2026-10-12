@@ -33,7 +33,7 @@ export default async function PublicOrderPage({ params }: Props) {
       fedexDroppedAt: true,
       fedexTrackingNum: true,
       createdAt: true,
-      client: { select: { name: true } },
+      client: { select: { name: true, clientShipsKit: true } },
     },
   })
   if (!order) notFound()
@@ -44,7 +44,7 @@ export default async function PublicOrderPage({ params }: Props) {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 sm:p-8">
           <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">{order.client.name}</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Order Status</h1>
-          <PublicOrderTimeline order={order} />
+          <PublicOrderTimeline order={order} clientShipsKit={order.client.clientShipsKit} />
         </div>
         <p className="text-xs text-gray-400 text-center mt-4">
           MobilePhlebotomy.org · This page updates as your order progresses.

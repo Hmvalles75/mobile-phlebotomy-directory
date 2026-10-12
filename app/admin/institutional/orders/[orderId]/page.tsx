@@ -269,6 +269,18 @@ export default async function OrderDetailPage({ params }: Props) {
               <span className="block text-sm font-medium text-gray-700 mb-1">Patient notes</span>
               <textarea name="patientNotes" rows={2} defaultValue={order.patientNotes ?? ''} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
             </label>
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-700 mb-1">Caregiver / alternate contact</span>
+              <input name="caregiverName" defaultValue={order.caregiverName ?? ''} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+            </label>
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-700 mb-1">Caregiver phone</span>
+              <input name="caregiverPhone" defaultValue={order.caregiverPhone ?? ''} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="block text-sm font-medium text-gray-700 mb-1">Accommodations / things the phlebotomist should know</span>
+              <textarea name="accommodations" rows={3} defaultValue={order.accommodations ?? ''} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+            </label>
             <label className="block sm:col-span-2">
               <span className="block text-sm font-medium text-gray-700 mb-1">Protocol notes <span className="text-gray-400 font-normal">(internal)</span></span>
               <textarea name="protocolNotes" rows={3} defaultValue={order.protocolNotes ?? ''} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />

@@ -25,7 +25,7 @@ const SITE = (process.env.PUBLIC_SITE_URL || SITE_URL).replace(/\/+$/, '')
 
 export const CLIENT_SESSION_COOKIE = 'client_session'
 const TOKEN_TTL_MIN = 15
-const SESSION_TTL_DAYS = 30
+const SESSION_TTL_DAYS = 7
 
 // Magic-link request throttles (per rolling hour). Prevents mail-bombing a
 // known portal user's inbox and unbounded token churn. Counted against the
@@ -53,6 +53,7 @@ export type ClientAuthEventType =
   | 'user_created'
   | 'user_disabled'
   | 'user_enabled'
+  | 'email_failed'
 
 export async function logClientAuthEvent(
   event: ClientAuthEventType,

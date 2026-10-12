@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { verifyAdminSession } from '@/lib/admin-auth'
-import { createOrder, createClientUser, setClientUserDisabled } from '@/lib/institutional-actions'
+import { createOrder, createClientUser, setClientUserDisabled, setClientShipsKit } from '@/lib/institutional-actions'
 import { StatusPill } from '@/components/orders/PublicOrderTimeline'
 import CopyLinkButton from '@/components/admin/CopyLinkButton'
 
@@ -66,6 +66,16 @@ export default async function ClientDetailPage({ params }: Props) {
           {client.notes && (
             <p className="text-sm text-gray-700 mt-3 whitespace-pre-line bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{client.notes}</p>
           )}
+          <form action={setClientShipsKit} className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-700">
+            <input type="hidden" name="clientId" value={client.id} />
+            <input type="hidden" name="clientShipsKit" value={client.clientShipsKit ? 'false' : 'true'} />
+            <span>
+              Kit handling: <strong>{client.clientShipsKit ? 'client ships the kit directly to the participant' : 'we receive and ship the kit'}</strong>
+            </span>
+            <button type="submit" className="text-xs text-gray-600 hover:text-gray-900 underline">
+              {client.clientShipsKit ? 'Switch to: we handle the kit' : 'Switch to: client ships kit directly'}
+            </button>
+          </form>
           {/* Without a portal user, /orders/login silently no-ops for this
               client's staff (by design — it never discloses who has an account).
               That silence is correct for them and useless for us, so say it here. */}

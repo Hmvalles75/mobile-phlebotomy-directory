@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60, // 30 days — matches SESSION_TTL_DAYS
+    maxAge: 7 * 24 * 60 * 60, // 7 days — matches SESSION_TTL_DAYS
     path: '/',
   })
   // Consume the one-shot destination cookie.

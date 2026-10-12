@@ -199,6 +199,9 @@ model InstitutionalClient {
   ccEmails         String? // comma-separated additional recipients
   notes            String?              @db.Text
   publicShareToken String               @unique @default(cuid())
+  // The client ships the collection kit straight to the participant; we only
+  // draw. Hides the kit-receipt steps on the client-facing timeline (2026-10).
+  clientShipsKit   Boolean              @default(false)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   orders           InstitutionalOrder[]
@@ -248,6 +251,13 @@ model InstitutionalOrder {
   submittedByClientUserId String?
   submittedByClientUser   ClientUser? @relation(fields: [submittedByClientUserId], references: [id], onDelete: SetNull)
   submittedFromIp         String?
+
+  // Portal fields added 2026-10 for participants with special needs: an
+  // alternate contact and anything the phlebotomist should know, kept apart
+  // from patientNotes so each can be shown or withheld on its own.
+  caregiverName  String?
+  caregiverPhone String?
+  accommodations String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
