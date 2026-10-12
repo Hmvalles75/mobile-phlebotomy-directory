@@ -3,6 +3,7 @@ import { SITE_URL } from './seo'
 import { nanoid } from 'nanoid'
 import { prisma } from './prisma'
 import sg from '@sendgrid/mail'
+import { NO_TRACKING } from './sendTransactionalEmail'
 
 if (process.env.SENDGRID_API_KEY) sg.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -159,11 +160,14 @@ hector@mobilephlebotomy.org`
 
   await sg.send({
     to,
-    from: FROM,
+    from: { email: FROM, name: 'MobilePhlebotomy.org Orders' },
     replyTo: FROM,
     subject: 'Your MobilePhlebotomy.org Order Portal login link',
     text,
     html,
+    // Plain https://www.mobilephlebotomy.org/... link, no click/open tracking:
+    // a rewritten login link looks like phishing to the client's mail filter.
+    trackingSettings: NO_TRACKING,
   })
 }
 
