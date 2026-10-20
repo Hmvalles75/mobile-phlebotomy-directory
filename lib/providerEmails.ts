@@ -1,8 +1,13 @@
 import sg from '@sendgrid/mail'
+import { NO_TRACKING } from './sendTransactionalEmail'
 
-type Send = (to: string, subject: string, text: string) => Promise<void>
+// noTracking (2026-10-21): plain https://www.mobilephlebotomy.org/... links,
+// no SendGrid click/open rewriting. Used on the approval welcome emails, whose
+// dashboard link a new provider must trust and click (NuWaie clicked the
+// rewritten url810 link nine times and never signed in).
+type Send = (to: string, subject: string, text: string, opts?: { noTracking?: boolean }) => Promise<void>
 
-const send: Send = async (to, subject, text) => {
+const send: Send = async (to, subject, text, opts) => {
   if (!process.env.LEAD_EMAIL_FROM) {
     console.error('[providerEmails] LEAD_EMAIL_FROM env var not set')
     return
@@ -16,7 +21,8 @@ const send: Send = async (to, subject, text) => {
       to,
       from: process.env.LEAD_EMAIL_FROM,
       subject,
-      text
+      text,
+      ...(opts?.noTracking ? { trackingSettings: NO_TRACKING } : {}),
     })
     console.log(`[providerEmails] Sent to ${to}: ${subject}`)
   } catch (error: any) {
@@ -213,8 +219,7 @@ P.S. Our emails can land in spam at first — please mark as Not Spam so you don
 
 ---
 📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
-Subscribe: https://thedrawreport.beehiiv.com/subscribe`
-  )
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`, { noTracking: true })
 }
 
 // New personalized email based on form lead opt-in choice
@@ -296,8 +301,7 @@ MobilePhlebotomy.org
 
 ---
 📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
-Subscribe: https://thedrawreport.beehiiv.com/subscribe`
-    )
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`, { noTracking: true })
   }
 
   // OPTED OUT of leads (listing only)
@@ -331,8 +335,7 @@ MobilePhlebotomy.org
 
 ---
 📬 The Draw Report — free newsletter for mobile phlebotomists. Tips on getting patients, billing insurance, landing contracts, and growing your practice.
-Subscribe: https://thedrawreport.beehiiv.com/subscribe`
-    )
+Subscribe: https://thedrawreport.beehiiv.com/subscribe`, { noTracking: true })
   }
 
   // NO PREFERENCE SET (old submission) - use original email

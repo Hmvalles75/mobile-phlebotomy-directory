@@ -1,4 +1,5 @@
 import sg from '@sendgrid/mail'
+import { NO_TRACKING } from './sendTransactionalEmail'
 
 // Set the key at send time, not module load — same reasoning as
 // lib/leadConfirmation.ts. Top-level setApiKey works under Next.js but breaks
@@ -186,6 +187,7 @@ MobilePhlebotomy.org`
       subject,
       text,
       html,
+      trackingSettings: NO_TRACKING, // plain dashboard links (2026-10-21)
     })
     const shown = Array.isArray(recipient) ? recipient.join(', ') : recipient
     console.log(`[ProviderWelcome] Sent welcome email to ${provider.name} <${shown}> for tier ${tier}`)

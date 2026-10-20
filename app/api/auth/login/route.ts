@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { NO_TRACKING } from '@/lib/sendTransactionalEmail'
 import { createMagicLinkToken } from '@/lib/auth'
 import sg from '@sendgrid/mail'
 
@@ -73,6 +74,8 @@ export async function POST(req: NextRequest) {
         to: email,
         from: process.env.LEAD_EMAIL_FROM || 'noreply@mobilephlebotomy.org',
         subject: 'Your Dashboard Login Link - MobilePhlebotomy.org',
+        // Plain sign-in link: a rewritten tracking URL looks like phishing (2026-10-21).
+        trackingSettings: NO_TRACKING,
         text: `Hi ${provider.name},
 
 Click the link below to access your provider dashboard:
