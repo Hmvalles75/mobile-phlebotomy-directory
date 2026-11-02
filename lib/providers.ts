@@ -52,6 +52,9 @@ export interface EnrichedProvider {
   googlePlaceId?: string
   testimonials?: string
   socialLinks?: string
+  operatingDays?: string        // "MON,WED,FRI"
+  operatingHoursStart?: string  // "05:00"
+  operatingHoursEnd?: string    // "17:00"
   certifications?: string
   licenseNumber?: string
   insuranceAmount?: string

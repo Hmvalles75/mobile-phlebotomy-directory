@@ -76,6 +76,10 @@ function toEnrichedProvider(provider: any): EnrichedProvider {
     testimonials: provider.testimonials || undefined,
     // Social profiles (JSON string from DB — premium template parses)
     socialLinks: provider.socialLinks || undefined,
+    // Hours as the provider entered them; present only where the query selects them (provider page)
+    operatingDays: provider.operatingDays || undefined,
+    operatingHoursStart: provider.operatingHoursStart || undefined,
+    operatingHoursEnd: provider.operatingHoursEnd || undefined,
 
     createdAt: provider.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: provider.updatedAt?.toISOString() || new Date().toISOString()

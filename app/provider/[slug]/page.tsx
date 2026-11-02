@@ -471,8 +471,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
                 <div className="flex flex-wrap gap-4 text-gray-600 mb-2">
                   <span className="flex items-center">📍 {location}</span>
-                  {/* Phone: hidden for featured, click-to-reveal for others */}
-                  {provider.phone && !isFeatured && (
+                  {/* Phone: click-to-reveal. Shown for featured providers too
+                      since 2026-11-02 — paying shouldn't hide your own number. */}
+                  {provider.phone && (
                     <div className="flex flex-col">
                       <PhoneReveal
                         phone={provider.phone}
@@ -770,11 +771,11 @@ export default async function ProviderDetailPage({ params }: PageProps) {
 
               {/* Direct-contact card — clearly labeled as the OTHER path
                   (distinct from the routed-request CTA above). Patients calling
-                  this number reach {providerName} directly. Featured providers
-                  hide their phone and rely on the request flow only; for those,
-                  this card collapses into a small "contact via request form"
-                  hint to avoid showing an empty header. */}
-              {(provider.phone && !isFeatured) || provider.contactPerson ? (
+                  this number reach {providerName} directly. Until 2026-11-02
+                  featured providers had their phone and website hidden here,
+                  so upgrading took a paying provider's own contact details off
+                  their page (Intuitive Hands asked why). */}
+              {provider.phone || provider.contactPerson ? (
                 <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
                   <h3 className="text-xl font-bold text-gray-900">
                     Contact {provider.name} directly
@@ -784,7 +785,7 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   </p>
 
                   <div className="space-y-4 mb-6">
-                    {provider.phone && !isFeatured && (
+                    {provider.phone && (
                       <div className="flex items-start">
                         <span className="text-gray-500 mr-2">📞</span>
                         <div>
@@ -811,6 +812,15 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                         </div>
                       </div>
                     )}
+
+                    {profileLinks(provider.socialLinks).map(link => (
+                      <div key={link.href} className="flex items-start">
+                        <span className="text-gray-500 mr-2">🔗</span>
+                        <a href={link.href} target="_blank" rel="noopener nofollow" className="font-semibold text-primary-600 hover:underline">
+                          {link.label}
+                        </a>
+                      </div>
+                    ))}
                   </div>
 
                   <ProviderActions
@@ -840,6 +850,9 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Availability</h4>
                     <div className="space-y-1">
+                      {formatHours(provider) && (
+                        <p className="text-sm text-gray-700">{formatHours(provider)}</p>
+                      )}
                       {(provider.emergencyAvailable === 'TRUE' || provider.emergencyAvailable === 'True' || provider.emergencyAvailable === 'Yes') && (
                         <p className="text-sm text-green-600">✓ Emergency services available</p>
                       )}
@@ -886,8 +899,8 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* Website Link - Hidden for featured providers, buried at bottom for others */}
-                  {provider.website && !isFeatured && (
+                  {/* Website Link - buried at the bottom; featured providers included since 2026-11-02 */}
+                  {provider.website && (
                     <div className="pt-4 border-t">
                       <ProviderWebsiteLink
                         website={provider.website}
@@ -934,4 +947,39 @@ export default async function ProviderDetailPage({ params }: PageProps) {
       </div>
     </>
   )
+}
+const DAY_LABELS: Record<string, string> = { MON: 'Mon', TUE: 'Tue', WED: 'Wed', THU: 'Thu', FRI: 'Fri', SAT: 'Sat', SUN: 'Sun' }
+
+/** "05:00" -> "5:00 AM". Returns null for anything that isn't HH:MM. */
+function to12h(hhmm?: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec((hhmm || '').trim())
+  if (!m) return null
+  const h = Number(m[1])
+  if (h > 23) return null
+  return `${h % 12 || 12}:${m[2]} ${h < 12 ? 'AM' : 'PM'}`
+}
+
+/** "Mon, Wed, Fri · 5:00 AM – 5:00 PM" from the provider's own hours fields, or null if unset. */
+function formatHours(p: { operatingDays?: string; operatingHoursStart?: string; operatingHoursEnd?: string }): string | null {
+  const days = (p.operatingDays || '').split(/[,\s]+/).map(d => DAY_LABELS[d.trim().toUpperCase().slice(0, 3)]).filter(Boolean)
+  const start = to12h(p.operatingHoursStart), end = to12h(p.operatingHoursEnd)
+  if (!days.length && !(start && end)) return null
+  return [days.join(', '), start && end ? `${start} – ${end}` : null].filter(Boolean).join(' · ')
+}
+
+const PROFILE_LINK_LABELS: Record<string, string> = {
+  google: 'Google Business Profile', facebook: 'Facebook', instagram: 'Instagram',
+  linkedin: 'LinkedIn', tiktok: 'TikTok', youtube: 'YouTube',
+}
+
+/** socialLinks is a JSON object string ({ google, facebook, ... }); unknown keys and non-https values are skipped. */
+function profileLinks(raw?: string): { label: string; href: string }[] {
+  try {
+    const obj = JSON.parse(raw || '{}')
+    return Object.entries(PROFILE_LINK_LABELS)
+      .filter(([k]) => typeof obj[k] === 'string' && /^https:\/\//i.test(obj[k]))
+      .map(([k, label]) => ({ label, href: obj[k] }))
+  } catch {
+    return []
+  }
 }
