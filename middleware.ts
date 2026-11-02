@@ -59,6 +59,14 @@ function isPageRoute(pathname: string): boolean {
 // instead of treating them as transient 404s.
 const PLACEHOLDER_PROVIDER_SLUG = /^provider-\d+$/
 
+// Listings removed because the business asked to be taken off the site and is
+// not affiliated with us. 410, not the usual 301 to a city page: a redirect
+// would keep their name resolving to our pages. Row stays in the DB with
+// removedAt + doNotRelist.
+const REMOVED_AT_OWNER_REQUEST = new Set([
+  'lite-touch-mobile-phlebotomy-services', // Jamaica NY, scraped stub, 2026-11-02
+])
+
 // The production Vercel alias got indexed as a full duplicate of the site —
 // ToS, Florida city pages and provider profiles all appear under
 // site:mobile-phlebotomy-directory.vercel.app. Every one of those competes with
@@ -117,10 +125,10 @@ export function middleware(request: NextRequest) {
   // Signals to Google these are permanently removed and speeds up de-indexing.
   if (pathname.startsWith('/provider/')) {
     const slug = pathname.replace('/provider/', '').replace(/\/$/, '')
-    if (PLACEHOLDER_PROVIDER_SLUG.test(slug)) {
+    if (PLACEHOLDER_PROVIDER_SLUG.test(slug) || REMOVED_AT_OWNER_REQUEST.has(slug.toLowerCase())) {
       return new NextResponse('This provider listing has been permanently removed.', {
         status: 410,
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'text/plain', 'X-Robots-Tag': 'noindex' },
       })
     }
   }
