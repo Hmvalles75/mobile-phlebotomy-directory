@@ -557,7 +557,16 @@ export default async function ProviderDetailPage({ params }: PageProps) {
                     <div className="bg-white rounded-lg shadow-md p-6">
                       <h2 className="text-2xl font-bold text-gray-900 mb-4">About {provider.name}</h2>
                       <div className="prose max-w-none text-gray-600">
-                        <p>{description.split('\n\n')[0].replace(/\*\*/g, '')}</p>
+                        {/* Every plain paragraph, not just the first: pricing, service-area and
+                            office lines appended to descriptions were invisible until 2026-11-02.
+                            Paragraphs carrying **Section:** markers are rendered by the cards below. */}
+                        {description.split(/\n\s*\n/)
+                          .filter((para, i) => i === 0 || !/\*\*[^*]+:\*\*/.test(para))
+                          .map((para, i) => (
+                            <p key={i} className={i > 0 ? 'mt-3 whitespace-pre-line' : 'whitespace-pre-line'}>
+                              {para.trim().replace(/\*\*/g, '')}
+                            </p>
+                          ))}
                         {primaryContactMatch && (
                           <p className="mt-3 text-sm">
                             <strong>Primary Contact:</strong> {primaryContactMatch[1]}
