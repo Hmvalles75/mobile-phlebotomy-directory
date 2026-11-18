@@ -43,6 +43,15 @@ const DEFAULT_PATHS = [
   // mixed-case tokens must NOT be lowercased (2026-09-29 regression fix)
   '/confirm/AbCdEfGhIjKlMnOpQrStUvWxYz012345',
   '/request/AbCdEfGhIjKlMnOpQrStUvWxYz012345',
+  // GSC 2026-11-18: legacy 2-letter state URLs still in the index; middleware must 301 each in ONE hop
+  '/us/la/metairie',
+  '/us/az/tempe',
+  '/us/ak/wasilla',
+  '/us/tn/goodlettsville',
+  '/us/wa/lakewood',
+  // retired /{city}-{st}/{service} tier: 308 in ONE hop to the canonical city page
+  '/queens-ny/blood-draw-at-home',
+  '/west-hollywood-ca/in-home-blood-draw',
 ]
 
 // Per-path expectations that override the generic judge.
@@ -60,6 +69,13 @@ const EXPECT: Record<string, { status: number; hops?: number; final?: string; no
   '/confirm/AbCdEfGhIjKlMnOpQrStUvWxYz012345': { status: 200, hops: 0 },   // the survey page resolves the token client-side; what matters is 0 hops (no lowercase 301)
   '/request/AbCdEfGhIjKlMnOpQrStUvWxYz012345': { status: 404, hops: 0 },
   '/provider/tru-blu-diagnostic-lab': { status: 200, hops: 0, jsonLdId: '/provider/tru-blu-diagnostic-lab#' },   // generic template
+  '/us/la/metairie': { status: 200, hops: 1, final: '/us/louisiana/metairie' },
+  '/us/az/tempe': { status: 200, hops: 1, final: '/us/arizona/tempe' },
+  '/us/ak/wasilla': { status: 200, hops: 1, final: '/us/alaska/wasilla' },
+  '/us/tn/goodlettsville': { status: 200, hops: 1, final: '/us/tennessee/goodlettsville' },
+  '/us/wa/lakewood': { status: 200, hops: 1, final: '/us/washington/lakewood' },
+  '/queens-ny/blood-draw-at-home': { status: 200, hops: 1, final: '/us/new-york/queens' },
+  '/west-hollywood-ca/in-home-blood-draw': { status: 200, hops: 1, final: '/us/california/los-angeles' },
 }
 
 const MAX_HOPS = 5
