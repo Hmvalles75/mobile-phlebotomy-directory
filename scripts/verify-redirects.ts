@@ -52,6 +52,13 @@ const DEFAULT_PATHS = [
   // retired /{city}-{st}/{service} tier: 308 in ONE hop to the canonical city page
   '/queens-ny/blood-draw-at-home',
   '/west-hollywood-ca/in-home-blood-draw',
+  // duplicate provider records merged 2026-11-18: removed slug -> kept slug in ONE hop
+  '/provider/rapid-reach-diagnostics-llc-1',
+  '/provider/smooth-stick-mobile-labs-1',
+  '/provider/unique-touch-mobile-labs-llc',
+  '/provider/minustouchmobilephlebotomyservices-health',
+  '/provider/precision-health-diagnostic-',
+  '/provider/expresslabsdbllc',
 ]
 
 // Per-path expectations that override the generic judge.
@@ -76,6 +83,12 @@ const EXPECT: Record<string, { status: number; hops?: number; final?: string; no
   '/us/wa/lakewood': { status: 200, hops: 1, final: '/us/washington/lakewood' },
   '/queens-ny/blood-draw-at-home': { status: 200, hops: 1, final: '/us/new-york/queens' },
   '/west-hollywood-ca/in-home-blood-draw': { status: 200, hops: 1, final: '/us/california/los-angeles' },
+  '/provider/rapid-reach-diagnostics-llc-1': { status: 200, hops: 1, final: '/provider/rapid-reach-diagnostics-llc' },
+  '/provider/smooth-stick-mobile-labs-1': { status: 200, hops: 1, final: '/provider/smooth-stick-mobile-labs' },
+  '/provider/unique-touch-mobile-labs-llc': { status: 200, hops: 1, final: '/provider/unique-touch-mobile-lab-llc' },
+  '/provider/minustouchmobilephlebotomyservices-health': { status: 200, hops: 1, final: '/provider/minustouchmobilephlebotomyservices-' },
+  '/provider/precision-health-diagnostic-': { status: 200, hops: 1, final: '/provider/precision-health-and-diagnostic' },
+  '/provider/expresslabsdbllc': { status: 200, hops: 1, final: '/provider/expresslabsdivineblendingllc' },
 }
 
 const MAX_HOPS = 5

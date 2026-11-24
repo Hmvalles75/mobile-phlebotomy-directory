@@ -361,6 +361,15 @@ const nextConfig = {
       // a second submission of the same business; soft-removed, history kept).
       { source: '/provider/evergreene-mobile-phlebotomy-', destination: '/provider/evergreene-mobile-phlebotomy', permanent: true },
       { source: '/provider/precision-mobile-phlebotomy-llc-', destination: '/provider/precision-mobile-phlebotomy-llc', permanent: true },
+      // Duplicate provider records merged 2026-11-18 (scripts/merge-duplicate-
+      // providers-2026-11-18.ts). Lead, claim and notification history moved to
+      // the kept record; the removed one is soft-removed with doNotRelist.
+      { source: '/provider/rapid-reach-diagnostics-llc-1', destination: '/provider/rapid-reach-diagnostics-llc', permanent: true },
+      { source: '/provider/smooth-stick-mobile-labs-1', destination: '/provider/smooth-stick-mobile-labs', permanent: true },
+      { source: '/provider/unique-touch-mobile-labs-llc', destination: '/provider/unique-touch-mobile-lab-llc', permanent: true },
+      { source: '/provider/minustouchmobilephlebotomyservices-health', destination: '/provider/minustouchmobilephlebotomyservices-', permanent: true },
+      { source: '/provider/precision-health-diagnostic-', destination: '/provider/precision-health-and-diagnostic', permanent: true },
+      { source: '/provider/expresslabsdbllc', destination: '/provider/expresslabsdivineblendingllc', permanent: true },
     ]
   },
 }
